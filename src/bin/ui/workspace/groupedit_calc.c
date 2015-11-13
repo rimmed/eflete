@@ -845,7 +845,7 @@ _parts_recalc(Ws_Groupedit_Smart_Data *sd)
    return true;
 }
 #define BORDER_ADD(R, G, B, A) \
-   IMAGE_ADD_NEW(sd->obj, gp->border, "border", "2px")\
+   IMAGE_ADD_NEW(sd->parent, gp->border, "border", "2px")\
    evas_object_color_set(gp->border, R*A/255, G*A/255, B*A/255, A);
 
 #define IMAGE_PART_GROUP "eflete/groupedit/image/default"
@@ -934,12 +934,12 @@ _part_draw_add(Ws_Groupedit_Smart_Data *sd, Part_ *part)
            ERR("Image can't be loaded.\n");
          evas_object_event_callback_add(gp->draw, EVAS_CALLBACK_DEL,
                                         _image_delete, NULL);
-         IMAGE_ADD_NEW(sd->obj, o, "bg", "proxy")
+         IMAGE_ADD_NEW(sd->parent, o, "bg", "proxy")
          edje_object_part_swallow(gp->draw, "swallow.image", o);
          BORDER_ADD(255, 112, 49, 255);
          break;
       case EDJE_PART_TYPE_SWALLOW:
-         IMAGE_ADD_NEW(sd->obj, gp->draw, "bg", "swallow")
+         IMAGE_ADD_NEW(sd->parent, gp->draw, "bg", "swallow")
          BORDER_ADD(120, 103, 140, 255)
          break;
 /* delete this case after merging https://phab.enlightenment.org/D2940 */
@@ -948,7 +948,7 @@ _part_draw_add(Ws_Groupedit_Smart_Data *sd, Part_ *part)
          BORDER_ADD(122, 122, 122, 255)
          break;
       case EDJE_PART_TYPE_SPACER:
-         IMAGE_ADD_NEW(sd->obj, gp->draw, "bg", "spacer")
+         IMAGE_ADD_NEW(sd->parent, gp->draw, "bg", "spacer")
          BORDER_ADD(101, 117, 133, 255)
          break;
       case EDJE_PART_TYPE_GROUP:
@@ -956,12 +956,12 @@ _part_draw_add(Ws_Groupedit_Smart_Data *sd, Part_ *part)
          BORDER_ADD(255, 109, 109, 255)
          break;
       case EDJE_PART_TYPE_TABLE:
-         IMAGE_ADD_NEW(sd->obj, gp->bg, "bg", "table")
+         IMAGE_ADD_NEW(sd->parent, gp->bg, "bg", "table")
          gp->draw = _part_container_add(sd, part, &(gp->items));
          BORDER_ADD(138, 125, 109, 255)
          break;
       case EDJE_PART_TYPE_BOX:
-         IMAGE_ADD_NEW(sd->obj, gp->bg, "bg", "box")
+         IMAGE_ADD_NEW(sd->parent, gp->bg, "bg", "box")
          gp->draw = _part_container_add(sd, part, &(gp->items));
          BORDER_ADD(124, 129, 102, 255)
          break;
@@ -1025,7 +1025,7 @@ _item_draw_add(Ws_Groupedit_Smart_Data *sd, Part_ *part,
         ge_item = (Groupedit_Item *)mem_calloc(1, sizeof(Groupedit_Item));
         ge_item->name = eina_stringshare_add(item);
 
-        IMAGE_ADD_NEW(sd->obj, ge_item->border, "bg", "part_item")
+        IMAGE_ADD_NEW(sd->parent, ge_item->border, "bg", "part_item")
         evas_object_show(ge_item->border);
         evas_object_size_hint_min_set(ge_item->border,    EVAS_HINT_FILL, EVAS_HINT_FILL);
         evas_object_size_hint_align_set(ge_item->border,  EVAS_HINT_FILL, EVAS_HINT_FILL);
@@ -1035,7 +1035,7 @@ _item_draw_add(Ws_Groupedit_Smart_Data *sd, Part_ *part,
         edje_object_file_set(ge_item->draw, ap.project->dev, item_source);
         evas_object_show(ge_item->draw);
 
-        IMAGE_ADD_NEW(sd->obj, ge_item->highlight, "border", "1px");
+        IMAGE_ADD_NEW(sd->parent, ge_item->highlight, "border", "1px");
         evas_object_size_hint_min_set(ge_item->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
         evas_object_size_hint_align_set(ge_item->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
         evas_object_size_hint_weight_set(ge_item->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
@@ -1332,7 +1332,7 @@ _proxy_param_update(Groupedit_Part *gp, Evas_Object *edit_obj)
      }
    else
      {
-         IMAGE_ADD_NEW(sd->obj, image, "bg", "proxy")
+         IMAGE_ADD_NEW(sd->parent, image, "bg", "proxy")
          edje_object_part_swallow(gp->draw, "swallow.image", image);
      }
 }
@@ -1610,12 +1610,12 @@ _table_param_update(Ws_Groupedit_Smart_Data *sd, Groupedit_Part *gp)
                     {
                        /* If there are no already created fakes items, then create new */
                        fake = (Groupedit_Item *)mem_calloc(1, sizeof(Groupedit_Item));
-                       IMAGE_ADD_NEW(sd->obj, fake->border, "bg", "part_item")
+                       IMAGE_ADD_NEW(sd->parent, fake->border, "bg", "part_item")
                        evas_object_show(fake->border);
                        evas_object_size_hint_min_set(fake->border, EVAS_HINT_FILL, EVAS_HINT_FILL);
                        evas_object_size_hint_align_set(fake->border, EVAS_HINT_FILL, EVAS_HINT_FILL);
                        evas_object_size_hint_weight_set(fake->border, EVAS_HINT_FILL, EVAS_HINT_FILL);
-                       IMAGE_ADD_NEW(sd->obj, fake->highlight, "border", "1px");
+                       IMAGE_ADD_NEW(sd->parent, fake->highlight, "border", "1px");
                        evas_object_size_hint_min_set(fake->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
                        evas_object_size_hint_align_set(fake->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
                        evas_object_size_hint_weight_set(fake->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
@@ -1787,12 +1787,12 @@ _box_param_update(Ws_Groupedit_Smart_Data *sd, Groupedit_Part *gp)
           {
              spread_item = (Groupedit_Item *)mem_calloc(1, sizeof(Groupedit_Item));
 
-             IMAGE_ADD_NEW(sd->obj, spread_item->border, "bg", "part_item")
+             IMAGE_ADD_NEW(sd->parent, spread_item->border, "bg", "part_item")
              evas_object_size_hint_min_set(spread_item->border, EVAS_HINT_FILL, EVAS_HINT_FILL);
              evas_object_size_hint_align_set(spread_item->border, EVAS_HINT_FILL, EVAS_HINT_FILL);
              evas_object_size_hint_weight_set(spread_item->border, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
-             IMAGE_ADD_NEW(sd->obj, spread_item->highlight, "border", "1px");
+             IMAGE_ADD_NEW(sd->parent, spread_item->highlight, "border", "1px");
              evas_object_size_hint_min_set(spread_item->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
              evas_object_size_hint_align_set(spread_item->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
              evas_object_size_hint_weight_set(spread_item->highlight, EVAS_HINT_FILL, EVAS_HINT_FILL);
