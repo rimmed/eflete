@@ -1367,8 +1367,6 @@ _textblock_param_update(Groupedit_Part *gp, Evas_Object *edit_obj)
 
    PART_STATE_GET(edit_obj, gp->part->name)
 
-   _color_apply(gp, edit_obj, state, value);
-
    get_style = edje_object_part_object_get(edit_obj, gp->part->name);
    obj_style = evas_object_textblock_style_get(get_style);
    text = evas_textblock_style_get(obj_style);
