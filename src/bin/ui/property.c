@@ -171,16 +171,9 @@ _on_tab_changed(void *data,
           ui_property_group_unset(pd->group_property);
         return;
      }
-   /* it has group here, and group's tab was clicked,
-      but if previous tab was image_property or sound_property tab,
-      we need to remove it from there and set group property in there */
-   if ((pd->type == IMAGE_PROPERTY) || (pd->type == SOUND_PROPERTY))
-     {
-        elm_object_content_unset(pd->layout);
-        elm_object_content_set(pd->layout, pd->group_property);
-        evas_object_hide(pd->image_property);
-        evas_object_hide(pd->sound_property);
-     }
+
+   evas_object_hide(elm_object_content_unset(pd->layout));
+   elm_object_content_set(pd->layout, pd->group_property);
    ui_property_group_set(pd->group_property, group);
 
    pd->type = PROPERTY;
