@@ -37,6 +37,23 @@ typedef enum {
    SOUND_EDITOR_TONE_SELECT
 } Sound_Editor_Mode;
 
+typedef enum {
+   SOUND_TYPE_SAMPLE,
+   SOUND_TYPE_TONE
+} Sound_Type;
+
+typedef struct {
+   Sound_Type sound_type;
+   Eina_Stringshare *file_name;
+   double duration;
+   Eina_Stringshare *snd_src;
+   Eina_Stringshare *format;
+   int length;
+   Edje_Edit_Sound_Comp compression_type;
+   double quality;
+   int tone_frq;
+} Selected_Sound_Data;
+
 /**
  * Delete added sounds from list
  *
