@@ -690,8 +690,6 @@ _sound_player_create(Evas_Object *parent, Sound_Editor *edit)
    elm_layout_theme_set(edit->player_markup, "layout", "sound_editor", "player");
    evas_object_size_hint_weight_set(edit->player_markup,
                                     EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_show(edit->player_markup);
-   elm_object_part_content_set(parent, "player", edit->player_markup);
 
    edit->snd_data.teg = elm_icon_add(edit->player_markup);
    evas_object_image_smooth_scale_set(edit->snd_data.teg, false);
