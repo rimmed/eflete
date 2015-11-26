@@ -480,6 +480,7 @@ _on_part_selected(void *data,
 
    if (!part)
      {
+        printf("\t%s:%s[%d]\n", __FILE__, __func__, __LINE__);
         _ui_property_part_unset(property);
         return;
      }
@@ -1210,6 +1211,7 @@ ui_property_group_unset(Evas_Object *property)
                                   _on_clicked, pd);
    evas_object_hide(pd_group.frame);
    evas_object_hide(pd_group.shared_check);
+   printf("\t%s:%s[%d]\n", __FILE__, __func__, __LINE__);
    _ui_property_part_unset(property);
    elm_scroller_policy_set(pd->scroller, ELM_SCROLLER_POLICY_OFF, ELM_SCROLLER_POLICY_OFF);
 
@@ -1556,7 +1558,13 @@ _ui_property_part_unset(Evas_Object *property)
         pd->attributes.part.validator = NULL;
      }
    */
+   if (pd->part)
+     printf("\t%s:%s[%d] #0 %s\n", __FILE__, __func__, __LINE__, pd->part->name);
+   else
+     printf("\t%s:%s[%d] #0\n", __FILE__, __func__, __LINE__);
+
    PROP_ITEM_UNSET(prop_box, pd->attributes.part.frame)
+   printf("\t%s:%s[%d] #5 %p\n", __FILE__, __func__, __LINE__, pd->attributes.part.frame);
    PROP_ITEM_UNSET(prop_box, pd->attributes.state.frame)
    evas_object_del(pd->attributes.state.color1);
    evas_object_del(pd->attributes.state.color2);

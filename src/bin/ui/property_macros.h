@@ -31,9 +31,13 @@
 #define PROP_ITEM_UNSET(BOX, ITEM) \
    if (ITEM) \
      {\
+        printf("\t%s:%s[%d] #1[%s]\n", __FILE__, __func__, __LINE__, #ITEM); \
         evas_object_smart_callback_del(ITEM, "clicked", _on_frame_click); \
+        printf("\t%s:%s[%d] #2[%p]\n", __FILE__, __func__, __LINE__, ITEM); \
         elm_box_unpack(BOX, ITEM); \
+        printf("\t%s:%s[%d] #3\n", __FILE__, __func__, __LINE__); \
         evas_object_del(ITEM); \
+        printf("\t%s:%s[%d] #4\n", __FILE__, __func__, __LINE__); \
         ITEM = NULL; \
      }
 /*
