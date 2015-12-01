@@ -35,59 +35,50 @@ typedef struct _Widget_Item_Data Widget_Item_Data;
 static Widget_Item_Data widget_item_data[] =
    {
      { N_("access"),           false },
-     { N_("actionslider"),     false },
      { N_("bg"),               false },
-     { N_("border"),           false },
      { N_("bubble"),           false },
      { N_("button"),           false },
-     { N_("calendar"),         false },
+     { N_("carousel"),         false },
      { N_("check"),            false },
-     { N_("clock"),            false },
-     { N_("colorsel"),         false },
-     { N_("conform"),          false },
+     { N_("colorselector"),    false },
+     { N_("conformant"),       false },
      { N_("ctxpopup"),         false },
-     { N_("cursor"),           false },
      { N_("datetime"),         false },
-     { N_("dayselector"),      false },
      { N_("diskselector"),     false },
      { N_("entry"),            false },
-     { N_("fileselector"),     false },
-     { N_("flipselector"),     false },
-     { N_("focus"),            false },
-     { N_("frame"),            false },
+     { N_("focus_highlight"),  false },
      { N_("gengrid"),          false },
      { N_("genlist"),          false },
-     { N_("hover"),            false },
-     { N_("icon"),             false },
+     { N_("genscroller"),      false },
+     { N_("icon_badge"),       false },
      { N_("index"),            false },
      { N_("label"),            false },
      { N_("layout"),           false },
      { N_("list"),             false },
      { N_("map"),              false },
-     { N_("menu"),             false },
      { N_("multibuttonentry"), false },
      { N_("naviframe"),        false },
+     { N_("nocontents"),       false },
      { N_("notify"),           false },
-     { N_("panel"),            false },
      { N_("panes"),            false },
-     { N_("photo"),            false },
      { N_("photocam"),         false },
-     { N_("player"),           false },
-     { N_("pointer"),          false },
      { N_("popup"),            false },
-     { N_("progress"),         false },
+     { N_("progressbar"),      false },
      { N_("radio"),            false },
      { N_("scroller"),         false },
      { N_("segment_control"),  false },
-     { N_("separator"),        false },
      { N_("slider"),           false },
-     { N_("slideshow"),        false },
      { N_("spinner"),          false },
-     { N_("thumb"),            false },
+     { N_("standard"),         false },
+     { N_("tickernoti"),       false },
      { N_("toolbar"),          false },
-     { N_("tooltip"),          false },
-     { N_("video"),            false },
-     { N_("win"),              false },
+     { N_("scroller"),         false },
+     { N_("segment_control"),  false },
+     { N_("slider"),           false },
+     { N_("spinner"),          false },
+     { N_("standard"),         false },
+     { N_("tickernoti"),       false },
+     { N_("toolbar"),          false },
      { NULL,                   false }
    };
 
@@ -187,17 +178,17 @@ _on_item_activated(void *data __UNUSED__,
 }
 
 /* GENERATE SOURCE */
-#define BTN_WD       (widget_item_data + 5)
-#define SCROLLER_WD  (widget_item_data + 43)
-#define ENTRY_WD     (widget_item_data + 16)
-#define LABEL_WD     (widget_item_data + 26)
-#define GENLIST_WD   (widget_item_data + 22)
-#define LIST_WD      (widget_item_data + 28)
-#define PHOTOCAM_WD  (widget_item_data + 37)
-#define NOTIFY_WD    (widget_item_data + 33)
-#define MAP_WD       (widget_item_data + 29)
-#define POPUP_WD     (widget_item_data + 40)
-#define GENGRID_WD   (widget_item_data + 21)
+#define BTN_WD       (widget_item_data + 3)
+#define SCROLLER_WD  (widget_item_data + 38)
+#define ENTRY_WD     (widget_item_data + 11)
+#define LABEL_WD     (widget_item_data + 18)
+#define GENLIST_WD   (widget_item_data + 14)
+#define LIST_WD      (widget_item_data + 20)
+#define PHOTOCAM_WD  (widget_item_data + 27)
+#define NOTIFY_WD    (widget_item_data + 25)
+#define MAP_WD       (widget_item_data + 21)
+#define POPUP_WD     (widget_item_data + 28)
+#define GENGRID_WD   (widget_item_data + 13)
 
 static int
 _widgets_dependencies_setup(Widget_Item_Data *item, Eina_Strbuf *dep_message)
