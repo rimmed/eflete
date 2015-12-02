@@ -1,0 +1,824 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+ group { name: "elm/conformant/base/default";
+     script {
+        public indicator_effect = 0;     //Indicator need effect
+        public indicator_visible = 0;     //Indicator visible check
+        public indicator_opacity = 0;     //0=opaque, 1=translucent, 2=transparent
+        public indicator_overlap = 0;     //check indicator overlap/nooverlap
+        public clipboard_disable  = 0;     //check clipboard enable/disable
+        public keypad_disable = 0;  //check virtualkeypad enable/disable
+        public landscape = 0; //Landscape mode status
+        public portrait_overlap = 0; //save portrait_overlap mode
+        public portrait_opacity = 0; //save portrait_opacity
+     }
+     parts {
+        part { name: "elm.swallow.bg";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+           }
+        }
+        part { name: "indicator_base";
+           type: RECT;
+           scale: 1;
+           mouse_events: 0;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 0;
+           }
+           description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              min: 0 0;
+           }
+        }
+        part { name: "indicator_overlap_base";
+           type: RECT;
+           description { state: "default" 0.0; //nooverlap
+              rel1 { relative: 0.0 0.0; to: "indicator_base"; }
+              rel2 { relative: 1.0 1.0; to: "indicator_base"; }
+              visible: 0;
+           }
+           description { state: "overlap" 0.0; //content start (0,0)
+              inherit: "default" 0.0;
+              rel2 { relative: 1.0 0.0; to: "indicator_base"; }
+           }
+        }
+        part { name: "elm.swallow.content";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0; //sip: enable
+              align: 0.5 0.5;
+              rel1.relative: 0.0 1.0;
+              rel1.to: "indicator_overlap_base";
+              rel2.relative: 1.0 0.0;
+              rel2.to: "sip_area";
+           }
+           description { state: "disable_sip" 0.0; //sip: disable
+              inherit: "default" 0.0;
+              rel2.relative: 1.0 1.0;
+              rel2.to: "elm.swallow.bg";
+           }
+        }
+        part { name: "elm.swallow.ug";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              align: 0.5 0.5;
+              rel1.relative: 0.0 1.0;
+              rel1.to: "indicator_overlap_base";
+              rel2.relative: 1.0 0.0;
+              rel2.to: "sip_area";
+           }
+           description { state: "disable_sip" 0.0; //sip: disable
+              inherit: "default" 0.0;
+              rel2.relative: 1.0 1.0;
+              rel2.to: "elm.swallow.bg";
+           }
+        }
+        part { name: "indicator_clipper";
+           type: RECT;
+           description { state: "default" 0.0;
+              rel1 { relative: 0.0 0.0; to: "indicator_base"; }
+              rel2 { relative: 1.0 1.0; to: "indicator_base"; }
+              visible: 1;
+           }
+           description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              rel1 { relative: 0.0 -1.0; to: "indicator_base"; }
+              rel2 { relative: 1.0  0.0; to: "indicator_base"; }
+           }
+        }
+        part { name: "indicator_bg";
+           type: RECT;
+           mouse_events: 0;
+           clip_to: "indicator_clipper";
+           description { state: "default" 0.0;
+              rel1 { relative: 0.0 0.0; to: "indicator_clipper"; }
+              rel2 { relative: 1.0 1.0; to: "indicator_clipper"; }
+              color: CONFORMANT_INDICATOR_BG_DEFAULT_COLOR_INC;
+           }
+           description { state: "translucent" 0.0;
+              inherit: "default" 0.0;
+              color: CONFORMANT_INDICATOR_BG_TRANSLUCENT_COLOR_INC;
+           }
+        }
+        part { name: "elm.swallow.indicator";
+           type: SWALLOW;
+           scale: 1;
+           clip_to: "indicator_clipper";
+           description { state: "default" 0.0;
+              rel1 { relative: 0.0 0.0; to: "indicator_clipper"; }
+              rel2 { relative: 1.0 1.0; to: "indicator_clipper"; }
+           }
+        }
+        part { name: "sip_area";
+           type: RECT;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              min: 0 0;
+              rel1.relative: 0.0 0.0;
+              rel1.to_y: "elm.swallow.virtualkeypad";
+              rel2.relative: 1.0 1.0;
+              rel2.to_y: "elm.swallow.virtualkeypad";
+              visible: 0;
+           }
+           description { state: "clipboard_on" 0.0;
+              inherit: "default" 0.0;
+              rel1.to_y: "elm.swallow.clipboard";
+              rel2.to_y: "elm.swallow.clipboard";
+           }
+        }
+        part { name: "elm.swallow.clipboard";
+           type: SWALLOW;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.0 1.0;
+              rel1.relative: 0.0 1.0;
+           }
+        }
+        part { name: "elm.swallow.virtualkeypad";
+           type: SWALLOW;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.0 1.0;
+              rel1.relative: 0.0 1.0;
+           }
+        }
+        part { name: "elm.swallow.indicator_event";
+           type: SWALLOW;
+           description { state: "default" 0.0;
+              rel1 { relative: 0.0 0.0; to: "indicator_base"; }
+              rel2 { relative: 1.0 1.0; to: "indicator_base"; }
+           }
+        }
+     }
+     programs {
+        program {
+            name: "hide_indicator";
+            signal: "elm,state,indicator,hide";
+            source: "elm";
+            script {
+               set_int(indicator_visible, 0);
+               set_state(PART:"indicator_base", "hide", 0.0);
+            }
+        }
+        program {
+            name: "show_indicator_transition"; //show indicator using effect
+            action: STATE_SET "default" 0.0;
+            target: "indicator_clipper";
+            transition: DECELERATE 0.5;
+        }
+        program {
+            name: "hide_indicator_transition"; //show indicator using effect
+            action: STATE_SET "hide" 0.0;
+            target: "indicator_clipper";
+            transition: DECELERATE 0.5;
+        }
+        program {
+            name: "show_indicator_effect"; //show indicator using effect
+            signal: "indicator,show,effect";
+            source: "elm";
+            script {
+               if (get_int(indicator_visible) == 1)
+                 run_program(PROGRAM:"show_indicator_transition");
+            }
+        }
+        program {
+            name: "hide_indicator_effect"; //show indicator using effect
+            signal: "indicator,hide,effect";
+            source: "elm";
+            script {
+               if (get_int(indicator_visible) == 1)
+                 run_program(PROGRAM:"hide_indicator_transition");
+            }
+        }
+        program {
+            name: "opaque_state";
+            script {
+               set_state(PART:"indicator_bg", "default", 0.0);
+               set_state(PART:"indicator_clipper", "default", 0.0);
+               set_state(PART:"indicator_overlap_base", "default", 0.0);
+            }
+        }
+        program {
+            name: "translucent_state";
+            script {
+               set_state(PART:"indicator_bg", "translucent", 0.0);
+               set_state(PART:"indicator_clipper", "default", 0.0);
+               set_state(PART:"indicator_overlap_base", "overlap", 0.0);
+            }
+        }
+        program {
+            name: "transparent_state";
+            script {
+               set_state(PART:"indicator_bg", "default", 0.0);
+               set_state(PART:"indicator_clipper", "hide", 0.0);
+               set_state(PART:"indicator_overlap_base", "overlap", 0.0);
+            }
+        }
+        program {
+            name: "opaque_indicator";
+            signal: "elm,state,indicator,opaque";
+            source: "elm";
+            script {
+              set_int(indicator_opacity, 0);
+              if ((get_int(indicator_visible) == 1) && (get_int(landscape) == 0))
+                run_program(PROGRAM:"opaque_state");
+            }
+        }
+        program {
+            name: "translucent_indicator";
+            signal: "elm,state,indicator,translucent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 1);
+               if ((get_int(indicator_visible) == 1) && (get_int(landscape) == 0))
+                 run_program(PROGRAM:"translucent_state");
+            }
+        }
+        program {
+            name: "transparent_indicator";
+            signal: "elm,state,indicator,transparent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 2);
+               if (get_int(indicator_visible) == 1)
+                 run_program(PROGRAM:"transparent_state");
+            }
+        }
+        program {
+           name: "overlap_indicator";
+           signal: "elm,state,indicator,overlap";
+           source: "elm";
+           script {
+              set_int(indicator_overlap, 1);
+              set_state(PART:"indicator_overlap_base", "overlap", 0.0);
+          }
+        }
+        program {
+           name: "nooverlap_indicator";
+           signal: "elm,state,indicator,nooverlap";
+           source: "elm";
+           script {
+              //Only portrait state get nooverlap mode
+              set_int(indicator_overlap, 0);
+              if (get_int(indicator_visible) == 1)
+                if (get_int(indicator_opacity) == 0) { //only opaque can be nooverlap
+                  if (get_int(landscape) == 0) { //landscape should be overlap
+                    set_state(PART:"indicator_overlap_base", "default", 0.0);
+                  }
+                }
+           }
+        }
+        program { name: "enable_clipboard";
+           signal: "elm,state,clipboard,enable";
+           source: "";
+           script {
+              set_int(clipboard_disable, 0);
+              //set content state
+              set_state(PART:"elm.swallow.content", "default", 0.0);
+           }
+        }
+        program { name: "disable_clipboard";
+           signal: "elm,state,clipboard,disable";
+           source: "";
+           script {
+              set_int(clipboard_disable, 1);
+              set_state(PART:"sip_area", "default", 0.0);
+              if (get_int(keypad_disable) == 1)
+                set_state(PART:"elm.swallow.content", "disable_sip", 0.0);
+              else
+                set_state(PART:"elm.swallow.content", "default", 0.0);
+           }
+        }
+        program { name: "enable_virtualkeypad";
+           signal: "elm,state,virtualkeypad,enable";
+           source: "";
+           script {
+              set_int(keypad_disable, 0);
+              set_state(PART:"elm.swallow.content", "default", 0.0);
+           }
+        }
+        program { name: "disable_virtualkeypad";
+           signal: "elm,state,virtualkeypad,disable";
+           source: "";
+           script {
+              set_int(keypad_disable, 1);
+              if (get_int(clipboard_disable) == 1)
+                {
+                   set_state(PART:"sip_area", "clipboard_on", 0.0);
+                   set_state(PART:"elm.swallow.content", "disable_sip", 0.0);
+                }
+              else
+                set_state(PART:"elm.swallow.content", "default", 0.0);
+           }
+        }
+        program {
+            name: "change_to_landscape";
+            signal: "elm,state,landscape";
+            source: "elm";
+            script {
+               if (get_int(landscape) == 0) { 
+                 set_int(landscape, 1);
+                 if (get_int(indicator_visible) == 1)
+                   run_program(PROGRAM:"transparent_state");
+               }
+            }
+         }
+         program {
+            name: "change_to_portrait";
+            signal: "elm,state,portrait";
+            source: "elm";
+            script {
+               if (get_int(indicator_visible) == 1) { 
+                 if (get_int(landscape) == 1) {  //content start (0, indicator height)
+                    set_int(landscape, 0);
+                    if (get_int(indicator_opacity) == 2)
+                      run_program(PROGRAM:"transparent_state");
+                    else if (get_int(indicator_opacity) == 1)
+                      run_program(PROGRAM:"translucent_state");
+                    else 
+                      run_program(PROGRAM:"opaque_state");
+                 }
+               }
+            }
+         }
+         program { name: "landscape_mode";
+            source: "elm";
+            signal: "elm,state,orient,90";
+            action: SIGNAL_EMIT "elm,state,landscape" "elm";
+         }
+         program { name: "landscape_mode2";
+            source: "elm";
+            signal: "elm,state,orient,270";
+            action: SIGNAL_EMIT "elm,state,landscape" "elm";
+         }
+         program { name: "portrait_mode";
+            source: "elm";
+            signal: "elm,state,orient,0";
+            action: SIGNAL_EMIT "elm,state,portrait" "elm";
+         }
+         program { name: "portrait_mode2";
+            source: "elm";
+            signal: "elm,state,orient,180";
+            action: SIGNAL_EMIT "elm,state,portrait" "elm";
+        }
+        program {
+            name: "clipboard_on";
+            signal: "elm,state,clipboard,on";
+            source: "elm";
+            action: STATE_SET "clipboard_on" 0.0;
+            target: "sip_area";
+        }
+        program {
+            name: "clipboard_off";
+            signal: "elm,state,clipboard,off";
+            source: "elm";
+            action: STATE_SET "default" 0.0;
+            target: "sip_area";
+        }
+     }
+  }
+ group { name: "elm/conformant/base/indicator_overlap";
+     script {
+        public indicator_visible = 0;     //Indicator visible check
+        public indicator_opacity = 0;     //0=opaque, 1=translucent, 2=transparent
+     }
+     parts {
+        part { name: "elm.swallow.bg";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+           }
+        }
+        part { name: "elm.swallow.content";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              align: 0.5 0.5;
+              rel2.relative: 1.0 0.0;
+              rel2.to: "sip_area";
+           }
+        }
+        part { name: "elm.swallow.ug";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              align: 0.5 0.5;
+              rel1.relative: 0.0 1.0;
+              rel1.to: "elm.swallow.indicator";
+              rel2.relative: 1.0 0.0;
+              rel2.to: "sip_area";
+           }
+        }
+        part { name: "indicator_bg";
+           type: RECT;
+           scale: 1;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_DEFAULT_COLOR_INC;
+           }
+           description { state: "translucent" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_TRANSLUCENT_COLOR_INC;
+           }
+           description { state: "transparent" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_DEFAULT_COLOR_INC;
+           }
+            description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              visible: 0;
+              min: 0 0;
+           }
+        }
+        part { name: "elm.swallow.indicator";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+           }
+            description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              visible: 0;
+              min: 0 0;
+           }
+        }
+        part { name: "sip_area";
+           type: RECT;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              min: 0 0;
+              rel1.relative: 0.0 0.0;
+              rel1.to_y: "elm.swallow.virtualkeypad";
+              rel2.relative: 1.0 1.0;
+              rel2.to_y: "elm.swallow.virtualkeypad";
+              visible: 0;
+           }
+           description { state: "clipboard_on" 0.0;
+              inherit: "default" 0.0;
+              rel1.to_y: "elm.swallow.clipboard";
+              rel2.to_y: "elm.swallow.clipboard";
+           }
+        }
+        part { name: "elm.swallow.clipboard";
+           type: SWALLOW;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.0 1.0;
+              rel1.relative: 0.0 1.0;
+           }
+        }
+        part { name: "elm.swallow.virtualkeypad";
+           type: SWALLOW;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.0 1.0;
+              rel1.relative: 0.0 1.0;
+           }
+        }
+     }
+     programs {
+        program {
+            name: "hide_indicator";
+            signal: "elm,state,indicator,hide";
+            source: "elm";
+            script {
+               set_int(indicator_visible, 0);
+               set_state(PART:"elm.swallow.indicator", "hide", 0.0);
+               set_state(PART:"indicator_bg", "hide", 0.0);
+            }
+        }
+        program {
+            name: "opaque_indicator";
+            signal: "elm,state,indicator,opaque";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 0);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "opaque", 0.0);
+            }
+        }
+        program {
+            name: "translucent_indicator";
+            signal: "elm,state,indicator,translucent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 1);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "translucent", 0.0);
+            }
+        }
+        program {
+            name: "transparent_indicator";
+            signal: "elm,state,indicator,transparent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 2);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "transparent", 0.0);
+            }
+        }
+        program {
+            name: "clipboard_on";
+            signal: "elm,state,clipboard,on";
+            source: "elm";
+            action: STATE_SET "clipboard_on" 0.0;
+            target: "sip_area";
+        }
+        program {
+            name: "clipboard_off";
+            signal: "elm,state,clipboard,off";
+            source: "elm";
+            action: STATE_SET "default" 0.0;
+            target: "sip_area";
+        }
+     }
+  }
+
+  group { name: "elm/conformant/base/nokeypad";
+     script {
+        public indicator_visible = 0;     //Indicator visible check
+        public indicator_opacity = 0;     //0=opaque, 1=translucent, 2=transparent
+     }
+     parts {
+        part { name: "elm.swallow.bg";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+           }
+        }
+        part { name: "elm.swallow.content";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              align: 0.5 0.5;
+              rel1.relative: 0.0 1.0;
+              rel1.to: "elm.swallow.indicator";
+           }
+        }
+        part { name: "elm.swallow.ug";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              align: 0.5 0.5;
+              rel1.relative: 0.0 1.0;
+              rel1.to: "elm.swallow.indicator";
+           }
+        }
+        part { name: "indicator_bg";
+           type: RECT;
+           scale: 1;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_DEFAULT_COLOR_INC;
+           }
+           description { state: "translucent" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_TRANSLUCENT_COLOR_INC;
+           }
+           description { state: "transparent" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_TRANSPARENT_COLOR_INC;
+           }
+            description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              visible: 0;
+              min: 0 0;
+           }
+        }
+        part { name: "elm.swallow.indicator";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+           }
+            description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              visible: 0;
+              min: 0 0;
+           }
+        }
+     }
+     programs {
+        program {
+            name: "hide_indicator";
+            signal: "elm,state,indicator,hide";
+            source: "elm";
+            script {
+               set_int(indicator_visible, 0);
+               set_state(PART:"elm.swallow.indicator", "hide", 0.0);
+               set_state(PART:"indicator_bg", "hide", 0.0);
+            }
+        }
+        program {
+            name: "opaque_indicator";
+            signal: "elm,state,indicator,opaque";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 0);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "opaque", 0.0);
+            }
+        }
+        program {
+            name: "translucent_indicator";
+            signal: "elm,state,indicator,translucent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 1);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "translucent", 0.0);
+            }
+        }
+        program {
+            name: "transparent_indicator";
+            signal: "elm,state,indicator,transparent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 2);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "transparent", 0.0);
+            }
+        }
+     }
+  }
+  group { name: "elm/conformant/base/without_resize";
+     script {
+        public indicator_visible = 0;     //Indicator visible check
+        public indicator_opacity = 0;     //0=opaque, 1=translucent, 2=transparent
+     }
+     parts {
+        part { name: "elm.swallow.bg";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+           }
+        }
+        part { name: "elm.swallow.indicator_area";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+           }
+        }
+        part { name: "elm.swallow.content";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              align: 0.5 0.5;
+              rel1.relative: 0.0 1.0;
+              rel1.to: "elm.swallow.indicator_area";
+           }
+        }
+        part { name: "indicator_bg";
+           type: RECT;
+           scale: 1;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_DEFAULT_COLOR_INC;
+           }
+           description { state: "translucent" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_TRANSLUCENT_COLOR_INC;
+           }
+           description { state: "transparent" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+              color: CONFORMANT_INDICATOR_BG_TRANSPARENT_COLOR_INC;
+           }
+            description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              visible: 0;
+              min: 0 0;
+           }
+        }
+        part { name: "elm.swallow.indicator";
+           type: SWALLOW;
+           scale: 1;
+           description { state: "default" 0.0;
+              fixed: 0 1;
+              align: 0.5 0.0;
+              min: 0 LAYOUT_INDICATOR_HEIGHT_INC;
+              rel2.relative: 1.0 0.0;
+              visible: 1;
+           }
+            description { state: "hide" 0.0;
+              inherit: "default" 0.0;
+              visible: 0;
+              min: 0 0;
+           }
+        }
+     }
+     programs {
+        program {
+            name: "hide_indicator";
+            signal: "elm,state,indicator,hide";
+            source: "elm";
+            script {
+               set_int(indicator_visible, 0);
+               set_state(PART:"elm.swallow.indicator", "hide", 0.0);
+               set_state(PART:"indicator_bg", "hide", 0.0);
+            }
+        }
+        program {
+            name: "opaque_indicator";
+            signal: "elm,state,indicator,opaque";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 0);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "opaque", 0.0);
+            }
+        }
+        program {
+            name: "translucent_indicator";
+            signal: "elm,state,indicator,translucent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 1);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "translucent", 0.0);
+            }
+        }
+        program {
+            name: "transparent_indicator";
+            signal: "elm,state,indicator,transparent";
+            source: "elm";
+            script {
+               set_int(indicator_opacity, 2);
+               if (get_int(indicator_visible) == 1)
+                  set_state(PART:"indicator_bg", "transparent", 0.0);
+            }
+        }
+     }
+  }

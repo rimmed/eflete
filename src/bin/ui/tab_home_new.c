@@ -38,7 +38,6 @@ static Widget_Item_Data widget_item_data[] =
      { N_("bg"),               false },
      { N_("bubble"),           false },
      { N_("button"),           false },
-     { N_("carousel"),         false },
      { N_("check"),            false },
      { N_("colorselector"),    false },
      { N_("conformant"),       false },
@@ -49,16 +48,13 @@ static Widget_Item_Data widget_item_data[] =
      { N_("focus_highlight"),  false },
      { N_("gengrid"),          false },
      { N_("genlist"),          false },
-     { N_("genscroller"),      false },
      { N_("icon_badge"),       false },
      { N_("index"),            false },
      { N_("label"),            false },
      { N_("layout"),           false },
-     { N_("list"),             false },
      { N_("map"),              false },
      { N_("multibuttonentry"), false },
      { N_("naviframe"),        false },
-     { N_("nocontents"),       false },
      { N_("notify"),           false },
      { N_("panes"),            false },
      { N_("photocam"),         false },
@@ -68,19 +64,12 @@ static Widget_Item_Data widget_item_data[] =
      { N_("scroller"),         false },
      { N_("segment_control"),  false },
      { N_("slider"),           false },
-     { N_("spinner"),          false },
-     { N_("standard"),         false },
-     { N_("tickernoti"),       false },
-     { N_("toolbar"),          false },
-     { N_("scroller"),         false },
-     { N_("segment_control"),  false },
-     { N_("slider"),           false },
-     { N_("spinner"),          false },
      { N_("standard"),         false },
      { N_("tickernoti"),       false },
      { N_("toolbar"),          false },
      { NULL,                   false }
    };
+
 
 struct _Tab_Home_New
 {
@@ -179,16 +168,15 @@ _on_item_activated(void *data __UNUSED__,
 
 /* GENERATE SOURCE */
 #define BTN_WD       (widget_item_data + 3)
-#define SCROLLER_WD  (widget_item_data + 38)
-#define ENTRY_WD     (widget_item_data + 11)
-#define LABEL_WD     (widget_item_data + 18)
-#define GENLIST_WD   (widget_item_data + 14)
-#define LIST_WD      (widget_item_data + 20)
-#define PHOTOCAM_WD  (widget_item_data + 27)
-#define NOTIFY_WD    (widget_item_data + 25)
-#define MAP_WD       (widget_item_data + 21)
-#define POPUP_WD     (widget_item_data + 28)
-#define GENGRID_WD   (widget_item_data + 13)
+#define SCROLLER_WD  (widget_item_data + 27)
+#define ENTRY_WD     (widget_item_data + 10)
+#define LABEL_WD     (widget_item_data + 16)
+#define GENLIST_WD   (widget_item_data + 13)
+#define PHOTOCAM_WD  (widget_item_data + 23)
+#define NOTIFY_WD    (widget_item_data + 21)
+#define MAP_WD       (widget_item_data + 18)
+#define POPUP_WD     (widget_item_data + 24)
+#define GENGRID_WD   (widget_item_data + 12)
 
 static int
 _widgets_dependencies_setup(Widget_Item_Data *item, Eina_Strbuf *dep_message)
@@ -206,7 +194,7 @@ _widgets_dependencies_setup(Widget_Item_Data *item, Eina_Strbuf *dep_message)
      return ret;
 
    if ((item == ENTRY_WD) || (item == GENLIST_WD) ||
-       (item == PHOTOCAM_WD) || (item == LIST_WD))
+       (item == PHOTOCAM_WD))
      {
         if (!SCROLLER_WD->check)
           {
@@ -245,13 +233,6 @@ _widgets_dependencies_setup(Widget_Item_Data *item, Eina_Strbuf *dep_message)
              eina_strbuf_append(dep_message, _("Button<br>"));
              ret++;
              ret += _widgets_dependencies_setup(BTN_WD, dep_message);
-          }
-        if (!LIST_WD->check)
-          {
-             LIST_WD->check = true;
-             eina_strbuf_append(dep_message, _("List<br>"));
-             ret++;
-             ret += _widgets_dependencies_setup(LIST_WD, dep_message);
           }
         if (!LABEL_WD->check)
           {
@@ -327,8 +308,20 @@ _widgets_dependencies_generate(Eina_Stringshare *path, Eina_Strbuf *dep_edc)
    DEPENDENCE_INCLUDE(SCROLLER_WD);
    DEPENDENCE_INCLUDE(ENTRY_WD);
    DEPENDENCE_INCLUDE(LABEL_WD);
+
+   if (GENLIST_WD->check)
+     {
+        _file_to_swap_copy(path, "genlist_macro");
+        _file_to_swap_copy(path, "genlist_custom");
+        _file_to_swap_copy(path, "genlist_normal");
+        _file_to_swap_copy(path, "genlist_decorate");
+        _file_to_swap_copy(path, "genlist_email");
+        _file_to_swap_copy(path, "genlist_sweep");
+        _file_to_swap_copy(path, "genlist_expandable");
+        _file_to_swap_copy(path, "genlist_groupindex");
+        _file_to_swap_copy(path, "genlist_textblock_style");
+     }
    DEPENDENCE_INCLUDE(GENLIST_WD);
-   DEPENDENCE_INCLUDE(LIST_WD);
    DEPENDENCE_INCLUDE(PHOTOCAM_WD);
    DEPENDENCE_INCLUDE(NOTIFY_WD);
    DEPENDENCE_INCLUDE(MAP_WD);
@@ -337,20 +330,6 @@ _widgets_dependencies_generate(Eina_Stringshare *path, Eina_Strbuf *dep_edc)
 
    return are_widgets_included;
 }
-
-#undef DEPENDENCE_INCLUDE
-
-#undef BTN_WD
-#undef SCROLLER_WD
-#undef ENTRY_WD
-#undef LABEL_WD
-#undef GENLIST_WD
-#undef LIST_WD
-#undef PHOTOCAM_WD
-#undef NOTIFY_WD
-#undef MAP_WD
-#undef POPUP_WD
-#undef GENGRID_WD
 
 static Eina_Strbuf *
 _edc_code_generate(Eina_Stringshare *path)
@@ -382,13 +361,11 @@ _edc_code_generate(Eina_Stringshare *path)
    eina_strbuf_append(edc, "   }\n");
 
    TODO("move fonts, colorclasses and macros to widgets where they are used");
-   eina_strbuf_append(edc, "   #include \"fonts.edc\"\n");
-   eina_strbuf_append(edc, "   #include \"colorclasses.edc\"\n");
-   eina_strbuf_append(edc, "   #include \"macros.edc\"\n");
+   eina_strbuf_append(edc, "   #include \"macros-light.edc\"\n");
+   eina_strbuf_append(edc, "   #include \"sounds.edc\"\n");
 
-   _file_to_swap_copy(path, "fonts");
-   _file_to_swap_copy(path, "colorclasses");
-   _file_to_swap_copy(path, "macros");
+   _file_to_swap_copy(path, "macros-light");
+   _file_to_swap_copy(path, "sounds");
 
    _widgets_dependencies_generate(path, dep_edc);
    eina_strbuf_append(edc, eina_strbuf_string_get(dep_edc));
@@ -408,6 +385,20 @@ _edc_code_generate(Eina_Stringshare *path)
    eina_strbuf_append(edc, "}\n");
    return edc;
 }
+
+#undef DEPENDENCE_INCLUDE
+
+#undef BTN_WD
+#undef SCROLLER_WD
+#undef ENTRY_WD
+#undef LABEL_WD
+#undef GENLIST_WD
+#undef LIST_WD
+#undef PHOTOCAM_WD
+#undef NOTIFY_WD
+#undef MAP_WD
+#undef POPUP_WD
+#undef GENGRID_WD
 
 /* SPLASH */
 

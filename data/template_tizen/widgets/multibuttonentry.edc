@@ -1,0 +1,485 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+group {
+   name: "elm/multibuttonentry/base/default";
+
+   data.item: "horizontal_pad" MULTIBUTTONENTRY_BOX_HORIZONTAL_PAD_INC;
+   data.item: "vertical_pad" MULTIBUTTONENTRY_BOX_VERTICAL_PAD_INC;
+   data.item: "closed_button_type" "label"; /* image, label, default: label */
+
+   parts {
+      part {
+         name: "bg";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            color: MULTIBUTTONENTRY_BG_COLOR_INC;
+         }
+      }
+      part {
+         name: "top.left.pad";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min : MULTIBUTTONENTRY_WIDTH_PAD_INC MULTIBUTTONENTRY_HEIGHT_PAD_INC;
+            fixed: 1 1;
+            rel2.relative: 0.0 0.0;
+            align: 0.0 0.0;
+            color: 0 0 0 0;
+         }
+      }
+      part {
+         name: "bottom.right.pad";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min : MULTIBUTTONENTRY_WIDTH_PAD_INC MULTIBUTTONENTRY_HEIGHT_PAD_INC;
+            fixed: 1 1;
+            rel1.relative: 1.0 1.0;
+            align: 1.0 1.0;
+            color: 0 0 0 0;
+         }
+      }
+      part {
+         name: "box.swallow";
+         type: SWALLOW;
+         description {
+            state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "top.left.pad";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "bottom.right.pad";
+            }
+         }
+      }
+      part { name: "block_events";
+         type: RECT;
+         description {
+            state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+         description {
+            state: "invisible" 0.0;
+            visible: 0;
+         }
+      }
+      part { name: "events";
+         type: RECT;
+         repeat_events: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+      }
+   }
+   programs {
+      program {
+         name: "clicked";
+         signal: "mouse,clicked,1";
+         source: "events";
+         action: SIGNAL_EMIT "elm,action,clicked" "";
+      }
+      program {
+         name: "event_allow";
+         signal: "elm,state,event,allow";
+         source: "";
+         action: STATE_SET "invisible" 0.0;
+         target: "block_events";
+      }
+      program {
+         name: "event_block";
+         signal: "elm,state,event,block";
+         source: "";
+         action: STATE_SET "default" 0.0;
+         target: "block_events";
+      }
+   }
+}
+
+group {
+   name: "elm/multibuttonentry/guidetext/default";
+
+   styles {
+      style {
+         name: "multibuttonentry_guide_style";
+         base: "font=Tizen:style=Regular font_size="MULTIBUTTONENTRY_GUIDE_TEXT_SIZE_INC" color="MULTIBUTTONENTRY_GUIDE_TEXT_COLOR_INC" wrap=char text_class=tizen";
+         tag:  "br" "\n";
+         tag:  "ps" "ps";
+         tag:  "hilight" "+ font=Tizen:style=Bold";
+         tag:  "b" "+ font=Tizen:style=Bold";
+         tag:  "tab" "\t";
+      }
+   }
+
+   parts {
+      part {
+         name: "elm.text";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: 0 MULTIBUTTONENTRY_GUIDE_HEIGHT_INC;
+            text.style: "multibuttonentry_guide_style";
+         }
+      }
+   }
+}
+
+group {
+   name: "elm/multibuttonentry/btn/default";
+
+   styles {
+      style {
+         name: "multibuttonentry_btn_text_style";
+         base: "font=Tizen:style=Regular font_size="MULTIBUTTONENTRY_BUTTON_TEXT_SIZE_INC" color="MULTIBUTTONENTRY_BUTTON_TEXT_COLOR_INC" style=far_shadow, bottom shadow_color="MULTIBUTTONENTRY_BUTTON_TEXT_NORMAL_SHADOW_COLOR_INC" text_class=tizen";
+      }
+      style {
+         name: "multibuttonentry_btn_text_pressed_style";
+         base: "font=Tizen:style=Regular font_size="MULTIBUTTONENTRY_BUTTON_TEXT_SIZE_INC" color="MULTIBUTTONENTRY_BUTTON_TEXT_COLOR_INC" style=far_shadow, top shadow_color="MULTIBUTTONENTRY_BUTTON_TEXT_PRESSED_SHADOW_COLOR_INC" text_class=tizen";
+      }
+      style {
+         name: "multibuttonentry_btn_text_ellipsis_style";
+         base: "font=Tizen:style=Regular font_size="MULTIBUTTONENTRY_BUTTON_TEXT_SIZE_INC" color="MULTIBUTTONENTRY_BUTTON_TEXT_COLOR_INC" style=far_shadow, bottom shadow_color="MULTIBUTTONENTRY_BUTTON_TEXT_NORMAL_SHADOW_COLOR_INC" ellipsis=1 text_class=tizen";
+      }
+      style {
+         name: "multibuttonentry_btn_text_ellipsis_pressed_style";
+         base: "font=Tizen:style=Regular font_size="MULTIBUTTONENTRY_BUTTON_TEXT_SIZE_INC" color="MULTIBUTTONENTRY_BUTTON_TEXT_COLOR_INC" style=far_shadow, top shadow_color="MULTIBUTTONENTRY_BUTTON_TEXT_PRESSED_SHADOW_COLOR_INC" ellipsis=1 text_class=tizen";
+      }
+   }
+
+   images {
+      image: "00_contacts_button.png" COMP;
+      image: "00_contacts_button_press.png" COMP;
+      image: "00_contacts_button_dim.png" COMP;
+   }
+
+   data.item: "button_left_pad" MULTIBUTTONENTRY_BUTTON_PAD_INC;
+   data.item: "button_right_pad" MULTIBUTTONENTRY_BUTTON_PAD_INC;
+
+   parts {
+      part {
+         name: "elm.btn.bg";
+         type: IMAGE;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: 0 MULTIBUTTONENTRY_BUTTON_HEIGHT_INC;
+            image {
+               normal: "00_contacts_button.png";
+               border: MULTIBUTTONENTRY_BUTTON_NINEPATCH_INC;
+               border_scale: 1;
+            }
+         }
+         description {
+            state: "focused" 0.0;
+            inherit: "default" 0.0;
+            image.normal: "00_contacts_button_press.png";
+         }
+         description {
+            state: "out_of_focus" 0.0;
+            inherit: "default" 0.0;
+            image.normal: "00_contacts_button_dim.png";
+         }
+      }
+      part {
+         name: "left.padding";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: MULTIBUTTONENTRY_BUTTON_PAD_INC 0;
+            fixed: 1 0;
+            rel2.relative: 0.0 1.0;
+            align: 0.0 0.5;
+            color: 0 0 0 0;
+         }
+      }
+      part {
+         name: "right.padding";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: MULTIBUTTONENTRY_BUTTON_PAD_INC 0;
+            fixed: 1 0;
+            rel1.relative: 1.0 0.0;
+            align: 1.0 0.5;
+            color: 0 0 0 0;
+         }
+      }
+      part {
+         name: "elm.btn.text";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         multiline: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            text {
+               style: "multibuttonentry_btn_text_style";
+               min: 1 0;
+            }
+            rel1 {
+               relative: 1.0 0.0;
+               to: "left.padding";
+            }
+            rel2 {
+               relative: 0.0 1.0;
+               to: "right.padding";
+            }
+         }
+         description {
+            state: "focused" 0.0;
+            inherit: "default" 0.0;
+            text.style: "multibuttonentry_btn_text_pressed_style";
+         }
+         description {
+            state: "ellipsis" 0.0;
+            inherit: "default" 0.0;
+            text {
+               style: "multibuttonentry_btn_text_ellipsis_style";
+               min: 0 0;
+            }
+         }
+         description {
+            state: "ellipsis_focused" 0.0;
+            inherit: "ellipsis" 0.0;
+            text.style: "multibuttonentry_btn_text_ellipsis_pressed_style";
+         }
+      }
+      part { name: "events";
+         type: RECT;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+      }
+   }
+   programs {
+      program {
+         name: "text_ellipsis";
+         signal: "elm,state,text,ellipsis";
+         source: "";
+         action: STATE_SET "ellipsis" 0.0;
+         target: "elm.btn.text";
+      }
+      program {
+         name: "focused";
+         signal: "focused";
+         source: "";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.btn.text", st, 30, vl);
+            if (!strcmp(st, "default"))
+              set_state(PART:"elm.btn.text", "focused", 0.0);
+            else
+              set_state(PART:"elm.btn.text", "ellipsis_focused", 0.0);
+
+            set_state(PART:"elm.btn.bg", "focused", 0.0);
+         }
+         after: "selected";
+      }
+      program {
+         name: "unfocused";
+         signal: "default";
+         source: "";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.btn.text", st, 30, vl);
+            if (!strcmp(st, "focused"))
+              set_state(PART:"elm.btn.text", "default", 0.0);
+            else
+              set_state(PART:"elm.btn.text", "ellipsis", 0.0);
+
+            set_state(PART:"elm.btn.bg", "default", 0.0);
+         }
+      }
+      program {
+         name: "mbe_lose_focus";
+         signal: "lose_focus";
+         source: "";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.btn.text", st, 30, vl);
+            if (!strcmp(st, "focused"))
+              set_state(PART:"elm.btn.text", "default", 0.0);
+            else
+              set_state(PART:"elm.btn.text", "ellipsis", 0.0);
+
+            set_state(PART:"elm.btn.bg", "out_of_focus", 0.0);
+         }
+      }
+      program {
+         name: "clicked";
+         signal: "mouse,clicked,1";
+         source: "events";
+         action: SIGNAL_EMIT "elm,action,clicked" "";
+         after: "touch_snd";
+      }
+      program {
+         name: "touch_snd";
+         action: PLAY_SAMPLE "touch_sound" 1.0;
+      }
+      program {
+         name: "selected";
+         action: SIGNAL_EMIT "elm,action,selected" "";
+      }
+   }
+}
+
+group {
+   name: "elm/multibuttonentry/number/default";
+
+   parts {
+      part {
+         name: "left.pad";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: MULTIBUTTONENTRY_LABEL_PAD_INC 0;
+            fixed: 1 0;
+            rel2.relative: 0.0 1.0;
+            align: 0.0 0.5;
+            color: 0 0 0 0;
+         }
+      }
+      part {
+         name: "elm.text";
+         type: TEXT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: 0 MULTIBUTTONENTRY_LABEL_HEIGHT_INC;
+            color: MULTIBUTTONENTRY_NUMBER_TEXT_COLOR_INC;
+            text {
+               font: "Tizen:style=Regular";
+               size: MULTIBUTTONENTRY_LABEL_TEXT_SIZE_INC;
+               min: 1 0;
+               text_class: "tizen";
+            }
+            rel1 {
+               relative: 1.0 0.0;
+               to: "left.pad";
+            }
+         }
+      }
+   }
+}
+
+group {
+   name: "elm/multibuttonentry/closedbutton/default";
+
+   images {
+      image: "00_circle_button.png" COMP;
+      image: "00_button_expand_closed.png" COMP;
+   }
+
+   parts {
+      part {
+         name: "closed_button_bg";
+         scale: 1;
+         mouse_events: 0;
+         description {
+            state: "default" 0.0;
+            min: MULTIBUTTONENTRY_CLOSEDBUTTON_SIZE_INC MULTIBUTTONENTRY_CLOSEDBUTTON_SIZE_INC;
+            image.normal: "00_circle_button.png";
+         }
+      }
+      part {
+         name: "closed_button";
+         scale: 1;
+         mouse_events: 0;
+         description {
+            state: "default" 0.0;
+            image.normal: "00_button_expand_closed.png";
+         }
+      }
+   }
+}
+
+group {
+   name: "elm/multibuttonentry/label/default";
+
+   styles {
+      style {
+         name: "multibuttonentry_label_style";
+         base: "font=Tizen:style=Regular font_size="MULTIBUTTONENTRY_LABEL_TEXT_SIZE_INC" color="MULTIBUTTONENTRY_LABEL_TEXT_COLOR_INC" wrap=char text_class=tizen";
+         tag:  "br" "\n";
+         tag:  "ps" "ps";
+         tag:  "hilight" "+ font=Tizen:style=Bold";
+         tag:  "b" "+ font=Tizen:style=Bold";
+         tag:  "tab" "\t";
+      }
+   }
+
+   parts {
+      part {
+         name: "mbe.label.right.padding";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: MULTIBUTTONENTRY_LABEL_PAD_INC 0;
+            fixed: 1 0;
+            rel1.relative: 1.0 0.0;
+            align: 1.0 0.5;
+            color: 0 0 0 0;
+         }
+      }
+      part {
+         name: "mbe.label";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: 0 MULTIBUTTONENTRY_LABEL_HEIGHT_INC;
+            text {
+               style: "multibuttonentry_label_style";
+               min: 1 0;
+            }
+            rel2 {
+               relative: 0.0 1.0;
+               to: "mbe.label.right.padding";
+            }
+         }
+      }
+   }
+}

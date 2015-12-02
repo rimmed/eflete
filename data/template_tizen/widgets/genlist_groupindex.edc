@@ -1,0 +1,360 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/*
+ * vim:ts=3:expandtab
+*/
+
+#define GROUPINDEX_PADDING_SIZE_LEFT 26
+#define GROUPINDEX_PADDING_SIZE_RIGHT 26
+#define GROUPINDEX_TEXT_HEIGHT 38
+#define GROUPINDEX_ICON_SIZE 64
+
+
+#define GENLIST_PART_INDEX_BG \
+      GENLIST_PART_RECT("bg",  \
+         description { state: "default" 0.0; \
+            color: GENLIST_GROUPINDEX_LIST_BG_COLOR; \
+         } \
+         description { state: "selected" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_GROUPINDEX_LIST_PRESS_COLOR; \
+         } \
+         description { state: "disabled" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_GROUPINDEX_LIST_BG_COLOR; \
+         } \
+      )
+
+ // group index
+#define GENLIST_DESCRIPTION_INDEX_LIST \
+   description { state: "selected" 0.0; \
+      inherit: "default" 0.0; \
+      color: GENLIST_GROUPINDEX_LIST_FOCUS_COLOR; \
+   }
+
+ #define GENLIST_DESCRIPTION_INDEX_LIST_TB \
+   description { state: "selected" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "genlist_style_groupindex_text_focus"; \
+   }
+
+#define GENLIST_PART_INDEX_LINE(TOP, BOTTOM) \
+      GENLIST_PART_RECT("index_line", \
+         GENLIST_DESCRIPTION_TB(TOP, BOTTOM, \
+            color: GENLIST_GROUPINDEX_LINE_COLOR; \
+            min: 0 4; \
+            max: -1 4; \
+         ) \
+         description { state: "selected" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_GROUPINDEX_LINE_FOCUS_COLOR; \
+         } \
+      )
+
+#define GENLIST_PART_INDEX_LINE_ICON(LEFT, TOP, BOTTOM) \
+      GENLIST_PART_RECT("index_line_icon", \
+         GENLIST_DESCRIPTION_LTB(LEFT, TOP, BOTTOM, \
+            color: GENLIST_GROUPINDEX_LINE_COLOR; \
+            min: 0 4; \
+            max: -1 4; \
+            rel2.to_x: "base"; \
+         ) \
+         description { state: "selected" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_GROUPINDEX_LINE_FOCUS_COLOR; \
+        } \
+      )
+
+// Group Index
+#define GENLIST_PARAM_INDEX_LIST \
+   color: GENLIST_GROUPINDEX_LIST_COLOR; \
+   text { \
+      align: 0 0.5; \
+      min: 0 1; \
+      font: "Tizen:style=Bold"; \
+      size: GENLIST_GROUPINDEX_LIST_SIZE; \
+      text_class: "list_item"; \
+   }
+
+// Group Index
+#define GENLIST_PARAM_INDEX_LIST_TB \
+   text { \
+      align: 0 0.5; \
+      min: 0 1; \
+      style: "genlist_style_groupindex_text"; \
+   }
+
+#define GENLIST_PART_PADDING_GROUPINDEX_LEFT \
+      GENLIST_PART_EXPANDED_PAD \
+         GENLIST_PART_RECT("elm.padding.left", \
+            GENLIST_DESCRIPTION_L("elm.swallow.pad",  \
+               color: GENLIST_LIST_BG_COLOR; \
+               min: GROUPINDEX_PADDING_SIZE_LEFT 0; \
+               max: GROUPINDEX_PADDING_SIZE_LEFT -1; \
+               fixed: 1 0; \
+            ) \
+            description { state: "selected" 0.0; \
+               inherit: "default" 0.0; \
+               color: GENLIST_GROUPINDEX_LIST_PRESS_COLOR; \
+            } \
+            description { state: "disabled" 0.0; \
+               inherit: "default" 0.0; \
+               color: GENLIST_GROUPINDEX_LIST_BG_COLOR; \
+            } \
+            GENLIST_DESCRIPTION_DECORATE_PADDING \
+            GENLIST_DESCRIPTION_REORDER_PADDING \
+            GENLIST_DESCRIPTION_DECORATE_REORDER_PADDING \
+         )
+
+#define GENLIST_PART_PADDING_GROUPINDEX_RIGHT \
+         GENLIST_PART_RECT("elm.padding.right", \
+            description { state: "default" 0.0; \
+               color: GENLIST_LIST_BG_COLOR; \
+               min: GROUPINDEX_PADDING_SIZE_RIGHT 0; \
+               max: GROUPINDEX_PADDING_SIZE_RIGHT -1; \
+               fixed: 1 0; \
+               align: 1.0 0.5; \
+               rel1.to: "base"; \
+               rel2.to: "base"; \
+               rel1.relative: 1 0; \
+            } \
+            description { state: "selected" 0.0; \
+               inherit: "default" 0.0; \
+               color: GENLIST_GROUPINDEX_LIST_PRESS_COLOR; \
+            } \
+            description { state: "disabled" 0.0; \
+               inherit: "default" 0.0; \
+               color: GENLIST_GROUPINDEX_LIST_BG_COLOR; \
+            } \
+            GENLIST_DESCRIPTION_DECORATE_PADDING \
+            GENLIST_DESCRIPTION_REORDER_PADDING \
+            GENLIST_DESCRIPTION_DECORATE_REORDER_PADDING \
+         )
+
+#define SLIDING_PER_FPS 1
+#define SLIDING_FPS     60.0
+// 2.1.1
+   group { GENLIST_NAME("groupindex/default")
+      alias: "elm/genlist/item/grouptitle/default";
+      alias: "elm/genlist/item_odd/grouptitle/default";
+      alias: "elm/genlist/item_compress/grouptitle/default";
+      alias: "elm/genlist/item_compress_odd/grouptitle/default";
+      alias: "elm/genlist/tree/grouptitle/default";
+      alias: "elm/genlist/tree_odd/grouptitle/default";
+      alias: "elm/genlist/tree_compress/grouptitle/default";
+      alias: "elm/genlist/tree_compress_odd/grouptitle/default";
+      GENLIST_PROLOG
+
+      data.item: "texts" "elm.text";
+
+      script {
+         public sliding_timer;
+         public end_timer;
+         public text_w;
+         public org_text_w;
+
+         public get_width() {
+            new x, y, w, h;
+            get_geometry(PART:"elm.text", x, y, w, h);
+            set_int(org_text_w, w);
+
+            set_state(PART:"elm.text", "sliding", 0.0);
+            get_geometry(PART:"elm.text", x, y, w, h);
+            set_int(text_w, w);
+         }
+         public ender(val) {
+            if (get_int(sliding_timer)) cancel_timer(get_int(sliding_timer));
+            set_int(sliding_timer, 0);
+            if (get_int(end_timer)) cancel_timer(get_int(end_timer));
+            set_int(end_timer, 0);
+            set_state(PART:"elm.text", "default", 0.0);
+         }
+         public sliding(val) {
+            if (val == 0) {
+               get_width();
+               if (get_int(text_w) < get_int(org_text_w)) {
+                  ender(1);
+                  return;
+               }
+            }
+            /*
+            new buf[128];
+            snprintf(buf, 127, "val:%d <= org_w:%d - sliding_w:%d  ",
+               val, get_int(org_text_w), get_int(text_w));
+            set_text(PART:"dbg", buf);
+            */
+            custom_state(PART:"elm.text", "sliding", 0.0);
+            set_state_val(PART:"elm.text", STATE_REL1_OFFSET, val, 0);
+            set_state_val(PART:"elm.text", STATE_REL2_OFFSET, val, 0);
+            set_state(PART:"elm.text", "custom", 0.0);
+            val -= SLIDING_PER_FPS;
+
+            if (val <= -get_int(text_w) + get_int(org_text_w)) {
+               set_int(end_timer, timer(0.5, "ender", 1));
+            } else
+               set_int(sliding_timer, timer(1.0/SLIDING_FPS, "sliding", val));
+         }
+      }
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_INDEX_BG
+         GENLIST_PART_PADDING_TOP_SIZE(20)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(14)
+         GENLIST_PART_TEXTBLOCK("elm.text",
+            GENLIST_DESCRIPTION_LRT("elm.padding.left", "elm.padding.right", "elm.padding.top",
+               GENLIST_PARAM_INDEX_LIST_TB
+               min: 0 GROUPINDEX_TEXT_HEIGHT;
+               fixed: 0 1;
+            )
+            description { state: "sliding" 0.0;
+               inherit: "default";
+               text.min: 1 1;
+               align: 0 0;
+            }
+            GENLIST_DESCRIPTION_INDEX_LIST_TB
+         )
+         /*
+         part { name: "dbg";
+            type: TEXT;
+            description { state: "default" 0.0;
+               color: 255 0 0 255;
+               text {
+                  font: "Sans";
+                  size: 12;
+                  align: 1.0 1.0;
+               }
+            }
+         }
+         */
+        GENLIST_PART_PADDING_GROUPINDEX_LEFT
+        GENLIST_PART_PADDING_GROUPINDEX_RIGHT
+        GENLIST_PART_INDEX_LINE("elm.text", "elm.padding.bottom")
+        GENLIST_PART_FOCUS
+      }
+      program { name: "default";
+         signal: "elm,state,default";
+         source: "elm";
+         script {
+            ender(1);
+            set_state(PART:"elm.text", "default", 0.0);
+            set_state(PART:"index_line", "default", 0.0);
+            set_state(PART:"bg", "default", 0.0);
+         }
+      }
+      programs {
+         GENLIST_PROGRAM_DISABLED( target: "elm.text"; target: "index_line"; )
+         program { name: "selected";
+            signal: "elm,state,selected";
+            source: "elm";
+            script {
+               if (!get_int(sliding_timer) && !get_int(end_timer)) {
+                  set_state(PART:"elm.text", "selected", 0.0);
+                  set_state(PART:"index_line", "selected", 0.0);
+                  set_state(PART:"bg", "selected", 0.0);
+                  set_state(PART:"elm.padding.left", "selected", 0.0);
+                  set_state(PART:"elm.padding.right", "selected", 0.0);
+               }
+            }
+         }
+         program { name: "unselected";
+            signal: "elm,state,unselected";
+            source: "elm";
+            script {
+               if (!get_int(sliding_timer) && !get_int(end_timer)) {
+                  set_state(PART:"elm.text", "default", 0.0);
+                  set_state(PART:"index_line", "default", 0.0);
+                  set_state(PART:"bg", "default", 0.0);
+                  set_state(PART:"elm.padding.left", "default", 0.0);
+                  set_state(PART:"elm.padding.right", "default", 0.0);
+               }
+            }
+         }
+         program { name: "slide_start";
+            signal: "elm,state,slide,start";
+            source: "";
+            script {
+               set_state(PART:"index_line", "default", 0.0);
+               set_state(PART:"bg", "default", 0.0);
+               if (!get_int(sliding_timer) && !get_int(end_timer)) {
+                  set_int(sliding_timer, timer(0.01, "sliding", 0));
+               }
+            }
+         }
+         program { name: "slide_stop";
+            signal: "elm,state,slide,stop";
+            source: "elm";
+            script {
+               if (get_int(sliding_timer) && get_int(end_timer)) {
+                  ender(0);
+               }
+            }
+         }
+         GENLIST_PROGRAM_FOCUS
+      }
+   }
+
+//2.1.3
+   group { GENLIST_NAME("groupindex.icon/default")
+      alias: "elm/genlist/item/grouptitle.icon/default";
+      alias: "elm/genlist/item_odd/grouptitle.icon/default";
+      alias: "elm/genlist/item_compress/grouptitle.icon/default";
+      alias: "elm/genlist/item_compress_odd/grouptitle.icon/default";
+      alias: "elm/genlist/tree/grouptitle.icon/default";
+      alias: "elm/genlist/tree_odd/grouptitle.icon/default";
+      alias: "elm/genlist/tree_compress/grouptitle.icon/default";
+      alias: "elm/genlist/tree_compress_odd/grouptitle.icon/default";
+      GENLIST_PROLOG
+
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_INDEX_BG
+         GENLIST_PART_PADDING_LEFT_SIZE(GROUPINDEX_PADDING_SIZE_LEFT)
+         GENLIST_PART_PADDING_RIGHT_SIZE(GROUPINDEX_PADDING_SIZE_RIGHT)
+         GENLIST_PART_PADDING_TOP_SIZE(6)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(6)
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION_LTB("elm.padding.left",
+               "elm.padding.top", "elm.padding.bottom",
+               min: GROUPINDEX_ICON_SIZE GROUPINDEX_ICON_SIZE;
+               max: GROUPINDEX_ICON_SIZE GROUPINDEX_ICON_SIZE;
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.icon.right", "elm.icon", 16)
+         GENLIST_PART_TEXT("elm.text",
+            GENLIST_DESCRIPTION_LRT("elm.padding.icon.right", "elm.padding.right", "elm.padding.top",
+               GENLIST_PARAM_INDEX_LIST
+               min: 0 GROUPINDEX_TEXT_HEIGHT;
+               fixed: 0 1;
+            )
+            GENLIST_DESCRIPTION_INDEX_LIST
+         )
+         GENLIST_PART_INDEX_LINE_ICON("elm.padding.icon.right", "elm.text", "elm.padding.bottom")
+         GENLIST_PART_FOCUS
+      }
+      programs {
+         GENLIST_PROGRAM_DISABLED( target: "elm.text"; target: "index_line_icon"; )
+         GENLIST_PROGRAM_SELECT( target: "elm.text"; target: "index_line_icon"; target: "bg"; )
+         GENLIST_PROGRAM_FOCUS
+      }
+   }
