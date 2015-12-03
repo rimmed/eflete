@@ -369,6 +369,28 @@ group { name: "elm/check/base/toggle";
    }
 }
 
+group { name: "elm/check/base/template_color";
+   images {
+      image: "toggle-black.png" COMP;
+      image: "toggle-white.png" COMP;
+   }
+   inherit: "elm/check/base/toggle";
+   parts {
+      part { name: "button";
+         description { state: "default" 0.0;
+            image {
+               normal: "toggle-black.png";
+            }
+         }
+         description { state: "on" 0.0;
+            image {
+               normal: "toggle-white.png";
+            }
+         }
+      }
+   }
+}
+
 group { name: "elm/check/base/default";
    images {
       image: "control-bg.png" COMP;
