@@ -1800,8 +1800,9 @@ group { name: "elm/layout/wizard/new_project";
                to: "swallow.all_widgets_check";
             }
             rel2 {
-               to_x: "area.widgets_info";
+               to_x: "swallow.tizen_theme";
                to_y: "swallow.all_widgets_check";
+               relative: 0.0 1.0;
             }
             text {
                font: "PT";
@@ -2068,6 +2069,16 @@ group { name: "elm/layout/wizard/new_project";
             rel2 {
                to: "area.large_items";
             }
+         }
+      }
+      part { name: "swallow.tizen_theme";
+         type: SWALLOW;
+         scale: 1;
+         description { state: "default" 0.0;
+            fixed: 1 1;
+            align: 1.0 0.0;
+            min: 60 20;
+            max: 60 20;
          }
       }
    }

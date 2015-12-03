@@ -21,10 +21,8 @@ template_edcdir = $(datadir)/eflete/themes/default/template_tizen/edc
 template_edc_DATA = \
    $(top_srcdir)/data/template_tizen/widgets/*.edc \
    $(top_srcdir)/data/template_tizen/macros-light.edc \
+   $(top_srcdir)/data/template_tizen/macros-black.edc \
    $(top_srcdir)/data/template_tizen/sounds.edc
-
-template_imgdir = $(datadir)/eflete/themes/default/template_tizen/images
-template_img_DATA = $(top_srcdir)/data/template_tizen/images/Tizen/*
 
 template_snddir = $(datadir)/eflete/themes/default/template_tizen/sounds
 template_snd_DATA = $(top_srcdir)/data/template_tizen/sounds/*
@@ -96,6 +94,5 @@ clean-local:
 
 install-exec-hook:
 	mkdir -p $(TEMPLATE_IMAGE_COPY_INTO) && \
-	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/Black $(TEMPLATE_IMAGE_COPY_INTO)/&& \
-	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/White/ $(TEMPLATE_IMAGE_COPY_INTO)/ && \
-	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/Content_views/ $(TEMPLATE_IMAGE_COPY_INTO)/
+	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/dark $(TEMPLATE_IMAGE_COPY_INTO) && \
+	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/light $(TEMPLATE_IMAGE_COPY_INTO)

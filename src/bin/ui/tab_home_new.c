@@ -333,7 +333,7 @@ _widgets_dependencies_generate(Eina_Stringshare *path, Eina_Strbuf *dep_edc)
 }
 
 static Eina_Strbuf *
-_edc_code_generate(Eina_Stringshare *path)
+_edc_code_generate(Eina_Stringshare *path, Eina_Bool theme_color)
 {
    assert(path != NULL);
 
@@ -362,10 +362,17 @@ _edc_code_generate(Eina_Stringshare *path)
    eina_strbuf_append(edc, "   }\n");
 
    TODO("move fonts, colorclasses and macros to widgets where they are used");
-   eina_strbuf_append(edc, "   #include \"macros-light.edc\"\n");
+   if (theme_color) /* true is white color */
+     eina_strbuf_append(edc, "   #include \"macros-light.edc\"\n");
+   else
+     eina_strbuf_append(edc, "   #include \"macros-black.edc\"\n");
+
    eina_strbuf_append(edc, "   #include \"sounds.edc\"\n");
 
-   _file_to_swap_copy(path, "macros-light");
+   if (theme_color) /* true is white color */
+     _file_to_swap_copy(path, "macros-light");
+   else
+     _file_to_swap_copy(path, "macros-black");
    _file_to_swap_copy(path, "sounds");
 
    _widgets_dependencies_generate(path, dep_edc);
@@ -420,11 +427,14 @@ _progress_end(void *data, PM_Project_Result result)
 }
 
 static Eina_Bool
-_setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
+_setup_open_splash(void *data, Splash_Status status __UNUSED__)
 {
    Eina_Tmpstr *tmp_dir;
    Eina_Strbuf *edc, *flags;
    Eina_Stringshare *edc_path;
+   Evas_Object *check = (Evas_Object *)data;
+   Eina_Bool white = elm_check_state_get(check);
+printf("УЫЕФЕУ ЩШОРП Е х   %d     ъ\n", white);
    FILE *fp;
 
    if (!eina_file_mkdtemp("eflete_project_XXXXXX", &tmp_dir))
@@ -436,7 +446,7 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    eina_tmpstr_del(tmp_dir);
 
    edc_path = eina_stringshare_printf("%s/new_project_tmp.edc", tab_new.tmp_dir_path);
-   edc = _edc_code_generate(tab_new.tmp_dir_path);
+   edc = _edc_code_generate(tab_new.tmp_dir_path, white);
 
    /* create and write edc file */
    fp = fopen(edc_path, "w");
@@ -449,9 +459,14 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    fclose(fp);
 
    flags = eina_strbuf_new();
-   eina_strbuf_append_printf(flags, "-id \"%s\" -sd \"%s\" -v",
-                             EFLETE_TEMPLATE_IMAGES_PATH,
-                             EFLETE_TEMPLATE_SOUNDS_PATH);
+   if (white)
+     eina_strbuf_append_printf(flags, "-id \"%s/light\" -sd \"%s\" -v",
+                               EFLETE_TEMPLATE_IMAGES_PATH,
+                               EFLETE_TEMPLATE_SOUNDS_PATH);
+   else
+     eina_strbuf_append_printf(flags, "-id \"%s/dark\" -sd \"%s\" -v",
+                               EFLETE_TEMPLATE_IMAGES_PATH,
+                               EFLETE_TEMPLATE_SOUNDS_PATH);
 
    pm_project_import_edc(elm_entry_entry_get(tab_new.name),
                          elm_entry_entry_get(tab_new.path),
@@ -484,7 +499,7 @@ _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 
 /* TAB_HOME_NEW LAYOUT */
 static void
-_on_create(void *data __UNUSED__,
+_on_create(void *data,
            Evas_Object *obj __UNUSED__,
            void *event_info __UNUSED__)
 {
@@ -513,7 +528,7 @@ _on_create(void *data __UNUSED__,
                           _setup_open_splash,
                           _teardown_open_splash,
                           _cancel_open_splash,
-                          NULL);
+                          data);
    elm_object_focus_set(ap.splash, true);
    evas_object_show(ap.splash);
    elm_check_state_set(tab_new.ch_all, false);
@@ -557,7 +572,6 @@ _tab_new_project_add(void)
 
    BUTTON_ADD(tab_new.layout, tab_new.btn_create, _("Create"))
    elm_object_part_content_set(tab_new.layout, "elm.swallow.btn_create", tab_new.btn_create);
-   evas_object_smart_callback_add(tab_new.btn_create, "clicked", _on_create, NULL);
    elm_object_disabled_set(tab_new.btn_create, true);
 
    /* label.name */
@@ -586,6 +600,7 @@ _tab_new_project_add(void)
    elm_object_style_set(tab_new.ch_color, "template_color");
    elm_object_part_content_set(tab_new.layout, "swallow.tizen_theme", tab_new.ch_color);
    elm_object_text_set(tab_new.ch_color, _("Theme Color:"));
+   evas_object_smart_callback_add(tab_new.btn_create, "clicked", _on_create, tab_new.ch_color);
 
    /* genlist */
    tab_new.genlist = elm_genlist_add(ap.win);
