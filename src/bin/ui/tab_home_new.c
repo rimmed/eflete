@@ -82,6 +82,7 @@ struct _Tab_Home_New
    Meta_Data_Controls meta;
 
    Evas_Object *ch_all;
+   Evas_Object *ch_color;
    Evas_Object *genlist;
    Eina_Stringshare *tmp_dir_path;
 };
@@ -579,6 +580,12 @@ _tab_new_project_add(void)
    evas_object_smart_callback_add(tab_new.ch_all, "changed", _on_check_all, NULL);
    elm_object_part_content_set(tab_new.layout, "swallow.all_widgets_check", tab_new.ch_all);
    elm_object_part_text_set(tab_new.layout, "label.widgets", _("Widgets:"));
+
+   /* tizen color */
+   CHECK_ADD(tab_new.layout, tab_new.ch_color);
+   elm_object_style_set(tab_new.ch_color, "template_color");
+   elm_object_part_content_set(tab_new.layout, "swallow.tizen_theme", tab_new.ch_color);
+   elm_object_text_set(tab_new.ch_color, _("Theme Color:"));
 
    /* genlist */
    tab_new.genlist = elm_genlist_add(ap.win);
