@@ -542,8 +542,9 @@ _prop_text_2color_add(const char *text,
    Evas_Object *layout;
    PROPERTY_ITEM_ADD(box, text, "2swallow")
 
-   ADD_COLOR_ELEMENT(object_left, item, layout)
-   ADD_COLOR_ELEMENT(object_right, item, layout)
+   ADD_COLOR_ELEMENT(*object_left, item, layout)
+   ADD_COLOR_ELEMENT(*object_right, item, layout)
+
    elm_layout_content_set(item, "swallow.content1", *object_left);
    elm_layout_content_set(item, "swallow.content2", *object_right);
 
