@@ -35,61 +35,41 @@ typedef struct _Widget_Item_Data Widget_Item_Data;
 static Widget_Item_Data widget_item_data[] =
    {
      { N_("access"),           false },
-     { N_("actionslider"),     false },
      { N_("bg"),               false },
-     { N_("border"),           false },
      { N_("bubble"),           false },
      { N_("button"),           false },
-     { N_("calendar"),         false },
      { N_("check"),            false },
-     { N_("clock"),            false },
-     { N_("colorsel"),         false },
-     { N_("conform"),          false },
+     { N_("colorselector"),    false },
+     { N_("conformant"),       false },
      { N_("ctxpopup"),         false },
-     { N_("cursor"),           false },
      { N_("datetime"),         false },
-     { N_("dayselector"),      false },
      { N_("diskselector"),     false },
      { N_("entry"),            false },
-     { N_("fileselector"),     false },
-     { N_("flipselector"),     false },
-     { N_("focus"),            false },
-     { N_("frame"),            false },
+     { N_("focus_highlight"),  false },
      { N_("gengrid"),          false },
      { N_("genlist"),          false },
-     { N_("hover"),            false },
-     { N_("icon"),             false },
+     { N_("icon_badge"),       false },
      { N_("index"),            false },
      { N_("label"),            false },
      { N_("layout"),           false },
-     { N_("list"),             false },
      { N_("map"),              false },
-     { N_("menu"),             false },
      { N_("multibuttonentry"), false },
      { N_("naviframe"),        false },
      { N_("notify"),           false },
-     { N_("panel"),            false },
      { N_("panes"),            false },
-     { N_("photo"),            false },
      { N_("photocam"),         false },
-     { N_("player"),           false },
-     { N_("pointer"),          false },
      { N_("popup"),            false },
-     { N_("progress"),         false },
+     { N_("progressbar"),      false },
      { N_("radio"),            false },
      { N_("scroller"),         false },
      { N_("segment_control"),  false },
-     { N_("separator"),        false },
      { N_("slider"),           false },
-     { N_("slideshow"),        false },
-     { N_("spinner"),          false },
-     { N_("thumb"),            false },
+     { N_("standard"),         false },
+     { N_("tickernoti"),       false },
      { N_("toolbar"),          false },
-     { N_("tooltip"),          false },
-     { N_("video"),            false },
-     { N_("win"),              false },
      { NULL,                   false }
    };
+
 
 struct _Tab_Home_New
 {
@@ -102,6 +82,7 @@ struct _Tab_Home_New
    Meta_Data_Controls meta;
 
    Evas_Object *ch_all;
+   Evas_Object *ch_color;
    Evas_Object *genlist;
    Eina_Stringshare *tmp_dir_path;
 };
@@ -187,17 +168,16 @@ _on_item_activated(void *data __UNUSED__,
 }
 
 /* GENERATE SOURCE */
-#define BTN_WD       (widget_item_data + 5)
-#define SCROLLER_WD  (widget_item_data + 43)
-#define ENTRY_WD     (widget_item_data + 16)
-#define LABEL_WD     (widget_item_data + 26)
-#define GENLIST_WD   (widget_item_data + 22)
-#define LIST_WD      (widget_item_data + 28)
-#define PHOTOCAM_WD  (widget_item_data + 37)
-#define NOTIFY_WD    (widget_item_data + 33)
-#define MAP_WD       (widget_item_data + 29)
-#define POPUP_WD     (widget_item_data + 40)
-#define GENGRID_WD   (widget_item_data + 21)
+#define BTN_WD       (widget_item_data + 3)
+#define SCROLLER_WD  (widget_item_data + 27)
+#define ENTRY_WD     (widget_item_data + 10)
+#define LABEL_WD     (widget_item_data + 16)
+#define GENLIST_WD   (widget_item_data + 13)
+#define PHOTOCAM_WD  (widget_item_data + 23)
+#define NOTIFY_WD    (widget_item_data + 21)
+#define MAP_WD       (widget_item_data + 18)
+#define POPUP_WD     (widget_item_data + 24)
+#define GENGRID_WD   (widget_item_data + 12)
 
 static int
 _widgets_dependencies_setup(Widget_Item_Data *item, Eina_Strbuf *dep_message)
@@ -215,7 +195,7 @@ _widgets_dependencies_setup(Widget_Item_Data *item, Eina_Strbuf *dep_message)
      return ret;
 
    if ((item == ENTRY_WD) || (item == GENLIST_WD) ||
-       (item == PHOTOCAM_WD) || (item == LIST_WD))
+       (item == PHOTOCAM_WD))
      {
         if (!SCROLLER_WD->check)
           {
@@ -254,13 +234,6 @@ _widgets_dependencies_setup(Widget_Item_Data *item, Eina_Strbuf *dep_message)
              eina_strbuf_append(dep_message, _("Button<br>"));
              ret++;
              ret += _widgets_dependencies_setup(BTN_WD, dep_message);
-          }
-        if (!LIST_WD->check)
-          {
-             LIST_WD->check = true;
-             eina_strbuf_append(dep_message, _("List<br>"));
-             ret++;
-             ret += _widgets_dependencies_setup(LIST_WD, dep_message);
           }
         if (!LABEL_WD->check)
           {
@@ -336,8 +309,20 @@ _widgets_dependencies_generate(Eina_Stringshare *path, Eina_Strbuf *dep_edc)
    DEPENDENCE_INCLUDE(SCROLLER_WD);
    DEPENDENCE_INCLUDE(ENTRY_WD);
    DEPENDENCE_INCLUDE(LABEL_WD);
+
+   if (GENLIST_WD->check)
+     {
+        _file_to_swap_copy(path, "genlist_macro");
+        _file_to_swap_copy(path, "genlist_custom");
+        _file_to_swap_copy(path, "genlist_normal");
+        _file_to_swap_copy(path, "genlist_decorate");
+        _file_to_swap_copy(path, "genlist_email");
+        _file_to_swap_copy(path, "genlist_sweep");
+        _file_to_swap_copy(path, "genlist_expandable");
+        _file_to_swap_copy(path, "genlist_groupindex");
+        _file_to_swap_copy(path, "genlist_textblock_style");
+     }
    DEPENDENCE_INCLUDE(GENLIST_WD);
-   DEPENDENCE_INCLUDE(LIST_WD);
    DEPENDENCE_INCLUDE(PHOTOCAM_WD);
    DEPENDENCE_INCLUDE(NOTIFY_WD);
    DEPENDENCE_INCLUDE(MAP_WD);
@@ -347,22 +332,8 @@ _widgets_dependencies_generate(Eina_Stringshare *path, Eina_Strbuf *dep_edc)
    return are_widgets_included;
 }
 
-#undef DEPENDENCE_INCLUDE
-
-#undef BTN_WD
-#undef SCROLLER_WD
-#undef ENTRY_WD
-#undef LABEL_WD
-#undef GENLIST_WD
-#undef LIST_WD
-#undef PHOTOCAM_WD
-#undef NOTIFY_WD
-#undef MAP_WD
-#undef POPUP_WD
-#undef GENGRID_WD
-
 static Eina_Strbuf *
-_edc_code_generate(Eina_Stringshare *path)
+_edc_code_generate(Eina_Stringshare *path, Eina_Bool theme_color)
 {
    assert(path != NULL);
 
@@ -391,13 +362,18 @@ _edc_code_generate(Eina_Stringshare *path)
    eina_strbuf_append(edc, "   }\n");
 
    TODO("move fonts, colorclasses and macros to widgets where they are used");
-   eina_strbuf_append(edc, "   #include \"fonts.edc\"\n");
-   eina_strbuf_append(edc, "   #include \"colorclasses.edc\"\n");
-   eina_strbuf_append(edc, "   #include \"macros.edc\"\n");
+   if (theme_color) /* true is white color */
+     eina_strbuf_append(edc, "   #include \"macros-light.edc\"\n");
+   else
+     eina_strbuf_append(edc, "   #include \"macros-black.edc\"\n");
 
-   _file_to_swap_copy(path, "fonts");
-   _file_to_swap_copy(path, "colorclasses");
-   _file_to_swap_copy(path, "macros");
+   eina_strbuf_append(edc, "   #include \"sounds.edc\"\n");
+
+   if (theme_color) /* true is white color */
+     _file_to_swap_copy(path, "macros-light");
+   else
+     _file_to_swap_copy(path, "macros-black");
+   _file_to_swap_copy(path, "sounds");
 
    _widgets_dependencies_generate(path, dep_edc);
    eina_strbuf_append(edc, eina_strbuf_string_get(dep_edc));
@@ -418,6 +394,20 @@ _edc_code_generate(Eina_Stringshare *path)
    return edc;
 }
 
+#undef DEPENDENCE_INCLUDE
+
+#undef BTN_WD
+#undef SCROLLER_WD
+#undef ENTRY_WD
+#undef LABEL_WD
+#undef GENLIST_WD
+#undef LIST_WD
+#undef PHOTOCAM_WD
+#undef NOTIFY_WD
+#undef MAP_WD
+#undef POPUP_WD
+#undef GENGRID_WD
+
 /* SPLASH */
 
 static void
@@ -437,11 +427,14 @@ _progress_end(void *data, PM_Project_Result result)
 }
 
 static Eina_Bool
-_setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
+_setup_open_splash(void *data, Splash_Status status __UNUSED__)
 {
    Eina_Tmpstr *tmp_dir;
    Eina_Strbuf *edc, *flags;
    Eina_Stringshare *edc_path;
+   Evas_Object *check = (Evas_Object *)data;
+   Eina_Bool white = elm_check_state_get(check);
+printf("УЫЕФЕУ ЩШОРП Е х   %d     ъ\n", white);
    FILE *fp;
 
    if (!eina_file_mkdtemp("eflete_project_XXXXXX", &tmp_dir))
@@ -453,7 +446,7 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    eina_tmpstr_del(tmp_dir);
 
    edc_path = eina_stringshare_printf("%s/new_project_tmp.edc", tab_new.tmp_dir_path);
-   edc = _edc_code_generate(tab_new.tmp_dir_path);
+   edc = _edc_code_generate(tab_new.tmp_dir_path, white);
 
    /* create and write edc file */
    fp = fopen(edc_path, "w");
@@ -466,9 +459,14 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    fclose(fp);
 
    flags = eina_strbuf_new();
-   eina_strbuf_append_printf(flags, "-id \"%s\" -sd \"%s\" -v",
-                             EFLETE_TEMPLATE_IMAGES_PATH,
-                             EFLETE_TEMPLATE_SOUNDS_PATH);
+   if (white)
+     eina_strbuf_append_printf(flags, "-id \"%s/light\" -sd \"%s\" -v",
+                               EFLETE_TEMPLATE_IMAGES_PATH,
+                               EFLETE_TEMPLATE_SOUNDS_PATH);
+   else
+     eina_strbuf_append_printf(flags, "-id \"%s/dark\" -sd \"%s\" -v",
+                               EFLETE_TEMPLATE_IMAGES_PATH,
+                               EFLETE_TEMPLATE_SOUNDS_PATH);
 
    pm_project_import_edc(elm_entry_entry_get(tab_new.name),
                          elm_entry_entry_get(tab_new.path),
@@ -501,7 +499,7 @@ _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 
 /* TAB_HOME_NEW LAYOUT */
 static void
-_on_create(void *data __UNUSED__,
+_on_create(void *data,
            Evas_Object *obj __UNUSED__,
            void *event_info __UNUSED__)
 {
@@ -530,7 +528,7 @@ _on_create(void *data __UNUSED__,
                           _setup_open_splash,
                           _teardown_open_splash,
                           _cancel_open_splash,
-                          NULL);
+                          data);
    elm_object_focus_set(ap.splash, true);
    evas_object_show(ap.splash);
    elm_check_state_set(tab_new.ch_all, false);
@@ -574,7 +572,6 @@ _tab_new_project_add(void)
 
    BUTTON_ADD(tab_new.layout, tab_new.btn_create, _("Create"))
    elm_object_part_content_set(tab_new.layout, "elm.swallow.btn_create", tab_new.btn_create);
-   evas_object_smart_callback_add(tab_new.btn_create, "clicked", _on_create, NULL);
    elm_object_disabled_set(tab_new.btn_create, true);
 
    /* label.name */
@@ -597,6 +594,13 @@ _tab_new_project_add(void)
    evas_object_smart_callback_add(tab_new.ch_all, "changed", _on_check_all, NULL);
    elm_object_part_content_set(tab_new.layout, "swallow.all_widgets_check", tab_new.ch_all);
    elm_object_part_text_set(tab_new.layout, "label.widgets", _("Widgets:"));
+
+   /* tizen color */
+   CHECK_ADD(tab_new.layout, tab_new.ch_color);
+   elm_object_style_set(tab_new.ch_color, "template_color");
+   elm_object_part_content_set(tab_new.layout, "swallow.tizen_theme", tab_new.ch_color);
+   elm_object_text_set(tab_new.ch_color, _("Theme Color:"));
+   evas_object_smart_callback_add(tab_new.btn_create, "clicked", _on_create, tab_new.ch_color);
 
    /* genlist */
    tab_new.genlist = elm_genlist_add(ap.win);

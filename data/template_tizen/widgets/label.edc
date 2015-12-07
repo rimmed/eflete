@@ -1,0 +1,1407 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+#define TEXT_SLIDE_DURATION 10
+
+      styles {
+         style { name: "textblock_style";
+            base: "font=Tizen:style=Medium font_size="LABEL_FONT_SIZE_INC" color="LABEL_TEXT_BLOCK_STYLE_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+         style { name: "naviframe_title_style";
+            base: "font=Tizen:style=Bold font_size="NAVIFRAME_TITLE_FONT_SIZE_INC" color="NAVIFRAME_TITLE_STYLE_COLOR_INC" style=far_shadow,bottom shadow_color="NAVIFRAME_TITLE_STYLE_SHADOW_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+         style { name: "naviframe_maintitle_style";
+            base: "font=Tizen:style=Bold font_size="NAVIFRAME_TITLE_SMALL_FONT_SIZE_INC" color="NAVIFRAME_TITLE_STYLE_COLOR_INC" style=far_shadow,bottom shadow_color="NAVIFRAME_TITLE_STYLE_SHADOW_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+         style { name: "naviframe_subtitle_style";
+            base: "font=Tizen:style=Bold font_size="NAVIFRAME_SUBTITLE_FONT_SIZE_INC" color="NAVIFRAME_TITLE_STYLE_COLOR_INC" style=far_shadow,bottom shadow_color="NAVIFRAME_TITLE_STYLE_SHADOW_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+         style { name: "naviframe_landscape_title_style";
+            base: "font=Tizen:style=Bold font_size="NAVIFRAME_LANDSCAPE_TITLE_FONT_SIZE_INC" color="NAVIFRAME_TITLE_STYLE_COLOR_INC" style=far_shadow,bottom shadow_color="NAVIFRAME_TITLE_STYLE_SHADOW_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+         style { name: "naviframe_landscape_maintitle_style";
+            base: "font=Tizen:style=Bold font_size="NAVIFRAME_LANDSCAPE_TITLE_SMALL_FONT_SIZE_INC" color="NAVIFRAME_TITLE_STYLE_COLOR_INC" style=far_shadow,bottom shadow_color="NAVIFRAME_TITLE_STYLE_SHADOW_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+         style { name: "naviframe_landscape_subtitle_style";
+            base: "font=Tizen:style=Bold font_size="NAVIFRAME_LANDSCAPE_SUBTITLE_FONT_SIZE_INC" color="NAVIFRAME_TITLE_STYLE_COLOR_INC" style=far_shadow,bottom shadow_color="NAVIFRAME_TITLE_STYLE_SHADOW_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+         /* label doesn't use it */
+         style { name: "textblock_charwrap_style";
+base: "font=Tizen:style=Medium font_size="LABEL_FONT_SIZE_INC" color="LABEL_TEXT_BLOCK_STYLE_COLOR_INC" text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "hilight" "+ font=Tizen:style=Bold";
+            tag:  "b" "+ font=Tizen:style=Bold";
+            tag:  "tab" "\t";
+         }
+      }
+
+      group { name: "elm/label/base/default";
+         parts {
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 0 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+      }
+
+      /* default label doesn't use it */
+      group { name: "elm/label/base_wrap/default";
+         parts {
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               multiline: 1;
+               description { state: "default" 0.0;
+                  text {
+                       style: "textblock_style";
+                       min: 0 1;
+                       align: 0.0 0.0;
+                  }
+               }
+               description { state: "charwrap_mode" 0.0;
+                  text {
+                     style: "textblock_charwrap_style";
+                     min: 0 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "default_on";
+               signal: "elm,state,default";
+               source: "elm";
+               action: STATE_SET "default" 0.0;
+               target: "elm.text";
+            }
+            program { name: "charwrap_on";
+               signal: "elm,state,charwrap";
+               source: "elm";
+               action: STATE_SET "charwrap_mode" 0.0;
+               target: "elm.text";
+            }
+         } // end programs
+      } // end group
+
+      /* default label doesn't use it */
+      group { name: "elm/label/base_wrap_ellipsis/default";
+         parts {
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               multiline: 1;
+               description { state: "default" 0.0;
+                  // FIXME : fixed for multiline ellipsis.
+                  //         does it need to make another ellipsis style? 
+                  fixed: 0 1;
+                  text {
+                     style: "textblock_style";
+                     min: 0 1;
+                     align: 0.0 0.0;
+                  }
+               }
+               description { state: "charwrap_mode" 0.0;
+                  // FIXME : fixed for multiline ellipsis.
+                  //         does it need to make another ellipsis style? 
+                  fixed: 0 1;
+                  text {
+                     style: "textblock_charwrap_style";
+                     min: 0 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "default_on";
+               signal: "elm,state,default";
+               source: "elm";
+               action: STATE_SET "default" 0.0;
+               target: "elm.text";
+            }
+            program { name: "charwrap_on";
+               signal: "elm,state,charwrap";
+               source: "elm";
+               action: STATE_SET "charwrap_mode" 0.0;
+               target: "elm.text";
+            }
+         } // end programs
+      } // end group
+
+      group { name: "elm/label/base/marker";
+         styles {
+            style { name: "textblock_style2";
+               base: "font=Tizen:style=Bold font_size=14 align=center color=#fff wrap=word text_class=tizen";
+               tag:  "br" "\n";
+               tag:  "ps" "ps";
+               tag:  "hilight" "+ color=#ffff";
+               tag:  "b" "+ color=#ffff";
+               tag:  "tab" "\t";
+            }
+         }
+         parts {
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               description { state: "default" 0.0;
+                  text {
+                     style: "textblock_style2";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+      }
+
+      /* default label doesn't use it */
+      group { name: "elm/label/base_wrap/marker";
+         parts {
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               multiline: 1;
+               description { state: "default" 0.0;
+                  text {
+                     style: "textblock_style2";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+      }
+
+      group { name: "elm/label/base/slide_long";
+         script {
+            public g_duration = 0, g_stopslide, g_timer_id, g_anim_id;
+
+            public message(Msg_Type:type, id, ...) {
+               if (type == MSG_FLOAT_SET) {
+                  new Float:duration;
+                  duration = getfarg(2);
+                  set_float(g_duration, duration);
+               }
+           }
+            public slide_to_end_anim(val, Float:pos) {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_tween_state(PART:"elm.text", pos, "slide_begin", 0.0, "slide_end", 0.0);
+               if (pos >= 1.0) {
+                  id = timer(0.5, "slide_to_begin", 1);
+                  set_int(g_timer_id, id);
+               }
+            }
+            public slide_to_end() {
+               new stopflag;
+               new id;
+               new Float:duration;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               duration = get_float(g_duration);
+               id = anim(duration, "slide_to_end_anim", 1);
+               set_int(g_anim_id, id);
+            }
+            public slide_to_begin() {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_state(PART:"elm.text", "slide_begin", 0.0);
+               id = timer(0.5, "slide_to_end", 1);
+               set_int(g_timer_id, id);
+            }
+            public start_slide() {
+               set_int(g_stopslide, 0);
+               set_state(PART:"elm.text", "slide_begin", 0.0);
+               slide_to_end();
+            }
+            public stop_slide() {
+               new id;
+               set_int(g_stopslide, 1);
+               id = get_int(g_anim_id);
+               cancel_anim(id);
+               id = get_int(g_timer_id);
+               cancel_timer(id);
+               set_state(PART:"elm.text", "default", 0.0);
+            }
+         }
+
+         parts {
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 0 1;
+                     align: 0.0 0.0;
+                  }
+               }
+               description { state: "slide_end" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+               description { state: "slide_begin" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "start_slide";
+               source: "elm";
+               signal: "elm,state,slide,start";
+               script {
+                  start_slide();
+               }
+            }
+            program { name: "stop_slide";
+               source: "elm";
+               signal: "elm,state,slide,stop";
+               script {
+                  stop_slide();
+               }
+            }
+         }
+      }
+
+      group { name: "elm/label/base/slide_short";
+         script {
+            public g_duration = 0, g_stopslide, g_timer_id, g_anim_id;
+
+            public message(Msg_Type:type, id, ...) {
+               if (type == MSG_FLOAT_SET) {
+                  new Float:duration;
+                  duration = getfarg(2);
+                  set_float(g_duration, duration);
+               }
+            }
+            public slide_to_end_anim(val, Float:pos) {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_tween_state(PART:"elm.text", pos, "slide_begin", 0.0, "slide_end", 0.0);
+               if (pos >= 1.0) {
+                  id = timer(0.5, "slide_to_begin", 1);
+                  set_int(g_timer_id, id);
+               }
+            }
+            public slide_to_end() {
+               new stopflag;
+               new id;
+               new Float:duration;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               duration = get_float(g_duration);
+               id = anim(duration, "slide_to_end_anim", 1);
+               set_int(g_anim_id, id);
+            }
+            public slide_to_begin() {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_state(PART:"elm.text", "slide_begin", 0.0);
+               id = timer(0.5, "slide_to_end", 1);
+               set_int(g_timer_id, id);
+            }
+            public start_slide() {
+               set_int(g_stopslide, 0);
+               set_state(PART:"elm.text", "slide_begin", 0.0);
+               slide_to_end();
+            }
+            public stop_slide() {
+               new id;
+               set_int(g_stopslide, 1);
+               id = get_int(g_anim_id);
+               cancel_anim(id);
+               id = get_int(g_timer_id);
+               cancel_timer(id);
+               set_state(PART:"elm.text", "default", 0.0);
+            }
+         }
+
+         parts {
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 0 1;
+                     align: 0.0 0.0;
+                  }
+               }
+               description { state: "slide_end" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+               description { state: "slide_begin" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "start_slide";
+               source: "elm";
+               signal: "elm,state,slide,start";
+               script {
+                  start_slide();
+               }
+            }
+            program { name: "stop_slide";
+               source: "elm";
+               signal: "elm,state,slide,stop";
+               script {
+                  stop_slide();
+               }
+            }
+         }
+      }
+
+      group { name: "elm/label/base/slide_bounce";
+         script {
+            public g_duration = 0, g_stopslide, g_timer_id, g_anim_id;
+
+            public message(Msg_Type:type, id, ...) {
+               if (type == MSG_FLOAT_SET) {
+                  new Float:duration;
+                  duration = getfarg(2);
+                  set_float(g_duration, duration);
+               }
+            }
+            public slide_to_end_anim(val, Float:pos) {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_tween_state(PART:"elm.text", pos, "slide_begin", 0.0, "slide_end", 0.0);
+               if (pos >= 1.0) {
+                  id = timer(0.5, "slide_to_begin", 1);
+                  set_int(g_timer_id, id);
+               }
+            }
+            public slide_to_end() {
+               new stopflag;
+               new id;
+               new Float:duration;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               duration = get_float(g_duration);
+               id = anim(duration, "slide_to_end_anim", 1);
+               set_int(g_anim_id, id);
+            }
+            public slide_to_begin_anim(val, Float:pos) {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_tween_state(PART:"elm.text", pos, "slide_end", 0.0, "slide_begin", 0.0);
+               if (pos >= 1.0) {
+                  id = timer(0.5, "slide_to_end", 1);
+                  set_int(g_timer_id, id);
+               }
+            }
+            public slide_to_begin() {
+               new stopflag;
+               new id;
+               new Float:duration;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               duration = get_float(g_duration);
+               id = anim(duration, "slide_to_begin_anim", 1);
+               set_int(g_anim_id, id);
+            }
+            public start_slide() {
+               set_int(g_stopslide, 0);
+               set_state(PART:"elm.text", "slide_begin", 0.0);
+               slide_to_end();
+            }
+            public stop_slide() {
+               new id;
+               set_int(g_stopslide, 1);
+               id = get_int(g_anim_id);
+               cancel_anim(id);
+               id = get_int(g_timer_id);
+               cancel_timer(id);
+               set_state(PART:"elm.text", "default", 0.0);
+            }
+         }
+
+         parts {
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 0 1;
+                     align: 0.0 0.0;
+                  }
+               }
+               description { state: "slide_end" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+               description { state: "slide_begin" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "textblock_style";
+                     min: 1 1;
+                     align: 0.0 0.0;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "start_slide";
+               source: "elm";
+               signal: "elm,state,slide,start";
+               script {
+                  start_slide();
+               }
+            }
+            program { name: "stop_slide";
+               source: "elm";
+               signal: "elm,state,slide,stop";
+               script {
+                  stop_slide();
+               }
+            }
+         }
+      }
+
+      group { name: "elm/label/base/naviframe_title";
+         script {
+            public g_duration = 0, g_stopslide, g_timer_id, g_anim_id, g_landscape = 0;
+
+            public message(Msg_Type:type, id, ...) {
+               if ((type == MSG_FLOAT_SET) && (id == 0)) {
+                  new Float:duration;
+                  duration = getfarg(2);
+                  set_float(g_duration, duration);
+               }
+            }
+            public slide_end_pending(val, Float:pos) {
+               if (pos >= 1.0) {
+                  stop_slide();
+                  emit("elm,state,slide,end", "");
+               }
+            }
+            public slide_to_end_anim(val, Float:pos) {
+               new stopflag;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_tween_state(PART:"elm.text", pos, "slide_begin", 0.0, "slide_end", 0.0);
+               if (pos >= 1.0)
+                 anim(1, "slide_end_pending", 1);
+            }
+            public slide_to_end() {
+               new stopflag;
+               new id;
+               new Float:duration;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               duration = get_float(g_duration);
+               id = anim(duration, "slide_to_end_anim", 1);
+               set_int(g_anim_id, id);
+            }
+            public slide_to_begin() {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               set_state(PART:"elm.text", "slide_begin", 0.0);
+               id = timer(0.5, "slide_to_end", 1);
+               set_int(g_timer_id, id);
+            }
+            public start_slide() {
+               set_int(g_stopslide, 0);
+               set_state(PART:"elm.text", "slide_begin", 0.0);
+               slide_to_end();
+            }
+            public stop_slide() {
+               new id;
+               set_int(g_stopslide, 1);
+               id = get_int(g_anim_id);
+               cancel_anim(id);
+               id = get_int(g_timer_id);
+               cancel_timer(id);
+               set_state(PART:"elm.text", "default", 0.0);
+            }
+         }
+         parts {
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_title_style";
+                     size: NAVIFRAME_TITLE_FONT_SIZE_INC;
+                     size_range: NAVIFRAME_TITLE_FONT_MIN_SIZE_INC NAVIFRAME_TITLE_FONT_SIZE_INC;
+                     fit: 1 0;
+                     min: 0 1;
+                  }
+               }
+               description { state: "slide_end" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "naviframe_title_style";
+                     size: NAVIFRAME_TITLE_FONT_SIZE_INC;
+                     size_range: NAVIFRAME_TITLE_FONT_MIN_SIZE_INC NAVIFRAME_TITLE_FONT_SIZE_INC;
+                     fit: 1 0;
+                     min: 1 1;
+                  }
+               }
+               description { state: "slide_begin" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_title_style";
+                     size: NAVIFRAME_TITLE_FONT_SIZE_INC;
+                     size_range: NAVIFRAME_TITLE_FONT_MIN_SIZE_INC NAVIFRAME_TITLE_FONT_SIZE_INC;
+                     fit: 1 0;
+                     min: 1 1;
+                  }
+               }
+               description { state: "default_landscape" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_landscape_title_style";
+                     size: NAVIFRAME_LANDSCAPE_TITLE_FONT_SIZE_INC;
+                     size_range: NAVIFRAME_TITLE_FONT_MIN_SIZE_INC NAVIFRAME_LANDSCAPE_TITLE_FONT_SIZE_INC;
+                     fit: 1 0;
+                     min: 0 1;
+                  }
+               }
+               description { state: "slide_end_landscape" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "naviframe_landscape_title_style";
+                     size: NAVIFRAME_LANDSCAPE_TITLE_FONT_SIZE_INC;
+                     size_range: NAVIFRAME_TITLE_FONT_MIN_SIZE_INC NAVIFRAME_LANDSCAPE_TITLE_FONT_SIZE_INC;
+                     fit: 1 0;
+                     min: 1 1;
+                  }
+               }
+               description { state: "slide_begin_landscape" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_landscape_title_style";
+                     size: NAVIFRAME_LANDSCAPE_TITLE_FONT_SIZE_INC;
+                     size_range: NAVIFRAME_TITLE_FONT_MIN_SIZE_INC NAVIFRAME_LANDSCAPE_TITLE_FONT_SIZE_INC;
+                     fit: 1 0;
+                     min: 1 1;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "start_slide";
+               source: "elm";
+               signal: "elm,state,slide,start";
+               script {
+                  start_slide();
+               }
+            }
+            program { name: "stop_slide";
+               source: "elm";
+               signal: "elm,state,slide,stop";
+               script {
+                  stop_slide();
+               }
+            }
+            program { name: "landscape_mode";
+               source: "elm";
+               signal: "elm,state,orient,90";
+               script {
+                  set_int(g_landscape, 1);
+               }
+            }
+            program { name: "landscape_mode2";
+               source: "elm";
+               signal: "elm,state,orient,270";
+               script {
+                  set_int(g_landscape, 1);
+               }
+            }
+            program { name: "portrait_mode";
+               source: "elm";
+               signal: "elm,state,orient,0";
+               script {
+                  set_int(g_landscape, 0);
+               }
+            }
+            program { name: "portrait_mode2";
+               source: "elm";
+               signal: "elm,state,orient,180";
+               script {
+                  set_int(g_landscape, 0);
+               }
+            }
+         }
+      }
+      group { name: "elm/label/base/naviframe_maintitle";
+         script {
+            public g_duration = 0, g_stopslide, g_timer_id, g_anim_id, g_landscape = 0;
+
+            public message(Msg_Type:type, id, ...) {
+               if ((type == MSG_FLOAT_SET) && (id == 0)) {
+                  new Float:duration;
+                  duration = getfarg(2);
+                  set_float(g_duration, duration);                  
+               }
+            }
+            public slide_end_pending(val, Float:pos) {
+               if (pos >= 1.0) {
+                  stop_slide();
+                  emit("elm,state,slide,end", "");
+               }
+            }
+            public slide_to_end_anim(val, Float:pos) {
+               new stopflag;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               if (!get_int(g_landscape))
+                 set_tween_state(PART:"elm.text", pos, "slide_begin", 0.0, "slide_end", 0.0);
+               else
+                 set_tween_state(PART:"elm.text", pos, "slide_begin_landscape", 0.0, "slide_end_landscape", 0.0);
+               if (pos >= 1.0)
+                 anim(1, "slide_end_pending", 1);
+            }
+            public slide_to_end() {
+               new stopflag;
+               new id;
+               new Float:duration;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               duration = get_float(g_duration);
+               id = anim(duration, "slide_to_end_anim", 1);
+               set_int(g_anim_id, id);
+            }
+            public slide_to_begin() {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               if (!get_int(g_landscape))
+                 set_state(PART:"elm.text", "slide_begin", 0.0);
+               else
+                 set_state(PART:"elm.text", "slide_begin_landscape", 0.0);
+               id = timer(0.5, "slide_to_end", 1);
+               set_int(g_timer_id, id);
+            }
+            public start_slide() {
+               set_int(g_stopslide, 0);
+               if (!get_int(g_landscape))
+                 set_state(PART:"elm.text", "slide_begin", 0.0);
+               else
+                 set_state(PART:"elm.text", "slide_begin_landscape", 0.0);
+               slide_to_end();
+            }
+            public stop_slide() {
+               new id;
+               set_int(g_stopslide, 1);
+               id = get_int(g_anim_id);
+               cancel_anim(id);
+               id = get_int(g_timer_id);
+               cancel_timer(id);
+               if (!get_int(g_landscape))
+                 set_state(PART:"elm.text", "default", 0.0);
+               else
+                 set_state(PART:"elm.text", "default_landscape", 0.0);
+            }
+         }
+         parts {
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_maintitle_style";
+                     min: 0 1;
+                  }
+               }
+               description { state: "slide_end" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "naviframe_maintitle_style";
+                     min: 1 1;
+                  }
+               }
+               description { state: "slide_begin" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_maintitle_style";
+                     min: 1 1;
+                  }
+               }
+               description { state: "default_landscape" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_landscape_maintitle_style";
+                     min: 0 1;
+                  }
+               }
+               description { state: "slide_end_landscape" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "naviframe_landscape_maintitle_style";
+                     min: 1 1;
+                  }
+               }
+               description { state: "slide_begin_landscape" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_landscape_maintitle_style";
+                     min: 1 1;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "start_slide";
+               source: "elm";
+               signal: "elm,state,slide,start";
+               script {
+                  start_slide();
+               }
+            }
+            program { name: "stop_slide";
+               source: "elm";
+               signal: "elm,state,slide,stop";
+               script {
+                  stop_slide();
+               }
+            }
+            program { name: "landscape_mode";
+               source: "elm";
+               signal: "elm,state,orient,90";
+               script {
+                  set_int(g_landscape, 1);
+               }
+            }
+            program { name: "landscape_mode2";
+               source: "elm";
+               signal: "elm,state,orient,270";
+               script {
+                  set_int(g_landscape, 1);
+               }
+            }
+            program { name: "portrait_mode";
+               source: "elm";
+               signal: "elm,state,orient,0";
+               script {
+                  set_int(g_landscape, 0);
+               }
+            }
+            program { name: "portrait_mode2";
+               source: "elm";
+               signal: "elm,state,orient,180";
+               script {
+                  set_int(g_landscape, 0);
+               }
+            }
+         }
+      }
+      group { name: "elm/label/base/naviframe_subtitle";
+         script {
+            public g_duration = 0, g_stopslide, g_timer_id, g_anim_id, g_landscape = 0;
+
+            public message(Msg_Type:type, id, ...) {
+               if ((type == MSG_FLOAT_SET) && (id == 0)) {
+                  new Float:duration;
+                  duration = getfarg(2);
+                  set_float(g_duration, duration);                  
+               }
+            }
+            public slide_end_pending(val, Float:pos) {
+               if (pos >= 1.0) {
+                  stop_slide();
+                  emit("elm,state,slide,end", "");
+               }
+            }
+            public slide_to_end_anim(val, Float:pos) {
+               new stopflag;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               if (!get_int(g_landscape))
+                 set_tween_state(PART:"elm.text", pos, "slide_begin", 0.0, "slide_end", 0.0);
+               else
+                 set_tween_state(PART:"elm.text", pos, "slide_begin_landscape", 0.0, "slide_end_landscape", 0.0);
+               if (pos >= 1.0)
+                 anim(1, "slide_end_pending", 1);
+            }
+            public slide_to_end() {
+               new stopflag;
+               new id;
+               new Float:duration;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               duration = get_float(g_duration);
+               id = anim(duration, "slide_to_end_anim", 1);
+               set_int(g_anim_id, id);
+            }
+            public slide_to_begin() {
+               new stopflag;
+               new id;
+               stopflag = get_int(g_stopslide);
+               if (stopflag == 1) return;
+               if (!get_int(g_landscape))
+                 set_state(PART:"elm.text", "slide_begin", 0.0);
+               else
+                 set_state(PART:"elm.text", "slide_begin_landscape", 0.0);
+               id = timer(0.5, "slide_to_end", 1);
+               set_int(g_timer_id, id);
+            }
+            public start_slide() {
+               set_int(g_stopslide, 0);
+               if (!get_int(g_landscape))
+                 set_state(PART:"elm.text", "slide_begin", 0.0);
+               else
+                 set_state(PART:"elm.text", "slide_begin_landscape", 0.0);
+               slide_to_end();
+            }
+            public stop_slide() {
+               new id;
+               set_int(g_stopslide, 1);
+               id = get_int(g_anim_id);
+               cancel_anim(id);
+               id = get_int(g_timer_id);
+               cancel_timer(id);
+               if (!get_int(g_landscape))
+                 set_state(PART:"elm.text", "default", 0.0);
+               else
+                 set_state(PART:"elm.text", "default_landscape", 0.0);
+            }
+         }
+         parts {
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXTBLOCK;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_subtitle_style";
+                     min: 0 1;
+                  }
+               }
+               description { state: "slide_end" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "naviframe_subtitle_style";
+                     min: 1 1;
+                  }
+               }
+               description { state: "slide_begin" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_subtitle_style";
+                     min: 1 1;
+                  }
+               }
+               description { state: "default_landscape" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_landscape_subtitle_style";
+                     min: 0 1;
+                  }
+               }
+               description { state: "slide_end_landscape" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 1.0 0.0;
+                  rel2.relative: 1.0 1.0;
+                  align: 1.0 0.0;
+                  text {
+                     style: "naviframe_landscape_subtitle_style";
+                     min: 1 1;
+                  }
+               }
+               description { state: "slide_begin_landscape" 0.0;
+                  inherit: "default" 0.0;
+                  rel1.relative: 0.0 0.0;
+                  rel2.relative: 0.0 1.0;
+                  align: 0.0 0.0;
+                  text {
+                     style: "naviframe_landscape_subtitle_style";
+                     min: 1 1;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "start_slide";
+               source: "elm";
+               signal: "elm,state,slide,start";
+               script {
+                  start_slide();
+               }
+            }
+            program { name: "stop_slide";
+               source: "elm";
+               signal: "elm,state,slide,stop";
+               script {
+                  stop_slide();
+               }
+            }
+            program { name: "landscape_mode";
+               source: "elm";
+               signal: "elm,state,orient,90";
+               script {
+                  set_int(g_landscape, 1);
+               }
+            }
+            program { name: "landscape_mode2";
+               source: "elm";
+               signal: "elm,state,orient,270";
+               script {
+                  set_int(g_landscape, 1);
+               }
+            }
+            program { name: "portrait_mode";
+               source: "elm";
+               signal: "elm,state,orient,0";
+               script {
+                  set_int(g_landscape, 0);
+               }
+            }
+            program { name: "portrait_mode2";
+               source: "elm";
+               signal: "elm,state,orient,180";
+               script {
+                  set_int(g_landscape, 0);
+               }
+            }
+         }
+      }
+
+   group { name: "elm/label/base/datetime/year/style1";
+      alias: "elm/label/base/datetime/month/style1";
+         images {
+            image: "00_picker_button_bg.png" COMP;
+            image: "00_picker_button_bg_press.png" COMP;
+         }
+         parts {
+            part { name: "bg";
+               type: RECT;
+               scale: 1;
+               description { state: "default" 0.0;
+                  color: 0 0 0 0;
+                  min: DATETIME_LABEL_DATE_FIELD_MIN_WIDTH_INC DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+                  max: -1 DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+               }
+            }
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "bg.img";
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1 {
+                     relative: 0.0 0.0;
+                     to_x: "elm.text";
+                  }
+                  rel2 {
+                     relative: 1.0 1.0;
+                     to_x: "elm.text";
+                  }
+                  image {
+                     normal: "00_picker_button_bg.png";
+                     border: DATETIME_LABEL_DATE_FIELD_BG_IMAGE_BORDER_INC;
+                     border_scale: 1;
+                  }
+                  fixed: 1 1;
+                  min: DATETIME_LABEL_DATE_FIELD_MIN_WIDTH_INC DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+                  max: -1 DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+               }
+               description { state: "selected" 0.0;
+                  inherit: "default" 0.0;
+                  image {
+                     normal: "00_picker_button_bg_press.png";
+                     border: DATETIME_LABEL_DATE_FIELD_BG_IMAGE_BORDER_INC;
+                     border_scale: 1;
+                  }
+               }
+            }
+            part { name: "elm.text";
+               type: TEXT;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  color: DATETIME_LABEL_TEXT_BLOCK_STYLE_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Regular";
+                     size: DATETIME_TEXT_FONT_SIZE_INC;
+                     text_class: "tizen";
+                     min: 1 0;
+                     max: 1 1;
+                  }
+               }
+               description { state: "selected" 0.0;
+                  inherit: "default" 0.0;
+                  color: DATETIME_LABEL_TEXT_BLOCK_STYLE_SELECTED_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Bold";
+                     size: DATETIME_TEXT_FONT_SIZE_INC;
+                     text_class: "tizen";
+                     min: 1 0;
+                     max: 1 1;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "label_select";
+               signal: "elm,state,select";
+               source: "elm";
+               action: STATE_SET "selected" 0.0;
+               target: "elm.text";
+               target: "bg.img";
+               after: "play_sound";
+            }
+            program { name: "play_sound";
+               action: PLAY_SAMPLE "touch_sound" 1.0;
+            }
+            program { name: "label_unselect";
+               signal: "elm,state,unselect";
+               source: "elm";
+               action: STATE_SET "default" 0.0;
+               target: "elm.text";
+               target: "bg.img";
+            }
+         }
+      }
+
+      group { name: "elm/label/base/datetime/hour/style1";
+         alias: "elm/label/base/datetime/minute/style1";
+         alias: "elm/label/base/datetime/date/style1";
+         inherit: "elm/label/base/datetime/year/style1";
+         parts {
+            part { name: "bg";
+               type: RECT;
+               scale: 1;
+               description { state: "default" 0.0;
+                  color: 0 0 0 0;
+                  min: DATETIME_LABEL_TIME_FIELD_MIN_WIDTH_INC DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+                  max: -1 DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;;
+               }
+            }
+            part { name: "bg.img";
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1 {
+                     relative: 0.0 0.0;
+                     to_x: "elm.text";
+                  }
+                  rel2 {
+                     relative: 1.0 1.0;
+                     to_x: "elm.text";
+                  }
+                  image {
+                     normal: "00_picker_button_bg.png";
+                     border: DATETIME_LABEL_DATE_FIELD_BG_IMAGE_BORDER_INC;
+                     border_scale: 1;
+                  }
+                  fixed: 1 1;
+                  min: DATETIME_LABEL_TIME_FIELD_MIN_WIDTH_INC DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+                  max: -1 DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+               }
+               description { state: "selected" 0.0;
+                  inherit: "default" 0.0;
+                  image {
+                     normal: "00_picker_button_bg_press.png";
+                     border: DATETIME_LABEL_DATE_FIELD_BG_IMAGE_BORDER_INC;
+                     border_scale: 1;
+                  }
+               }
+            }
+         }
+      }
+   group { name: "elm/label/base/datetime";
+      alias: "elm/label/base/datetime/year/default";
+      alias: "elm/label/base/datetime/month/default";
+      alias: "elm/label/base/datetime/date/default";
+      alias: "elm/label/base/datetime/hour/default";
+      alias: "elm/label/base/datetime/minute/default";
+      alias: "elm/label/base/datetime/ampm/default";
+         parts {
+            part { name: "bg";
+               type: RECT;
+               scale: 1;
+               description { state: "default" 0.0;
+                  color: 0 0 0 0;
+                  min: 0 DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+                  max: -1 DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+               }
+            }
+            part { name: "label.text.clip";
+               type: RECT;
+               description { state: "default" 0.0;
+               }
+            }
+            part { name: "bg.img";
+               type: RECT;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  rel1 {
+                     relative: 0.0 0.0;
+                     to_x: "elm.text";
+                  }
+                  rel2 {
+                     relative: 1.0 1.0;
+                     to_x: "elm.text";
+                  }
+                  fixed: 1 1;
+                  color: 0 0 0 0;
+                  min: DATETIME_LABEL_DATE_FIELD_MIN_WIDTH_INC DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+                  max: -1 DATETIME_LABEL_DATE_FIELD_HEIGHT_INC;
+               }
+               description { state: "selected" 0.0;
+                  inherit: "default" 0.0;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXT;
+               scale: 1;
+               clip_to: "label.text.clip";
+               description { state: "default" 0.0;
+                  color: DATETIME_LABEL_TEXT_BLOCK_STYLE_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Regular";
+                     size: DATETIME_TEXT_FONT_SIZE_INC;
+                     text_class: "tizen";
+                     min: 1 0;
+                     max: 1 1;
+                  }
+               }
+               description { state: "selected" 0.0;
+                  inherit: "default" 0.0;
+                  color: DATETIME_LABEL_TEXT_BLOCK_STYLE_SELECTED_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Bold";
+                     size: DATETIME_TEXT_FONT_SIZE_INC;
+                     text_class: "tizen";
+                     min: 1 0;
+                     max: 1 1;
+                  }
+               }
+            }
+         }
+         programs {
+            program { name: "label_select";
+               signal: "elm,state,select";
+               source: "elm";
+               action: STATE_SET "selected" 0.0;
+               target: "elm.text";
+               target: "bg.img";
+            }
+            program { name: "label_unselect";
+               signal: "elm,state,unselect";
+               source: "elm";
+               action: STATE_SET "default" 0.0;
+               target: "elm.text";
+               target: "bg.img";
+            }
+         }
+      }

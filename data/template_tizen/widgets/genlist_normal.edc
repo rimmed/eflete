@@ -1,0 +1,4458 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/*
+ * vim:ts=3
+*/
+
+   group { GENLIST_NAME("default/default")
+      alias: "elm/list/item/default";
+      alias: "elm/list/item_odd/default";
+      alias: "elm/list/item_compress/default";
+      alias: "elm/list/item_compress_odd/default";
+
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.swallow.icon elm.swallow.end";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON("elm.swallow.icon",
+            GENLIST_DESCRIPTION_LTB("elm.padding.left", "elm.padding.top", "elm.padding.bottom",
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_LISTITEM_("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.swallow.icon", "elm.swallow.end",
+            "elm.padding.top", "elm.padding.bottom",
+         )
+         GENLIST_PART_ICON("elm.swallow.end",
+            GENLIST_DESCRIPTION_R("elm.padding.right",
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.swallow.icon"; target: "elm.swallow.end"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// -------------------------------------------------------------------
+// Tizen Theme -------------------------------------------------------
+// -------------------------------------------------------------------
+// 2.2.6.1
+   group {  GENLIST_NAME("editfield/default")
+      alias: "elm/layout/item/editfield/default";
+
+      GENLIST_PROLOG_NORMAL
+
+      data.item: "contents" "elm.icon.entry";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT_SIZE(16)
+         GENLIST_PART_PADDING_RIGHT_SIZE(16)
+         GENLIST_PART_PADDING_TOP_SIZE(8)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(8)
+
+         GENLIST_PART_ICON("elm.icon.entry",
+            GENLIST_DESCRIPTION(
+               "elm.padding.left", "elm.padding.right",
+               "elm.padding.top", "elm.padding.bottom",
+               min: 0 96; // This is tuned value for exact entry size.
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_ENTRY( target: "elm.icon.entry"; )
+   }
+
+// 2.2.6.1 (without genlist background)
+   group {  GENLIST_NAME("editfield/no_bg/default")
+      alias: "elm/layout/editfield/no_bg/default";
+      inherit: "elm/genlist/item/editfield/default";
+
+      parts {
+         GENLIST_PART_BG_NORMAL_OFF
+         GENLIST_PART_BOTTOM_LINE_OFF
+         GENLIST_PART_PADDING_LEFT_SIZE(0)
+         GENLIST_PART_PADDING_RIGHT_SIZE(0)
+      }
+   }
+
+// 2.2.6.2
+   group { GENLIST_NAME("editfield/title/default")
+      alias: "elm/layout/editfield/title/default";
+
+      GENLIST_PROLOG_NORMAL
+      data.item: "contents" "elm.icon.entry";
+      data.item: "texts" "elm.text";
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT_SIZE( 16 )
+         GENLIST_PART_PADDING_RIGHT_SIZE( 16 )
+         GENLIST_PART_PADDING_TOP_SIZE(17)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(16)
+
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.title", "elm.padding.left", 10)
+         GENLIST_PART_SUBITEM_SETTINGS_LRT("elm.text", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.title", "elm.padding.right", "elm.padding.top"
+         )
+         GENLIST_PART_ICON("elm.icon.entry",
+            GENLIST_DESCRIPTION(
+               "elm.padding.left", "elm.padding.right",
+               "elm.text", "elm.padding.bottom",
+               min: 0 62; // This is tuned value for exact entry size.
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_ENTRY( target: "elm.text"; target: "elm.icon.entry"; )
+   }
+
+// 2.2.6.2 (without genlist background)
+   group {  GENLIST_NAME("editfield/title/no_bg/default")
+      alias: "elm/layout/editfield/title/no_bg/default";
+      inherit: "elm/genlist/item/editfield/title/default";
+
+      parts {
+         GENLIST_PART_BG_NORMAL_OFF
+         GENLIST_PART_BOTTOM_LINE_OFF
+         GENLIST_PART_PADDING_LEFT_SIZE(0)
+         GENLIST_PART_PADDING_RIGHT_SIZE(0)
+      }
+   }
+
+   group {  GENLIST_NAME("1icon/default")
+      GENLIST_PROLOG_NORMAL
+
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION(
+               "elm.padding.left", "elm.padding.right",
+               "elm.padding.top", "elm.padding.bottom",
+               min: 0 GENLIST_HEIGHT_1LINE;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAM_DEFAULT( target: "elm.icon"; )
+      GENLIST_PROGRAM_DISABLED( target: "elm.icon"; )
+      GENLIST_PROGRAM_SELECT( target: "elm.icon"; )
+      GENLIST_PROGRAM_FLIP
+      GENLIST_PROGRAM_FOCUS_NORMAL
+   }
+
+   group { GENLIST_NAME("1icon/with_no_line/default")
+      inherit: "elm/genlist/item/1icon/default";
+
+      parts {
+         GENLIST_PART_BOTTOM_LINE_OFF
+      }
+   }
+
+   group { GENLIST_NAME("1icon/no_padding/default")
+      inherit: "elm/genlist/item/1icon/default";
+
+      parts {
+         GENLIST_PART_PADDING_LEFT_SIZE(0)
+         GENLIST_PART_PADDING_RIGHT_SIZE(0)
+         GENLIST_PART_PADDING_TOP_SIZE(0)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(0)
+         part { name: "elm.icon";
+            description { state: "default" 0.0;
+               min: 0 (GENLIST_HEIGHT_1LINE+4);
+            }
+         }
+      }
+   }
+
+   group { GENLIST_NAME("1icon/no_padding_line/default")
+      inherit: "elm/genlist/item/1icon/default";
+
+      parts {
+         GENLIST_PART_PADDING_LEFT_SIZE(0)
+         GENLIST_PART_PADDING_RIGHT_SIZE(0)
+         GENLIST_PART_PADDING_TOP_SIZE(0)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(0)
+         GENLIST_PART_BOTTOM_LINE_OFF
+         part { name: "elm.icon";
+            description { state: "default" 0.0;
+               min: 0 (GENLIST_HEIGHT_1LINE + GENLIST_PADDING_SIZE_TOP + GENLIST_PADDING_SIZE_BOTTOM);
+            }
+         }
+      }
+   }
+
+// -------------------------------------------------------------------
+// 1 line -------------------------------------------------------
+// -------------------------------------------------------------------
+// 2.2.1.1
+   group { GENLIST_NAME("1text/default")
+      GENLIST_PROLOG_NORMAL
+
+      data.item: "texts" "elm.text";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_LISTITEM_("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.padding.right",
+            "elm.padding.top", "elm.padding.bottom",
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+// 2.2.1.1 (textblock)
+   group { GENLIST_NAME("1text.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_LISTITEM_TB_("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.padding.right",
+            "elm.padding.top", "elm.padding.bottom",
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.2
+   group { GENLIST_NAME("2text/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.text.2",
+            "elm.padding.top", "elm.padding.bottom",
+         )
+         GENLIST_PART_SUBITEM_RTB("elm.text.2", GENLIST_HEIGHT_1LINE,
+            "elm.padding.right",
+            "elm.padding.top", "elm.padding.bottom"
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.1.3
+   group { GENLIST_NAME("2text.6/default")
+      inherit: "elm/genlist/item/2text/default";
+
+      parts {
+
+         part { name: "elm.text.2";
+            description { state: "default" 0.0;
+               color: GENLIST_LIST_SUB_TEXT_SETTINGS_COLOR;
+            }
+            GENLIST_DESCRIPTION_SUBITEM_SETTINGS_OTHERS
+         }
+      }
+   }
+
+// 2.2.1.4
+   group { GENLIST_NAME("1text.1icon/default")
+      GENLIST_PROLOG_NORMAL
+
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_LISTITEM_("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.padding.top", "elm.padding.bottom",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_BTN_01_RTB("elm.icon",
+            "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.5
+   group { GENLIST_NAME("1text.1icon.4/default")
+      inherit: "elm/genlist/item/1text.1icon/default";
+
+      parts {
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+      }
+   }
+
+// 2.2.1.6
+   group { GENLIST_NAME("1text.1icon.6/default")
+      inherit: "elm/genlist/item/1text.1icon/default";
+
+      parts {
+         GENLIST_PART_ICON_BTN_ONOFF_R("elm.icon", "elm.padding.right")
+      }
+   }
+
+// 2.2.1.7
+      group { GENLIST_NAME("1text.1icon.7/default")
+      inherit: "elm/genlist/item/1text.1icon/default";
+
+      parts {
+         GENLIST_PART_ICON_BIG_R("elm.icon", "elm.padding.right")
+      }
+   }
+
+// 2.2.1.8
+   group { GENLIST_NAME("1text.1icon.5/default")
+      inherit: "elm/genlist/item/1text.1icon/default";
+
+      parts {
+         GENLIST_PART_ICON_THUMBNAIL1_R("elm.icon", "elm.padding.right")
+         GENLIST_PART_FOCUS_NORMAL
+      }
+   }
+
+// 2.2.1.8.1 (Circle)
+   group { GENLIST_NAME("1text.1icon.5.thumb.circle/default")
+      inherit: "elm/genlist/item/1text.1icon.5/default";
+
+      GENLIST_INHERIT_THUMB_CIRCLE_LARGE("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.1.8.1 (Square)
+   group { GENLIST_NAME("1text.1icon.5.thumb.square/default")
+      inherit: "elm/genlist/item/1text.1icon.5/default";
+
+      GENLIST_INHERIT_THUMB_SQUARE_LARGE("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.1.9
+   group { GENLIST_NAME("1text.2icon.3/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.text.limit",
+            fixed: 1 0; align: 0 0.5; text.max: 1 0;  // This limits text growing.
+         )
+         GENLIST_PART_PADDING_L("elm.padding.text.right", "elm.text")
+         GENLIST_PART_ICON_SMALL_L("elm.icon.2", "elm.padding.text.right")
+         // Virtual part for Maxmimum right X axis of TEXT
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.padding.icon1.left",
+               min: (GENLIST_ICON_SMALL_SIZE+GENLIST_PADDING_SIZE_DEFAULT) 0;
+            )
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_THUMBNAIL1_R("elm.icon.1", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.9 (textblock)
+   group { GENLIST_NAME("1text.2icon.3.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_LISTITEM_LR_TB("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.text.limit",
+            fixed: 1 0; align: 0 0.5; text.max: 1 0;  // This limits text growing.
+         )
+         GENLIST_PART_PADDING_L("elm.padding.text.right", "elm.text")
+         GENLIST_PART_ICON_SMALL_L("elm.icon.2", "elm.padding.text.right")
+         // Virtual part for Maxmimum right X axis of TEXT
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.padding.icon1.left",
+               min: (GENLIST_ICON_SMALL_SIZE+GENLIST_PADDING_SIZE_DEFAULT) 0;
+            )
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_THUMBNAIL1_R("elm.icon.1", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.10
+   group { GENLIST_NAME("1text.1icon.2/default")
+      // FIXME: just for backward compatibility
+      alias: "elm/genlist/item/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/item_odd/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/item_compress/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/item_compress_odd/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/tree/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/tree_odd/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/tree_compress/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/tree_compress_odd/1text.1/expandable_n_depth/default";
+      alias: "elm/genlist/item/1text.2/expandable_n_depth/default";
+      alias: "elm/genlist/item_odd/1text.2/expandable_n_depth/default";
+      alias: "elm/genlist/item_compress/1text.2/expandable_n_depth/default";
+      alias: "elm/genlist/item_compress_odd/1text.2/expandable_n_depth/default";
+      alias: "elm/genlist/tree/1text.2/expandable_n_depth/default";
+      alias: "elm/genlist/tree_odd/1text.2/expandable_n_depth/default";
+      alias: "elm/genlist/tree_compress/1text.2/expandable_n_depth/default";
+
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.icon.right", "elm.padding.right", )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.10.1 (circle)
+   group { GENLIST_NAME("1text.1icon.2.thumb.circle/default")
+      inherit: "elm/genlist/item/1text.1icon.2/default";
+
+      GENLIST_INHERIT_THUMB_CIRCLE_MEDIUM("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.1.10.1 (square)
+   group { GENLIST_NAME("1text.1icon.2.thumb.square/default")
+      inherit: "elm/genlist/item/1text.1icon.2/default";
+
+      GENLIST_INHERIT_THUMB_SQUARE_MEDIUM("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.1.10 (textblock)
+   group { GENLIST_NAME("1text.1icon.2.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_LR_TB("elm.text", GENLIST_HEIGHT_1LINE, "elm.padding.icon.right", "elm.padding.right",)
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.11
+   group { GENLIST_NAME("2text.1icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_LR("elm.text.1", GENLIST_HEIGHT_1LINE, "elm.padding.icon.right", "elm.text.2",)
+         GENLIST_PART_SUBITEM_R("elm.text.2", GENLIST_HEIGHT_1LINE, "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.1.11 (textblock)
+   group { GENLIST_NAME("2text.1icon.tb/default")
+      alias: "elm/genlist/item/2text.1icon.6.tb/default";
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_LR_TB("elm.text.1", GENLIST_HEIGHT_1LINE, "elm.padding.icon.right", "elm.text.2",)
+         GENLIST_PART_SUBITEM_R_TB("elm.text.2", GENLIST_HEIGHT_1LINE, "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.1.12
+   group { GENLIST_NAME("2text.1icon.6/default")
+      inherit: "elm/genlist/item/2text.1icon/default";
+
+      parts {
+         part { name: "elm.text.2";
+            description { state: "default" 0.0;
+               color: GENLIST_LIST_SUB_TEXT_SETTINGS_COLOR;
+            }
+            GENLIST_DESCRIPTION_SUBITEM_SETTINGS_OTHERS
+         }
+      }
+   }
+
+// 2.2.1.13
+   group { GENLIST_NAME("1text.2icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_BIG_L( "elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE, "elm.padding.icon1.right", "elm.padding.icon2.left",)
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_BTN_01_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.13 (textblock)
+   group { GENLIST_NAME("1text.2icon.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_BIG_L( "elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_LR_TB("elm.text", GENLIST_HEIGHT_1LINE, "elm.padding.icon1.right", "elm.padding.icon2.left",)
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_BTN_01_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.14
+   group { GENLIST_NAME("1text.2icon.6/default")
+      inherit: "elm/genlist/item/1text.2icon/default";
+
+      parts {
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+
+      }
+   }
+
+// 2.2.1.14 (textblock)
+   group { GENLIST_NAME("1text.2icon.6.tb/default")
+      inherit: "elm/genlist/item/1text.2icon.tb/default";
+
+      parts {
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+      }
+   }
+
+// 2.2.1.15
+   group { GENLIST_NAME("1text.2icon.7/default")
+      inherit: "elm/genlist/item/1text.2icon/default";
+
+      parts {
+         GENLIST_PART_ICON_BTN_ONOFF_R("elm.icon.2", "elm.padding.right")
+      }
+   }
+
+// 2.2.1.16
+// 2.2.1.20
+   group { GENLIST_NAME("1text.1icon.3/default")
+      inherit: "elm/genlist/item/1text.1icon.2/default";
+
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon", "elm.padding.left")
+      }
+   }
+
+// 2.2.1.16 (textblock)
+// 2.2.1.20 (textblock)
+   group { GENLIST_NAME("1text.1icon.3.tb/default")
+      inherit: "elm/genlist/item/1text.1icon.2.tb/default";
+
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon", "elm.padding.left")
+      }
+   }
+
+// 2.2.1.17
+   group { GENLIST_NAME("1text.2icon.4/default")
+      inherit: "elm/genlist/item/1text.2icon/default";
+
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+      }
+   }
+
+// 2.2.1.17 (textblock)
+   group { GENLIST_NAME("1text.2icon.4.tb/default")
+      inherit: "elm/genlist/item/1text.2icon.tb/default";
+
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+      }
+   }
+
+// 2.2.1.18
+// 2.2.1.23
+   group { GENLIST_NAME("1text.2icon.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_ICON_BIG_L("elm.icon.2", "elm.padding.icon1.right")
+         GENLIST_PART_PADDING_L("elm.padding.icon2.right", "elm.icon.2")
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE, "elm.padding.icon2.right", "elm.padding.right",)
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.19
+// 2.2.1.25
+   group { GENLIST_NAME("1text.3icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_ICON_BIG_L("elm.icon.2", "elm.padding.icon1.right")
+         GENLIST_PART_PADDING_L("elm.padding.icon2.right", "elm.icon.2")
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.icon2.right", "elm.padding.icon3.left",)
+         GENLIST_PART_PADDING_R("elm.padding.icon3.left", "elm.icon.3")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.3", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.21
+   group { GENLIST_NAME("1text.2icon.8/default")
+      inherit: "elm/genlist/item/1text.2icon/default";
+
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_ICON_BIG_R("elm.icon.2", "elm.padding.right")
+      }
+   }
+
+// 2.2.1.22
+   group { GENLIST_NAME("1text.2icon.9/default")
+      inherit: "elm/genlist/item/1text.2icon/default";
+
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+      }
+   }
+
+// 2.2.1.24
+   group { GENLIST_NAME("1text.3icon.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.icon1.right", "elm.padding.icon2.left", )
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_BIG_R("elm.icon.2", "elm.padding.icon3.left")
+         GENLIST_PART_PADDING_R("elm.padding.icon3.left", "elm.icon.3")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.3", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.1.26
+   group { GENLIST_NAME("2text.4/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_SUBITEM_LR("elm.text.1", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.divider1.left",
+         )
+         GENLIST_PART_PADDING_R("elm.divider1.left", "elm.divider1")
+         GENLIST_PART_DIVIDER_R("elm.text.2.left")
+         GENLIST_PART_PADDING_R("elm.text.2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_R_FIXED("elm.text.2", 200, GENLIST_HEIGHT_1LINE,
+            "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL(
+         target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.divider1"; target: "elm.divider2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.1.26 (textblock)
+   group { GENLIST_NAME("2text.4.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_LISTITEM_LR_TB("elm.text.1", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.elm.divider1.left",)
+         GENLIST_PART_PADDING_R("elm.elm.divider1.left", "elm.divider1")
+         GENLIST_PART_DIVIDER_R("elm.text.2.left")
+         GENLIST_PART_PADDING_R("elm.text.2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_R_FIXED_TB("elm.text.2", 206, GENLIST_HEIGHT_1LINE,
+            "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.divider1"; target: "elm.divider2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.1.27
+   group { GENLIST_NAME("2text.5/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_SUBITEM_L_FIXED("elm.text.2", 200, GENLIST_HEIGHT_1LINE,
+            "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.text2.right", "elm.text.2")
+         GENLIST_PART_DIVIDER_L("elm.text2.right")
+         GENLIST_PART_PADDING_L("elm.divider.right", "elm.divider2")
+         GENLIST_PART_SUBITEM_LR("elm.text.1", GENLIST_HEIGHT_1LINE,
+            "elm.divider.right", "elm.padding.right", )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.divider1"; target: "elm.divider2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.1.28
+   group { GENLIST_NAME("1text.1icon.divider/default")
+      inherit: "elm/genlist/item/1text.1icon.7/default";
+
+      parts {
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.left", "elm.divider1",
+         )
+         GENLIST_PART_DIVIDER_R("elm.padding.icon.left")
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_BTN_ONOFF_R("elm.icon", "elm.padding.right")
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; target: "elm.divider1"; target: "elm.divider2"; )
+   }
+
+// 2.2.1.29
+   group { GENLIST_NAME("1text.2icon.divider/default")
+      inherit: "elm/genlist/item/1text.2icon.7/default";
+
+      parts {
+         GENLIST_PART_LISTITEM_LR("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.padding.icon1.right", "elm.divider1",
+         )
+         GENLIST_PART_DIVIDER_R("elm.padding.icon2.left")
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+      }
+   }
+
+// -------------------------------------------------------------------
+// 2 line -------------------------------------------------------
+// -------------------------------------------------------------------
+// 2.2.2.1
+   group { GENLIST_NAME("2text.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.1 (textblock)
+   group { GENLIST_NAME("2text.2.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.bottom"
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.2
+   group { GENLIST_NAME("2text.3/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_SUBITEM_LRT("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.top"
+         )
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.right",
+            "elm.text.2", "elm.padding.bottom",
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.3
+   group { GENLIST_NAME("3text/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.text.3",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_RTB("elm.text.3", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.2"
+         )
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.3 (textblock)
+   group { GENLIST_NAME("3text.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.text.3",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.3", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.2"
+         )
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.bottom"
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.4
+   group { GENLIST_NAME("2text.1icon.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_BTN_01_RTB("elm.icon", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.4 (textblock)
+   group { GENLIST_NAME("2text.1icon.2.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_BTN_01_RTB("elm.icon", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+
+// 2.2.2.5
+   group { GENLIST_NAME("2text.1icon.10/default")
+      inherit: "elm/genlist/item/2text.1icon.2/default";
+
+      parts {
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+      }
+   }
+
+// 2.2.2.5 (textblock)
+   group { GENLIST_NAME("2text.1icon.10.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon.left", "elm.padding.bottom"
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.6
+   group { GENLIST_NAME("2text.5icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4 elm.icon.5";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.icon.5",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.5",
+            "elm.padding.icon4.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon4.left", "elm.icon.4", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.4",
+            "elm.padding.icon3.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon3.left", "elm.icon.3", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.3",
+            "elm.padding.icon2.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon2.left", "elm.icon.2", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.2",
+            "elm.padding.icon1.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon1.left", "elm.icon.1", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.1",
+            "elm.padding.right", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; target: "elm.icon.4"; target: "elm.icon.5";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.7
+   group { GENLIST_NAME("3text.1icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.padding.top", "elm.text.3",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon",
+            "elm.padding.right", "elm.padding.top", "elm.text.3"
+         )
+
+         GENLIST_PART_SUBITEM_("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text3.right",
+            "elm.text.1", "elm.padding.bottom",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.text3.right", "elm.text.3")
+         GENLIST_PART_SUBITEM_RB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.7 (textblock)
+   group { GENLIST_NAME("3text.1icon.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         // elm.text.1 should be fixed part becuase 2nd line texts are both TEXTBLOCK
+         // and theier font size can be changed both.
+         GENLIST_PART_LISTITEM_LRT_TB("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.padding.top",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon",
+            "elm.padding.right", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_SUBITEM_TB_("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text3.right",
+            "elm.text.1", "elm.padding.bottom"
+         )
+         GENLIST_PART_PADDING_R("elm.padding.text3.right", "elm.text.3")
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.8
+   group { GENLIST_NAME("2text.2icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top", "elm.icon.2",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.1",
+            "elm.padding.right", "elm.padding.top", "elm.icon.2")
+
+         GENLIST_PART_ICON_SMALL_LB("elm.icon.2",
+            "elm.padding.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_L("elm.icon2.right", "elm.icon.2")
+         GENLIST_PART_SUBITEM_("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.icon2.right", "elm.padding.right",
+            "elm.text.1", "elm.padding.bottom",
+            fixed: 1 1;
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.9
+   group { GENLIST_NAME("2text.7/default")
+      inherit: "elm/genlist/item/2text.2/default";
+
+      parts {
+         part { name: "elm.text.2";
+            description { state: "default" 0.0;
+               color: GENLIST_LIST_SUB_TEXT_SETTINGS_COLOR;
+            }
+            GENLIST_DESCRIPTION_SUBITEM_SETTINGS_OTHERS
+         }
+      }
+   }
+
+// 2.2.2.10
+   group { GENLIST_NAME("2text.1icon.7/default")
+      inherit: "elm/genlist/item/2text.1icon.2/default";
+
+      parts {
+         part { name: "elm.text.2";
+            description { state: "default" 0.0;
+               color: GENLIST_LIST_SUB_TEXT_SETTINGS_COLOR;
+            }
+            GENLIST_DESCRIPTION_SUBITEM_SETTINGS_OTHERS
+         }
+         GENLIST_PART_ICON_BTN_ONOFF_R("elm.icon", "elm.padding.right")
+      }
+   }
+
+// 2.2.2.10 (textblock)
+   group { GENLIST_NAME("2text.1icon.7.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_SETTINGS_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon.left", "elm.padding.bottom"
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_BTN_ONOFF_R("elm.icon", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.11
+   group { GENLIST_NAME("2text.1icon.11/default")
+      inherit: "elm/genlist/item/2text.1icon.2/default";
+      parts {
+         part { name: "elm.text.2";
+            description { state: "default" 0.0;
+               color: GENLIST_LIST_SUB_TEXT_SETTINGS_COLOR;
+            }
+            GENLIST_DESCRIPTION_SUBITEM_SETTINGS_OTHERS
+         }
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+      }
+   }
+
+// 2.2.2.12
+   group { GENLIST_NAME("2text.2icon.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_RB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.icon2.rect", "elm.padding.bottom")
+         GENLIST_PART_PADDING_L("elm.padding.text2.right", "elm.text.2")
+         GENLIST_PART_ICON_SMALL_LTB("elm.icon.2",
+            "elm.padding.text2.right", "elm.text.1", "elm.padding.bottom")
+         // Virtual part for Maxmimum right X axis of text.2
+         part { name: "elm.icon2.rect";
+            type: RECT;
+            scale: 1;
+            GENLIST_DESCRIPTION_R("elm.padding.icon1.left",
+               min: (GENLIST_ICON_SMALL_SIZE + GENLIST_PADDING_SIZE_DEFAULT) GENLIST_ICON_SMALL_SIZE;
+               max: (GENLIST_ICON_SMALL_SIZE + GENLIST_PADDING_SIZE_DEFAULT) GENLIST_ICON_SMALL_SIZE;
+               fixed: 1 1;
+               visible: 0;
+            )
+         }
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_BIG_R("elm.icon.1", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.13
+   group { GENLIST_NAME("2text.1icon.5/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_SUBITEM_LRT("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon.left", "elm.padding.top")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon.left",
+            "elm.text.2", "elm.padding.bottom",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON_BIG_R("elm.icon", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.14
+   group { GENLIST_NAME("2text.1icon.4/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon.right", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon.right", "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.14.1 (circle)
+   group { GENLIST_NAME("2text.1icon.4.thumb.circle/default")
+      inherit: "elm/genlist/item/2text.1icon.4/default";
+
+      GENLIST_INHERIT_THUMB_CIRCLE_MEDIUM("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.2.14.1 (square)
+   group { GENLIST_NAME("2text.1icon.4.thumb.square/default")
+      inherit: "elm/genlist/item/2text.1icon.4/default";
+
+      GENLIST_INHERIT_THUMB_SQUARE_MEDIUM("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.2.14 (textblock)
+   group { GENLIST_NAME("2text.1icon.4.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon.right", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon.right", "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.15
+   group { GENLIST_NAME("3text.1icon.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon.right", "elm.text.3",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_RTB("elm.text.3", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon.right", "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.16
+   group { GENLIST_NAME("2text.1icon.8/default")
+      inherit: "elm/genlist/item/2text.1icon.4/default";
+
+      parts {
+         part { name: "elm.text.2";
+            description { state: "default" 0.0;
+               color: GENLIST_LIST_SUB_TEXT_SETTINGS_COLOR;
+            }
+            GENLIST_DESCRIPTION_SUBITEM_SETTINGS_OTHERS
+         }
+      }
+   }
+
+// 2.2.2.17
+   group { GENLIST_NAME("2text.6icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4 elm.icon.5 elm.icon.6";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.6", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon6.right", "elm.icon.6")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon6.right", "elm.icon.5",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon6.right", "elm.padding.right", "elm.padding.bottom")
+
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.5",
+            "elm.padding.icon4.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon4.left", "elm.icon.4", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.4",
+            "elm.padding.icon3.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon3.left", "elm.icon.3", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.3",
+            "elm.padding.icon2.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon2.left", "elm.icon.2", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.2",
+            "elm.padding.icon1.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon1.left", "elm.icon.1", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.1",
+            "elm.padding.right", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; target: "elm.icon.4"; target: "elm.icon.5"; target: "elm.icon.6"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.17 (textblock)
+   group { GENLIST_NAME("2text.6icon.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4 elm.icon.5 elm.icon.6";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.6", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon6.right", "elm.icon.6")
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon6.right", "elm.icon.5",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon6.right", "elm.padding.right", "elm.padding.bottom")
+
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.5",
+            "elm.padding.icon4.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon4.left", "elm.icon.4", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.4",
+            "elm.padding.icon3.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon3.left", "elm.icon.3", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.3",
+            "elm.padding.icon2.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon2.left", "elm.icon.2", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.2",
+            "elm.padding.icon1.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon1.left", "elm.icon.1", 2)
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.1",
+            "elm.padding.right", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; target: "elm.icon.4"; target: "elm.icon.5"; target: "elm.icon.6"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.18
+   group { GENLIST_NAME("2text.2icon.4/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon1.right", "elm.padding.icon2.left",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon1.right", "elm.padding.icon2.left", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+
+// 2.2.2.18 (textblock)
+   group { GENLIST_NAME("2text.2icon.4.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon1.right", "elm.padding.icon2.left",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon1.right", "elm.padding.icon2.left", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.19
+   group { GENLIST_NAME("2text.2icon.6/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon1.right", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon1.right", "elm.padding.icon2.left", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.2",
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.19 (textblock)
+   group { GENLIST_NAME("2text.2icon.6.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon1.right", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon1.right", "elm.padding.icon2.left", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.2",
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.20
+   group { GENLIST_NAME("2text.2icon.8/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon1.right", "elm.padding.icon2.left",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon1.right", "elm.padding.icon2.left", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_BTN_01_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.20 (textblock)
+   group { GENLIST_NAME("2text.2icon.8.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon1.right", "elm.padding.icon2.left",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon1.right", "elm.padding.icon2.left", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_BTN_01_RTB("elm.icon.2", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.21
+   group { GENLIST_NAME("2text.2icon.progress/default")
+      // FIXME: deprecated name, will be removed
+      alias: "elm/genlist/item/1text.2icon.5/default";
+      alias: "elm/genlist/item_odd/1text.2icon.5/default";
+      alias: "elm/genlist/item_compress/1text.2icon.5/default";
+      alias: "elm/genlist/item_compress_odd/1text.2icon.5/default";
+
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.swallow.progress ";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( 59 )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 54 )
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_ICON("elm.swallow.progress", GENLIST_DESCRIPTION(
+            "elm.padding.icon1.right", "elm.padding.right",
+            "elm.padding.top", "elm.padding.bottom",
+            min: 0 27;)
+         )
+         GENLIST_PART_SUBITEM_LRT("elm.text.1", 54,
+            "elm.padding.icon1.right", "elm.text.2", "elm.swallow.progress")
+         GENLIST_PART_SUBITEM("elm.text.2", GENLIST_DESCRIPTION_RT(
+            "elm.padding.right", "elm.swallow.progress",
+            min: 0 54;
+            GENLIST_PARAM_SUBITEM_DEFAULT
+            GENLIST_PARAM_TEXT_LIMIT_RT
+            fixed: 1 1;)
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.swallow.progress";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.22
+   group { GENLIST_NAME("3text.3icon.progress/default")
+      // FIXME: deprecated name, will be removed
+      alias: "elm/genlist/item/3text.3icon/default";
+      alias: "elm/genlist/item_odd/3text.3icon/default";
+      alias: "elm/genlist/item_compress/3text.3icon/default";
+      alias: "elm/genlist/item_compress_odd/3text.3icon/default";
+
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.swallow.progress";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( 0 )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 0 )
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_LISTITEM("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.icon1.right", "elm.padding.icon2.left",
+               "elm.padding.top",
+               min: 0 59;
+               GENLIST_PARAM_PROGRESS_MAIN
+               fixed: 0 1;
+            )
+         )
+         GENLIST_PART_ICON("elm.swallow.progress",
+            GENLIST_DESCRIPTION("elm.padding.icon1.right", "elm.padding.icon2.left", "elm.text.1", "elm.text.2",
+               min: 0 27;
+            )
+         )
+         GENLIST_PART_SUBITEM("elm.text.2",
+            GENLIST_DESCRIPTION_LRB("elm.padding.icon1.right", "elm.text.3", "elm.padding.bottom",
+               min: 0 54;
+               GENLIST_PARAM_SUBITEM_DEFAULT
+               fixed: 1 1;
+            )
+         )
+         GENLIST_PART_SUBITEM("elm.text.3",
+            GENLIST_DESCRIPTION_RB("elm.padding.icon2.left", "elm.padding.bottom",
+               min: 0 54;
+               GENLIST_PARAM_SUBITEM_DEFAULT
+               GENLIST_PARAM_TEXT_LIMIT_RT
+               fixed: 1 1; // This limits text growing.
+            )
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON("elm.icon.2", GENLIST_DESCRIPTION_R(
+            "elm.padding.right",
+            min: 156 GENLIST_BTN_01_HEIGHT;
+            max: 156 GENLIST_BTN_01_HEIGHT;)
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.swallow.progress"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.23
+   group { GENLIST_NAME("2text.1icon.divider/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.divider.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_SETTINGS_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.divider.left", "elm.padding.bottom",)
+         GENLIST_PART_PADDING_R("elm.padding.divider.left", "elm.divider1")
+         GENLIST_PART_DIVIDER_R("elm.padding.icon.left")
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon.left", "elm.icon", 26)
+         GENLIST_PART_ICON_BTN_ONOFF_R("elm.icon", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; target: "elm.divider1"; target: "elm.divider2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.30
+   group { GENLIST_NAME("2text.3icon/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.text.limit",
+            "elm.padding.top", "elm.icon.3",
+            fixed: 1 0; align: 0 0.5; text.max: 1 0;  // This limits text growing.
+         )
+         GENLIST_PART_PADDING_L("elm.padding.text1.right", "elm.text.1")
+         GENLIST_PART_ICON_SMALL_LTB("elm.icon.2",
+            "elm.padding.text1.right", "elm.padding.top", "elm.icon.3")
+
+          GENLIST_PART_ICON_SMALL_LB("elm.icon.3",
+            "elm.padding.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_L("elm.icon3.right", "elm.icon.3")
+         GENLIST_PART_SUBITEM_("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.icon3.right", "elm.padding.icon1.left",
+            "elm.text.1", "elm.padding.bottom",
+            fixed: 1 1;
+         )
+         // Virtual part for Maxmimum right X axis of TEXT
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.padding.icon1.left",
+               min: (GENLIST_ICON_LARGE_SIZE+GENLIST_PADDING_SIZE_DEFAULT) 0;
+            )
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_THUMBNAIL1_R("elm.icon.1", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.31
+   group { GENLIST_NAME("2text.1icon.12/default")
+      inherit: "elm/genlist/item/2text.1icon.2/default";
+      parts {
+         GENLIST_PART_ICON_THUMBNAIL1_R("elm.icon", "elm.padding.right")
+         GENLIST_PART_FOCUS_NORMAL
+      }
+   }
+
+// 2.2.2.31.1 (circle)
+   group { GENLIST_NAME("2text.1icon.12.thumb.circle/default")
+      inherit: "elm/genlist/item/2text.1icon.12/default";
+
+      GENLIST_INHERIT_THUMB_CIRCLE_LARGE("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.2.31.1 (square)
+   group { GENLIST_NAME("2text.1icon.12.thumb.square/default")
+      inherit: "elm/genlist/item/2text.1icon.12/default";
+
+      GENLIST_INHERIT_THUMB_SQUARE_LARGE("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.2.31 (textblock)
+   group { GENLIST_NAME("2text.1icon.12.tb/default")
+      inherit: "elm/genlist/item/2text.1icon.2.tb/default";
+      parts {
+         GENLIST_PART_ICON_THUMBNAIL1_R("elm.icon", "elm.padding.right")
+         GENLIST_PART_FOCUS_NORMAL
+      }
+   }
+
+// 2.2.2.31.1 (circle) textblock
+   group { GENLIST_NAME("2text.1icon.12.tb.thumb.circle/default")
+      inherit: "elm/genlist/item/2text.1icon.12.tb/default";
+
+      GENLIST_INHERIT_THUMB_CIRCLE_LARGE("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.2.2.31.1 (square) textblock
+   group { GENLIST_NAME("2text.1icon.12.tb.thumb.square/default")
+      inherit: "elm/genlist/item/2text.1icon.12.tb/default";
+
+      GENLIST_INHERIT_THUMB_SQUARE_LARGE("elm.icon")
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+
+// 2.2.2.32
+// 2.2.2.36
+   group { GENLIST_NAME("2text.1icon.9/default")
+      inherit:"elm/genlist/item/2text.1icon.4/default";
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon", "elm.padding.left")
+      }
+   }
+
+// 2.2.2.33
+   group { GENLIST_NAME("2text.2icon.7/default")
+      inherit: "elm/genlist/item/2text.2icon.4/default";
+
+      parts {
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+      }
+   }
+
+// 2.2.2.34
+// 2.2.2.37
+   group { GENLIST_NAME("2text.2icon.5/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_ICON_BIG_L("elm.icon.2", "elm.padding.icon1.right")
+         GENLIST_PART_PADDING_L("elm.padding.icon2.right", "elm.icon.2")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon2.right", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon2.right", "elm.padding.right", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.35
+   group { GENLIST_NAME("2text.3icon.4/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_ICON_BIG_L("elm.icon.2", "elm.padding.icon1.right")
+         GENLIST_PART_PADDING_L("elm.padding.icon2.right", "elm.icon.2")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon2.right", "elm.padding.icon3.left",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon2.right", "elm.padding.icon3.left", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon3.left", "elm.icon.3")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.3", "elm.padding.right", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+
+// 2.2.2.38
+   group { GENLIST_NAME("4text.1icon.1/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+      data.item: "contents" "elm.icon.1";
+
+      images {
+         image: "00_list_bubble_bg.png" COMP;
+      }
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top", "elm.text.3",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.1",
+            "elm.padding.bubble.left", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_PADDING_R("elm.padding.bubble.left", "elm.bubble")
+         GENLIST_PART_LIST_BUBBLE_TEXT_RTB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_SUBITEM_LRB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text2.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.text2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_RTB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4";
+         target: "elm.icon.1"; target: "elm.bubble"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+   }
+
+// 2.2.2.38 textblock
+      group { GENLIST_NAME("4text.1icon.1.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+      data.item: "contents" "elm.icon.1";
+
+      images {
+         image: "00_list_bubble_bg.png" COMP;
+      }
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         // elm.text.1 should be fixed part becuase 2nd line texts are both TEXTBLOCK
+         // and theier font size can be changed both.
+         GENLIST_PART_LISTITEM_LRT_TB("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left", "elm.padding.top",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.1",
+            "elm.padding.bubble.left", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_PADDING_R("elm.padding.bubble.left", "elm.bubble")
+         GENLIST_PART_LIST_BUBBLE_TEXT_RTB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_SUBITEM_TB_("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text2.left", "elm.text.1", "elm.padding.bottom"
+         )
+         GENLIST_PART_PADDING_R("elm.padding.text2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom"
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4";
+         target: "elm.icon.1"; target: "elm.bubble"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+   }
+
+// 2.2.2.39
+   group { GENLIST_NAME("4text.1icon.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+      data.item: "contents" "elm.icon.1 ";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top", "elm.text.3",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.1",
+            "elm.padding.text4.left", "elm.padding.top", "elm.text.3")
+         GENLIST_PART_PADDING_R("elm.padding.text4.left", "elm.text.4")
+         GENLIST_PART_SUBITEM_02_RTB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_SUBITEM_LRB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text2.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.text2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_RTB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4";
+         target: "elm.icon.1";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+   }
+// 2.2.2.39 (TEXTBLOCK)
+   group { GENLIST_NAME("4text.1icon.2.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+      data.item: "contents" "elm.icon.1";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_LRT_TB("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left", "elm.padding.top",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.1",
+            "elm.padding.text4.left", "elm.padding.top", "elm.text.2"
+         )
+         GENLIST_PART_PADDING_R("elm.padding.text4.left", "elm.text.4")
+
+         // FIXME: This part depends on elm.text.2 as bottom part.
+         // So if elm.text.3 (the other bottom part) size is changed,
+         // It can break this part's height.
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.2"
+         )
+
+         GENLIST_PART_SUBITEM_TB_("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text2.left", "elm.text.1", "elm.padding.bottom"
+         )
+         GENLIST_PART_PADDING_R("elm.padding.text2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom"
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4";
+         target: "elm.icon.1";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+   }
+
+// 2.2.2.40
+   group { GENLIST_NAME("4text.1/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+
+      images {
+         image: "00_list_bubble_bg.png" COMP;
+      }
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.bubble.left",
+            "elm.padding.top", "elm.text.3",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.bubble.left", "elm.bubble")
+         GENLIST_PART_LIST_BUBBLE_TEXT_RTB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_SUBITEM_LRB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text2.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.text2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_RTB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4";
+         target: "elm.bubble"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+
+   }
+
+// 2.2.2.40.tb
+   group { GENLIST_NAME("4text.1.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+
+      images {
+         image: "00_list_bubble_bg.png" COMP;
+      }
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.bubble.left",
+            "elm.padding.top", "elm.text.3",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.bubble.left", "elm.bubble")
+         GENLIST_PART_LIST_BUBBLE_TEXT_RTB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.3")
+
+         GENLIST_PART_SUBITEM_LRB_TB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.text2.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.text2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4";
+         target: "elm.bubble"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+
+   }
+
+
+// 2.2.2.41
+   group { GENLIST_NAME("4text.2/default")
+      inherit: "elm/genlist/item/4text.1/default";
+      parts {
+         part { name: "elm.bubble";
+            description { state: "default" 0.0;
+               visible: 0;
+            }
+            description { state: "selected" 0.0;
+               visible: 0;
+            }
+         }
+         GENLIST_PART_SUBITEM_02_RTB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.3")
+      }
+   }
+
+// 2.2.2.42
+   group { GENLIST_NAME("3text.1icon.3/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon.1";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top", "elm.text.3",)
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.1",
+             "elm.padding.right", "elm.padding.top", "elm.text.3")
+         GENLIST_PART_SUBITEM_LRB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.text.2", "elm.padding.bottom")
+         GENLIST_PART_SUBITEM_RTB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.icon.1";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.42
+   group { GENLIST_NAME("3text.1icon.3.tb/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon.1";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_LRT_TB("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.1",
+            "elm.padding.right", "elm.padding.top", "elm.text.3"
+         )
+         GENLIST_PART_SUBITEM_TB_("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.text.2", "elm.text.1", "elm.padding.bottom"
+         )
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.icon.1";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+
+// 2.2.2.43
+   group { GENLIST_NAME("2text.4icon.1/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon4.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.icon4.left", "elm.icon.4")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.4",
+            "elm.padding.icon3.left", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.icon3.left", "elm.icon.3")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.3",
+            "elm.padding.icon2.left", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_SMALL_RTB("elm.icon.2",
+            "elm.padding.icon1.left", "elm.text.1", "elm.padding.bottom")
+
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_BIG_R("elm.icon.1", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; target: "elm.icon.4";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.44
+   group { GENLIST_NAME("4text.1icon.3/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+      data.item: "contents" "elm.swallow.colorbar elm.icon.1";
+
+      images {
+         image: "00_list_bubble_bg.png" COMP;
+      }
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_COLORBAR
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+
+
+         GENLIST_PART_LISTITEM_LRT("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon1.right", "elm.padding.bubble.left", "elm.padding.top",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.bubble.left", "elm.bubble")
+         GENLIST_PART_LIST_BUBBLE_TEXT_RTB("elm.text.4", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.text.3"
+         )
+
+         GENLIST_PART_SUBITEM_("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon1.right", "elm.padding.text2.left", "elm.text.1", "elm.padding.bottom",
+         )
+         GENLIST_PART_PADDING_R("elm.padding.text2.left", "elm.text.2")
+         GENLIST_PART_SUBITEM_RTB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom"
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4";
+         target: "elm.swallow.colorbar"; target: "elm.icon.1"; target: "elm.bubble"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+   }
+
+// 2.2.2.45
+   group { GENLIST_NAME("3text.1icon.1/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_ICON_BIG_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.icon.right", "elm.padding.right",
+            "elm.padding.top", "elm.text.2",)
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon.right", "elm.text.3", "elm.padding.bottom")
+         GENLIST_PART_SUBITEM_RTB("elm.text.3", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.right", "elm.text.1", "elm.padding.bottom")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+   }
+
+// 2.2.2.46
+   group { GENLIST_NAME("2text.2icon.1/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.icon1.left",
+            "elm.padding.top", "elm.text.2",
+         )
+         GENLIST_PART_SUBITEM_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon1.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_BIG_R("elm.icon.1", "elm.padding.icon2.left")
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON_THUMBNAIL1_R("elm.icon.2", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.2.47
+   group { GENLIST_NAME("2text.1icon.1/default")
+      inherit: "elm/genlist/item/2text.1icon.2/default";
+
+      parts {
+         GENLIST_PART_ICON_BIG_R("elm.icon", "elm.padding.right")
+      }
+   }
+
+// 2.2.4.1
+   group { GENLIST_NAME("multiline/1title.2text/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.title elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( 0 )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 0 )
+
+         // FIXME: if textblock is used, part grows to big.
+         GENLIST_PART_TEXT("elm.title",
+            GENLIST_DESCRIPTION_L("elm.padding.left",
+               GENLIST_PARAM_LISTITEM
+               min: 226 0;
+               fixed: 1 0;
+            )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_PADDING_L("elm.padding.title.right", "elm.title")
+         GENLIST_PART_DIVIDER_L("elm.padding.title.right")
+         GENLIST_PART_PADDING_L("elm.divider.right", "elm.divider2")
+
+         GENLIST_PART_TEXTBLOCK("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.divider.right", "elm.padding.right", "elm.padding.top",
+               GENLIST_PARAM_LISTITEM_TB_WRAP
+               min: 0 90; fixed: 0 1;
+            )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS_TB_WRAP
+         )
+         GENLIST_PART_CENTER_LINE_LRT("elm.divider2", "bg", "elm.text.1")
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION("elm.divider.right", "elm.padding.right", "center_line2", "elm.padding.bottom",
+               GENLIST_PARAM_LISTITEM_TB_WRAP
+               min: 0 90;
+            )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS_TB_WRAP
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.title"; target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.divider1"; target:"elm.divider2";
+         target: "center_line"; target:"center_line2";
+      )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+   }
+
+// 2.2.4.2
+   group { GENLIST_NAME("multiline/1title.1text/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.title elm.text";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( 22 )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 22 )
+
+         // FIXME: if textblock is used, part grows to big.
+         GENLIST_PART_TEXT("elm.title",
+            GENLIST_DESCRIPTION_L("elm.padding.left",
+               GENLIST_PARAM_LISTITEM
+               min: 226 0;
+               fixed: 1 0;
+            )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_PADDING_L("elm.padding.title.right", "elm.title")
+         GENLIST_PART_DIVIDER_L("elm.padding.title.right")
+         GENLIST_PART_PADDING_L("elm.divider.right", "elm.divider2")
+
+         GENLIST_PART_TEXTBLOCK("elm.text",
+            GENLIST_DESCRIPTION("elm.divider.right", "elm.padding.right", "elm.padding.top", "elm.padding.bottom",
+               GENLIST_PARAM_LISTITEM_TB_WRAP
+               //min: 0 48;
+            )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS_TB_WRAP
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.title";
+         target: "elm.text";
+         target: "elm.divider1"; target:"elm.divider2";
+      )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.2.4.3
+   group { GENLIST_NAME("multiline/2text/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_TEXT("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.left", "elm.padding.right", "elm.padding.top",
+               GENLIST_PARAM_LISTITEM
+               min: 0 GENLIST_HEIGHT_2LINE_MAIN;
+               fixed: 0 1;
+            )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_PADDING_T_SIZE("elm.padding.text1.bottom", "elm.text.1", 16)
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION("elm.padding.left", "elm.padding.right", "elm.padding.text1.bottom", "elm.padding.bottom",
+               GENLIST_PARAM_SUBITEM_DEFAULT_TB_WRAP
+               min: 0 GENLIST_HEIGHT_MULTILINE_SUB;
+            )
+            GENLIST_DESCRIPTION_SUBITEM_DEFAULT_OTHERS_TB_WRAP
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.2.4.4
+   group { GENLIST_NAME("multiline/2text.5icon/default")
+      // FIXME: deprecated name, wiil be removed
+      alias: "elm/genlist/item/multiline/2text.1icon/default";
+      alias: "elm/genlist/item_odd/multiline/2ext.1icon/default";
+      alias: "elm/genlist/item_compress/multiline/2text.1icon/default";
+      alias: "elm/genlist/item_compress_odd/multiline/2text.1icon/default";
+
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4 elm.icon.5";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( 10 )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 10 )
+
+         GENLIST_PART_LISTITEM("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.left", "elm.padding.icon5.left", "elm.padding.top",
+               GENLIST_PARAM_LISTITEM
+               min: 0 GENLIST_HEIGHT_2LINE_MAIN; )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon5.left", "elm.icon.5")
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.5",
+            "elm.icon.4", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.4",
+            "elm.icon.3", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.3",
+            "elm.icon.2", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.2",
+            "elm.icon.1", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_ICON_STAR_RTB("elm.icon.1",
+            "elm.padding.right", "elm.padding.top", "elm.text.2")
+
+
+         GENLIST_PART_PADDING_T_SIZE("elm.padding.text1.bottom", "elm.text.1", 14)
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION("elm.padding.left", "elm.padding.right", "elm.padding.text1.bottom", "elm.padding.bottom",
+            GENLIST_PARAM_SUBITEM_DEFAULT_TB_WRAP
+            min: 0 GENLIST_HEIGHT_MULTILINE_SUB; )
+            GENLIST_DESCRIPTION_SUBITEM_DEFAULT_OTHERS_TB_WRAP
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.4.4.5
+   group { GENLIST_NAME("multiline/2text.1icon.2/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( 16 )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 16 )
+
+         GENLIST_PART_ICON_SMALL_LTB("elm.icon", "elm.padding.left", "elm.padding.top", "elm.text.2")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.icon.right", "elm.padding.right", "elm.padding.top",
+               GENLIST_PARAM_LISTITEM
+               min: 0 GENLIST_HEIGHT_2LINE_MAIN; )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_PADDING_T_SIZE("elm.padding.text1.bottom", "elm.text.1", 16)
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION("elm.padding.left", "elm.padding.right", "elm.padding.text1.bottom", "elm.padding.bottom",
+            GENLIST_PARAM_SUBITEM_DEFAULT_TB_WRAP
+            min: 0 GENLIST_HEIGHT_MULTILINE_SUB; )
+            GENLIST_DESCRIPTION_SUBITEM_DEFAULT_OTHERS_TB_WRAP
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+/************************************************************/
+/******************** Dialogue Group ************************/
+/************************************************************/
+// 2.4.3 (Dialogue)
+   group { GENLIST_NAME("dialogue/editfield/default")
+      alias: "elm/layout/dialogue/editfield/default";
+      inherit: "elm/genlist/item/editfield/default";
+
+      data.item: "contents" "elm.icon.entry elm.icon.edit";
+
+      GENLIST_DIALOGUE_EDITFIELD_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE_ENTRY( target: "elm.icon.entry"; target: "elm.icon.edit";)
+   }
+
+// 2.4.3 (Dialogue)
+   group { GENLIST_NAME("dialogue/editfield/title/default")
+      alias: "elm/layout/dialogue/editfield/title/default";
+      inherit: "elm/genlist/item/editfield/title/default";
+
+      data.item: "contents" "elm.icon.entry elm.icon.edit";
+
+      GENLIST_DIALOGUE_EDITFIELD_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE_ENTRY( target: "elm.icon.entry"; target: "elm.icon.edit";)
+   }
+
+// Dialogue Group Separators
+// default separator
+   group { GENLIST_NAME("dialogue/separator/default")
+      alias: "elm/layout/dialogue/separator";
+
+      data.item: "stacking" "above";
+      data.item: "selectraise" "on";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_SPACER("separator",
+            description { state: "default" 0.0;
+               min: 0 32;
+               max: -1 32;
+            }
+         )
+      }
+   }
+
+// Dialogue Group Separators
+// default separator
+   group { GENLIST_NAME("dialogue/separator.2/default")
+      alias: "elm/layout/dialogue/separator.2";
+
+      data.item: "stacking" "above";
+      data.item: "selectraise" "on";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_SPACER("separator",
+            description { state: "default" 0.0;
+               min: 0 8;
+               max: -1 8;
+            }
+         )
+      }
+   }
+
+   group { GENLIST_NAME("dialogue/1icon/default")
+      alias: "elm/layout/dialogue/1icon";
+      inherit: "elm/genlist/item/1icon/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.icon"; )
+   }
+
+// 2.4.1.1
+// 2.5.2.1 (deprecated)
+   group { GENLIST_NAME("dialogue/1text/default")
+      alias: "elm/layout/dialogue/1text";
+      inherit: "elm/genlist/item/1text/default";
+
+      // FIXME: temporary alias for back-wrad compatibility
+      alias: "elm/genlist/item/dialogue/1text/expandable2/default";
+      alias: "elm/genlist/item_odd/dialogue/1text/expandable2/default";
+      alias: "elm/genlist/item_compress/dialogue/1text/expandable2/default";
+      alias: "elm/genlist/item_compress_odd/dialogue/1text/expandable2/default";
+
+      data.item: "contents" "elm.icon.edit";
+      /*
+      alias: "elm/genlist/item/dialogue.1text/default";
+      alias: "elm/genlist/item_odd/dialogue.1text/default";
+      alias: "elm/genlist/item_compress/dialogue.1text/default";
+      alias: "elm/genlist/item_compress_odd/dialogue.1text/default";
+      */
+      GENLIST_DIALOGUE_INHERIT_BODY(;)
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.4.1.2
+   group { GENLIST_NAME("dialogue/1text.1icon/default")
+      alias: "elm/layout/dialogue/1text.1icon";
+      inherit: "elm/genlist/item/1text.1icon.6/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+   }
+
+// 2.4.1.3
+// 2.5.2.4 (expandable)
+   group { GENLIST_NAME("dialogue/1text.1icon.2/default")
+      alias: "elm/layout/dialogue/1text.1icon.2";
+      inherit: "elm/genlist/item/1text.1icon.2/default";
+
+      // FIXME: deprecated, only for backward compatibility
+      alias: "elm/genlist/item/dialogue/1text.1icon.2/expandable2/default";
+      alias: "elm/genlist/item_compress/dialogue/1text.1icon.2/expandable2/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+   }
+
+// 2.4.1.3.1 (circle)
+   group { GENLIST_NAME("dialogue/1text.1icon.2.thumb.circle/default")
+      inherit: "elm/genlist/item/dialogue/1text.1icon.2/default";
+
+      GENLIST_INHERIT_THUMB_CIRCLE_MEDIUM_DIALOGUE("elm.icon")
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.4.1.3.1 (square)
+   group { GENLIST_NAME("dialogue/1text.1icon.2.thumb.square/default")
+      inherit: "elm/genlist/item/dialogue/1text.1icon.2/default";
+
+      GENLIST_INHERIT_THUMB_SQUARE_MEDIUM_DIALOGUE("elm.icon")
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.4.1.3 (TEXTBLOCK)
+   group { GENLIST_NAME("dialogue/1text.1icon.2.tb/default")
+      alias: "elm/layout/dialogue/1text.1icon.2.tb";
+      inherit: "elm/genlist/item/1text.1icon.2.tb/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+   }
+
+// 2.4.1.4
+   group { GENLIST_NAME("dialogue/1text.2icon/default")
+      alias: "elm/layout/dialogue/1text.2icon";
+      inherit: "elm/genlist/item/1text.2icon.7/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE(  target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; )
+   }
+
+// 2.4.1.5
+   group { GENLIST_NAME("dialogue/2text.1icon.6/default")
+      alias: "elm/layout/dialogue/2text.1icon.6";
+      inherit: "elm/genlist/item/2text.1icon.6/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+   }
+
+// 2.4.1.5 (textblock)
+   group { GENLIST_NAME("dialogue/2text.1icon.6.tb/default")
+      alias: "elm/layout/dialogue/2text.1icon.6.tb";
+      inherit: "elm/genlist/item/2text.1icon.tb/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+   }
+
+// 2.4.1.6
+// 2.4.1.15
+// 2.5.2.2 & 2.5.2.3 (expandable)
+   group { GENLIST_NAME("dialogue/1text.1icon.3/default")
+      alias: "elm/layout/dialogue/1text.1icon.3";
+      inherit: "elm/genlist/item/1text.1icon.3/default";
+
+      // FIXME: deprecated, only for backward compatibility
+      alias: "elm/genlist/item/dialogue/1text.1icon/expandable2/default";
+      alias: "elm/genlist/item_compress/dialogue/1text.1icon/expandable2/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+   }
+
+// 2.4.1.6 (textblock)
+   group { GENLIST_NAME("dialogue/1text.1icon.3.tb/default")
+      alias: "elm/layout/dialogue/1text.1icon.3.tb";
+      inherit: "elm/genlist/item/1text.1icon.3.tb/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+   }
+
+// 2.4.1.7
+// 2.4.1.11
+   group { GENLIST_NAME("dialogue/1text.2icon.2/default")
+      alias: "elm/layout/dialogue/1text.2icon.2";
+      inherit: "elm/genlist/item/1text.2icon.4/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon.1"; target: "elm.icon.2"; )
+   }
+
+// 2.4.1.8
+   group { GENLIST_NAME("dialogue/1text.3icon/default")
+      alias: "elm/layout/dialogue/1text.3icon";
+      inherit: "elm/genlist/item/1text.3icon.2/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; )
+   }
+
+// 2.4.1.9  FIME: This style is not needed?? (slide has already 3icons style)
+   group { GENLIST_NAME("dialogue/3icon/default")
+      alias: "elm/layout/dialogue/3icon";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON_BIG_L("elm.icon.1", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_ICON("elm.icon.2", GENLIST_DESCRIPTION_LR(
+            "elm.padding.icon1.right", "elm.padding.icon3.left",
+            min: 468 GENLIST_HEIGHT_1LINE; )
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon3.left", "elm.icon.3")
+         GENLIST_PART_ICON_BIG_R("elm.icon.3", "elm.padding.right")
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.icon.1"; target: "elm.icon.2";
+         target: "elm.icon.3"; )
+   }
+
+// 2.4.1.9
+   group { GENLIST_NAME("dialogue/1text.1icon.5/default")
+      alias: "elm/layout/dialogue/1text.1icon.5";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_SUBITEM_("elm.text", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.top", "elm.icon",
+         )
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION_LRB("elm.padding.left", "elm.padding.right", "elm.padding.bottom",
+               min: 0 74;
+               fixed: 0 1;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text")
+   }
+
+// 2.4.1.10
+   group { GENLIST_NAME("dialogue/2text.1icon.4/default")
+      alias: "elm/layout/dialogue/2text.1icon.4";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_SIZE(16)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(16)
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.text.2",
+            "elm.padding.top", "elm.padding.icon.top",
+         )
+         GENLIST_PART_SUBITEM_RTB("elm.text.2", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.padding.icon.top"
+         )
+         GENLIST_PART_PADDING_B_SIZE("elm.padding.icon.top", "elm.icon", 10)
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION_LRB("elm.padding.left", "elm.padding.right", "elm.padding.bottom",
+               min: 0 16;
+               fixed: 0 1;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1");
+      GENLIST_PROGRAM_SOUND("elm.text.2");
+   }
+
+// 2.4.1.10 (Textblock)
+   group { GENLIST_NAME("dialogue/2text.1icon.4.tb/default")
+      alias: "elm/layout/dialogue/2text.1icon.4.tb";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_SIZE(16)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(16)
+
+         GENLIST_PART_LISTITEM_TB_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.text.2",
+            "elm.padding.top", "elm.padding.icon.top",
+         )
+         GENLIST_PART_SUBITEM_RTB_TB("elm.text.2", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.right", "elm.padding.top", "elm.padding.icon.top"
+         )
+         GENLIST_PART_PADDING_B_SIZE("elm.padding.icon.top", "elm.icon", 10)
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION_LRB("elm.padding.left", "elm.padding.right", "elm.padding.bottom",
+               min: 0 16;
+               fixed: 0 1;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+   }
+
+// 2.4.1.12
+   group { GENLIST_NAME("dialogue/2text.6/default")
+      alias: "elm/layout/dialogue/2text.6";
+      inherit: "elm/genlist/item/2text.5/default";
+
+      // FIXME: deprecated, will be removed
+      alias: "elm/genlist/item/dialogue.1title.1text/default";
+      alias: "elm/genlist/item_odd/dialogue.1title.1text/default";
+      alias: "elm/genlist/item_compress/dialogue.1title.1text/default";
+      alias: "elm/genlist/item_compress_odd/dialogue.1title.1text/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; )
+   }
+
+// 2.4.1.13
+   group { GENLIST_NAME("dialogue/2text.9/default")
+      alias: "elm/layout/dialogue/2text.9";
+      inherit: "elm/genlist/item/dialogue/2text.6/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      parts {
+         part { name: "elm.text.1";
+            description { state: "default";
+               color: GENLIST_LIST_SUB_TEXT_SETTINGS_COLOR;
+            }
+         }
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";)
+   }
+
+// 2.4.1.14
+   group { GENLIST_NAME("dialogue/2text.4/default")
+      alias: "elm/layout/dialogue/2text.4";
+      inherit: "elm/genlist/item/2text.4/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.divider1"; target: "elm.divider2"; )
+   }
+
+// 2.4.1.14 (textblcok)
+   group { GENLIST_NAME("dialogue/2text.4.tb/default")
+      alias: "elm/layout/dialogue/2text.4.tb";
+      inherit: "elm/genlist/item/2text.4.tb/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(
+         GENLIST_PART_SUBITEM_R_FIXED_TB("elm.text.2", 200, GENLIST_HEIGHT_1LINE,
+            "elm.padding.right")
+      )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.divider1"; target: "elm.divider2"; )
+   }
+
+// 2.4.1.16
+   group { GENLIST_NAME("dialogue/1text.3icon.2/default")
+      alias: "elm/layout/dialogue/1text.3icon.2";
+      inherit: "elm/genlist/item/1text.3icon/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; )
+   }
+
+// 2.4.1.17
+   group { GENLIST_NAME("dialogue/1text.1icon.4/default")
+      alias: "elm/layout/dialogue/1text.1icon.4";
+      inherit: "elm/genlist/item/1text.1icon.5/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text";
+         target: "elm.icon"; )
+   }
+
+// 2.4.1.18
+   group { GENLIST_NAME("dialogue/2text.5/default")
+      alias: "elm/layout/dialogue/2text.5";
+      inherit: "elm/genlist/item/2text.6/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; )
+   }
+
+
+// 2.4.1.19
+   group { GENLIST_NAME("dialogue/multiline/1text.1icon/default")
+      alias: "elm/layout/dialogue/multiline/1text.1icon.flexible";
+      inherit: "elm/genlist/item/1text.1icon.3.tb/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(
+         part { name: "elm.text";
+            description { state: "default" 0.0;
+               text.style: "genlist_style_list_main_text_unread_wrap";
+            }
+            description { state: "selected" 0.0;
+               text.style: "genlist_style_list_main_text_focus_wrap";
+            }
+            description { state: "disabled" 0.0;
+               text.style: "genlist_style_list_main_text_unread_dim_wrap";
+            }
+         }
+      )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+   }
+
+// 2.4.1.20
+   group { GENLIST_NAME("dialogue/1text.1icon.divider/default")
+      alias: "elm/layout/dialogue/1text.1icon.divider";
+      inherit: "elm/genlist/item/1text.1icon.divider/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(;)
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon"; )
+   }
+
+// 2.4.1.21
+   group { GENLIST_NAME("dialogue/1text.2icon.divider/default")
+      alias: "elm/layout/dialogue/1text.2icon.divider";
+      inherit: "elm/genlist/item/1text.2icon.divider/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(;)
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon.1";  target: "elm.icon.2";
+         target: "elm.divider1"; target: "elm.divider2";
+      )
+   }
+
+// 2.4.1.22
+   group { GENLIST_NAME("dialogue/1text.2icon.10/default")
+      alias: "elm/layout/dialogue/1text.2icon.10";
+      inherit: "elm/genlist/item/1text.2icon.2/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(;)
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text"; target: "elm.icon.1";  target: "elm.icon.2"; )
+   }
+
+// 2.4.2.1
+    group { GENLIST_NAME("dialogue/2text/default")
+      alias: "elm/layout/dialogue/2text";
+      inherit: "elm/genlist/item/2text.2/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; )
+   }
+
+// 2.4.2.2
+   group { GENLIST_NAME("dialogue/2text.2/default")
+      alias: "elm/layout/dialogue/2text.2";
+      inherit: "elm/genlist/item/2text.3/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; )
+   }
+
+// 2.4.2.3
+   group { GENLIST_NAME("dialogue/2text.3/default")
+      alias: "elm/layout/dialogue/2text.3";
+      inherit: "elm/genlist/item/2text.7/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; )
+   }
+
+// 2.4.2.4
+   group { GENLIST_NAME("dialogue/2text.1icon.2/default")
+      alias: "elm/layout/dialogue/2text.1icon.2";
+      inherit: "elm/genlist/item/2text.1icon.4/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+   }
+
+// 2.4.2.5
+   group { GENLIST_NAME("dialogue/2text.1icon.3/default")
+      alias: "elm/layout/dialogue/2text.1icon.3";
+      inherit: "elm/genlist/item/2text.1icon.8/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+   }
+
+// 2.4.2.6
+   group { GENLIST_NAME("dialogue/2text.3icon/default")
+      alias: "elm/layout/dialogue/2text.3icon";
+      inherit: "elm/genlist/item/2text.2icon.8/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.swallow.colorbar elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(
+         GENLIST_PART_COLORBAR_DIALOGUE
+         GENLIST_PART_ICON_BIG_R("elm.icon.2", "elm.padding.right")
+      )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.swallow.colorbar"; )
+   }
+
+// 2.4.2.7
+   group { GENLIST_NAME("dialogue/2text.2icon/default")
+      alias: "elm/layout/dialogue/2text.2icon";
+      inherit: "elm/genlist/item/2text.2icon.5/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(
+         GENLIST_PART_SUBITEM_SETTINGS_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.icon2.right", "elm.padding.right", "elm.padding.bottom",)
+      )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+   }
+
+// 2.4.2.8
+   group { GENLIST_NAME("dialogue/2text.2icon.2/default")
+      alias: "elm/layout/dialogue/2text.2icon.2";
+      inherit: "elm/genlist/item/2text.2icon.6/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+   }
+
+// 2.4.2.9
+   group { GENLIST_NAME("dialogue/2text.2icon.3/default")
+      alias: "elm/layout/dialogue/2text.2icon.3";
+      inherit: "elm/genlist/item/2text.2icon.4/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+   }
+
+// 2.4.2.9 (TEXTBLOCK)
+   group { GENLIST_NAME("dialogue/2text.2icon.3.tb/default")
+      alias: "elm/layout/dialogue/2text.2icon.3.tb";
+      inherit: "elm/genlist/item/2text.2icon.4.tb/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+   }
+
+// 2.4.2.10
+   group { GENLIST_NAME("dialogue/2text.1icon.5/default")
+      alias: "elm/layout/dialogue/2text.1icon.5";
+      inherit: "elm/genlist/item/2text.1icon.5/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+   }
+
+
+// 2.4.2.11
+   group { GENLIST_NAME("dialogue/multiline/1title.1text/default")
+      alias: "elm/layout/dialogue/multiline/1title.1text/default";
+      inherit: "elm/genlist/item/multiline/1title.1text/default";
+
+      // FIXME: deprecated name, will be removed
+      alias: "elm/genlist/item/dialogue/1title.1text.2/default";
+      alias: "elm/genlist/item_odd/dialogue/1title.1text.2/default";
+      alias: "elm/genlist/item_compress/dialogue/1title.1text.2/default";
+      alias: "elm/genlist/item_compress_odd/dialogue/1title.1text.2/default";
+      alias: "elm/layout/dialogue/1title.1text.2/default";
+
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.title";
+         target: "elm.text";
+         target: "elm.divider1"; target:"elm.divider2"; )
+   }
+
+// 2.4.2.12
+   group { GENLIST_NAME("dialogue/multiline/1title.2text/default")
+      alias: "elm/layout/dialogue/multiline/1title.2text/default";
+      inherit: "elm/genlist/item/multiline/1title.2text/default";
+
+      data.item: "contents" "elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      parts {
+         GENLIST_PART_CENTER_LINE_LRT("elm.divider2", "bg_dialogue", "elm.text.1")
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.title";
+         target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.divider1"; target:"elm.divider2";
+         target: "center_line"; target:"center_line2";)
+   }
+
+#define GENLIST_PART_PASSWORD_RTB(NAME, BG_NAME, RIGHT, TOP, BOTTOM) \
+   GENLIST_PART_IMAGE(BG_NAME, \
+      mouse_events: 0; \
+      GENLIST_DESCRIPTION_RTB(RIGHT, TOP, BOTTOM, \
+         GENLIST_PARAM_PASSWORD_IMAGE \
+         fixed: 1 0; \
+      ) \
+   ) \
+   GENLIST_PART_ICON(NAME, \
+      GENLIST_DESCRIPTION_ENVELOP(BG_NAME, \
+         rel1.offset: 1 1; \
+         rel2.offset: -1 -1; \
+      ) \
+   )
+
+#define GENLIST_PART_PASSWORD_LTB(NAME, BG_NAME, LEFT, TOP, BOTTOM) \
+   GENLIST_PART_IMAGE(BG_NAME, \
+      mouse_events: 0; \
+      GENLIST_DESCRIPTION_LTB(LEFT, TOP, BOTTOM, \
+         GENLIST_PARAM_PASSWORD_IMAGE \
+         fixed: 1 0; \
+      ) \
+   ) \
+   GENLIST_PART_ICON(NAME, \
+      GENLIST_DESCRIPTION_ENVELOP(BG_NAME, \
+         rel1.offset: 1 1; \
+         rel2.offset: -1 -1; \
+      ) \
+   )
+
+//2.4.2.13 (password style)
+   group { GENLIST_NAME("dialogue/1text.4icon/default")
+      alias: "elm/layout/dialogue/4icon";
+
+      data.item: "stacking" "above";
+      data.item: "selectraise" "on";
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4";
+
+      images {
+         image : "00_search_edit_field_bg.png" COMP;
+      }
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_PADDING_LEFT_SIZE(DIALOGUE_PADDING_SIZE_LEFT)
+         GENLIST_PART_PADDING_RIGHT_SIZE(DIALOGUE_PADDING_SIZE_RIGHT)
+         GENLIST_PART_PADDING_TOP_SIZE(22)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(18)
+         GENLIST_PART_TEXT( "elm.text",
+            GENLIST_DESCRIPTION_LRT("elm.padding.left", "elm.padding.right", "elm.padding.top",
+               fixed: 0 1;
+               min: 0 42;
+               GENLIST_PARAM_PASSWORD_TITLE
+            )
+         )
+         GENLIST_PART_PADDING_T_SIZE("elm.padding.text.bottom", "elm.text", 18);
+
+         GENLIST_PART_PASSWORD_RTB("elm.icon.1", "elm.icon.1.bg",
+            "elm.padding.1", "elm.padding.text.bottom", "elm.padding.bottom"
+         )
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.1", "elm.icon.2.bg", 22)
+         GENLIST_PART_PASSWORD_RTB("elm.icon.2", "elm.icon.2.bg",
+            "elm.padding.center", "elm.padding.text.bottom", "elm.padding.bottom"
+         )
+         GENLIST_PART_SPACER("elm.padding.center",
+            description { state: "default" 0.0.;
+               min: 22 0;
+               max: 22 0;
+               fixed: 1 1;
+               align: 0.5 0.5;
+               rel1 {
+                  relative: 0.5 0;
+               }
+               rel2 {
+                  relative: 0.5 1;
+               }
+            }
+         )
+         GENLIST_PART_PASSWORD_LTB("elm.icon.3", "elm.icon.3.bg",
+            "elm.padding.center", "elm.padding.text.bottom", "elm.padding.bottom"
+         )
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.2", "elm.icon.3.bg", 22)
+         GENLIST_PART_PASSWORD_LTB("elm.icon.4", "elm.icon.4.bg",
+            "elm.padding.2", "elm.padding.text.bottom", "elm.padding.bottom"
+         )
+      }
+      programs {
+         GENLIST_PROGRAM_DISABLED( target: "elm.text"; )
+         GENLIST_PROGRAM_SOUND("elm.text")
+      }
+   }
+
+// 2.4.2.14
+   group { GENLIST_NAME("dialogue/2text.2icon.4/default")
+      alias: "elm/layout/dialogue/2text.2icon.4";
+      inherit: "elm/genlist/item/2text.2icon/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2";)
+   }
+
+// 2.4.2.15
+   group { GENLIST_NAME("dialogue/2text.1icon.10/default")
+      alias: "elm/layout/dialogue/2text.1icon.10";
+      inherit: "elm/genlist/item/2text.1icon.divider/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY(
+         GENLIST_PART_SUBITEM_SETTINGS_LRB("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.icon.left", "elm.padding.bottom",)
+         part { name: "elm.divider1";
+            description { state: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "elm.divider2";
+            description { state: "default" 0.0;
+               visible: 0;
+            }
+         }
+      )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+   }
+
+
+// 2.4.2.15 (textblock)
+   group { GENLIST_NAME("dialogue/2text.1icon.10.tb/default")
+      alias: "elm/layout/dialogue/2text.1icon.10.tb";
+      inherit: "elm/genlist/item/2text.1icon.7.tb/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+   }
+
+// 2.4.2.16
+   group { GENLIST_NAME("dialogue/2text.1icon.7/default")
+      alias: "elm/layout/dialogue/2text.1icon.12";
+      inherit: "elm/genlist/item/2text.1icon.12/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon"; )
+   }
+
+
+// 2.4.2.17
+   group { GENLIST_NAME("dialogue/2text.1icon.8/default")
+      alias: "elm/layout/dialogue/2text.1icon.8";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_SUBITEM_LRT("elm.text.2", GENLIST_HEIGHT_2LINE_SUB,
+            "elm.padding.left", "elm.padding.right", "elm.padding.top")
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.text2.limit",
+            "elm.text.2", "elm.padding.bottom",
+             align: 0 0.5; text.max: 1 0;  // This limits text growing.
+         )
+         GENLIST_PART_PADDING_L("elm.padding.text1.right", "elm.text.1")
+         GENLIST_PART_ICON_SMALL_LTB("elm.icon",
+            "elm.padding.text1.right", "elm.text.2", "elm.padding.bottom")
+         // Virtual part for Maxmimum right X axis of text.2
+         GENLIST_PART_SPACER("elm.text2.limit",
+            GENLIST_DESCRIPTION_R("elm.padding.right",
+               min: (GENLIST_ICON_SMALL_SIZE+GENLIST_PADDING_SIZE_DEFAULT) 0;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1";
+         target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.4.2.18
+   group { GENLIST_NAME("dialogue/multiline/2text/default")
+      alias: "elm/layout/dialogue/multiline/2text/default";
+
+      // FIXME: deprecated name, will be removed
+      alias: "elm/genlist/item/multiline/dialogue/2text/default";
+      alias: "elm/genlist/item_odd/multiline/dialogue/2text/default";
+      alias: "elm/genlist/item_compress/multiline/dialogue/2text/default";
+      alias: "elm/genlist/item_compress_odd/multiline/dialogue/2text/default";
+      alias: "elm/layout/multiline/dialogue/2text/default";
+
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+         GENLIST_PART_TEXT("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.left", "elm.padding.right", "elm.padding.top",
+               GENLIST_PARAM_LISTITEM
+               min: 0 GENLIST_HEIGHT_2LINE_MAIN;
+               fixed: 0 1;
+            )
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_PADDING_T_SIZE("elm.padding.text1.bottom", "elm.text.1", 4)
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION("elm.padding.left", "elm.padding.right", "elm.padding.text1.bottom", "elm.padding.bottom",
+               GENLIST_PARAM_SUBITEM_DEFAULT_TB_WRAP
+               min: 0 GENLIST_HEIGHT_MULTILINE_SUB;
+           )
+            GENLIST_DESCRIPTION_SUBITEM_DEFAULT_OTHERS_TB_WRAP
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.4.2.19
+   group { GENLIST_NAME("dialogue/2text.1icon.15/default")
+      alias: "elm/layout/dialogue/2text.1icon.15/default";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_2LINE
+         GENLIST_PART_PADDING_BOTTOM_2LINE
+
+         GENLIST_PART_LISTITEM_("elm.text.1", GENLIST_HEIGHT_2LINE_MAIN,
+            "elm.padding.left", "elm.padding.right",
+            "elm.padding.top", "elm.icon",
+         )
+         GENLIST_PART_ICON_SMALL_LB("elm.icon",
+            "elm.padding.left", "elm.padding.bottom")
+         GENLIST_PART_PADDING_L("elm.icon.right", "elm.icon")
+         GENLIST_PART_TEXT("elm.text.2",
+            GENLIST_DESCRIPTION("elm.icon.right", "elm.padding.right", "elm.text.1", "elm.padding.bottom",
+               GENLIST_PARAM_SUBITEM_SETTINGS
+               min: 0 GENLIST_HEIGHT_2LINE_SUB;
+               fixed: 0 1;
+            )
+            GENLIST_DESCRIPTION_SUBITEM_SETTINGS_OTHERS
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+   }
+
+// 2.4.2.20
+   group { GENLIST_NAME("dialogue/2text.1icon.divider/default")
+      alias: "elm/layout/dialogue/2text.1icon.divider/default";
+      inherit: "elm/genlist/item/2text.1icon.divider/default";
+
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+   }
+
+// 2.4.2.21
+// FIXME: Why name is 3text ?? it's 2text
+   group { GENLIST_NAME("dialogue/3text.2icon/default")
+      alias: "elm/layout/dialogue/3text.2icon/default";
+      inherit: "elm/genlist/item/2text.2icon/default";
+
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      GENLIST_DIALOGUE_INHERIT_BODY( ; )
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+   }
+
+// 2.4.4.1 group title
+   group { GENLIST_NAME("dialogue/grouptitle/default")
+      alias: "elm/layout/dialogue/grouptitle";
+
+      // FIXME: deprecated name, will be removed
+      alias : "elm/genlist/item/dialogue/title/default";
+      alias: "elm/genlist/item_odd/dialogue/title/default";
+      alias: "elm/genlist/item_compress/dialogue/title/default";
+      alias: "elm/genlist/item_compress_odd/dialogue/title/default";
+      alias: "elm/layout/dialogue/title";
+
+      GENLIST_PROLOG
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon";
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_TOP_SIZE( 0 )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 0 )
+         GENLIST_PART_PADDING_RIGHT_SIZE( 26 )
+
+         GENLIST_PART_PADDING_R("elm.padding.icon.right", "elm.icon");
+         GENLIST_PART_TEXT("elm.text",
+            GENLIST_DESCRIPTION("elm.padding.left", "elm.padding.icon.right",
+               "elm.padding.top", "elm.padding.bottom",
+               GENLIST_PARAM_DIALOGUE_GROUP_TITLE
+               min: 0 GENLIST_HEIGHT_GROUPTITLE;
+            )
+         )
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION_RTB("elm.padding.right",
+               "elm.padding.top", "elm.padding.bottom",
+               max: 32 32;
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAM_DISABLED( target: "elm.text"; target: "elm.icon"; )
+      GENLIST_PROGRAM_FOCUS_NORMAL
+   }
+
+// 2.4.4.2 Help Text
+   group { GENLIST_NAME("multiline/1text/default");
+      alias: "elm/layout/multiline/1text/default";
+
+      // FIXME: name is not correct...
+      alias: "elm/layout/dialogue/multiline/1text/default";
+
+      data.item: "stacking" "above";
+      data.item: "selectraise" "on";
+      data.item: "texts" "elm.text";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_PADDING_LEFT_SIZE(38)
+         GENLIST_PART_PADDING_RIGHT_SIZE(38)
+         GENLIST_PART_PADDING_TOP_SIZE(0)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(0)
+
+         GENLIST_PART_DIALOGUE_GROUP_HELP_TEXT("elm.text",
+            "elm.padding.left", "elm.padding.right", "elm.padding.top", "elm.padding.bottom",
+            min: 0 38;
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAM_DISABLED( target: "elm.text"; )
+      GENLIST_PROGRAM_FOCUS
+   }
+
+// 2.4.4.3
+   group { GENLIST_NAME("dialogue/bg/2text.1icon/default")
+      alias: "elm/layout/dialogue/bg/2text.1icon/default";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text.1 elm.text.2";
+      data.item: "contents" "elm.icon elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_SIZE(19)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(19)
+
+         GENLIST_PART_TEXT("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.left", "elm.padding.icon.left", "elm.padding.top",
+               GENLIST_PARAM_LISTITEM
+               min: 0 57; fixed:1 1;)
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_TEXT("elm.text.2",
+            GENLIST_DESCRIPTION("elm.padding.left", "elm.padding.icon.left", "elm.text.1", "elm.padding.bottom",
+               GENLIST_PARAM_SUBITEM_DEFAULT
+               min: 0 45;)
+            GENLIST_DESCRIPTION_SUBITEM_DEFAULT_OTHERS
+         )
+
+         GENLIST_PART_PADDING_R("elm.padding.icon.left", "elm.icon")
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION_R("elm.padding.right",
+               min: GENLIST_ICON_LARGE_SIZE GENLIST_ICON_LARGE_SIZE;
+               max: GENLIST_ICON_LARGE_SIZE GENLIST_ICON_LARGE_SIZE;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.icon"; )
+   }
+
+// 2.4.4.4
+   group { GENLIST_NAME("dialogue/bg/3text.2icon/default")
+      alias: "elm/layout/dialogue/bg/3text.2icon/default";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_SIZE(19)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(19)
+
+         GENLIST_PART_TEXT("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.left", "elm.padding.icon1.left", "elm.padding.top",
+               GENLIST_PARAM_LISTITEM
+               min: 0 57; fixed:1 1;)
+            GENLIST_DESCRIPTION_LISTITEM_OTHERS
+         )
+         GENLIST_PART_PADDING_T_SIZE("elm.padding.text1.bottom", "elm.text.1", 4)
+         GENLIST_PART_TEXT("elm.text.2",
+            GENLIST_DESCRIPTION("elm.padding.left", "elm.padding.icon1.left", "elm.padding.text1.bottom", "elm.text.3",
+               GENLIST_PARAM_SUBITEM_DEFAULT
+               min: 0 38;)
+            GENLIST_DESCRIPTION_SUBITEM_DEFAULT_OTHERS
+         )
+         GENLIST_PART_TEXT("elm.text.3",
+            GENLIST_DESCRIPTION_LRB("elm.padding.left", "elm.padding.icon1.left", "elm.padding.bottom",
+               GENLIST_PARAM_SUBITEM_DEFAULT
+               min: 0 38; fixed: 1 1; )
+            GENLIST_DESCRIPTION_SUBITEM_DEFAULT_OTHERS
+         )
+
+         GENLIST_PART_PADDING_R("elm.padding.icon1.left", "elm.icon.1")
+         GENLIST_PART_ICON_BTN_02_RTB("elm.icon.1", "elm.padding.icon2.left", "elm.padding.top", "elm.padding.bottom")
+         GENLIST_PART_PADDING_R("elm.padding.icon2.left", "elm.icon.2")
+         GENLIST_PART_ICON("elm.icon.2",
+            GENLIST_DESCRIPTION_R("elm.padding.right",
+               min: GENLIST_ICON_LARGE_SIZE GENLIST_ICON_LARGE_SIZE;
+               max: GENLIST_ICON_LARGE_SIZE GENLIST_ICON_LARGE_SIZE;
+            )
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.icon.1"; target: "elm.icon.2"; )
+   }
+
+// 2.4.4.5
+   group { GENLIST_NAME("dialogue/bg/5text.6icon/default")
+      alias: "elm/layout/dialogue/bg/5text.6icon/default";
+
+      GENLIST_PROLOG_DIALOGUE
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4 elm.text.5";
+      data.item: "contents" "elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4 elm.icon.5 elm.icon.6 elm.icon.edit";
+
+      parts {
+         GENLIST_PART_BG_DIALOGUE
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT_SIZE( DIALOGUE_PADDING_SIZE_LEFT )
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_SIZE(13)
+         GENLIST_PART_PADDING_BOTTOM_SIZE(13)
+
+         GENLIST_PART_ICON("elm.icon.1",
+            GENLIST_DESCRIPTION_L("elm.padding.left",
+               min: GENLIST_ICON_LARGE_SIZE GENLIST_ICON_LARGE_SIZE;
+               max: GENLIST_ICON_LARGE_SIZE GENLIST_ICON_LARGE_SIZE;
+               fixed: 1 1;
+            )
+         )
+         GENLIST_PART_PADDING_L("elm.padding.icon1.right", "elm.icon.1")
+         GENLIST_PART_TEXT("elm.text.1", GENLIST_DESCRIPTION_LRT(
+            "elm.padding.icon1.right", "elm.padding.right", "elm.padding.top",
+            GENLIST_PARAM_APPS_NAME
+            min: 0 32; fixed: 0 1;)
+         )
+         GENLIST_PART_TEXT("elm.text.2", GENLIST_DESCRIPTION_LRT(
+            "elm.padding.icon1.right", "elm.padding.right", "elm.text.1",
+            GENLIST_PARAM_APPS_INC
+            min: 0 32; fixed: 0 1;)
+         )
+
+         GENLIST_PART_ICON("elm.icon.2", GENLIST_DESCRIPTION_LTB(
+            "elm.padding.icon1.right", "elm.text.2", "elm.text.4",
+            min: 38 38; fixed: 1 1;)
+         )
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.icon2.right", "elm.icon.2", 2)
+         GENLIST_PART_ICON("elm.icon.3", GENLIST_DESCRIPTION_LTB(
+            "elm.padding.icon2.right", "elm.text.2", "elm.text.4",
+            min: 38 38; fixed: 1 1;)
+         )
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.icon3.right", "elm.icon.3", 2)
+         GENLIST_PART_ICON("elm.icon.4", GENLIST_DESCRIPTION_LTB(
+            "elm.padding.icon3.right", "elm.text.2", "elm.text.4",
+            min: 38 38; fixed: 1 1;)
+         )
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.icon4.right", "elm.icon.4", 2)
+         GENLIST_PART_ICON("elm.icon.5", GENLIST_DESCRIPTION_LTB(
+            "elm.padding.icon4.right", "elm.text.2", "elm.text.4",
+            min: 38 38; fixed: 1 1;)
+         )
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.icon5.right", "elm.icon.5", 2)
+         GENLIST_PART_ICON("elm.icon.6", GENLIST_DESCRIPTION_LTB(
+            "elm.padding.icon5.right", "elm.text.2", "elm.text.4",
+            min: 38 38; fixed: 1 1;)
+         )
+         GENLIST_PART_PADDING_L_SIZE("elm.padding.icon6.right", "elm.icon.6", 12)
+         GENLIST_PART_TEXT("elm.text.3", GENLIST_DESCRIPTION(
+            "elm.padding.icon6.right", "elm.padding.right", "elm.text.2", "elm.text.4",
+            GENLIST_PARAM_APPS_RATING
+            min :0 38;)
+         )
+
+         GENLIST_PART_TEXT("elm.text.4", GENLIST_DESCRIPTION_LB(
+            "elm.padding.icon1.right", "elm.padding.bottom",
+            GENLIST_PARAM_APPS_PRICE
+            min: 0 32; fixed: 0 1;
+            rel2.to_x: "base";  rel2.relative: 0.5 0; text.max: 1 0;/* This limits text growing. */ )
+         )
+         GENLIST_PART_PADDING_L("elm.padding.text4.right", "elm.text.4")
+         GENLIST_PART_TEXT("elm.text.5", GENLIST_DESCRIPTION_LRB(
+            "elm.padding.text4.right", "elm.padding.right", "elm.padding.bottom",
+            GENLIST_PARAM_APPS_PRICE_SALE
+            min: 0 32; fixed: 0 1;)
+         )
+         GENLIST_PART_FLIP
+         GENLIST_PART_FOCUS_DIALOGUE
+      }
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4"; target: "elm.text.5";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; target: "elm.icon.4"; target: "elm.icon.5"; target: "elm.icon.6"; )
+   }
+
+// 2.4.4.5.1 (Circle)
+   group { GENLIST_NAME("dialogue/bg/5text.6icon.thumb.circle/default")
+      inherit: "elm/genlist/item/dialogue/bg/5text.6icon/default";
+
+      GENLIST_INHERIT_THUMB_CIRCLE_LARGE_DIALOGUE("elm.icon.1")
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4"; target: "elm.text.5";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; target: "elm.icon.4"; target: "elm.icon.5"; target: "elm.icon.6";
+      )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// 2.4.4.5.1 (Square)
+   group { GENLIST_NAME("dialogue/bg/5text.6icon.thumb.square/default")
+      inherit: "elm/genlist/item/dialogue/bg/5text.6icon/default";
+
+      GENLIST_INHERIT_THUMB_SQUARE_LARGE_DIALOGUE("elm.icon.1")
+      GENLIST_PROGRAMS_DIALOGUE( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3"; target: "elm.text.4"; target: "elm.text.5";
+         target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3"; target: "elm.icon.4"; target: "elm.icon.5"; target: "elm.icon.6";
+      )
+      GENLIST_PROGRAMS_THUMB
+   }
+
+// ----------------------------------------------------------------------
+// Pop Up Style ---------------------------------------------------------
+// ----------------------------------------------------------------------
+GENLIST_POPUP_STYLE("default")
+GENLIST_POPUP_STYLE("editfield")
+GENLIST_POPUP_STYLE("editfield/title")
+GENLIST_POPUP_STYLE("1icon")
+GENLIST_POPUP_STYLE("1icon/with_no_line")
+GENLIST_POPUP_STYLE("1icon/no_padding")
+GENLIST_POPUP_STYLE("1icon/no_padding_line")
+GENLIST_POPUP_STYLE("1text")
+GENLIST_POPUP_STYLE("1text.tb")
+GENLIST_POPUP_STYLE("2text")
+GENLIST_POPUP_STYLE("1text.1icon")
+GENLIST_POPUP_STYLE("1text.1icon.6")
+GENLIST_POPUP_STYLE("1text.1icon.7")
+GENLIST_POPUP_STYLE("1text.1icon.5")
+GENLIST_POPUP_STYLE("1text.1icon.5.thumb.circle")
+GENLIST_POPUP_STYLE("1text.1icon.5.thumb.square")
+GENLIST_POPUP_STYLE("1text.2icon.3")
+GENLIST_POPUP_STYLE("1text.2icon.3.tb")
+GENLIST_POPUP_STYLE("1text.1icon.2")
+GENLIST_POPUP_STYLE("1text.1icon.2.tb")
+GENLIST_POPUP_STYLE("2text.1icon")
+GENLIST_POPUP_STYLE("2text.1icon.tb")
+GENLIST_POPUP_STYLE("1text.2icon")
+GENLIST_POPUP_STYLE("1text.2icon.tb")
+GENLIST_POPUP_STYLE("1text.2icon.6")
+GENLIST_POPUP_STYLE("1text.2icon.6.tb")
+GENLIST_POPUP_STYLE("1text.1icon.3")
+GENLIST_POPUP_STYLE("1text.1icon.3.tb")
+GENLIST_POPUP_STYLE("1text.2icon.4")
+GENLIST_POPUP_STYLE("1text.2icon.2")
+GENLIST_POPUP_STYLE("1text.3icon")
+GENLIST_POPUP_STYLE("1text.2icon.9")
+GENLIST_POPUP_STYLE("1text.3icon.2")
+GENLIST_POPUP_STYLE("2text.1icon.divider")
+GENLIST_POPUP_STYLE("1text.2icon.divider")
+GENLIST_POPUP_STYLE("2text.2")
+GENLIST_POPUP_STYLE("2text.2.tb")
+GENLIST_POPUP_STYLE("2text.3")
+GENLIST_POPUP_STYLE("3text")
+GENLIST_POPUP_STYLE("3text.tb")
+GENLIST_POPUP_STYLE("2text.1icon.2")
+GENLIST_POPUP_STYLE("2text.1icon.2.tb")
+GENLIST_POPUP_STYLE("2text.1icon.10")
+GENLIST_POPUP_STYLE("2text.1icon.10.tb")
+GENLIST_POPUP_STYLE("3text.1icon")
+GENLIST_POPUP_STYLE("3text.1icon.tb")
+GENLIST_POPUP_STYLE("2text.2icon")
+GENLIST_POPUP_STYLE("2text.1icon.4")
+GENLIST_POPUP_STYLE("2text.1icon.4.thumb.circle")
+GENLIST_POPUP_STYLE("2text.1icon.4.thumb.square")
+GENLIST_POPUP_STYLE("2text.1icon.4.tb")
+GENLIST_POPUP_STYLE("3text.1icon.2")
+GENLIST_POPUP_STYLE("2text.2icon.4")
+GENLIST_POPUP_STYLE("2text.2icon.4.tb")
+GENLIST_POPUP_STYLE("2text.2icon.6")
+GENLIST_POPUP_STYLE("2text.2icon.6.tb")
+GENLIST_POPUP_STYLE("2text.2icon.8")
+GENLIST_POPUP_STYLE("2text.2icon.8.tb")
+GENLIST_POPUP_STYLE("2text.2icon.progress")
+GENLIST_POPUP_STYLE("3text.3icon.progress")
+GENLIST_POPUP_STYLE("2text.1icon.12")
+GENLIST_POPUP_STYLE("2text.1icon.12.tb")
+GENLIST_POPUP_STYLE("2text.1icon.7")
+GENLIST_POPUP_STYLE("2text.2icon.5")
+GENLIST_POPUP_STYLE("2text.3icon.4")
+GENLIST_POPUP_STYLE("4text.1icon.1")
+GENLIST_POPUP_STYLE("4text.1icon.1.tb")
+GENLIST_POPUP_STYLE("4text.1icon.2")
+GENLIST_POPUP_STYLE("4text.1icon.2.tb")
+GENLIST_POPUP_STYLE("4text.1")
+GENLIST_POPUP_STYLE("4text.1.tb")
+GENLIST_POPUP_STYLE("4text.2")
+GENLIST_POPUP_STYLE("3text.1icon.3")
+GENLIST_POPUP_STYLE("3text.1icon.3.tb")
+GENLIST_POPUP_STYLE("4text.1icon.3")
+GENLIST_POPUP_STYLE("3text.1icon.1")
+GENLIST_POPUP_STYLE("2text.2icon.1")
+GENLIST_POPUP_STYLE("2text.1icon.1")

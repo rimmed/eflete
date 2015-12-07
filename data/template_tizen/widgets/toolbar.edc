@@ -1,0 +1,2399 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+#define ITEM_STATE_ENABLED 0
+#define ITEM_STATE_DISABLED 1
+#define TOOLBAR_SLIDING_PER_FPS     2
+#define TOOLBAR_SLIDING_FPS         40.0
+#define TOOLBAR_SLIDING_TEXT_GAP    40
+#define TOOLBAR_SLIDING_TEXT_OFFSET 5
+
+#define TOOLBAR_TEXT_STYLE(_font_size) \
+   style { name: "toolbar_text_style_"_font_size; \
+      base: "font=Tizen:style=Bold style=far_shadow,bottom shadow_color="TOOLBAR_ITEM_TEXTBLOCK_SHADOW_COLOR_INC" font_size="_font_size" align=center color="TOOLBAR_ITEM_TEXTBLOCK_COLOR_INC" wrap=word ellipsis=1 text_class=tizen linegap=0"; \
+      tag: "br" "\n"; \
+      tag: "ps" "ps"; \
+      tag: "hilight" "+ font=Tizen:style=Bold"; \
+      tag: "b" "+ font=Tizen:style=Bold"; \
+      tag: "tab" "\t"; \
+   }
+
+#define TOOLBAR_PRESSED_TEXT_STYLE(_font_size) \
+   style { name: "toolbar_pressed_text_style_"_font_size; \
+      base: "font=Tizen:style=Bold style=far_shadow,bottom shadow_color="TOOLBAR_ITEM_PRESSED_TEXTBLOCK_SHADOW_COLOR_INC" font_size="_font_size" align=center color="TOOLBAR_ITEM_PRESSED_TEXTBLOCK_COLOR_INC" wrap=word ellipsis=1 text_class=tizen linegap=0"; \
+      tag: "br" "\n"; \
+      tag: "ps" "ps"; \
+      tag: "hilight" "+ font=Tizen:style=Bold"; \
+      tag: "b" "+ font=Tizen:style=Bold"; \
+      tag: "tab" "\t"; \
+   }
+
+#define TABBAR_TEXT_STYLE(_font_size) \
+   style { name: "tabbar_text_style_"_font_size; \
+      base: "font=Tizen:style=Bold style=far_shadow,bottom shadow_color="TABBAR_ITEM_TEXTBLOCK_SHADOW_COLOR_INC" font_size="_font_size" align=center color="TABBAR_ITEM_TEXTBLOCK_COLOR_INC" wrap=word ellipsis=1 text_class=tizen linegap=0"; \
+      tag: "br" "\n"; \
+      tag: "ps" "ps"; \
+      tag: "hilight" "+ font=Tizen:style=Bold"; \
+      tag: "b" "+ font=Tizen:style=Bold"; \
+      tag: "tab" "\t"; \
+   }
+
+#define TABBAR_SELECTED_TEXT_STYLE(_font_size) \
+   style { name: "tabbar_selected_text_style_"_font_size; \
+      base: "font=Tizen:style=Bold style=far_shadow,bottom shadow_color="TABBAR_ITEM_TEXTBLOCK_SHADOW_COLOR_INC" font_size="_font_size" align=center color="TABBAR_ITEM_SELECTED_TEXTBLOCK_COLOR_INC" wrap=word ellipsis=1 text_class=tizen linegap=0"; \
+      tag: "br" "\n"; \
+      tag: "ps" "ps"; \
+      tag: "hilight" "+ font=Tizen:style=Bold"; \
+      tag: "b" "+ font=Tizen:style=Bold"; \
+      tag: "tab" "\t"; \
+   }
+
+#define TABBAR_PRESSED_TEXT_STYLE(_font_size) \
+   style { name: "tabbar_pressed_text_style_"_font_size; \
+      base: "font=Tizen:style=Bold style=far_shadow,bottom shadow_color="TABBAR_ITEM_PRESSED_TEXTBLOCK_SHADOW_COLOR_INC" font_size="_font_size" align=center color="TABBAR_ITEM_PRESSED_TEXTBLOCK_COLOR_INC" wrap=word ellipsis=1 text_class=tizen linegap=0"; \
+      tag: "br" "\n"; \
+      tag: "ps" "ps"; \
+      tag: "hilight" "+ font=Tizen:style=Bold"; \
+      tag: "b" "+ font=Tizen:style=Bold"; \
+      tag: "tab" "\t"; \
+   }
+
+styles{
+   TABBAR_TEXT_STYLE(30)
+   TABBAR_SELECTED_TEXT_STYLE(30)
+   TABBAR_PRESSED_TEXT_STYLE(30)
+   TOOLBAR_TEXT_STYLE(38)
+   TOOLBAR_PRESSED_TEXT_STYLE(38)
+}
+
+group { name: "elm/toolbar/base/default";
+   data {
+      item: "focus_highlight" "on";
+   }
+   images {
+       image: "00_toolbar_bg.png" COMP;
+   }
+   parts {
+      part { name: "base";
+         type: RECT;
+         mouse_events: 1;
+         description { state: "default" 0.0;
+         }
+      }
+      part { name: "base_bg";
+         type: IMAGE;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            rel1 {
+                relative: 0.0 0.0;
+                to: "base";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to: "base";
+            }
+            image {
+                normal: "00_toolbar_bg.png";
+                border: TOOLBAR_ITEM_BG_DEFAULT_BORDER_INC;
+                border_scale: 1;
+            }
+         }
+      }
+      part { name: "clipper";
+         type: RECT;
+         mouse_events: 0;
+         description {
+            state: "default" 0.0;
+            rel1 {
+               relative: 0.0 0.0;
+               to: "base";
+            }
+            rel2 {
+               relative: 1.0 1.0;
+               to: "base";
+            }
+         }
+      }
+      part { name: "elm.swallow.content";
+         clip_to: "clipper";
+         type: SWALLOW;
+         description {
+            state: "default" 0.0;
+            rel1.to: "clipper";
+            rel2.to: "clipper";
+         }
+      }
+      part { name: "event";
+         type: RECT;
+         mouse_events: 1;
+         repeat_events: 1;
+         description { state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+      }
+   }
+}
+
+group { name: "elm/toolbar/item/default";
+   images {
+      image: "00_toolbar_press.png" COMP;
+      image: "00_tab_focus.png" COMP;
+   }
+
+   data.item: "transition_animation_on" "0";
+   script {
+      public item_state = ITEM_STATE_ENABLED;
+      public items_number = 0;
+   }
+   parts {
+      part { name: "bg";
+         type: IMAGE;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            visible: 0;
+            image {
+               normal: "00_toolbar_press.png";
+               border: TOOLBAR_ITEM_BG_PRESSED_BORDER_INC;
+               border_scale: 1;
+            }
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            visible: 0;
+         }
+      }
+      part { name: "padding_left_top";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            align: 0.0 0.0;
+            rel2.relative: 0.0 0.0;
+            min: 0 0;
+            fixed: 1 1;
+            visible: 0;
+            color: 0 0 0 0;
+         }
+         description { state: "1_item" 0.0;
+            inherit: "default" 0.0;
+            min: TOOLBAR_ITEM_ONE_ITEM_PADDING_SIZE 0;
+         }
+         description { state: "2_items" 0.0;
+            inherit: "default" 0.0;
+            min: TOOLBAR_ITEM_TWO_ITEMS_PADDING_SIZE 0;
+         }
+         description { state: "3_items" 0.0;
+            inherit: "default" 0.0;
+            min: TOOLBAR_ITEM_THREE_ITEMS_PADDING_SIZE 0;
+         }
+      }
+      part { name: "padding_right_bottom";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            align: 1.0 1.0;
+            rel1.relative: 1.0 1.0;
+            min: 0 0;
+            fixed: 1 1;
+            visible: 0;
+            color: 0 0 0 0;
+         }
+         description { state: "1_item" 0.0;
+            inherit: "default" 0.0;
+            min: TOOLBAR_ITEM_ONE_ITEM_PADDING_SIZE 0;
+         }
+         description { state: "2_items" 0.0;
+            inherit: "default" 0.0;
+            min: TOOLBAR_ITEM_TWO_ITEMS_PADDING_SIZE 0;
+         }
+         description { state: "3_items" 0.0;
+            inherit: "default" 0.0;
+            min: TOOLBAR_ITEM_THREE_ITEMS_PADDING_SIZE 0;
+         }
+      }
+      part { name: "elm.text";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         scale: 1;
+         clip_to: "elm.text.clipper";
+         description { state: "default" 0.0;
+            visible: 0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            fixed: 1 1;
+            max: 9999 60;
+            text {
+               style: "toolbar_text_style_38";
+               min: 0 1;
+            }
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+         description { state: "pressed" 0.0;
+            inherit: visible;
+            text.style: "toolbar_pressed_text_style_38";
+         }
+      }
+      part { name: "elm.text_new";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         scale: 1;
+         clip_to: "elm.text_new.clipper";
+         description { state: "default" 0.0;
+            visible: 0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: BUTTON_NAVIFRAME_DEFAULT_TEXT_COLOR_INC;
+            fixed: 1 1;
+            text {
+               style: "toolbar_text_style_38";
+               min: 0 1;
+            }
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+         description { state: "pressed" 0.0;
+            inherit: visible;
+            text.style: "toolbar_pressed_text_style_38";
+         }
+      }
+      part { name: "elm.text.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            color: 255 255 255 255;
+         }
+         description { state: "animation" 0.0;
+            color: 255 255 255 0;
+         }
+         description { state: "disabled" 0.0;
+            color: 255 255 255 153;
+         }
+      }
+      part { name: "elm.text_new.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            color: 255 255 255 0;
+         }
+         description { state: "animation" 0.0;
+            color: 255 255 255 255;
+         }
+         description { state: "disabled" 0.0;
+            color: 255 255 255 153;
+         }
+      }
+      part { name: "divider";
+         type: RECT;
+         scale: 1;
+         description { state: "default" 0.0;
+            min: TOOLBAR_ITEM_DIVIDER_SIZE;
+            max: TOOLBAR_ITEM_DIVIDER_SIZE;
+            fixed: 1 1;
+            rel1 {
+                relative: 1.0 0.5;
+            }
+            rel2 {
+                relative: 1.0 0.5;
+            }
+         }
+         description { state: "hidden" 0.0;
+            inherit: "default" 0.0;
+            visible: 0;
+         }
+      }
+      part { name: "divider_left";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TOOLBAR_ITEM_DIVIDER_LEFT_COLOR_INC;
+            rel1 {
+                relative: 0.0 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 0.5 1.0;
+                to: "divider";
+            }
+         }
+      }
+      part { name: "divider_right";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TOOLBAR_ITEM_DIVIDER_RIGHT_COLOR_INC;
+            rel1 {
+                relative: 0.5 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to: "divider";
+            }
+         }
+      }
+      part { name: "event";
+         type: RECT;
+         mouse_events: 1;
+         ignore_flags: ON_HOLD;
+         description { state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+      }
+      part { name: "event2";
+         type: RECT;
+         mouse_events: 1;
+         repeat_events: 1;
+         description { state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+      }
+      part { name: "highlight";
+         type: IMAGE;
+         scale: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            image {
+                normal: "00_tab_focus.png";
+                border: TOOLBAR_ITEM_TAB_FOCUS_BORDER_INC;
+                border_scale: 1;
+            }
+         }
+         description { state: "highlighted" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+   }
+   programs {
+      program { name: "pressed";
+         signal:  "mouse,down,1";
+         source:  "event";
+         script {
+            if (get_int(item_state) != ITEM_STATE_DISABLED)
+              {
+                set_state(PART:"bg", "pressed", 0.0);
+                set_state(PART:"elm.text", "pressed", 0.0);
+                set_state(PART:"elm.text_new", "pressed", 0.0);
+              }
+         }
+      }
+      program { name: "unpressed";
+         signal:  "mouse,up,1";
+         source:  "event2";
+         script {
+            set_state(PART:"bg", "default", 0.0);
+            set_state(PART:"elm.text", "visible", 0.0);
+            set_state(PART:"elm.text_new", "visible", 0.0);
+         }
+      }
+      program { name: "go";
+         signal:  "mouse,clicked,1";
+         source:  "event";
+         action:  SIGNAL_EMIT "elm,action,click" "elm";
+         after: "play_sound";
+      }
+      program { name: "play_sound";
+         action: PLAY_SAMPLE "touch_sound" 1.0;
+      }
+      program { name: "mouse,in";
+         signal:  "mouse,in";
+         source:  "event";
+         action:  SIGNAL_EMIT "elm,mouse,in" "elm";
+      }
+      program { name: "mouse,out";
+         signal:  "mouse,out";
+         source:  "event";
+         action:  SIGNAL_EMIT "elm,mouse,out" "elm";
+      }
+      program { name: "disable";
+         signal: "elm,state,disabled";
+         source: "elm";
+         script {
+            set_int(item_state, ITEM_STATE_DISABLED);
+            set_state(PART:"bg", "disabled", 0.0);
+            set_state(PART:"elm.text.clipper", "disabled", 0.0);
+            run_program(PROGRAM:"label_set,animation,done");
+         }
+      }
+      program { name: "enable";
+         signal: "elm,state,enabled";
+         source: "elm";
+         script {
+            set_int(item_state, ITEM_STATE_ENABLED);
+            set_state(PART:"bg", "default", 0.0);
+            set_state(PART:"elm.text.clipper", "default", 0.0);
+            run_program(PROGRAM:"label_set,animation,done");
+         }
+      }
+      program { name: "label_set,animation,forward";
+         signal: "elm,state,label_set,forward";
+         source: "elm";
+         after: "label_set,sync";
+      }
+      program { name: "label_set,animation,backward";
+         signal: "elm,state,label_set,backward";
+         source: "elm";
+         after: "label_set,sync";
+      }
+      program { name: "label_set,sync";
+         signal: "elm,state,label_set";
+         source: "elm";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.text", st, 30, vl);
+            set_state(PART:"elm.text_new", st, vl);
+         }
+         after: "label_set,animation";
+      }
+      program { name: "label_set,animation";
+         action: STATE_SET "animation" 0.0;
+         target: "elm.text.clipper";
+         target: "elm.text_new.clipper";
+         after: "label_set,animation,done";
+      }
+      program { name: "label_set,animation,done";
+         action: SIGNAL_EMIT "elm,state,label_set,done" "elm";
+      }
+      program { name: "label,reset";
+         signal: "elm,state,label,reset";
+         source: "elm";
+         script {
+            set_state(PART:"elm.text_new.clipper", "default", 0.0);
+            if (get_int(item_state) != ITEM_STATE_DISABLED)
+              set_state(PART:"elm.text.clipper", "default", 0.0);
+            else
+              set_state(PART:"elm.text.clipper", "disabled", 0.0);
+         }
+      }
+      program { name: "text_show";
+         signal: "elm,state,text,visible";
+         source: "elm";
+         script {
+               set_state(PART:"elm.text", "visible", 0.0);
+         }
+      }
+      program { name: "text_hide";
+         signal: "elm,state,text,hidden";
+         source: "elm";
+         script {
+            set_state(PART:"elm.text", "default", 0.0);
+         }
+      }
+      program { name: "text_only_item_1";
+         signal: "elm,number,item,1";
+         source: "elm";
+         script {
+            set_int(items_number, 1);
+            set_state(PART:"padding_left_top", "1_item", 0.0);
+            set_state(PART:"padding_right_bottom", "1_item", 0.0);
+         }
+      }
+      program { name: "text_only_item_2";
+         signal: "elm,number,item,2";
+         source: "elm";
+         script {
+            set_int(items_number, 2);
+            set_state(PART:"padding_left_top", "2_items", 0.0);
+            set_state(PART:"padding_right_bottom", "2_items", 0.0);
+         }
+      }
+      program { name: "text_only_item_3";
+         signal: "elm,number,item,3";
+         source: "elm";
+         script {
+            set_int(items_number, 3);
+            set_state(PART:"padding_left_top", "3_items", 0.0);
+            set_state(PART:"padding_right_bottom", "3_items", 0.0);
+         }
+      }
+      program { name: "divider_visible_1";
+         signal: "elm,order,first,item";
+         source: "elm";
+         action: STATE_SET "default" 0.0;
+         target: "divider";
+      }
+      program { name: "divider_visible_2";
+         signal: "elm,order,default,item";
+         source: "elm";
+         action: STATE_SET "default" 0.0;
+         target: "divider";
+      }
+      program { name: "divider_hidden";
+         signal: "elm,order,last,item";
+         source: "elm";
+         action: STATE_SET "hidden" 0.0;
+         target: "divider";
+      }
+      program { name: "highlight_on";
+         signal: "elm,highlight,on";
+         source: "elm";
+         action: STATE_SET "highlighted" 0.0;
+         target: "highlight";
+      }
+      program { name: "highlight_off";
+         signal: "elm,highlight,off";
+         source: "elm";
+         action: STATE_SET "default" 0.0;
+         target: "highlight";
+      }
+   }
+}
+
+group { name: "elm/toolbar/separator/default";
+   parts {
+      part { name: "divider";
+         type: RECT;
+         scale: 1;
+         description { state: "default" 0.0;
+            min: TABBAR_ITEM_DIVIDER_SIZE;
+            max: TABBAR_ITEM_DIVIDER_SIZE;
+            fixed: 1 1;
+            rel1 {
+                relative: 0.5 0.5;
+            }
+            rel2 {
+                relative: 0.5 0.5;
+            }
+         }
+      }
+      part { name: "divider_left";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TABBAR_ITEM_DIVIDER_LEFT_COLOR_INC;
+            rel1 {
+                relative: 0.0 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 0.5 1.0;
+                to: "divider";
+            }
+         }
+      }
+      part { name: "divider_right";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TABBAR_ITEM_DIVIDER_RIGHT_COLOR_INC;
+            rel1 {
+                relative: 0.5 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to: "divider";
+            }
+         }
+      }
+   }
+}
+
+group { name: "elm/toolbar/object/default";
+   parts {
+      part { name: "elm.swallow.object"; // object group
+         type: SWALLOW;
+         description {
+             state: "default" 0.0;
+         }
+      }
+   }
+}
+
+group { name: "elm/toolbar/base/tabbar";
+   data {
+      item: "focus_highlight" "on";
+   }
+   images {
+      image: "00_effect_tab_bounce_left.png" COMP;
+      image: "00_effect_tab_bounce_right.png" COMP;
+      image: "00_title_bg.png" COMP;
+   }
+   script {
+      public left_timer, right_timer;
+      public l_timer(val) {
+         emit("do-hide-left-shadow", "");
+         set_int(left_timer, 0);
+         return 0;
+      }
+      public r_timer(val) {
+         emit("do-hide-right-shadow", "");
+         set_int(right_timer, 0);
+         return 0;
+      }
+   }
+   parts {
+      part { name: "base";
+         type: RECT;
+         scale: 1;
+         description { state: "default" 0.0;
+         }
+      }
+      part { name: "base_bg";
+         type: IMAGE;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            rel1 {
+                relative: 0.0 0.0;
+                to: "base";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to: "base";
+            }
+            image {
+                normal: "00_title_bg.png";
+                border: TABBAR_ITEM_BG_DEFAULT_BORDER_INC;
+                border_scale: 1;
+            }
+         }
+      }
+      part { name: "left_padding";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: 0 0;
+            fixed: 1 1;
+            visible: 0;
+            align: 0.0 0.5;
+            rel1.to: "base";
+            rel2.to: "base";
+            rel1.relative: 0.0 0.0;
+            rel2.relative: 0.0 1.0;
+         }
+      }
+      part { name: "right_padding";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: 0 0;
+            fixed: 1 1;
+            visible: 0;
+            align: 1.0 0.5;
+            rel1.to: "base";
+            rel2.to: "base";
+            rel1.relative: 1.0 0.0;
+            rel2.relative: 1.0 1.0;
+         }
+      }
+      part { name: "clipper";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            rel1.to: "left_padding";
+            rel1.relative: 1.0 0.0;
+            rel2.to: "right_padding";
+            rel2.relative: 0.0 1.0;
+         }
+      }
+      part { name: "elm.swallow.content";
+         clip_to: "clipper";
+         type: SWALLOW;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            rel1.to: "clipper";
+            rel2.to: "clipper";
+         }
+      }
+      part { name: "left_shadow_clip";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            color: 255 255 255 0;
+         }
+         description { state: "show" 0.0;
+         }
+      }
+      part { name: "right_shadow_clip";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            color: 255 255 255 0;
+         }
+         description { state: "show" 0.0;
+         }
+      }
+      part { name: "shadow_left";
+         clip_to: "left_shadow_clip";
+         type: IMAGE;
+         scale: 1;
+         repeat_events: 1;
+         description { state: "default" 0.0;
+            min: 162 0;
+            fixed: 1 1;
+            align: 0.0 0.5;
+            color: 255 255 255 255;
+            rel1.relative: 0.0 0.0;
+            rel2.relative: 0.0 1.0;
+            image.normal: "00_effect_tab_bounce_left.png";
+         }
+      }
+      part { name: "shadow_right";
+         clip_to: "right_shadow_clip";
+         type: IMAGE;
+         scale: 1;
+         repeat_events: 1;
+         description { state: "default" 0.0;
+            min: 162 0;
+            fixed: 1 1;
+            align: 1.0 0.5;
+            color: 255 255 255 255;
+            rel1.relative: 1.0 0.0;
+            rel2.relative: 1.0 1.0;
+            image.normal: "00_effect_tab_bounce_right.png";
+         }
+      }
+   }
+   programs {
+      program { name: "load";
+         script {
+            set_int(left_timer, 0);
+            set_int(right_timer, 0);
+         }
+      }
+      program { name: "left_shadow_show";
+         signal: "do-show-left-shadow";
+         source: "";
+         action:  STATE_SET "show" 0.0;
+         transition: LINEAR 0.3;
+         target: "left_shadow_clip";
+      }
+      program { name: "left_shadow_hide";
+         signal: "do-hide-left-shadow";
+         source: "";
+         action:  STATE_SET "default" 0.0;
+         transition: LINEAR 0.3;
+         target: "left_shadow_clip";
+      }
+      program { name: "right_shadow_show";
+         signal: "do-show-right-shadow";
+         source: "";
+         action:  STATE_SET "show" 0.0;
+         transition: LINEAR 0.3;
+         target: "right_shadow_clip";
+      }
+      program { name: "right_shadow_hide";
+         signal: "do-hide-right-shadow";
+         source: "";
+         action:  STATE_SET "default" 0.0;
+         transition: LINEAR 0.3;
+         target: "right_shadow_clip";
+      }
+      program { name: "edge_left";
+         signal: "elm,edge,left";
+         source: "elm";
+         script {
+            new v;
+            v = get_int(left_timer);
+            if (!v) {
+                emit("do-show-left-shadow", "");
+            }
+            if (v > 0) cancel_timer(v);
+            v = timer(0.5, "l_timer", 0);
+            set_int(left_timer, v);
+         }
+      }
+      program { name: "edge_right";
+         signal: "elm,edge,right";
+         source: "elm";
+         script {
+            new v;
+            v = get_int(right_timer);
+            if (!v) {
+                emit("do-show-right-shadow", "");
+            }
+            if (v > 0) cancel_timer(v);
+            v = timer(0.5, "r_timer", 0);
+            set_int(right_timer, v);
+         }
+      }
+   }
+}
+
+group { name: "elm/toolbar/item/tabbar";
+   images {
+      image: "00_tab_press.png" COMP;
+      image: "00_badge_bg.png" COMP;
+      image: "00_tab_focus.png" COMP;
+      image: "00_tab_select_bar.png" COMP;
+      image: "00_effect_tab_text_dim_left.png" COMP;
+      image: "00_effect_tab_text_dim_right.png" COMP;
+   }
+
+   data.item: "transition_animation_on" "0";
+   script {
+      public item_state = ITEM_STATE_ENABLED;
+      public items_number = 0;
+      public sliding_timer;
+      public end_timer;
+      public text_w;
+      public org_text_w;
+      public loop_count = 0;
+      public selected = 0;
+      public pressed = 0;
+
+      public get_width() {
+         new x, y, w, h;
+         if (get_int(selected))
+            {
+               set_state(PART:"elm.text", "selected", 0.0);
+            }
+            else
+            {
+               set_state(PART:"elm.text", "visible", 0.0);
+            }
+         get_geometry(PART:"elm.text", x, y, w, h);
+         set_int(org_text_w, w);
+
+         set_state(PART:"elm.text", "sliding", 0.0);
+         get_geometry(PART:"elm.text", x, y, w, h);
+         set_int(text_w, w);
+      }
+      public ender(val) {
+         set_int(loop_count, 0);
+         if (get_int(sliding_timer)) cancel_timer(get_int(sliding_timer));
+         set_int(sliding_timer, 0);
+         if (get_int(end_timer)) cancel_timer(get_int(end_timer));
+         set_int(end_timer, 0);
+         set_state(PART:"elm.text.dim.left", "default", 0.0);
+         set_state(PART:"elm.text_new.clipper", "default", 0.0);
+         if (val == 1) {
+            custom_state(PART:"elm.text", "sliding", 0.0);
+            set_state_val(PART:"elm.text", STATE_REL1_OFFSET, TOOLBAR_SLIDING_TEXT_OFFSET, 0);
+            set_state_val(PART:"elm.text", STATE_REL2_OFFSET, TOOLBAR_SLIDING_TEXT_OFFSET, 0);
+            set_state(PART:"elm.text", "custom", 0.0);
+         } else {
+            if (get_int(selected))
+            {
+               set_state(PART:"elm.text", "selected", 0.0);
+            }
+            else
+            {
+               set_state(PART:"elm.text", "visible", 0.0);
+            }
+            set_state(PART:"elm.text.dim.right", "default", 0.0);
+         }
+      }
+      public sliding(val) {
+         new buf[128];
+         if (val == TOOLBAR_SLIDING_TEXT_OFFSET) {
+            set_int(loop_count, get_int(loop_count) + 1);
+            get_width();
+            if (get_int(text_w) <= get_int(org_text_w)) {
+               ender(0);
+               return;
+            }
+         }
+         val -= TOOLBAR_SLIDING_PER_FPS;
+// for debuging //////////////////////////////
+/*         snprintf(buf, 127, "%d:%d:%d",
+            val, get_int(org_text_w), get_int(text_w));
+         set_text(PART:"dbg", buf);*/
+
+         if (val <= -get_int(text_w) - TOOLBAR_SLIDING_TEXT_GAP + TOOLBAR_SLIDING_TEXT_OFFSET)
+            val = TOOLBAR_SLIDING_TEXT_OFFSET;
+         custom_state(PART:"elm.text", "sliding", 0.0);
+         set_state_val(PART:"elm.text", STATE_REL1_OFFSET, val, 0);
+         set_state_val(PART:"elm.text", STATE_REL2_OFFSET, val, 0);
+         set_state(PART:"elm.text", "custom", 0.0);
+
+         set_state(PART:"elm.text_new.clipper", "animation", 0.0);
+         get_text(PART:"elm.text", buf, 128);
+         set_text(PART:"elm.text_new", buf);
+         custom_state(PART:"elm.text_new", "sliding", 0.0);
+         set_state_val(PART:"elm.text_new", STATE_REL1_OFFSET,
+            val + get_int(text_w) + TOOLBAR_SLIDING_TEXT_GAP, 0);
+         set_state_val(PART:"elm.text_new", STATE_REL2_OFFSET,
+            val + get_int(text_w) + TOOLBAR_SLIDING_TEXT_GAP, 0);
+         set_state(PART:"elm.text_new", "custom", 0.0);
+
+         set_state(PART:"elm.text.dim.left", "show", 0.0);
+         set_state(PART:"elm.text.dim.right", "show", 0.0);
+
+         if (val == TOOLBAR_SLIDING_TEXT_OFFSET || val <= -get_int(text_w))
+            set_state(PART:"elm.text.dim.left", "default", 0.0);
+
+         if (val == TOOLBAR_SLIDING_TEXT_OFFSET) {
+            if (get_int(loop_count) < 3)
+               set_int(sliding_timer, timer(2.0, "sliding", TOOLBAR_SLIDING_TEXT_OFFSET));
+            else
+               set_int(end_timer, timer(0.5, "ender", 1));
+         } else
+            set_int(sliding_timer, timer(1.0/TOOLBAR_SLIDING_FPS, "sliding", val));
+      }
+   }
+   parts {
+      part { name: "bg";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            min: 180 0;
+            visible: 0;
+         }
+         description { state: "icon_text" 0.0;
+            inherit: "default" 0.0;
+            min: 180 0;
+         }
+      }
+      part { name: "selected_line";
+         type: IMAGE;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            rel1 {
+                relative: 0.0 1.0;
+            }
+            rel2 {
+                relative: 1.0 1.0;
+            }
+            image {
+                normal: "00_tab_select_bar.png";
+                border: TABBAR_ITEM_TAB_SELECT_BAR_BORDER_INC;
+                border_scale: 1;
+            }
+            align: 0.0 1.0;
+            min: 0 10;
+            fixed: 0 1;
+            visible: 0;
+         }
+         description { state: "selected" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "bg_cover";
+         type: IMAGE;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            visible: 0;
+            image {
+               normal: "00_tab_press.png";
+               border: TABBAR_ITEM_TAB_PRESS_BORDER_INC;
+               border_scale: 1;
+            }
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+         description { state: "moving" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "padding_left_top";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            align: 0.0 0.0;
+            rel2.relative: 0.0 0.0;
+            min: 2 0;
+            fixed: 1 1;
+            visible: 0;
+            color: 0 0 0 0;
+         }
+      }
+      part { name: "padding_right_bottom";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            align: 1.0 1.0;
+            rel1.relative: 1.0 1.0;
+            min: 2 0;
+            fixed: 1 1;
+            visible: 0;
+            color: 0 0 0 0;
+         }
+      }
+      part {
+         name: "icon_rect";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            min: 0 0;
+            fixed: 0 1;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 1.0;
+               to_x: "padding_right_bottom";
+               to_y: "padding_left_top";
+            }
+            align: 0.5 0.0;
+            color: 0 0 0 0;
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            min: TABBAR_ITEM_ICON_SIZE_INC;
+         }
+         description { state: "icononly" 0.0;
+            inherit: "default" 0.0;
+         }
+      }
+      part { name: "padding_after_icon";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0; //when only icon or no icon is there
+            align: 0.5 0.0;
+            rel1 {
+               relative: 0.0 1.0;
+               to: "icon_rect";
+            }
+            rel2.to: "icon_rect";
+            fixed: 0 1;
+            min: 0 0;
+            color: 0 0 0 0;
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            min: 0 1;
+         }
+         description { state: "icononly" 0.0;
+            inherit: "default" 0.0;
+         }
+      }
+      part { name: "padding_before_text";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0; //when only icon or no icon is there
+            align: 0.5 1.0;
+            rel1 {
+               relative: 1.0 0.0;
+               to_x: "padding_left_top";
+               to_y: "elm.text";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to_x: "padding_right_bottom";
+               to_y: "elm.text";
+            }
+            fixed: 0 1;
+            min: 0 0;
+            color: 0 0 0 0;
+         }
+      }
+      part { name: "elm.swallow.icon";
+         type: SWALLOW;
+         scale: 1;
+         clip_to: "elm.icon.clipper";
+         description { state: "default" 0.0;
+            visible: 0;
+            min: TABBAR_ITEM_ICON_SIZE_INC;
+            max: TABBAR_ITEM_ICON_SIZE_INC;
+            rel1 {
+                to: "padding_left_top";
+            }
+            rel2 {
+                to: "padding_right_bottom";
+            }
+            aspect: 1.0 1.0;
+            aspect_preference: HORIZONTAL;
+         }
+         description { state: "visible" 0.0;
+            fixed: 1 0;
+            min: TABBAR_ITEM_ICON_SIZE_INC;
+            max: TABBAR_ITEM_ICON_SIZE_INC;
+            align: 0.5 1.0;
+            rel1 {
+               relative: 1.0 0.0;
+               to_x: "padding_left_top";
+               to_y: "padding_before_text";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to_x: "padding_right_bottom";
+               to_y: "padding_before_text";
+            }
+            aspect: 1.0 1.0;
+            aspect_preference: HORIZONTAL;
+         }
+         description { state: "icononly" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "elm.swallow.icon_new";
+         type: SWALLOW;
+         scale: 1;
+         clip_to: "elm.icon_new.clipper";
+         description { state: "default" 0.0;
+            visible: 0;
+            min: TABBAR_ITEM_ICON_SIZE_INC;
+            max: TABBAR_ITEM_ICON_SIZE_INC;
+            rel1.to: "padding_left_top";
+            rel2.to: "padding_right_bottom";
+            aspect: 1.0 1.0;
+            aspect_preference: HORIZONTAL;
+         }
+         description { state: "visible" 0.0;
+            fixed: 1 0;
+            min: TABBAR_ITEM_ICON_SIZE_INC;
+            max: TABBAR_ITEM_ICON_SIZE_INC;
+            rel1 {
+               relative: 0.0 1.0;
+               to_x: "padding_left_top";
+               to_y: "padding_before_text";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to_x: "padding_right_bottom";
+               to_y: "padding_before_text";
+            }
+            aspect: 1.0 1.0;
+            aspect_preference: HORIZONTAL;
+         }
+         description { state: "icononly" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "elm.swallow.icon.proxy";
+         type: PROXY;
+         scale: 1;
+         clip_to: "elm.icon.proxy.clipper";
+         description { state: "default" 0.0;
+             source: "elm.swallow.icon";
+             rel1.to: "elm.swallow.icon";
+             rel1.offset: 0 2;
+             rel2.to: "elm.swallow.icon";
+             rel2.offset: 0 2;
+         }
+      }
+      part { name: "elm.swallow.icon_new.proxy";
+         type: PROXY;
+         scale: 1;
+         clip_to: "elm.icon_new.proxy.clipper";
+         description { state: "default" 0.0;
+             source: "elm.swallow.icon_new";
+             rel1.to: "elm.swallow.icon_new";
+             rel1.offset: 0 2;
+             rel2.to: "elm.swallow.icon_new";
+             rel2.offset: 0 2;
+         }
+      }
+      part { name: "elm.swallow.icon.proxy.2";
+         type: PROXY;
+         scale: 1;
+         clip_to: "elm.icon.proxy.clipper.2";
+         description { state: "default" 0.0;
+             source: "elm.swallow.icon";
+             rel1.to: "elm.swallow.icon";
+             rel2.to: "elm.swallow.icon";
+         }
+      }
+      part { name: "elm.swallow.icon_new.proxy.2";
+         type: PROXY;
+         scale: 1;
+         clip_to: "elm.icon_new.proxy.clipper.2";
+         description { state: "default" 0.0;
+             source: "elm.swallow.icon_new";
+             rel1.to: "elm.swallow.icon_new";
+             rel2.to: "elm.swallow.icon_new";
+         }
+      }
+      part { name: "elm.text";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         scale: 1;
+         clip_to: "elm.text.clipper";
+         description { state: "default" 0.0;
+            visible: 0;
+            rel1 {
+               relative: 1.0 1.0;
+               to_x: "padding_left_top";
+               to_y: "padding_after_icon";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            fixed: 1 1;
+            max: 0 34;
+            text {
+               style: "tabbar_text_style_30";
+               min: 0 1;
+               max: 1 0;
+            }
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+         description { state: "selected" 0.0;
+            inherit: "visible" 0.0;
+            text.style: "tabbar_selected_text_style_30";
+         }
+         description { state: "pressed" 0.0;
+            inherit: "visible" 0.0;
+            text.style: "tabbar_pressed_text_style_30";
+         }
+         description { state: "sliding" 0.0;
+            inherit: "selected" 0.0;
+            rel1.offset: TOOLBAR_SLIDING_TEXT_OFFSET 0;
+            rel2.offset: TOOLBAR_SLIDING_TEXT_OFFSET 0;
+            text.min: 1 1;
+            align: 0.0 0.5;
+         }
+      }
+      part { name: "elm.text_new";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         scale: 1;
+         clip_to: "elm.text_new.clipper";
+         description { state: "default" 0.0;
+            visible: 0;
+            rel1 {
+               relative: 1.0 1.0;
+               to_x: "padding_left_top";
+               to_y: "padding_after_icon";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            max: 0 34;
+            fixed: 1 1;
+            text {
+               style: "tabbar_text_style_30";
+               min: 0 1;
+               max: 1 0;
+            }
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+         description { state: "selected" 0.0;
+            inherit: "visible" 0.0;
+            text.style: "tabbar_selected_text_style_30";
+         }
+         description { state: "pressed" 0.0;
+            inherit: "visible" 0.0;
+            text.style: "tabbar_pressed_text_style_30";
+         }
+         description { state: "sliding" 0.0;
+            inherit: "selected" 0.0;
+            rel1.offset: TOOLBAR_SLIDING_TEXT_OFFSET 0;
+            rel2.offset: TOOLBAR_SLIDING_TEXT_OFFSET 0;
+            text.min: 1 1;
+            align: 0.0 0.5;
+         }
+      }
+      part { name: "padding.badge";
+         type: RECT;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            align: 1.0 0.0;
+            rel1 {
+                relative: 1.0 0.0;
+            }
+            rel2 {
+                relative: 1.0 0.0;
+            }
+            min: 10 10;
+            fixed: 1 1;
+            visible: 0;
+         }
+         description { state: "default" 0.10;
+            inherit: "default" 0.0;
+            min: TABBAR_BADGE_ONE_ITEM_PADDING_SIZE;
+         }
+         description { state: "default" 0.06;
+            inherit: "default" 0.0;
+            min: TABBAR_BADGE_TWO_ITEMS_PADDING_SIZE;
+         }
+         description { state: "default" 0.04;
+            inherit: "default" 0.0;
+            min: TABBAR_BADGE_THREE_ITEMS_PADDING_SIZE;
+         }
+      }
+      part { name: "elm.image.badge";
+         mouse_events: 0;
+         scale: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            min: 54 54;
+            fixed: 1 1;
+            rel1 {
+               to: "left.padding.text";
+               relative: 0.0 0.0;
+            }
+            rel2 {
+               to: "right.padding.text";
+               relative: 1.0 1.0;
+            }
+            image {
+               normal: "00_badge_bg.png";
+               border: TABBAR_BADGE_BG_IMAGE_BORDER_INC;
+               border_scale: 1;
+            }
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "left.padding.text";
+         type: RECT;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            visible: 0;
+            fixed: 1 1;
+            min: 12 54;
+            rel1 {
+               to: "elm.text.badge";
+               relative: 0.0 0.0;
+            }
+            rel2 {
+               to: "elm.text.badge";
+               relative: 0.0 1.0;
+            }
+            align: 1.0 0.0;
+         }
+      }
+      part { name: "right.padding.text";
+         type: RECT;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            visible: 0;
+            fixed: 1 1;
+            min: 12 54;
+            rel1 {
+               to: "padding.badge";
+               relative: 0.0 1.0;
+            }
+            rel2 {
+               to: "padding.badge";
+               relative: 0.0 1.0;
+            }
+            align: 1.0 0.0;
+         }
+      }
+      part { name: "elm.text.badge";
+         type: TEXT;
+         mouse_events: 0;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            visible: 0;
+            rel1 {
+               to: "right.padding.text";
+               relative: 0.0 0.0;
+            }
+            rel2 {
+               to: "right.padding.text";
+               relative: 0.0 1.0;
+            }
+            min: 30 0;
+            fixed: 1 0;
+            align: 1.0 0.5;
+            color: TABBAR_BADGE_TEXT_COLOR_INC;
+            text {
+               font: "Tizen:style=Bold";
+               size: 34;
+               min: 1 0;
+               text_class: "tizen";
+            }
+         }
+         description { state: "visible" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "elm.text.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: 255 255 255 255;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: 255 255 255 0;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: 255 255 255 153;
+         }
+      }
+      part { name: "elm.text_new.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: 255 255 255 0;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: 255 255 255 255;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: 255 255 255 153;
+         }
+      }
+      part { name: "elm.icon.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "selected" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+      }
+      part { name: "elm.icon_new.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "selected" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DEFAULT_ICON_COLOR_INC;
+         }
+      }
+      part { name: "elm.icon.proxy.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "selected" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_PRESSED_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+      }
+      part { name: "elm.icon_new.proxy.clipper";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "selected" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_PRESSED_ICON_SHADOW_COLOR_INC;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_SHADOW_COLOR_INC;
+         }
+      }
+      part { name: "elm.icon.proxy.clipper.2";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: TABBAR_ITEM_ICON_COLOR_INC;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_COLOR_INC;
+         }
+         description { state: "selected" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_SELECTED_ICON_COLOR_INC;
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_PRESSED_ICON_COLOR_INC;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DISABLED_ICON_COLOR_INC;
+         }
+      }
+      part { name: "elm.icon_new.proxy.clipper.2";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1 {
+               relative: 1.0 1.0;
+               to: "padding_left_top";
+            }
+            rel2 {
+               relative: 0.0 0.0;
+               to: "padding_right_bottom";
+            }
+            color: TABBAR_ITEM_ICON_COLOR_INC;
+         }
+         description { state: "animation" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_ICON_COLOR_INC;
+         }
+         description { state: "selected" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_SELECTED_ICON_COLOR_INC;
+         }
+         description { state: "pressed" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_PRESSED_ICON_COLOR_INC;
+         }
+         description { state: "disabled" 0.0;
+            inherit: "default" 0.0;
+            color: TABBAR_ITEM_DISABLED_ICON_COLOR_INC;
+         }
+      }
+      part { name: "elm.text.dim.left";
+         type: IMAGE;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            min: 45 0;
+            fixed: 1 0;
+            align: 0.0 0.5;
+            visible: 0;
+            rel1 {
+                relative: 0.0 0.0;
+                to_x: "elm.text.clipper";
+                to_y: "elm.text";
+            }
+            rel2 {
+                relative: 0.0 1.0;
+                to_x: "elm.text.clipper";
+                to_y: "elm.text";
+            }
+            image.normal: "00_effect_tab_text_dim_left.png";
+         }
+         description { state: "show" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "elm.text.dim.right";
+         type: IMAGE;
+         scale: 1;
+         mouse_events: 0;
+         description { state: "default" 0.0;
+            min: 45 0;
+            fixed: 1 0;
+            align: 1.0 0.5;
+            visible: 0;
+            rel1 {
+                relative: 1.0 0.0;
+                to_x: "elm.text.clipper";
+                to_y: "elm.text";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to_x: "elm.text.clipper";
+                to_y: "elm.text";
+            }
+            image.normal: "00_effect_tab_text_dim_right.png";
+         }
+         description { state: "show" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "divider";
+         type: RECT;
+         scale: 1;
+         description { state: "default" 0.0;
+            min: TABBAR_ITEM_DIVIDER_SIZE;
+            max: TABBAR_ITEM_DIVIDER_SIZE;
+            fixed: 1 1;
+            rel1 {
+                relative: 1.0 0.5;
+            }
+            rel2 {
+                relative: 1.0 0.5;
+            }
+         }
+         description { state: "hidden" 0.0;
+            inherit: "default" 0.0;
+            visible: 0;
+         }
+      }
+      part { name: "divider_left";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TABBAR_ITEM_DIVIDER_LEFT_COLOR_INC;
+            rel1 {
+                relative: 0.0 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 0.5 1.0;
+                to: "divider";
+            }
+         }
+      }
+      part { name: "divider_right";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TABBAR_ITEM_DIVIDER_RIGHT_COLOR_INC;
+            rel1 {
+                relative: 0.5 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to: "divider";
+            }
+         }
+      }
+      part { name: "highlight";
+         type: IMAGE;
+         scale: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            image {
+                normal: "00_tab_focus.png";
+                border: TABBAR_ITEM_TAB_FOCUS_BORDER_INC;
+                border_scale: 1;
+            }
+         }
+         description { state: "highlighted" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "event";
+         type: RECT;
+         mouse_events: 1;
+         dragable {
+            x: 1 0 0;
+            y: 1 0 0;
+         }
+         description { state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+      }
+// for debuging //////////////////////////////
+/*      part { name: "dbg";
+         type: TEXTBLOCK;
+         mouse_events: 0;
+         scale: 1;
+         description { state: "default" 0.0;
+            rel1.relative: 1.0 0.0;
+            rel2.relative: 1.0 0.0;
+            fixed: 1 1;
+            align: 1.0 0.0;
+            text {
+               style: "tabbar_text_style_30";
+               text: "test";
+               min: 1 1;
+            }
+         }
+      }*/
+   }
+   programs {
+      program { name: "go_active";
+         signal:  "elm,state,selected";
+         source:  "elm";
+         action:  STATE_SET "selected" 0.0;
+         target:  "elm.icon.clipper";
+         target:  "elm.icon.proxy.clipper";
+         target:  "elm.icon.proxy.clipper.2";
+         target:  "selected_line";
+         after: "selected_text";
+      }
+      program { name: "selected_text";
+         script{
+            new st[31];
+            new Float:vl;
+            set_int(selected, 1);
+            get_state(PART:"elm.text", st, 30, vl);
+            if (!strcmp(st, "visible"))
+                set_state(PART:"elm.text", "selected", vl);
+            if (strcmp(st, "default"))
+                run_program(PROGRAM:"slide_start");
+         }
+      }
+      program { name: "go_passive";
+         signal:  "elm,state,unselected";
+         source:  "elm";
+         action:  STATE_SET "default" 0.0;
+         target:  "elm.icon.clipper";
+         target:  "elm.icon.proxy.clipper";
+         target:  "elm.icon.proxy.clipper.2";
+         target:  "selected_line";
+         after: "unselected_text";
+      }
+      program { name: "unselected_text";
+         script{
+            new st[31];
+            new Float:vl;
+            set_int(selected, 0);
+            get_state(PART:"elm.text", st, 30, vl);
+            if (!strcmp(st, "selected"))
+                set_state(PART:"elm.text", "visible", vl);
+            if (strcmp(st, "default"))
+                run_program(PROGRAM:"slide_stop");
+         }
+      }
+      program { name: "moving";
+         signal:  "elm,state,moving";
+         source:  "elm";
+         script {
+            set_state(PART:"bg_cover", "moving", 0.0);
+         }
+      }
+      program { name: "pressed";
+         signal:  "mouse,down,1";
+         source:  "event";
+         script {
+            set_state(PART:"bg_cover", "pressed", 0.0);
+            set_state(PART:"elm.text", "pressed", 0.0);
+            set_state(PART:"elm.icon.clipper", "pressed", 0.0);
+            set_state(PART:"elm.icon.proxy.clipper", "pressed", 0.0);
+            set_state(PART:"elm.icon.proxy.clipper.2", "pressed", 0.0);
+            set_int(pressed, 1);
+         }
+      }
+      program {
+         name: "drag";
+         signal: "drag";
+         source: "event";
+         script {
+            new st[31];
+            new Float:vl;
+            new Float:dx, Float:dy;
+            get_state(PART:"bg_cover", st, 30, vl);
+            if (strcmp(st, "moving"))
+              {
+                get_drag(PART:"event", dx, dy);
+                if ((abs(dx)*abs(dx))+(abs(dy)*abs(dy)) > 400)
+                  {
+                    set_drag(PART:"event", 0.0, 0.0);
+                    set_state(PART:"bg_cover", "default", 0.0);
+                    if (get_int(selected))
+                      {
+                        set_state(PART:"elm.text", "selected", 0.0);
+                        set_state(PART:"elm.icon.clipper", "selected", 0.0);
+                        set_state(PART:"elm.icon.proxy.clipper", "selected", 0.0);
+                        set_state(PART:"elm.icon.proxy.clipper.2", "selected", 0.0);
+                      }
+                    else
+                      {
+                        set_state(PART:"elm.text", "visible", 0.0);
+                        set_state(PART:"elm.icon.clipper", "default", 0.0);
+                        set_state(PART:"elm.icon.proxy.clipper", "default", 0.0);
+                        set_state(PART:"elm.icon.proxy.clipper.2", "default", 0.0);
+                      }
+                  }
+                set_drag(PART:"event", 0.0, 0.0);
+              }
+          }
+      }
+      program { name: "unpressed";
+         signal:  "mouse,up,1";
+         source:  "event";
+         script {
+            set_drag(PART:"event", 0.0, 0.0);
+            set_state(PART:"bg_cover", "default", 0.0);
+            set_int(pressed, 0);
+            if (get_int(selected))
+              {
+                set_state(PART:"elm.text", "selected", 0.0);
+                set_state(PART:"elm.icon.clipper", "selected", 0.0);
+                set_state(PART:"elm.icon.proxy.clipper", "selected", 0.0);
+                set_state(PART:"elm.icon.proxy.clipper.2", "selected", 0.0);
+              }
+            else
+              {
+                set_state(PART:"elm.text", "visible", 0.0);
+                set_state(PART:"elm.icon.clipper", "default", 0.0);
+                set_state(PART:"elm.icon.proxy.clipper", "default", 0.0);
+                set_state(PART:"elm.icon.proxy.clipper.2", "default", 0.0);
+              }
+         }
+      }
+      program { name: "go";
+         signal:  "mouse,clicked,1";
+         source:  "event";
+         action:  SIGNAL_EMIT "elm,action,click" "elm";
+         after: "play_sound";
+      }
+      program { name: "play_sound";
+         action: PLAY_SAMPLE "touch_sound" 1.0;
+      }
+      program { name: "mouse,in";
+         signal:  "mouse,in";
+         source:  "event";
+         action:  SIGNAL_EMIT "elm,mouse,in" "elm";
+      }
+      program { name: "mouse,out";
+         signal:  "mouse,out";
+         source:  "event";
+         action:  SIGNAL_EMIT "elm,mouse,out" "elm";
+      }
+      program { name: "disable";
+         signal: "elm,state,disabled";
+         source: "elm";
+         script {
+            set_int(item_state, ITEM_STATE_DISABLED);
+            set_state(PART:"bg", "disabled", 0.0);
+            set_state(PART:"elm.text.clipper", "disabled", 0.0);
+            set_state(PART:"elm.icon.clipper", "disabled", 0.0);
+            set_state(PART:"elm.icon.proxy.clipper", "disabled", 0.0);
+            set_state(PART:"elm.icon.proxy.clipper.2", "disabled", 0.0);
+            run_program(PROGRAM:"label_set,animation,done");
+            run_program(PROGRAM:"icon_set,animation,done");
+         }
+      }
+      program { name: "enable";
+         signal: "elm,state,enabled";
+         source: "elm";
+         script {
+            set_int(item_state, ITEM_STATE_ENABLED);
+            set_state(PART:"bg", "default", 0.0);
+            set_state(PART:"elm.text.clipper", "default", 0.0);
+            set_state(PART:"elm.icon.clipper", "default", 0.0);
+            set_state(PART:"elm.icon.proxy.clipper", "default", 0.0);
+            set_state(PART:"elm.icon.proxy.clipper.2", "default", 0.0);
+            run_program(PROGRAM:"label_set,animation,done");
+            run_program(PROGRAM:"icon_set,animation,done");
+         }
+      }
+      program { name: "label_set,animation,forward";
+         signal: "elm,state,label_set,forward";
+         source: "elm";
+         after: "label_set,sync";
+      }
+      program { name: "label_set,animation,backward";
+         signal: "elm,state,label_set,backward";
+         source: "elm";
+         after: "label_set,sync";
+      }
+      program { name: "label_set,sync";
+         signal: "elm,state,label_set";
+         source: "elm";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.text", st, 30, vl);
+            set_state(PART:"elm.text_new", st, vl);
+         }
+         after: "label_set,animation";
+      }
+      program { name: "label_set,animation";
+         action: STATE_SET "animation" 0.0;
+         target: "elm.text.clipper";
+         target: "elm.text_new.clipper";
+         after: "label_set,animation,done";
+      }
+      program { name: "label_set,animation,done";
+         action: SIGNAL_EMIT "elm,state,label_set,done" "elm";
+      }
+      program { name: "label,reset";
+         signal: "elm,state,label,reset";
+         source: "elm";
+         script {
+            set_state(PART:"elm.text_new.clipper", "default", 0.0);
+            if (get_int(item_state) != ITEM_STATE_DISABLED)
+              set_state(PART:"elm.text.clipper", "default", 0.0);
+            else
+              set_state(PART:"elm.text.clipper", "disabled", 0.0);
+         }
+      }
+      program { name: "icon_set,animation,forward";
+         signal: "elm,state,icon_set,forward";
+         source: "elm";
+         after: "icon_set,animation";
+      }
+      program { name: "icon_set,animation,backward";
+         signal: "elm,state,icon_set,backward";
+         source: "elm";
+         after: "icon_set,animation";
+      }
+      program { name: "icon_set,animation";
+         signal: "elm,state,icon_set";
+         source: "elm";
+         action: STATE_SET "animation" 0.0;
+         target: "elm.icon.clipper";
+         target: "elm.icon_new.clipper";
+         target: "elm.icon.proxy.clipper";
+         target: "elm.icon_new.proxy.clipper";
+         target: "elm.icon.proxy.clipper.2";
+         target: "elm.icon_new.proxy.clipper.2";
+         after: "icon_set,animation,done";
+      }
+      program { name: "icon_set,animation,done";
+         action: SIGNAL_EMIT "elm,state,icon_set,done" "elm";
+      }
+      program { name: "icon,reset";
+         signal: "elm,state,icon,reset";
+         source: "elm";
+         script {
+            set_state(PART:"elm.icon_new.clipper", "default", 0.0);
+            if (get_int(item_state) != ITEM_STATE_DISABLED)
+              {
+                 set_state(PART:"elm.icon.clipper", "default", 0.0);
+                 set_state(PART:"elm.icon.proxy.clipper", "default", 0.0);
+                 set_state(PART:"elm.icon.proxy.clipper.2", "default", 0.0);
+              }
+            else
+              {
+                 set_state(PART:"elm.icon.clipper", "disabled", 0.0);
+                 set_state(PART:"elm.icon.proxy.clipper", "disabled", 0.0);
+                 set_state(PART:"elm.icon.proxy.clipper.2", "disabled", 0.0);
+              }
+         }
+      }
+      program { name: "text_show";
+         signal: "elm,state,text,visible";
+         source: "elm";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.swallow.icon", st, 30, vl);
+            if (!strcmp(st, "icononly"))
+              {
+                 set_state(PART:"elm.swallow.icon", "visible", 0.0);
+                 set_state(PART:"icon_rect", "visible", 0.0);
+                 set_state(PART:"padding_after_icon", "visible", 0.0);
+                 set_state(PART:"bg", "icon_text", 0.0);
+              }
+            if (get_int(selected))
+              set_state(PART:"elm.text", "selected", 0.0);
+            else
+              set_state(PART:"elm.text", "visible", 0.0);
+         }
+      }
+      program { name: "text_hide";
+         signal: "elm,state,text,hidden";
+         source: "elm";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.swallow.icon", st, 30, vl);
+            if (strcmp(st, "default"))
+              {
+                 set_state(PART:"elm.swallow.icon", "icononly", 0.0);
+                 set_state(PART:"icon_rect", "icononly", 0.0);
+                 set_state(PART:"padding_after_icon", "icononly", 0.0);
+              }
+            set_state(PART:"elm.text", "default", 0.0);
+            set_state(PART:"bg", "default", 0.0);
+         }
+      }
+      program { name: "icon_show";
+         signal: "elm,state,icon,visible";
+         source: "elm";
+         script {
+            new st[31];
+            new Float:vl;
+            get_state(PART:"elm.text", st, 30, vl);
+            if (strncmp(st, "default", 7))
+              {
+                 set_state(PART:"elm.swallow.icon", "visible", 0.0);
+                 set_state(PART:"icon_rect", "visible", 0.0);
+                 set_state(PART:"padding_after_icon", "visible", 0.0);
+                 set_state(PART:"bg", "icon_text", 0.0);
+              }
+            else
+              {
+                 set_state(PART:"elm.swallow.icon", "icononly", 0.0);
+                 set_state(PART:"icon_rect", "icononly", 0.0);
+                 set_state(PART:"padding_after_icon", "icononly", 0.0);
+              }
+         }
+      }
+      program { name: "icon_hide";
+         signal: "elm,state,icon,hidden";
+         source: "elm";
+         script {
+            set_state(PART:"elm.swallow.icon", "default", 0.0);
+            set_state(PART:"icon_rect", "default", 0.0);
+            set_state(PART:"padding_after_icon", "default", 0.0);
+            set_state(PART:"bg", "default", 0.0);
+         }
+      }
+      program { name: "badge_show";
+         signal: "elm,state,elm.text.badge,visible";
+         source: "elm";
+         action: STATE_SET "visible" 0.0;
+         target: "elm.text.badge";
+         target: "elm.image.badge";
+      }
+      program { name: "badge_hide";
+         signal: "elm,state,elm.text.badge,hidden";
+         source: "elm";
+         action:  STATE_SET "default" 0.0;
+         target: "elm.text.badge";
+         target: "elm.image.badge";
+      }
+      program { name: "divider_visible_1";
+         signal: "elm,order,first,item";
+         source: "elm";
+         action: STATE_SET "default" 0.0;
+         target: "divider";
+      }
+      program { name: "divider_visible_2";
+         signal: "elm,order,default,item";
+         source: "elm";
+         action: STATE_SET "default" 0.0;
+         target: "divider";
+      }
+      program { name: "divider_hidden";
+         signal: "elm,order,last,item";
+         source: "elm";
+         action: STATE_SET "hidden" 0.0;
+         target: "divider";
+      }
+      program { name: "highlight_on";
+         signal: "elm,highlight,on";
+         source: "elm";
+         action: STATE_SET "highlighted" 0.0;
+         target: "highlight";
+      }
+      program { name: "highlight_off";
+         signal: "elm,highlight,off";
+         source: "elm";
+         action: STATE_SET "default" 0.0;
+         target: "highlight";
+      }
+      program { name: "tab_item_2";
+         signal: "elm,number,item,2";
+         source: "elm";
+         script {
+            set_int(items_number, 2);
+            set_state(PART:"padding.badge", "default", 0.10);
+         }
+      }
+      program { name: "tab_item_3";
+         signal: "elm,number,item,3";
+         source: "elm";
+         script {
+            set_int(items_number, 3);
+            set_state(PART:"padding.badge", "default", 0.06);
+         }
+      }
+      program { name: "tab_item_4";
+         signal: "elm,number,item,4";
+         source: "elm";
+         script {
+            set_int(items_number, 4);
+         }
+         after: "tab_item_upper_4";
+      }
+      program { name: "tab_item_5";
+         signal: "elm,number,item,5";
+         source: "elm";
+         script {
+            set_int(items_number, 5);
+         }
+         after: "tab_item_upper_4";
+      }
+      program { name: "tab_item_6";
+         signal: "elm,number,item,6";
+         source: "elm";
+         script {
+            set_int(items_number, 6);
+         }
+         after: "tab_item_upper_4";
+      }
+      program { name: "tab_item_7";
+         signal: "elm,number,item,7";
+         source: "elm";
+         script {
+            set_int(items_number, 7);
+         }
+         after: "tab_item_upper_4";
+      }
+      program { name: "tab_item_8";
+         signal: "elm,number,item,8";
+         source: "elm";
+         script {
+            set_int(items_number, 8);
+         }
+         after: "tab_item_upper_4";
+      }
+      program { name: "tab_item_9";
+         signal: "elm,number,item,9";
+         source: "elm";
+         script {
+            set_int(items_number, 9);
+         }
+         after: "tab_item_upper_4";
+      }
+      program { name: "tab_item_10";
+         signal: "elm,number,item,10";
+         source: "elm";
+         script {
+            set_int(items_number, 10);
+         }
+         after: "tab_item_upper_4";
+      }
+      program { name: "tab_item_upper_4";
+         script {
+            set_state(PART:"padding.badge", "default", 0.04);
+         }
+      }
+      program { name: "slide_start";
+         script {
+            if (!get_int(sliding_timer) && !get_int(end_timer)) {
+               set_int(sliding_timer, timer(1.5, "sliding", TOOLBAR_SLIDING_TEXT_OFFSET));
+            }
+         }
+      }
+      program { name: "slide_stop";
+         script {
+             ender(0);
+         }
+      }
+   }
+}
+
+group { name: "elm/toolbar/base/tabbar/item_with_title";
+   inherit: "elm/toolbar/base/tabbar";
+   images {
+      image: "00_sub_title_bg.png" COMP;
+   }
+   parts {
+       part { name: "base_bg";
+         type: IMAGE;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            rel1 {
+                relative: 0.0 0.0;
+                to: "base";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to: "base";
+            }
+            image {
+                normal: "00_sub_title_bg.png";
+                border: TABBAR_ITEM_BG_DEFAULT_BORDER_INC;
+                border_scale: 1;
+            }
+         }
+      }
+   }
+}
+
+group { name: "elm/toolbar/item/tabbar/item_with_title";
+   inherit: "elm/toolbar/item/tabbar";
+   images {
+      image: "00_effect_tab_text_dim_left_02.png" COMP;
+      image: "00_effect_tab_text_dim_right_02.png" COMP;
+   }
+   parts {
+      part { name: "elm.text.dim.left";
+         description { state: "default" 0.0;
+            image.normal: "00_effect_tab_text_dim_left_02.png";
+         }
+         description { state: "show" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "elm.text.dim.right";
+         description { state: "default" 0.0;
+            image.normal: "00_effect_tab_text_dim_right_02.png";
+         }
+         description { state: "show" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "divider";
+         type: RECT;
+         scale: 1;
+         description { state: "default" 0.0;
+            min: TABBAR_ITEM_WITH_TITLE_DIVIDER_SIZE;
+            max: TABBAR_ITEM_WITH_TITLE_DIVIDER_SIZE;
+            fixed: 1 1;
+            rel1 {
+                relative: 1.0 0.5;
+            }
+            rel2 {
+                relative: 1.0 0.5;
+            }
+         }
+         description { state: "hidden" 0.0;
+            inherit: "default" 0.0;
+            visible: 0;
+         }
+      }
+      part { name: "divider_left";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TABBAR_ITEM_DIVIDER_LEFT_COLOR_INC;
+            rel1 {
+                relative: 0.0 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 0.5 1.0;
+                to: "divider";
+            }
+         }
+      }
+      part { name: "divider_right";
+         type: RECT;
+         clip_to: "divider";
+         description { state: "default" 0.0;
+            color: TABBAR_ITEM_DIVIDER_RIGHT_COLOR_INC;
+            rel1 {
+                relative: 0.5 0.0;
+                to: "divider";
+            }
+            rel2 {
+                relative: 1.0 1.0;
+                to: "divider";
+            }
+         }
+      }
+   }
+}

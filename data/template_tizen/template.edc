@@ -1,0 +1,76 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+// LICENSE NOTE:
+// This file (and only this one) is licenses under public-domain. The reason
+// is that this is meant to serve as a template for making your own themes and
+// Elementary's LGPL license is not intended to follow. The images used do come
+// under LGPL, but this file specifically for the structure of your theme is
+// public-domain. This means you can take, use, re-license and otherwise
+// have zero restrictions on using this file as a base for your theme.
+
+// theme configuration file for each theme (tizen, tizen-black, ...)
+#include "macros-light.edc"
+#include "sounds.edc"
+
+externals {
+   external: "elm";
+}
+
+data.item: "version" "110";
+
+collections {
+
+#include "widgets/access.edc"
+#include "widgets/badge.edc"
+#include "widgets/bg.edc"
+#include "widgets/bubble.edc"
+#include "widgets/button.edc"
+#include "widgets/check.edc"
+#include "widgets/colorselector.edc"
+#include "widgets/conformant.edc"
+#include "widgets/ctxpopup.edc"
+#include "widgets/datetime.edc"
+#include "widgets/diskselector.edc"
+#include "widgets/entry.edc"
+#include "widgets/gengrid.edc"
+#include "widgets/scroller.edc"
+#include "widgets/genlist.edc" // include scroller first
+#include "widgets/index.edc"
+#include "widgets/label.edc"
+#include "widgets/layout.edc"
+#include "widgets/map.edc"
+#include "widgets/multibuttonentry.edc"
+#include "widgets/naviframe.edc"
+#include "widgets/notify.edc"
+#include "widgets/panes.edc"
+#include "widgets/photocam.edc"
+#include "widgets/popup.edc"
+#include "widgets/progressbar.edc"
+#include "widgets/radio.edc"
+#include "widgets/segmentedcontrol.edc"
+#include "widgets/selectioninfo.edc"
+#include "widgets/slider.edc"
+#include "widgets/tickernoti.edc"
+#include "widgets/toolbar.edc"
+
+
+
+}
+

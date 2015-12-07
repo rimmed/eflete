@@ -11,22 +11,21 @@ EDJE_CC = @edje_cc@
 EDJE_FLAGS = -id $(top_srcdir)/data/layouts/images -fd $(top_srcdir)/data/fonts
 EDJE_FLAGS_DEFAULT = -id $(top_srcdir)/data/themes/default/images -id $(top_srcdir)/data/themes/default/images/splash -fd $(top_srcdir)/data/fonts
 EDJE_FLAGS_RESOURCES = -id $(top_srcdir)/data/resources/images
+TEMPLATE_IMAGE_COPY_FROM = $(top_srcdir)/data/template_tizen/images
+TEMPLATE_IMAGE_COPY_INTO = $(datadir)/eflete/themes/default/template_tizen/images
 
 filesdir = $(datadir)/eflete/themes/default
 files_DATA = eflete_elm.edj
 
-template_edcdir = $(datadir)/eflete/themes/default/template/edc
+template_edcdir = $(datadir)/eflete/themes/default/template_tizen/edc
 template_edc_DATA = \
-   $(top_srcdir)/data/template/widgets/*.edc \
-   $(top_srcdir)/data/template/macros.edc \
-   $(top_srcdir)/data/template/fonts.edc \
-   $(top_srcdir)/data/template/colorclasses.edc
+   $(top_srcdir)/data/template_tizen/widgets/*.edc \
+   $(top_srcdir)/data/template_tizen/macros-light.edc \
+   $(top_srcdir)/data/template_tizen/macros-black.edc \
+   $(top_srcdir)/data/template_tizen/sounds.edc
 
-template_imgdir = $(datadir)/eflete/themes/default/template/images
-template_img_DATA = $(top_srcdir)/data/template/images/*
-
-template_snddir = $(datadir)/eflete/themes/default/template/sounds
-template_snd_DATA = $(top_srcdir)/data/template/sounds/*
+template_snddir = $(datadir)/eflete/themes/default/template_tizen/sounds
+template_snd_DATA = $(top_srcdir)/data/template_tizen/sounds/*
 
 alayoutsdir = $(datadir)/eflete/layouts
 alayouts_DATA = eflete.edj
@@ -92,3 +91,8 @@ color.eet: Makefile \
 
 clean-local:
 	rm -f *.edj *.eet
+
+install-exec-hook:
+	mkdir -p $(TEMPLATE_IMAGE_COPY_INTO) && \
+	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/dark $(TEMPLATE_IMAGE_COPY_INTO) && \
+	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/light $(TEMPLATE_IMAGE_COPY_INTO)

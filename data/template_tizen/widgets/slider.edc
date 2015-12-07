@@ -1,0 +1,1454 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+   group { name: "elm/slider/horizontal/tap_to_drag";
+      images {
+         image: "00_progress_bg.png" COMP;
+         image: "00_progress_bar.png" COMP;
+      }
+      script {
+         public invert_on = 0;
+         public set_invert_on() {
+            set_state(PART:"level", "inverted", 0.0);
+            set_state(PART:"level2", "inverted", 0.0);
+            set_int(invert_on, 1);
+         }
+         public set_invert_off() {
+            set_state(PART:"level", "default", 0.0);
+            set_state(PART:"level2", "default", 0.0);
+            set_int(invert_on, 0);
+         }
+         public thumb_down() {
+            if(get_int(invert_on) == 0)
+               set_state(PART:"level", "pressed", 0.0);
+            else if(get_int(invert_on) == 1)
+               set_state(PART:"level2", "pressed", 0.0);
+            }
+         public thumb_up() {
+            if(get_int(invert_on) == 0)
+               set_state(PART:"level", "default", 0.0);
+            else if(get_int(invert_on) == 1)
+               set_state(PART:"level2", "inverted", 0.0);
+            }
+         }
+         parts {
+            part { name: "access";
+               type: RECT;
+               description { state: "default" 0.0;
+                  fixed: 1 1;
+                  color: 0 0 0 0;
+               }
+            }
+            part { name: "base";
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  min: SLIDER_BASE_MIN_WIDTH_INC SLIDER_BASE_HEIGHT_INC;
+                  max: 99999 SLIDER_BASE_HEIGHT_INC;
+                  rel1 { to: "bg";
+                     offset: 1 0;
+                  }
+                  rel2 { to: "bg";
+                     offset: -5 -1;
+                  }
+                  image.normal: "00_progress_bg.png";
+                  image.border: PROGRESS_BG_IMAGE_BORDER_INC;
+                  image.border_scale: 1;
+               }
+            }
+            part {
+               name: "bar_image_left_padding";
+               type: RECT;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  max: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  fixed: 1 0;
+                  rel1.to: "base";
+                  rel2 {
+                     relative: 0.0  1.0;
+                     to: "base";
+                  }
+                  align: 0.0 0.5;
+               }
+            }
+            part {
+               name: "bar_image_right_padding";
+               type: RECT;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  max: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  fixed: 1 0;
+                  rel1 {
+                     relative: 1.0  0.0;
+                     to: "base";
+                  }
+                  rel2.to: "base";
+                  align: 1.0 0.5;
+               }
+            }
+            part { name: "level";
+               mouse_events: 0;
+               scale: 1;
+               clip_to: "clipper";
+               description { state: "default" 0.0;
+                  fixed: 1 1;
+                  rel1 {
+                     to_x: "bar_image_left_padding";
+                     to_y: "base";
+                     relative: 1.0 0.0;
+                  }
+                  rel2 {
+                     to_y: "base";
+                     to_x: "elm.dragable.slider";
+                     offset: -5 -1;
+                     relative: 0.5 1.0;
+                  }
+                  image.normal: "00_progress_bar.png";
+                  image.border: PROGRESS_BAR_IMAGE_BORDER_INC;
+                  image.border_scale: 1;
+               }
+               description { state: "inverted" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 0;
+               }
+               description { state: "pressed" 0.0;
+                  inherit: "default" 0.0;
+               }
+            }
+            part { name: "level2";
+               mouse_events: 0;
+               scale: 1;
+               clip_to: "clipper";
+               description { state: "default" 0.0;
+                  fixed: 1 1;
+                  visible: 0;
+                  rel1 {
+                     to_y: "base";
+                     to_x: "elm.dragable.slider";
+                     relative: 0.5 0.0;
+                  }
+                  rel1 {
+                     to_x: "bar_image_right_padding";
+                     to_y: "base";
+                     relative: 0.0 1.0;
+                  }
+                  image.normal: "00_progress_bg.png";
+                  image.border: PROGRESS_BG_IMAGE_BORDER_INC;
+                  image.border_scale: 1;
+               }
+               description { state: "inverted" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+               description { state: "pressed" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+            }
+            part { name: "bg";
+               type: RECT;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  rel1.to: "elm.swallow.bar";
+                  rel2.to: "elm.swallow.bar";
+                  rel2.offset: 3 0;
+                  color: 0 0 0 0;
+               }
+            }
+            part { name: "elm.swallow.bar";
+               type: SWALLOW;
+               scale: 1;
+               description { state: "default" 0.0;
+                  min: SLIDER_SWALLOW_BAR_MIN_WIDTH_INC SLIDER_SWALLOW_BAR_HEIGHT_INC;
+                  max: 99999 SLIDER_SWALLOW_BAR_HEIGHT_INC;
+                  align: 1.0 0.5;
+                  rel1 {
+                     to_x: "bar_left_padding";
+                     relative: 1.0 0.0;
+                  }
+                  rel2 {
+                     to_x: "bar_right_padding";
+                     relative: 0.0 1.0;
+                  }
+               }
+            }
+            part {
+               name: "bar_left_padding";
+               type: SWALLOW;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: 10 0;
+                  fixed: 1 1;
+                  rel1 {
+                     relative: 1.0  0.5;
+                     to_x: "elm.text";
+                  }
+                  rel2 {
+                     relative: 1.0  0.5;
+                     to_x: "elm.text";
+                  }
+                  align: 0.0 0.5;
+               }
+            }
+            part {
+               name: "bar_right_padding";
+               type: SWALLOW;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: 10 0;
+                  fixed: 1 1;
+                  rel1 {
+                     relative: 0.0  0.5;
+                     to_x: "elm.units";
+                  }
+                  rel2 {
+                     relative: 0.0  0.5;
+                     to_x: "elm.units";
+                  }
+                  align: 1.0 0.5;
+               }
+            }
+            part { name: "elm.swallow.icon";
+               type: SWALLOW;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  align: 0.0 0.5;
+                  rel1 {
+                     to_y: "elm.swallow.bar";
+                  }
+                  rel2 {
+                     relative: 0.0 1.0;
+                     to_y: "elm.swallow.bar";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+                  aspect: 1.0 1.0;
+                  aspect_preference: VERTICAL;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXT;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  fixed: 1 1;
+                  align: 0.0 0.5;
+                  rel1.to_x: "elm.swallow.icon";
+                  rel1.relative: 1.0 0.0;
+                  rel1.offset: -1 4;
+                  rel2.to_x: "elm.swallow.icon";
+                  rel2.relative: 1.0 1.0;
+                  rel2.offset: -1 -5;
+                  color: SLIDER_UNITS_TEXT_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Medium";
+                     size: SLIDER_UNITS_TEXT_SIZE_INC;
+                     min: 0 0;
+                     align: 0.0 0.5;
+                     text_class: "tizen";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+                  text.min: 1 1;
+                  rel1.offset: 0 4;
+                  rel2.offset: 0 -5;
+               }
+            }
+            part { name: "elm.swallow.end";
+               type: SWALLOW;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  align: 1.0 0.5;
+                  rel1 {
+                     relative: 1.0 0.0;
+                     to_y: "elm.swallow.bar";
+                  }
+                  rel2 {
+                     relative: 1.0 1.0;
+                     to_y: "elm.swallow.bar";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+                  aspect: 1.0 1.0;
+                  aspect_preference: VERTICAL;
+               }
+            }
+            part { name: "units";
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  rel1 {
+                     to_x: "elm.units";
+                     offset: 0 5;
+                  }
+                  image {
+   //                  normal: "sl_units.png";
+                     border: 0 5 3 8;
+                     border_scale: 1;
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+            }
+            part { name: "elm.units";
+               type: TEXT;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  fixed: 1 1;
+                  align: 1.0 0.5;
+                  rel1.relative: 0.0 0.0;
+                  rel1.offset: 0 8;
+                  rel1.to_x: "elm.swallow.end";
+                  rel2.relative: 0.0 1.0;
+                  rel2.offset: 0 -9;
+                  rel2.to_x: "elm.swallow.end";
+                  color: SLIDER_UNITS_TEXT_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Bold";
+                     size: SLIDER_UNITS_TEXT_SIZE_INC;
+                     min: 0 0;
+                     align: 0.0 0.5;
+                     text_class: "tizen";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  fixed: 1 1;
+                  visible: 1;
+                  text.min: 1 1;
+                  rel1.offset: -5 0;
+                  rel2.offset: -5 -1;
+               }
+            }
+            part { name: "elm.dragable.slider";
+               type: GROUP;
+               source: "elm/slider/horizontal/indicator/tap_to_drag";
+               mouse_events: 1;
+               scale: 1;
+               dragable {
+                  x: 1 1 0;
+                  y: 0 0 0;
+                  confine: "bg";
+               }
+               description { state: "default" 0.0;
+                  min: SLIDER_INDICATOR_WIDTH_INC SLIDER_INDICATOR_HEIGHT_INC;
+                  fixed: 1 1;
+                  rel1 {
+                     relative: 0.5 0.0;
+                     to_x: "bg";
+                  }
+                  rel2 {
+                     relative: 0.5 1.0;
+                     to_x: "bg";
+                  }
+                  color: 0 0 0 0;
+               }
+            }
+            part { name: "disabler";
+               type: RECT;
+               mouse_events: 1;
+               repeat_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  min: 1 1;
+                  color: 0 0 0 0;
+               }
+               description { state: "disabled" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+            }
+            part { name: "clipper";
+               type: RECT;
+               description { state: "default" 0.0;
+                  color: 255 255 255 255;
+               }
+               description { state: "disabled" 0.0;
+                  color: 255 255 255 102;
+               }
+            }
+         }
+         programs {
+            program { name: "text_show";
+            signal: "elm,state,text,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.text";
+         }
+         program { name: "text_hide";
+            signal: "elm,state,text,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.text";
+         }
+         program { name: "icon_show";
+            signal: "elm,state,icon,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.swallow.icon";
+         }
+         program { name: "icon_hide";
+            signal: "elm,state,icon,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.swallow.icon";
+         }
+         program { name: "end_show";
+            signal: "elm,state,end,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.swallow.end";
+         }
+         program { name: "end_hide";
+            signal: "elm,state,end,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.swallow.end";
+         }
+         program { name: "units_show";
+            signal: "elm,state,units,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.units";
+            target: "units";
+         }
+         program { name: "units_hide";
+            signal: "elm,state,units,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.units";
+            target: "units";
+         }
+         program { name: "invert_on";
+            signal: "elm,state,inverted,on";
+            source: "elm";
+            script {
+               set_invert_on();
+            }
+         }
+         program { name: "invert_off";
+            signal: "elm,state,inverted,off";
+            source: "elm";
+            script {
+               set_invert_off();
+            }
+         }
+         program { name: "val_show";
+            signal: "mouse,down,*";
+            source: "elm.dragable.slider";
+            script {
+               thumb_down();
+            }
+         }
+         program { name: "val_hide";
+            signal: "mouse,up,*";
+            source: "elm.dragable.slider";
+            script {
+               thumb_up();
+            }
+         }
+         program { name: "slider_disable";
+            signal: "elm,state,disabled";
+            source: "elm";
+            action:  STATE_SET "disabled" 0.0;
+            target: "disabler";
+            target: "clipper";
+         }
+         program { name: "slider_enable";
+            signal: "elm,state,enabled";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "disabler";
+            target: "clipper";
+         }
+      }
+   }
+
+   group { name: "elm/slider/horizontal/indicator/default";
+           alias: "elm/slider/horizontal/indicator/disabled";
+           alias: "elm/slider/horizontal/indicator/tap_to_drag";
+      images {
+         image: "00_slider_handle.png" COMP;
+         image: "00_slider_handle_dim.png" COMP;
+         image: "00_slider_handle_press.png" COMP;
+      }
+      parts {
+         part { name: "access";
+            type: RECT;
+            description { state: "default" 0.0;
+               fixed: 1 1;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "button_events";
+            type: RECT;
+            mouse_events: 1;
+            scale: 1;
+            description { state: "default" 0.0;
+               fixed: 1 1;
+               min: 2*SLIDER_INDICATOR_WIDTH_INC 1.5*SLIDER_INDICATOR_HEIGHT_INC;
+               aspect: 1.0 1.0;
+               aspect_preference: VERTICAL;
+               color: 0 0 0 0;
+            }
+            description { state: "disabled" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "image_left_padding";
+            type: RECT;
+            mouse_events: 0;
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               fixed: 1 1;
+               min: SLIDER_INDICATOR_IMAGE_PADDING_SIZE_INC;
+               max: SLIDER_INDICATOR_IMAGE_PADDING_SIZE_INC;
+               rel1 {
+                  to_x: "elm.indicator";
+                  relative: -1.0 0.0;
+               }
+               rel2 {
+                  to_x: "elm.indicator";
+                  relative: 0.0 1.0;
+               }
+               align: 1.0 0.5;
+            }
+         }
+         part { name: "image_right_padding";
+            type: RECT;
+            mouse_events: 0;
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               fixed: 1 1;
+               min: SLIDER_INDICATOR_IMAGE_PADDING_SIZE_INC;
+               max: SLIDER_INDICATOR_IMAGE_PADDING_SIZE_INC;
+               rel1 {
+                  to_x: "elm.indicator";
+                  relative: 1.0 0.0;
+               }
+               rel2 {
+                  to_x: "elm.indicator";
+                  relative: 2.0 1.0;
+               }
+               align: 0.0 0.5;
+            }
+         }
+         part { name: "button0";
+            mouse_events: 0;
+            scale: 1;
+            description { state: "default" 0.0;
+               fixed: 1 1;
+               min: SLIDER_INDICATOR_WIDTH_INC SLIDER_INDICATOR_HEIGHT_INC;
+               max: SLIDER_INDICATOR_MAX_WIDTH_INC SLIDER_INDICATOR_HEIGHT_INC;
+               rel1.to: "image_left_padding";
+               rel2.to: "image_right_padding";
+               image {
+                  normal: "00_slider_handle.png";
+                  border: SLIDER_INDICATOR_IMAGE_BORDER_INC;
+                  border_scale: 1;
+               }
+            }
+            description { state: "pressed" 0.0;
+               inherit: "default" 0.0;
+               image {
+                  normal: "00_slider_handle_press.png";
+               }
+            }
+            description { state: "disabled" 0.0;
+               inherit: "default" 0.0;
+               image {
+                  normal: "00_slider_handle_dim.png";
+               }
+            }
+         }
+         part { name: "elm.indicator";
+            type: TEXT;
+            mouse_events: 0;
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 1;
+               color: SLIDER_INDICATOR_TEXT_COLOR_INC;
+               text {
+                  font: "Tizen:style=Medium";
+                  size: SLIDER_INDICATOR_TEXT_SIZE_INC;
+                  min: 1 1;
+                  align: 0.5 0.5;
+                  text_class: "tizen";
+               }
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+             }
+            description { state: "pressed" 0.0;
+               inherit: "default" 0.0;
+               color: SLIDER_INDICATOR_TEXT_PRESSED_COLOR_INC;
+            }
+         }
+      }
+      programs {
+         program { name: "set_val_show";
+            signal: "elm,state,val,show";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.indicator";
+         }
+         program { name: "set_val_hide";
+            signal: "elm,state,val,hide";
+            source: "elm";
+            action:  STATE_SET "hide" 0.0;
+            target: "elm.indicator";
+         }
+         program { name: "slider_disable";
+            signal: "elm,state,disabled";
+            source: "elm";
+            action:  STATE_SET "disabled" 0.0;
+            target: "button0";
+            target: "button_events";
+         }
+         program { name: "slider_enable";
+            signal: "elm,state,enabled";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "button0";
+            target: "button_events";
+         }
+         program { name: "mouse_down";
+            signal: "mouse,down,*";
+            source: "button_events";
+            action:  STATE_SET "pressed" 0.0;
+            target: "button0";
+            after: "text_pressed";
+         }
+         program { name: "mouse_up";
+            signal: "mouse,up,*";
+            source: "button_events";
+            action:  STATE_SET "default" 0.0;
+            target: "button0";
+            after: "text_unpressed";
+         }
+         program { name: "text_pressed";
+            script {
+               new st[31];
+               new Float:vl;
+               get_state(PART:"elm.indicator", st, 30, vl);
+               if (!strcmp(st, "default"))
+                 set_state(PART:"elm.indicator", "pressed", 0.0);
+            }
+         }
+         program { name: "text_unpressed";
+            script {
+               new st[31];
+               new Float:vl;
+               get_state(PART:"elm.indicator", st, 30, vl);
+               if (!strcmp(st, "pressed"))
+                 set_state(PART:"elm.indicator", "default", 0.0);
+            }
+         }
+      }
+   }
+
+   group { name: "elm/slider/horizontal/default";
+           alias: "elm/slider/horizontal/disabled";
+      images {
+         image: "00_progress_bg.png" COMP;
+         image: "00_progress_bar.png" COMP;
+      }
+      script {
+         public invert_on = 0;
+         public popup_show = 1;
+         public set_popup_show() {
+            set_int(popup_show, 1);
+         }
+         public set_popup_hide() {
+            set_int(popup_show, 0);
+         }
+         public set_invert_on() {
+            set_state(PART:"level", "inverted", 0.0);
+            set_state(PART:"level2", "inverted", 0.0);
+            set_int(invert_on, 1);
+         }
+         public set_invert_off() {
+            set_state(PART:"level", "default", 0.0);
+            set_state(PART:"level2", "default", 0.0);
+            set_int(invert_on, 0);
+         }
+         public thumb_down() {
+            if(get_int(invert_on) == 0)
+               set_state(PART:"level", "pressed", 0.0);
+            else if(get_int(invert_on) == 1)
+               set_state(PART:"level2", "pressed", 0.0);
+            if(get_int(popup_show) == 1)
+               emit("popup,show", "elm");
+            }
+         public thumb_up() {
+            if(get_int(invert_on) == 0)
+               set_state(PART:"level", "default", 0.0);
+            else if(get_int(invert_on) == 1)
+               set_state(PART:"level2", "inverted", 0.0);
+            if(get_int(popup_show) == 1)
+               emit("popup,hide", "elm");
+            }
+         }
+         parts {
+            part { name: "access";
+               type: RECT;
+               description { state: "default" 0.0;
+                  fixed: 1 1;
+                  color: 0 0 0 0;
+               }
+            }
+            part { name: "base";
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  min: SLIDER_BASE_MIN_WIDTH_INC SLIDER_BASE_HEIGHT_INC;
+                  max: 99999 SLIDER_BASE_HEIGHT_INC;
+                  rel1.to: "bg";
+                  rel2.to: "bg";
+                  image.normal: "00_progress_bg.png";
+                  image.border: PROGRESS_BG_IMAGE_BORDER_INC;
+                  image.border_scale: 1;
+               }
+            }
+            part {
+               name: "bar_image_left_padding";
+               type: RECT;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  max: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  fixed: 1 0;
+                  rel1.to: "base";
+                  rel2 {
+                     relative: 0.0  1.0;
+                     to: "base";
+                  }
+                  align: 0.0 0.5;
+               }
+            }
+            part {
+               name: "bar_image_right_padding";
+               type: RECT;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  max: PROGRESS_BAR_IMAGE_PADDING_SIZE_INC;
+                  fixed: 1 0;
+                  rel1 {
+                     relative: 1.0  0.0;
+                     to: "base";
+                  }
+                  rel2.to: "base";
+                  align: 1.0 0.5;
+               }
+            }
+            part { name: "level";
+               mouse_events: 0;
+               scale: 1;
+               clip_to: "clipper";
+               description { state: "default" 0.0;
+                  fixed: 1 1;
+                  rel1 {
+                     to_x: "bar_image_left_padding";
+                     to_y: "base";
+                     relative: 1.0 0.0;
+                  }
+                  rel2 {
+                     to_y: "base";
+                     to_x: "elm.dragable.slider";
+                     relative: 0.5 1.0;
+                  }
+                  image.normal: "00_progress_bar.png";
+                  image.border: PROGRESS_BAR_IMAGE_BORDER_INC;
+                  image.border_scale: 1;
+               }
+               description { state: "inverted" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 0;
+               }
+               description { state: "pressed" 0.0;
+                  inherit: "default" 0.0;
+               }
+            }
+            part { name: "level2";
+               mouse_events: 0;
+               scale: 1;
+               clip_to: "clipper";
+               description { state: "default" 0.0;
+                  fixed: 1 1;
+                  visible: 0;
+                  rel1 {
+                     to_y: "base";
+                     to_x: "elm.dragable.slider";
+                     relative: 0.5 0.0;
+                  }
+                  rel2 {
+                     to_y: "base";
+                     to_x: "bar_image_left_padding";
+                     relative: 0.0 1.0;
+                  }
+                  image.normal: "00_progress_bar.png";
+                  image.border: PROGRESS_BAR_IMAGE_BORDER_INC;
+                  image.border_scale: 1;
+               }
+               description { state: "inverted" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+               description { state: "pressed" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+            }
+            part { name: "bg";
+               type: RECT;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  rel1.to: "elm.swallow.bar";
+                  rel2.to: "elm.swallow.bar";
+               }
+            }
+            part { name: "elm.swallow.bar";
+               type: SWALLOW;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  min: SLIDER_SWALLOW_BAR_MIN_WIDTH_INC SLIDER_SWALLOW_BAR_HEIGHT_INC;
+                  max: 99999 SLIDER_SWALLOW_BAR_HEIGHT_INC;
+                  align: 1.0 0.5;
+                  rel1 {
+                     to_x: "bar_left_padding";
+                     relative: 1.0 0.0;
+                  }
+                  rel2 {
+                     to_x: "bar_right_padding";
+                     relative: 0.0 1.0;
+                  }
+               }
+            }
+            part {
+               name: "bar_left_padding";
+               type: RECT;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: 16 0;
+                  fixed: 1 1;
+                  rel1 {
+                     relative: 1.0  0.5;
+                     to_x: "elm.text";
+                  }
+                  rel2 {
+                     relative: 1.0  0.5;
+                     to_x: "elm.text";
+                  }
+                  align: 0.0 0.5;
+               }
+            }
+            part {
+               name: "bar_right_padding";
+               type: RECT;
+               scale: 1;
+               description {
+                  state: "default" 0.0;
+                  visible: 0;
+                  min: 16 0;
+                  fixed: 1 1;
+                  rel1 {
+                     relative: 0.0  0.5;
+                     to_x: "elm.units";
+                  }
+                  rel2 {
+                     relative: 0.0  0.5;
+                     to_x: "elm.units";
+                  }
+                  align: 1.0 0.5;
+               }
+            }
+            part { name: "elm.swallow.icon";
+               type: SWALLOW;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  align: 0.0 0.5;
+                  rel1 {
+                     to_y: "elm.swallow.bar";
+                  }
+                  rel2 {
+                     relative: 0.0 1.0;
+                     to_y: "elm.swallow.bar";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+                  aspect: 1.0 1.0;
+                  aspect_preference: VERTICAL;
+               }
+            }
+            part { name: "elm.swallow.content.shadow.proxy";
+               type: PROXY;
+               scale: 1;
+               clip_to: "elm.swallow.content.shadow.clipper";
+               description { state: "default" 0.0;
+                  source: "elm.swallow.icon";
+                  rel1 {
+                     to: "elm.swallow.icon";
+                     offset: 0 1;
+                  }
+                  rel2 {
+                     to: "elm.swallow.icon";
+                     offset: -1 0;
+                  }
+               }
+            }
+            part { name: "elm.swallow.content.proxy";
+               type: PROXY;
+               scale: 1;
+               clip_to: "icon_clipper";
+               description { state: "default" 0.0;
+                  source: "elm.swallow.icon";
+                  rel1.to: "elm.swallow.icon";
+                  rel2.to: "elm.swallow.icon";
+               }
+            }
+            part { name: "elm.swallow.content.shadow.clipper";
+               scale: 1;
+               type: RECT;
+               description { state: "default" 0.0;
+                  color: 0 0 0 255;
+               }
+            }
+            part { name: "icon_clipper";
+               scale: 1;
+               type: RECT;
+               description { state: "default" 0.0;
+                  color: SLIDER_ICON_CLIPPER_COLOR_INC;
+               }
+            }
+            part { name: "elm.text";
+               type: TEXT;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  fixed: 1 1;
+                  align: 0.0 0.5;
+                  rel1.to_x: "elm.swallow.icon";
+                  rel1.relative: 1.0 0.0;
+                  rel2.to_x: "elm.swallow.icon";
+                  color: SLIDER_UNITS_TEXT_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Medium";
+                     size: SLIDER_UNITS_TEXT_SIZE_INC;
+                     min: 0 0;
+                     align: 0.0 0.5;
+                     text_class: "tizen";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+                  text.min: 1 1;
+               }
+            }
+            part { name: "elm.swallow.end";
+               type: SWALLOW;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  align: 1.0 0.5;
+                  rel1 {
+                     relative: 1.0 0.0;
+                     to_y: "elm.swallow.bar";
+                  }
+                  rel2 {
+                     relative: 1.0 1.0;
+                     to_y: "elm.swallow.bar";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+                  aspect: 1.0 1.0;
+                  aspect_preference: VERTICAL;
+               }
+            }
+            part { name: "elm.swallow.content.shadow.proxy.end";
+               type: PROXY;
+               scale: 1;
+               clip_to: "elm.swallow.content.shadow.clipper.end";
+               description { state: "default" 0.0;
+                  source: "elm.swallow.end";
+                  rel1 {
+                     to: "elm.swallow.end";
+                     offset: 0 1;
+                  }
+                  rel2 {
+                     to: "elm.swallow.end";
+                     offset: -1 0;
+                  }
+               }
+            }
+            part { name: "elm.swallow.content.proxy.end";
+               type: PROXY;
+               scale: 1;
+               clip_to: "icon_clipper_end";
+               description { state: "default" 0.0;
+                  source: "elm.swallow.end";
+                  rel1.to: "elm.swallow.end";
+                  rel2.to: "elm.swallow.end";
+               }
+            }
+            part { name: "elm.swallow.content.shadow.clipper.end";
+               scale: 1;
+               type: RECT;
+               description { state: "default" 0.0;
+                  color: 0 0 0 255;
+               }
+            }
+            part { name: "icon_clipper_end";
+               scale: 1;
+               type: RECT;
+               description { state: "default" 0.0;
+                  color: SLIDER_ICON_CLIPPER_COLOR_INC;
+               }
+            }
+            part { name: "units";
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  rel1 {
+                     to_x: "elm.units";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+            }
+            part { name: "elm.units";
+               type: TEXT;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  fixed: 1 1;
+                  align: 1.0 0.5;
+                  rel1.to_x: "elm.swallow.end";
+                  rel2.relative: 0.0 1.0;
+                  rel2.to_x: "elm.swallow.end";
+                  color: SLIDER_UNITS_TEXT_COLOR_INC;
+                  text {
+                     font: "Tizen:style=Bold";
+                     size: SLIDER_UNITS_TEXT_SIZE_INC;
+                     min: 0 0;
+                     align: 0.0 0.5;
+                     text_class: "tizen";
+                  }
+               }
+               description { state: "visible" 0.0;
+                  inherit: "default" 0.0;
+                  fixed: 1 1;
+                  visible: 1;
+                  text.min: 1 1;
+               }
+            }
+            part { name: "elm.track.slider";
+               type: SWALLOW;
+               mouse_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  min: 0 SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+                  max: -1 SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+                  align: 0.5 1.0;
+                  fixed: 0 1;
+                  rel1.to: "elm.dragable.slider";
+                  rel2 {
+                     relative: 1.0 0.0;
+                     to: "elm.dragable.slider";
+                  }
+               }
+            }
+            part { name: "elm.dragable.slider";
+               type: GROUP;
+               source: "elm/slider/horizontal/indicator/default";
+               mouse_events: 1;
+               scale: 1;
+               dragable {
+                  x: 1 1 0;
+                  y: 0 0 0;
+                  confine: "bg";
+               }
+               description { state: "default" 0.0;
+                  min: SLIDER_INDICATOR_WIDTH_INC SLIDER_INDICATOR_HEIGHT_INC;
+                  fixed: 1 1;
+                  align: 0.5 0.5;
+                  color: 0 0 0 0;
+               }
+            }
+            part { name: "disabler";
+               type: RECT;
+               mouse_events: 1;
+               repeat_events: 0;
+               scale: 1;
+               description { state: "default" 0.0;
+                  visible: 0;
+                  color: 0 0 0 0;
+               }
+               description { state: "disabled" 0.0;
+                  inherit: "default" 0.0;
+                  visible: 1;
+               }
+            }
+            part { name: "clipper";
+               type: RECT;
+               description { state: "default" 0.0;
+                  color: 255 255 255 255;
+               }
+               description { state: "disabled" 0.0;
+                  color: 255 255 255 102;
+               }
+            }
+         }
+         programs {
+            program { name: "text_show";
+            signal: "elm,state,text,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.text";
+         }
+         program { name: "text_hide";
+            signal: "elm,state,text,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.text";
+         }
+         program { name: "icon_show";
+            signal: "elm,state,icon,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.swallow.icon";
+         }
+         program { name: "icon_hide";
+            signal: "elm,state,icon,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.swallow.icon";
+         }
+         program { name: "end_show";
+            signal: "elm,state,end,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.swallow.end";
+         }
+         program { name: "end_hide";
+            signal: "elm,state,end,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.swallow.end";
+         }
+         program { name: "units_show";
+            signal: "elm,state,units,visible";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.units";
+            target: "units";
+         }
+         program { name: "units_hide";
+            signal: "elm,state,units,hidden";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.units";
+            target: "units";
+         }
+         program { name: "invert_on";
+            signal: "elm,state,inverted,on";
+            source: "elm";
+            script {
+               set_invert_on();
+            }
+         }
+         program { name: "invert_off";
+            signal: "elm,state,inverted,off";
+            source: "elm";
+            script {
+               set_invert_off();
+            }
+         }
+         program { name: "val_show";
+            signal: "mouse,down,*";
+            source: "elm.dragable.slider";
+            script {
+               thumb_down();
+            }
+         }
+         program { name: "val_hide";
+            signal: "mouse,up,*";
+            source: "elm.dragable.slider";
+            script {
+               thumb_up();
+            }
+         }
+         program { name: "popup_show";
+            signal: "elm,state,val,show";
+            source: "elm";
+            script {
+               set_popup_show();
+            }
+         }
+         program { name: "popup_hide";
+            signal: "elm,state,val,hide";
+            source: "elm";
+            script {
+               set_popup_hide();
+            }
+         }
+         program { name: "slider_disable";
+            signal: "elm,state,disabled";
+            source: "elm";
+            action:  STATE_SET "disabled" 0.0;
+            target: "disabler";
+            target: "clipper";
+         }
+         program { name: "slider_enable";
+            signal: "elm,state,enabled";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "disabler";
+            target: "clipper";
+         }
+      }
+   }
+
+   group { name: "elm/slider/horizontal/popup/default";
+      alias: "elm/slider/horizontal/popup/tap_to_drag";
+      images {
+         image: "00_slider_popup_center.png" COMP;
+         image: "00_slider_popup_left.png" COMP;
+         image: "00_slider_popup_right.png" COMP;
+      }
+      parts {
+         part { name: "bg";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               min: SLIDER_INDICATOR_POPUP_MIN_WIDTH_INC SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+               max: -1 SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+            }
+         }
+         part { name: "left.padding";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               min: SLIDER_INDICATOR_POPUP_PADDING_MIN_SIZE_INC;
+               max: SLIDER_INDICATOR_POPUP_PADDING_MIN_SIZE_INC;
+               rel1.to: "elm.indicator";
+               rel2 {
+                  relative: 0.0 1.0;
+                  to: "elm.indicator";
+               }
+               align: 1.0 0.5;
+            }
+         }
+         part { name: "right.padding";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               min: SLIDER_INDICATOR_POPUP_PADDING_MIN_SIZE_INC;
+               max: SLIDER_INDICATOR_POPUP_PADDING_MIN_SIZE_INC;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to: "elm.indicator";
+               }
+               rel2.to: "elm.indicator";
+               align: 0.0 0.5;
+            }
+         }
+         part { name: "bg.left.image";
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               rel1.to_x: "left.padding";
+               rel2 {
+                  relative: 0.0 1.0;
+                  to_x: "bg.center.image";
+               }
+               align: 0.0 0.5;
+               min: SLIDER_INDICATOR_POPUP_BG_IMAGE_WIDTH_INC SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+               max: -1 SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+               image {
+                  normal: "00_slider_popup_left.png";
+                  border: SLIDER_INDICATOR_POPUP_LEFT_BG_BORDER_INC;
+                  border_scale: 1;
+               }
+            }
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
+         part { name: "bg.right.image";
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "bg.center.image";
+               }
+               rel2.to_x: "right.padding";
+               align: 1.0 0.5;
+               min: SLIDER_INDICATOR_POPUP_BG_IMAGE_WIDTH_INC SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+               max: -1 SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+               image {
+                  normal: "00_slider_popup_right.png";
+                  border: SLIDER_INDICATOR_POPUP_RIGHT_BG_BORDER_INC;
+                  border_scale: 1;
+               }
+            }
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
+         part { name: "bg.center.image";
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               fixed: 1 1;
+               min: SLIDER_INDICATOR_POPUP_BG_CENTER_IMAGE_SIZE_INC;
+               max: SLIDER_INDICATOR_POPUP_BG_CENTER_IMAGE_SIZE_INC;
+               image {
+                  normal: "00_slider_popup_center.png";
+                  border: 0 0 0 0;
+                  border_scale: 1;
+               }
+            }
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
+         part { name: "elm.indicator";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               visible: 0;
+               min: SLIDER_INDICATOR_POPUP_MIN_WIDTH_INC SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+               max: -1 SLIDER_INDICATOR_POPUP_HEIGHT_INC;
+               color: SLIDER_INDICATOR_POPUP_TEXT_COLOR_INC;
+               text {
+                  font: "Tizen:style=Bold";
+                  size: SLIDER_INDICATOR_POPUP_TEXT_SIZE_INC;
+                  align: 0.5 0.0;
+                  min: 1 1;
+                  text_class: "tizen";
+               }
+            }
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
+      }
+      programs {
+         program { name: "popup,val,show";
+            signal: "elm,state,val,show";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.indicator";
+            target: "bg.left.image";
+            target: "bg.right.image";
+            target: "bg.center.image";
+         }
+         program { name: "popup,val,hide";
+            signal: "elm,state,val,hide";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.indicator";
+            target: "bg.left.image";
+            target: "bg.right.image";
+            target: "bg.center.image";
+         }
+         program { name: "popup,show";
+            signal: "popup,show";
+            source: "elm";
+            action:  STATE_SET "visible" 0.0;
+            target: "elm.indicator";
+            target: "bg.left.image";
+            target: "bg.right.image";
+            target: "bg.center.image";
+         }
+         program { name: "popup,hide";
+            signal: "popup,hide";
+            source: "elm";
+            action:  STATE_SET "default" 0.0;
+            target: "elm.indicator";
+            target: "bg.left.image";
+            target: "bg.right.image";
+            target: "bg.center.image";
+            after: "popup,hide,done";
+         }
+         program { name: "popup,hide,done";
+            action: SIGNAL_EMIT "popup,hide,done" "elm";
+         }
+      }
+   }

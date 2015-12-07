@@ -1,0 +1,412 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define RADIO_STATE_DEFAULT 0 // radio is off
+#define RADIO_STATE_VISIBLE 1 // radio is on
+
+   styles {
+      style { name: "radio_label_textblock_style";
+         base: "font=Tizen:style=Regular font_size="RADIO_STYLE_DEFAULT_FONT_SIZE_INC" color="RADIO_DEFAULT_TEXT_NORMAL_COLOR_INC" wrap=char text_class=tizen";
+         tag: "br" "\n";
+         tag: "ps" "ps";
+         tag: "hilight" "+ font=Tizen:style=Bold";
+         tag: "b" "+ font=Tizen:style=Bold";
+         tag: "whitecolor" "+ color=#ffffff";
+         tag: "tab" "\t";
+      }
+      style { name: "radio_label_textblock_style_disable";
+         base: "font=Tizen:style=Regular font_size="RADIO_STYLE_DEFAULT_FONT_SIZE_INC" color="RADIO_DEFAULT_TEXT_NORMAL_COLOR_INC" wrap=char text_class=tizen";
+         tag: "br" "\n";
+         tag: "ps" "ps";
+         tag: "hilight" "+ font=Tizen:style=Bold";
+         tag: "b" "+ font=Tizen:style=Bold";
+         tag: "whitecolor" "+ color=#ffffff";
+         tag: "tab" "\t";
+      }
+   }
+////////////////////////////////////////////////////////////////////////////////////////
+
+#define RADIO_STYLE_DEFAULT(style_name, min_width, min_height) \
+   group { name: "elm/radio/base/"style_name; \
+      images { \
+         image: "00_button_radio_activated_dim.png" COMP; \
+         image: "00_button_radio_activated.png" COMP; \
+         image: "00_button_radio_activated_press.png" COMP; \
+         image: "00_button_radio_bg.png" COMP; \
+         image: "00_button_radio_dim_bg.png" COMP; \
+         image: "00_button_radio_press_bg.png" COMP; \
+         image: "00_button_radio_focus.png" COMP; \
+      } \
+      script { \
+         public radio_state = RADIO_STATE_DEFAULT; \
+      } \
+      parts { \
+         part { name: "back_bg"; \
+            type: RECT; \
+            scale: 1; \
+            description { state: "default" 0.0; \
+               rel2.relative: 0.0 1.0; \
+               align: 0 0.5; \
+               min: min_width min_height; \
+               fixed: 1 0; \
+               color: 0 0 0 0; \
+            } \
+         } \
+         part { name: "bg"; \
+            mouse_events: 0; \
+            scale: 1; \
+            description { state: "default" 0.0; \
+               min: RADIO_STYLE_DEFAULT_BG_MIN_MAX_INC; \
+               max: RADIO_STYLE_DEFAULT_BG_MIN_MAX_INC; \
+               fixed: 1 1; \
+               rel1.to: "back_bg"; \
+               rel2.to: "back_bg"; \
+               image.normal: "00_button_radio_bg.png"; \
+            } \
+            description { state: "disabled" 0.0; \
+               inherit: "default" 0.0; \
+               image.normal: "00_button_radio_dim_bg.png"; \
+            } \
+            description { state: "pressed" 0.0; \
+               inherit: "default" 0.0; \
+               image.normal: "00_button_radio_press_bg.png"; \
+            } \
+         } \
+         part { name: "radio"; \
+            clip_to: "opacity_clip"; \
+            mouse_events: 0; \
+            scale: 1; \
+            description { state: "default" 0.0; \
+               rel1.to: "bg"; \
+               rel2.to: "bg"; \
+               max: 0 0; \
+               image.normal: "00_button_radio_activated.png"; \
+               visible: 0; \
+            } \
+            description { state: "visible" 0.0; \
+               inherit: "default" 0.0; \
+               visible: 1; \
+               max: RADIO_STYLE_DEFAULT_BG_MIN_MAX_INC; \
+            } \
+            description { state: "disabled" 0.0; \
+               inherit: "default" 0.0; \
+            } \
+            description { state: "disabled_visible" 0.0; \
+               inherit: "visible" 0.0; \
+               image.normal: "00_button_radio_activated_dim.png"; \
+            } \
+            description { state: "pressed" 0.0; \
+               inherit: "visible" 0.0; \
+               image.normal: "00_button_radio_activated_press.png"; \
+            } \
+         } \
+         part { name: "opacity_clip"; \
+            type: RECT; \
+            mouse_events: 0; \
+            description { state: "default" 0.0; \
+               color: 255 255 255 0; \
+            } \
+            description { state: "visible" 0.0; \
+               inherit: "default" 0.0; \
+               color: 255 255 255 255; \
+            } \
+         } \
+         part { name: "elm.swallow.content"; \
+            type: SWALLOW; \
+            clip_to: "disclip"; \
+            description { state: "default" 0.0; \
+               fixed: 1 0; \
+               visible: 0; \
+               align: 0.0 0.5; \
+               rel1 { \
+                  to_x: "bg"; \
+                  relative: 1.0 0.0; \
+                  offset: 1 1; \
+               } \
+               rel2 { \
+                  to_x: "bg"; \
+                  offset: 2 -2; \
+               } \
+            } \
+            description { state: "visible" 0.0; \
+               inherit: "default" 0.0; \
+               fixed: 1 1; \
+               visible: 1; \
+               aspect: 1.0 1.0; \
+               aspect_preference: VERTICAL; \
+            } \
+            description { state: "disabled" 0.0; \
+               inherit: "default" 0.0; \
+            } \
+            description { state: "disabled_visible" 0.0; \
+               inherit: "default" 0.0; \
+               fixed: 1 1; \
+               visible: 1; \
+               aspect: 1.0 1.0; \
+            } \
+         } \
+         part { name: "elm.text"; \
+            type: TEXTBLOCK; \
+            mouse_events: 0; \
+            clip_to: "disclip"; \
+            scale: 1; \
+            description { state: "default" 0.0; \
+               visible: 0; \
+               fixed: 0 1; \
+               rel1 { \
+                  relative: 1.0 0.5; \
+                  offset: 1 1; \
+                  to_x: "elm.swallow.content"; \
+               } \
+               rel2 { \
+                  relative: 1.0 0.5; \
+                  offset: -2 -2; \
+               } \
+               align: 0.0 0.5; \
+               text { \
+                  style: "radio_label_textblock_style"; \
+                  min: 0 0; \
+               } \
+            } \
+            description { state: "visible" 0.0; \
+               inherit: "default" 0.0; \
+               visible: 1; \
+               text.min: 1 1; \
+            } \
+            description { state: "disabled" 0.0; \
+               inherit: "default" 0.0; \
+            } \
+            description { state: "disabled_visible" 0.0; \
+               inherit: "default" 0.0; \
+               visible: 1; \
+               text { \
+                  style: "radio_label_textblock_style_disable"; \
+                  min: 0 0; \
+               } \
+            } \
+         } \
+         part { name: "over1"; \
+            type: RECT; \
+            ignore_flags: ON_HOLD; \
+            description { state: "default" 0.0; \
+               color: 0 0 0 0; \
+            } \
+         } \
+         part { name: "over2"; \
+            type: RECT; \
+            repeat_events:1; \
+            description { state: "default" 0.0; \
+               color: 0 0 0 0; \
+            } \
+         } \
+         part { name: "disclip"; \
+            type: RECT; \
+            mouse_events: 0; \
+            description { state: "default" 0.0; \
+               color: RADIO_DISCLIP_NORMAL_COLOR_INC; \
+            } \
+            description { state: "disabled" 0.0; \
+               color: RADIO_DISCLIP_DISABLED_COLOR_INC; \
+            } \
+         } \
+         part { name: "disabler"; \
+            type: RECT; \
+            description { state: "default" 0.0; \
+               visible: 0; \
+            } \
+            description { state: "disabled" 0.0; \
+               inherit: "default" 0.0; \
+               visible: 1; \
+               color: 0 0 0 0; \
+            } \
+         } \
+      } \
+      programs { \
+         program { name: "click"; \
+            signal: "mouse,clicked,1"; \
+            source: "over1"; \
+            action: SIGNAL_EMIT "elm,action,radio,toggle" ""; \
+         } \
+         program { name: "touch_sound"; \
+            signal: "mouse,clicked,1"; \
+            source: "over2"; \
+            action: PLAY_SAMPLE "touch_sound" 1.0; \
+         } \
+         program { name: "bg_normal"; \
+            signal: "mouse,up,1"; \
+            source: "over2"; \
+            script { \
+               if (get_int(radio_state) == RADIO_STATE_VISIBLE) \
+                  set_state(PART:"radio", "visible", 0.0); \
+               else \
+                  set_state(PART:"radio", "default", 0.0); \
+               set_state(PART:"bg", "default", 0.0); \
+            } \
+         } \
+         program { name: "pressed"; \
+            signal: "mouse,down,1"; \
+            source: "over2"; \
+            script { \
+               if (get_int(radio_state) == RADIO_STATE_VISIBLE) \
+                  set_state(PART:"radio", "pressed", 0.0); \
+               else \
+                  set_state(PART:"radio", "default", 0.0); \
+               set_state(PART:"bg", "pressed", 0.0); \
+            } \
+         } \
+         program { name: "mouse,out"; \
+            signal: "mouse,out"; \
+            source: "over2"; \
+            script { \
+               if (get_int(radio_state) == RADIO_STATE_VISIBLE) \
+                  set_state(PART:"radio", "visible", 0.0); \
+               else \
+                  set_state(PART:"radio", "default", 0.0); \
+               set_state(PART:"bg", "default", 0.0); \
+            } \
+         } \
+         program { name: "radio_on"; \
+            signal: "elm,state,radio,on"; \
+            source: "elm"; \
+            script { \
+               set_int(radio_state, RADIO_STATE_VISIBLE); \
+               run_program(PROGRAM:"radio_show_effect"); \
+               run_program(PROGRAM:"radio_draw_effect"); \
+            } \
+         } \
+         program { name: "radio_off"; \
+            signal: "elm,state,radio,off"; \
+            source: "elm"; \
+            script { \
+               set_int(radio_state, RADIO_STATE_DEFAULT); \
+               set_state(PART:"opacity_clip", "default", 0.0); \
+               set_state(PART:"radio", "default", 0.0); \
+            } \
+         } \
+         program { name: "radio_show_effect"; \
+            action: STATE_SET "visible" 0.0; \
+            transition: LINEAR 0.233; \
+            target: "opacity_clip"; \
+         } \
+         program { name: "radio_draw_effect"; \
+            action: STATE_SET "visible" 0.0; \
+            transition: LINEAR 0.267; \
+            target: "radio"; \
+         } \
+         program { name: "text_show"; \
+            signal: "elm,state,text,visible"; \
+            source: "elm"; \
+            action: STATE_SET "visible" 0.0; \
+            target: "elm.text"; \
+         } \
+         program { name: "text_hide"; \
+            signal: "elm,state,text,hidden"; \
+            source: "elm"; \
+            action: STATE_SET "default" 0.0; \
+            target: "elm.text"; \
+         } \
+         program { name: "icon_show"; \
+            signal: "elm,state,icon,visible"; \
+            source: "elm"; \
+            action: STATE_SET "visible" 0.0; \
+            target: "elm.swallow.content"; \
+         } \
+         program { name: "icon_hide"; \
+            signal: "elm,state,icon,hidden"; \
+            source: "elm"; \
+            action: STATE_SET "default" 0.0; \
+            target: "elm.swallow.content"; \
+         } \
+         program { name: "disable"; \
+            signal: "elm,state,disabled"; \
+            source: "elm"; \
+            action: STATE_SET "disabled" 0.0; \
+            target: "disclip"; \
+            target: "bg"; \
+            target: "disabler"; \
+            after: "disable_text"; \
+         } \
+         program { name: "disable_text"; \
+            script { \
+               new st[31]; \
+               new Float:vl; \
+               get_state(PART:"elm.text", st, 30, vl); \
+               if (!strcmp(st, "visible")) \
+                 set_state(PART:"elm.text", "disabled_visible", 0.0); \
+               else \
+                 set_state(PART:"elm.text", "disabled", 0.0); \
+               get_state(PART:"elm.swallow.content", st, 30, vl); \
+               if (!strcmp(st, "visible")) \
+                 set_state(PART:"elm.swallow.content", "disabled_visible", 0.0); \
+               else \
+                 set_state(PART:"elm.swallow.content", "disabled", 0.0); \
+               get_state(PART:"radio", st, 30, vl); \
+               if (!strcmp(st, "visible")) \
+                 set_state(PART:"radio", "disabled_visible", 0.0); \
+               else \
+                 set_state(PART:"radio", "disabled", 0.0); \
+            } \
+         } \
+         program { name: "enable"; \
+            signal: "elm,state,enabled"; \
+            source: "elm"; \
+            action: STATE_SET "default" 0.0; \
+            target: "disabler"; \
+            target: "disclip"; \
+            target: "bg"; \
+            after: "enable_text"; \
+         } \
+         program { name: "enable_text"; \
+            script { \
+               new st[31]; \
+               new Float:vl; \
+               get_state(PART:"elm.text", st, 30, vl); \
+               if (!strcmp(st, "disabled_visible")) \
+                 set_state(PART:"elm.text", "visible", 0.0); \
+               else \
+                 set_state(PART:"elm.text", "default", 0.0); \
+               get_state(PART:"elm.swallow.content", st, 30, vl); \
+               if (!strcmp(st, "disabled_visible")) \
+                 set_state(PART:"elm.swallow.content", "visible", 0.0); \
+               else \
+                 set_state(PART:"elm.swallow.content", "default", 0.0); \
+               get_state(PART:"radio", st, 30, vl); \
+               if (!strcmp(st, "disabled_visible")) \
+                 { \
+                    set_state(PART:"opacity_clip", "visible", 0.0); \
+                    set_state(PART:"radio", "visible", 0.0); \
+                 } \
+               else \
+                 { \
+                    set_state(PART:"opacity_clip", "default", 0.0); \
+                    set_state(PART:"radio", "default", 0.0); \
+                 } \
+            } \
+         } \
+      } \
+   }
+
+///////////////////////////////////////////////////////////////////////////////////////
+RADIO_STYLE_DEFAULT("default", RADIO_STYLE_DEFAULT_BG_IMAGE_MIN_WIDTH_INC, RADIO_STYLE_DEFAULT_BG_IMAGE_MIN_HEIGHT_INC)
+
+///////////////////////////////////////////////////////////////////////////////////////
+RADIO_STYLE_DEFAULT("default/extended", RADIO_STYLE_DEFAULT_EXTENDED_BG_IMAGE_MIN_WIDTH_INC, RADIO_STYLE_DEFAULT_EXTENDED_BG_IMAGE_MIN_WIDTH_INC)
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+#undef RADIO_STATE_DEFAULT
+#undef RADIO_STATE_VISIBLE

@@ -1,0 +1,877 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+group {
+   name: "elm/colorselector/palette/default";
+   data.item: "horizontal_pad" COLORSELECTOR_PORTRAIT_HOR_PAD_INC;
+   data.item: "vertical_pad" COLORSELECTOR_PORTRAIT_VER_PAD_INC;
+   parts {
+      part { name: "base";
+         type: RECT;
+         scale: 1;
+         mouse_events: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            align: 0.0 0.0;
+         }
+      }
+      part { name: "palette";
+         type: SWALLOW;
+         scale: 1;
+         mouse_events: 1;
+         description { state: "default" 0.0;
+            align: 0.0 0.0;
+            fixed: 0 1;
+            rel1 {
+               relative: 0.0 0.0;
+               to: "base";
+            }
+            rel2 {
+               relative: 1.0 0.0;
+               to: "base";
+            }
+         }
+      }
+      part{ name: "bottom_padding";
+         type: RECT;
+         scale: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            min: 0 20;
+            fixed: 0 1;
+            rel1.relative: 0.0 1.0;
+            rel1.to: "palette";
+            rel2.to: "palette";
+            align: 0.0 0.0;
+         }
+      }
+      part { name: "selector";
+         type: SWALLOW;
+         scale: 1;
+         mouse_events: 1;
+         description { state: "default" 0.0;
+            align: 0.0 1.0;
+            rel1 {
+               relative: 0.0 1.0;
+               to: "bottom_padding";
+            }
+            rel2 {
+               relative: 1.0 1.0;
+               to: "base";
+            }
+         }
+      }
+   }
+}
+
+group {
+   name: "elm/colorselector/palette/landscape";
+   data.item: "horizontal_pad" COLORSELECTOR_LANDSCAPE_HOR_PAD_INC;
+   data.item: "vertical_pad" COLORSELECTOR_LANDSCAPE_VER_PAD_INC;
+   parts {
+      part { name: "base";
+         type: RECT;
+         scale: 1;
+         mouse_events: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            align: 0.0 0.0;
+         }
+      }
+      part { name: "palette";
+         type: SWALLOW;
+         scale: 1;
+         mouse_events: 1;
+         description { state: "default" 0.0;
+            align: 0.0 0.0;
+            fixed: 0 1;
+            rel1 {
+               relative: 0.0 0.0;
+               to: "base";
+            }
+            rel2 {
+               relative: 1.0 0.0;
+               to: "base";
+            }
+         }
+      }
+      part{ name: "bottom_padding";
+         type: RECT;
+         scale: 1;
+         description { state: "default" 0.0;
+            visible: 0;
+            min: 0 20;
+            fixed: 0 1;
+            rel1.relative: 0.0 1.0;
+            rel1.to: "palette";
+            rel2.to: "palette";
+            align: 0.0 0.0;
+         }
+      }
+      part { name: "selector";
+         type: SWALLOW;
+         scale: 1;
+         mouse_events: 1;
+         description { state: "default" 0.0;
+            align: 0.0 1.0;
+            rel1 {
+               relative: 0.0 1.0;
+               to: "bottom_padding";
+            }
+            rel2 {
+               relative: 1.0 1.0;
+               to: "base";
+            }
+         }
+      }
+   }
+}
+
+group{
+   name: "elm/colorselector/bg/default";
+   parts{
+      part{
+         name: "bg_rect";
+         type: RECT;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: COLORSELECTOR_MIN_W_INC COLORSELECTOR_MIN_H_INC;
+            color: 0 0 0 0;
+         }
+      }
+      part{ name: "top_padding1";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_TOP_INC;
+            rel2.relative: 1.0 0.0;
+            rel1.to: "bg_rect";
+            rel2.to: "bg_rect";
+            align: 0.0 0.0;
+         }
+      }
+      part{ name: "top_padding2";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_BOTTOM_INC;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "top_padding1";
+            rel2.to_y: "top_padding1";
+            align: 0.0 0.0;
+         }
+      }
+      part{
+         name: "elm.colorbar_0";
+         type: SWALLOW;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: 1 COLORSELECTOR_COLORBAR_HEIGHT;
+            max: COLORSELECTOR_MAX_W_INC COLORSELECTOR_COLORBAR_HEIGHT;
+            fixed: 0 1;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "top_padding2";
+            rel2.to_y: "top_padding2";
+            align: 0.5 0.0;
+         }
+      }
+      part{
+         name: "bottom_padding1";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_TOP_INC;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "elm.colorbar_0";
+            rel2.to_y: "elm.colorbar_0";
+            align: 0.0 0.0;
+         }
+      }
+      part{
+         name: "bottom_padding2";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_BOTTOM_INC;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "bottom_padding1";
+            rel2.to_y: "bottom_padding1";
+            align: 0.0 0.0;
+         }
+      }
+      part{
+         name: "elm.colorbar_1";
+         type: SWALLOW;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: 1 COLORSELECTOR_COLORBAR_HEIGHT;
+            max: COLORSELECTOR_MAX_W_INC COLORSELECTOR_COLORBAR_HEIGHT;
+            fixed: 0 1;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "bottom_padding2";
+            rel2.to_y: "bottom_padding2";
+            align: 0.5 0.0;
+         }
+      }
+      part {
+         name: "bottom_padding3";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_TOP_INC;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "elm.colorbar_1";
+            rel2.to_y: "elm.colorbar_1";
+            align: 0.0 0.0;
+         }
+      }
+      part {
+         name: "bottom_padding4";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_BOTTOM_INC;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "bottom_padding3";
+            rel2.to_y: "bottom_padding3";
+            align: 0.0 0.0;
+         }
+      }
+      part{
+         name: "elm.colorbar_2";
+         type: SWALLOW;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: 1 COLORSELECTOR_COLORBAR_HEIGHT;
+            max: COLORSELECTOR_MAX_W_INC COLORSELECTOR_COLORBAR_HEIGHT;
+            fixed: 0 1;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "bottom_padding4";
+            rel2.to_y: "bottom_padding4";
+            align: 0.5 0.0;
+         }
+      }
+      part {
+         name: "bottom_padding5";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_TOP_INC;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "elm.colorbar_2";
+            rel2.to_y: "elm.colorbar_2";
+            align: 0.0 0.0;
+         }
+      }
+      part {
+         name: "bottom_padding6";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            min: 1 1;
+            fixed: 1 1;
+            color: COLORSELECTOR_PADDING_COLOR_BOTTOM_INC;
+            rel1.relative: 0.0 1.0;
+            rel1.to_y: "bottom_padding5";
+            rel2.to_y: "bg_rect";
+            align: 0.0 0.0;
+         }
+      }
+   }
+}
+
+group{
+   name: "elm/colorselector/base/default";
+   parts{
+      part{
+         name: "bg_rect";
+         type: RECT;
+         scale: 1;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            color: 0 0 0 0;
+         }
+      }
+      part{
+         name: "bar_bg_padding_rect_l";
+         type: RECT;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            visible: 0;
+            min: COLORSELECTOR_COLORBAR_LEFT_PADDING 0;
+            fixed: 1 0;
+            rel1.relative: 0.0 0.5;
+            rel2.relative: 0.0 0.5;
+            align: 0.0 0.5;
+         }
+      }
+      part{
+         name: "bar_bg_padding_rect_r";
+         type: RECT;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            visible: 0;
+            min: COLORSELECTOR_COLORBAR_RIGHT_PADDING 0;
+            fixed: 1 0;
+            rel1.relative: 1.0 0.5;
+            rel2.relative: 1.0 0.5;
+            align: 1.0 0.5;
+         }
+      }
+      part {
+         name: "button_top_padding";
+         type: RECT;
+         scale: 1;
+         ignore_flags: ON_HOLD;
+         description {
+            state: "default" 0.0;
+            visible: 0;
+            min: 0 COLORSELECTOR_BUTTON_TOP_PADDING;
+            fixed: 1 1;
+            rel1.relative: 0.0 0.0;
+            rel2.relative: 1.0 0.0;
+            align: 0.5 0;
+         }
+      }
+      part{
+         name: "elm.bar_bg";
+         type: SWALLOW;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            rel1 {relative: 1.0 (16/70); to_x: "bar_bg_padding_rect_l";}
+            rel2 {relative: 0.0 (54/70); to_x: "bar_bg_padding_rect_r";}
+         }
+      }
+      part{
+         name: "elm.bar";
+         type: SWALLOW;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            rel1.to: "elm.bar_bg";
+            rel2.to: "elm.bar_bg";
+         }
+      }
+      part{
+         name: "arrow_bg_padding_rect_l";
+         type: RECT;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            visible: 0;
+            min: COLORSELECTOR_ARROW_BG_LEFT_PADDING 0;
+            fixed: 1 0;
+            rel2.relative: 0.0 1.0;
+            align: 0.0 0.5;
+         }
+      }
+      part{
+         name: "arrow_bg_padding_rect_r";
+         type: RECT;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            visible: 0;
+            min: COLORSELECTOR_ARROW_BG_RIGHT_PADDING 0;
+            fixed: 1 0;
+            rel1.relative: 1.0 0.0;
+            align: 1.0 0.5;
+         }
+      }
+      part{
+         name: "elm.arrow_bg";
+         type: SWALLOW;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            rel1 {relative: 1.0 (10/70); to_x: "arrow_bg_padding_rect_l";}
+            rel2 {relative: 0.0 (60/70); to_x: "arrow_bg_padding_rect_r";}
+         }
+      }
+      part{
+         name: "elm.arrow";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: COLORSELECTOR_ARROW_MIN_WIDTH COLORSELECTOR_ARROW_MIN_HEIGHT;
+            fixed: 1 1;
+            align: 0 0.5;
+            visible: 0;
+            rel1 {relative: 0.0 0.0; to_y: "elm.arrow_bg";}
+            rel2 {relative: 0.0 1.0; to_y: "elm.arrow_bg";}
+         }
+         dragable{
+            confine: "elm.arrow_bg";
+            x: 1 1 0;
+            y: 0 0 0;
+         }
+      }
+      part{
+         name: "elm.arrow_icon";
+         type: SWALLOW;
+         mouse_events: 0;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            fixed: 1 1;
+            align: 0.5 0.5;
+            rel1 {
+               to: "elm.arrow";
+               offset: COLORSELECTOR_ARROW_REL1_OFFSET;
+            }
+            rel2 {
+               to: "elm.arrow";
+               offset: COLORSELECTOR_ARROW_REL2_OFFSET;
+            }
+         }
+      }
+      part{
+         name: "event";
+         type: RECT;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: COLORSELECTOR_DRAGGABLE_EVENT_AREA;
+            fixed: 1 1;
+            rel1.to: "elm.arrow_icon";
+            rel2.to: "elm.arrow_icon";
+            color: 0 0 0 0;
+         }
+         dragable{
+            events: "elm.arrow";
+         }
+      }
+      part{
+         name: "l_button_padding_rect";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            visible: 0;
+            min: COLORSELECTOR_BUTTON_LEFT_PADDING 0;
+            fixed: 1 0;
+            rel2.relative: 0.0 1.0;
+            align: 0.0 0.5;
+         }
+      }
+      part{
+         name: "r_button_padding_rect";
+         type: RECT;
+         mouse_events: 0;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            visible: 0;
+            min: COLORSELECTOR_BUTTON_RIGHT_PADDING 0;
+            fixed: 1 0;
+            rel1.relative: 1.0 0.0;
+            align: 1.0 0.5;
+         }
+      }
+      part{
+         name: "elm.l_button";
+         type: SWALLOW;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: COLORSELECTOR_BUTTON_WIDTH COLORSELECTOR_BUTTON_HEIGHT;
+            fixed: 1 1;
+            rel1 {relative: 1.0 1.0; to_x: "l_button_padding_rect"; to_y: "button_top_padding";}
+            rel2 {relative: 1.0 1.0; to_x: "l_button_padding_rect"; to_y: "button_top_padding";}
+            align: 0.0 0.0;
+         }
+      }
+      part{
+         name: "elm.r_button";
+         type: SWALLOW;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            min: COLORSELECTOR_BUTTON_WIDTH COLORSELECTOR_BUTTON_HEIGHT;
+            fixed: 1 1;
+            rel1 {relative: 0.0 1.0; to_x: "r_button_padding_rect"; to_y: "button_top_padding";}
+            rel2 {relative: 0.0 1.0; to_x: "r_button_padding_rect"; to_y: "button_top_padding";}
+            align: 1.0 0.0;
+         }
+      }
+   }
+}
+
+group{
+   name: "elm/colorselector/image/colorbar_0/default";
+   images{
+      image: "00_color_picker_color.png" COMP;
+      image: "00_color_picker_color_h.png" COMP;
+   }
+   parts{
+      part{
+         name: "bg";
+         type: RECT;
+         mouse_events: 1;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            color: 0 0 0 0;
+         }
+      }
+      part{
+         name: "colorbar_0_image";
+         type: IMAGE;
+         mouse_events: 1;
+         description {
+            state: "default" 0.0;
+            visible: 1;
+            rel1.to: "bg";
+            rel2.to: "bg";
+            image.normal: "00_color_picker_color.png";
+         }
+         description {
+            state: "landscape" 0.0;
+            inherit: "default" 0.0;
+            image.normal: "00_color_picker_color_h.png";
+         }
+      }
+   }
+   programs {
+      program { name: "landscape_mode";
+         source: "elm";
+         signal: "elm,state,orient,90";
+         action: STATE_SET "landscape" 0.0;
+         target: "colorbar_0_image";
+      }
+      program { name: "landscape_mode2";
+         source: "elm";
+         signal: "elm,state,orient,270";
+         action: STATE_SET "landscape" 0.0;
+         target: "colorbar_0_image";
+      }
+      program { name: "portrait_mode";
+         source: "elm";
+         signal: "elm,state,orient,0";
+         action: STATE_SET "default" 0.0;
+         target: "colorbar_0_image";
+      }
+      program { name: "portrait_mode2";
+         source: "elm";
+         signal: "elm,state,orient,180";
+         action: STATE_SET "default" 0.0;
+         target: "colorbar_0_image";
+      }
+   }
+}
+
+group{
+   name: "elm/colorselector/image/colorbar_1/default";
+   images{
+      image: "00_color_picker_saturation.png" COMP;
+      image: "00_color_picker_saturation_h.png" COMP;
+   }
+   parts{
+      part{
+         name: "bg";
+         type: RECT;
+         scale: 1;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            visible: 1;
+            color: 0 0 0 0;
+         }
+      }
+      part{
+         name: "colorbar_1_image";
+         type: IMAGE;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            visible: 1;
+            rel1.to: "bg";
+            rel2.to: "bg";
+            image.normal:  "00_color_picker_saturation.png";
+         }
+         description {
+            state: "landscape" 0.0;
+            inherit: "default" 0.0;
+            image.normal:  "00_color_picker_saturation_h.png";
+         }
+      }
+   }
+   programs {
+      program { name: "landscape_mode";
+         source: "elm";
+         signal: "elm,state,orient,90";
+         action: STATE_SET "landscape" 0.0;
+         target: "colorbar_1_image";
+      }
+      program { name: "landscape_mode2";
+         source: "elm";
+         signal: "elm,state,orient,270";
+         action: STATE_SET "landscape" 0.0;
+         target: "colorbar_1_image";
+      }
+      program { name: "portrait_mode";
+         source: "elm";
+         signal: "elm,state,orient,0";
+         action: STATE_SET "default" 0.0;
+         target: "colorbar_1_image";
+      }
+      program { name: "portrait_mode2";
+         source: "elm";
+         signal: "elm,state,orient,180";
+         action: STATE_SET "default" 0.0;
+         target: "colorbar_1_image";
+      }
+   }
+}
+
+group{
+   name: "elm/colorselector/image/colorbar_2/default";
+   images{
+      image: "00_color_picker_brightness.png" COMP;
+      image: "00_color_picker_brightness_h.png" COMP;
+   }
+   parts{
+      part{
+         name: "bg";
+         type: RECT;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            visible: 1;
+            color: 0 0 0 0;
+         }
+      }
+      part{
+         name: "colorbar_2_image";
+         type: IMAGE;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            visible: 1;
+            rel1.to: "bg";
+            rel2.to: "bg";
+            image.normal:  "00_color_picker_brightness.png";
+         }
+         description {
+            state: "landscape" 0.0;
+            inherit: "default" 0.0;
+            image.normal:  "00_color_picker_brightness_h.png";
+         }
+      }
+   }
+   programs {
+      program { name: "landscape_mode";
+         source: "elm";
+         signal: "elm,state,orient,90";
+         action: STATE_SET "landscape" 0.0;
+         target: "colorbar_2_image";
+      }
+      program { name: "landscape_mode2";
+         source: "elm";
+         signal: "elm,state,orient,270";
+         action: STATE_SET "landscape" 0.0;
+         target: "colorbar_2_image";
+      }
+      program { name: "portrait_mode";
+         source: "elm";
+         signal: "elm,state,orient,0";
+         action: STATE_SET "default" 0.0;
+         target: "colorbar_2_image";
+      }
+      program { name: "portrait_mode2";
+         source: "elm";
+         signal: "elm,state,orient,180";
+         action: STATE_SET "default" 0.0;
+         target: "colorbar_2_image";
+      }
+   }
+}
+
+group{
+   name: "elm/colorselector/arrow/default";
+   images{
+      image:"00_color_picker_handler.png" COMP;
+   }
+   parts{
+      part{
+         name: arrow_image;
+         scale: 1;
+         type: IMAGE;
+         mouse_events: 1;
+         description{
+            state: "default" 0.0;
+            image.normal: "00_color_picker_handler.png";
+         }
+      }
+   }
+}
+
+group {
+   name: "elm/colorselector/item/default";
+   images {
+      image: "00_color_picker_palette_focus.png" COMP;
+   }
+   parts {
+      part {
+         name: "color_bg";
+         type: RECT;
+         mouse_events:1;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            min: COLORSELECTOR_PALETTE_COLORBG_MIN_WIDTH_INC COLORSELECTOR_PALETTE_COLORBG_MIN_HEIGHT_INC;
+            visible: 0;
+         }
+      }
+      part { name: "color_obj";
+         type: SWALLOW;
+         mouse_events: 1;
+         scale: 1;
+         description { state: "default" 0.0;
+            rel1.to: "color_bg";
+            rel2.to: "color_bg";
+         }
+      }
+      part {
+         name: "focus_image";
+         mouse_events:1;
+         scale: 1;
+         description {
+            state: "default" 0.0;
+            visible: 0;
+            min: COLORSELECTOR_PALETTE_COLORBG_FOCUS_MIN_WIDTH_INC COLORSELECTOR_PALETTE_COLORBG_FOCUS_MIN_HEIGHT_INC;
+            image.normal: "00_color_picker_palette_focus.png";
+            image.border: COLORSELECTOR_PALETTE_BORDER_INC;
+            image.border_scale: 1;
+            rel1.to: "color_bg";
+            rel2.to: "color_bg";
+         }
+         description {
+            state: "focused" 0.0;
+            inherit: "default" 0.0;
+            visible: 1;
+         }
+      }
+      part { name: "over1";
+         type: RECT;
+         scale: 1;
+         repeat_events: 1;
+         description {
+            state: "default" 0.0;
+            rel1.to: "color_bg";
+            rel2.to: "color_bg";
+            color: 0 0 0 0;
+         }
+      }
+   }
+   programs {
+      program { name: "item_focus";
+         source: "elm";
+         signal: "elm,state,selected";
+         action: STATE_SET "focused" 0.0;
+         target: "focus_image";
+      }
+      program { name: "item_unfocus";
+         source: "elm";
+         signal: "elm,state,unselected";
+         action: STATE_SET "default" 0.0;
+         target: "focus_image";
+      }
+      program { name: "touch_snd";
+         signal: "mouse,clicked,1";
+         source: "over1";
+         action: PLAY_SAMPLE "touch_sound" 1.0;
+      }
+   }
+}
+
+group {
+   name: "elm/colorselector/item/color/default";
+   images {
+      image: "00_color_picker_palette_bg.png" COMP;
+   }     
+   parts {
+      part {
+         name: "color_rect";
+         type: IMAGE;
+         mouse_events: 1;
+         scale: 1;
+         description{
+            state: "default" 0.0;
+            image.normal: "00_color_picker_palette_bg.png";
+            image.border: COLORSELECTOR_PALETTE_BORDER_INC;
+            image.border_scale: 1;
+         }
+      }
+   }
+}
+

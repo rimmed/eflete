@@ -1,0 +1,817 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+#define BUBBLE_WIDTH		380
+
+#define BUBBLE_DATE_PAD		15
+#define BUBBLE_DATE_HEIGHT	30
+
+#define BUBBLE_TOP_PAD		10
+#define BUBBLE_RIGHT_PAD	15
+#define BUBBLE_ICON_PAD		6
+
+images {
+	image: "00_messagebubble_bg_receive.png" COMP;
+	image: "00_messagebubble_bg_sent.png" COMP;
+}
+
+// deprecated style
+group {
+	name: "elm/bubble/base/default";
+	alias: "elm/bubble/base/readmessage";
+
+	parts {
+		part {
+			name: "elm.rect.left.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: BUBBLE_DATE_PAD 0;
+				fixed: 1 0;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 0.0; }
+				rel2 { relative: 0.0 0.0; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				min: BUBBLE_DATE_PAD BUBBLE_DATE_HEIGHT;
+				fixed: 1 1;
+			}
+		}
+		part {
+			name: "elm.rect.top.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 BUBBLE_TOP_PAD;
+				fixed: 0 1;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to_y: "elm.rect.left.pad"; }
+				rel2 { relative: 1.0 1.0; to_y: "elm.rect.left.pad"; }
+			}
+		}
+		part {
+			name: "elm.rect.right.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: BUBBLE_RIGHT_PAD 0;
+				fixed: 1 0;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 1.0 0.0; to: "elm.swallow.content"; }
+				rel2 { relative: 1.0 1.0; to: "elm.swallow.content"; }
+			}
+		}
+		part {
+			name: "elm.rect.bottom.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 BUBBLE_TOP_PAD;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to_y: "elm.rect.icon.bottom.pad"; }
+				rel2 { relative: 1.0 1.0; }
+			}
+		}
+		part {
+			name: "elm.rect.icon.top.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 0;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to: "elm.swallow.content"; }
+				rel2 { relative: 1.0 1.0; to: "elm.swallow.content"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				min: 0 BUBBLE_ICON_PAD;
+				fixed: 0 1;
+			}
+		}
+		part {
+			name: "elm.rect.icon.bottom.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 0;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to: "elm.swallow.icon"; }
+				rel2 { relative: 1.0 1.0; to: "elm.swallow.icon"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				min: 0 BUBBLE_ICON_PAD;
+				fixed: 0 1;
+			}
+		}
+		part {
+			name: "elm.text";
+			type: TEXT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 0.0 0.5;
+				fixed: 1 1;
+				visible: 0;
+				text {
+					font: "Tizen:style=Roman";
+					size: 14;
+					min: 1 0;
+					align: 0.0 0.5;
+					text_class: "tizen";
+				}
+				color: 76 75 73 255;
+				rel1 { relative: 1.0 0.0; to: "elm.rect.left.pad"; }
+				rel2 { relative: 1.0 1.0; to: "elm.rect.left.pad"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				visible: 1;
+			}
+		}
+		part {
+			name: "elm.image.bg";
+			type: IMAGE;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 0.0 0.0;
+				rel1 { relative: 0.0 0.0; to_x: "elm.rect.left.pad"; to_y: "elm.rect.top.pad"; }
+				rel2 { relative: 1.0 1.0; to_x: "elm.rect.right.pad"; to_y: "elm.rect.bottom.pad"; }
+				image {
+					normal: "00_messagebubble_bg_receive.png";
+					border: 1 11 7 12;
+					border_scale: 1;
+				}
+			}
+		}
+		part {
+			name: "elm.rect.bg.pad";
+			type: RECT;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 1.0 0.0; to: "elm.image.bg"; }
+				rel2 { relative: 1.0 1.0; to_y: "elm.image.bg"; }
+			}
+		}
+		part {
+			name: "elm.swallow.content";
+			type: SWALLOW;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 0.0 0.0;
+				fixed: 1 1;
+				rel1 { relative: 1.0 1.0; to_x: "elm.rect.left.pad"; to_y: "elm.rect.top.pad"; }
+				rel2 { relative: 0.7 1.0; to_y: "elm.rect.top.pad"; }
+			}
+		}
+		part {
+			name: "elm.swallow.icon";
+			type: SWALLOW;
+			description {
+				state: "default" 0.0;
+				min: 0 0;
+				align: 0.0 0.0;
+				rel1 { relative: 0.0 1.0; to: "elm.rect.icon.top.pad"; }
+				rel2 { relative: 0.5 1.0; to_y: "elm.rect.icon.top.pad"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit : "default" 0.0;
+				min: 0 50; //default height of icon
+				fixed: 0 1;
+			}
+		}
+		part {
+			name: "elm.swallow.sweep";
+			type: SWALLOW;
+			description {
+				state: "default" 0.0;
+				rel1 { relative: 0.0 0.0; to_y: "elm.image.bg"; }
+				rel2 { relative: 1.0 1.0; to_y: "elm.image.bg"; }
+			}
+		}
+		/*part {
+			name: "elm.info";
+			type: TEXT;
+			mouse_events:   0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 1.0 0.0;
+				fixed: 1 1;
+				rel1 {
+					relative: 1.0 0.0;
+					offset: -5 4;
+				}
+				rel2 {
+					relative: 1.0 0.0;
+					offset: -5 4;
+				}
+				color: 0 0 0 64;
+				text {
+					font: "Helvetica_:style=Bold";
+					size: 16;
+					min: 1 1;
+					max: 1 1;
+					align: 1.0 0.0;
+				}
+			}
+		}*/
+	}
+	programs {
+		program {
+			name: "text_add";
+			signal: "elm,state,text,visible";
+			source: "elm";
+			action: STATE_SET "expand" 0.0;
+			target: "elm.rect.left.pad";
+			target: "elm.text";
+		}
+		program {
+			name: "text_del";
+			signal: "elm,state,text,hidden";
+			source: "elm";
+			action: STATE_SET "default" 0.0;
+			target: "elm.rect.left.pad";
+			target: "elm.text";
+		}
+		program {
+			name: "icon_add";
+			signal: "elm,state,icon,visible";
+			source: "elm";
+			action: STATE_SET "expand" 0.0;
+			target: "elm.rect.icon.top.pad";
+			target: "elm.swallow.icon";
+			target: "elm.rect.icon.bottom.pad";
+		}
+		program {
+			name: "icon_del";
+			signal: "elm,state,icon,hidden";
+			source: "elm";
+			action: STATE_SET "default" 0.0;
+			target: "elm.rect.icon.top.pad";
+			target: "elm.swallow.icon";
+			target: "elm.rect.icon.bottom.pad";
+		}
+	}
+}
+
+// deprecated style
+group {
+	name: "elm/bubble/base/sentmessage";
+
+	parts {
+		part {
+			name: "elm.rect.right.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: BUBBLE_DATE_PAD 0;
+				fixed: 1 0;
+				align: 1.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 1.0 0.0; }
+				rel2 { relative: 1.0 0.0; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				min: BUBBLE_DATE_PAD BUBBLE_DATE_HEIGHT;
+				fixed: 1 1;
+			}
+		}
+		part {
+			name: "elm.rect.top.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 BUBBLE_TOP_PAD;
+				fixed: 0 1;
+				align: 1.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to_y: "elm.rect.right.pad"; }
+				rel2 { relative: 1.0 1.0; to_y: "elm.rect.right.pad"; }
+			}
+		}
+		part {
+			name: "elm.rect.left.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: BUBBLE_RIGHT_PAD 0;
+				fixed: 1 0;
+				align: 1.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 0.0; to: "elm.swallow.content"; }
+				rel2 { relative: 0.0 1.0; to: "elm.swallow.content"; }
+			}
+		}
+		part {
+			name: "elm.rect.bottom.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 BUBBLE_TOP_PAD;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to_y: "elm.rect.icon.bottom.pad"; }
+				rel2 { relative: 1.0 1.0; }
+			}
+		}
+		part {
+			name: "elm.rect.icon.top.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 0;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to: "elm.swallow.content"; }
+				rel2 { relative: 1.0 1.0; to: "elm.swallow.content"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				min: 0 BUBBLE_ICON_PAD;
+				fixed: 0 1;
+			}
+		}
+		part {
+			name: "elm.rect.icon.bottom.pad";
+			type: RECT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				min: 0 0;
+				align: 0.0 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 1.0; to: "elm.swallow.icon"; }
+				rel2 { relative: 1.0 1.0; to: "elm.swallow.icon"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				min: 0 BUBBLE_ICON_PAD;
+				fixed: 0 1;
+			}
+		}
+		part {
+			name: "elm.text";
+			type: TEXT;
+			mouse_events: 0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 1.0 0.5;
+				fixed: 1 1;
+				visible: 0;
+				text {
+					font: "Tizen:style=Roman";
+					size: 14;
+					min: 1 0;
+					align: 0.0 0.5;
+					text_class: "tizen";
+				}
+				color: 76 75 73 255;
+				rel1 { relative: 0.0 0.0; to: "elm.rect.right.pad"; }
+				rel2 { relative: 0.0 1.0; to: "elm.rect.right.pad"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit: "default" 0.0;
+				visible: 1;
+			}
+		}
+		part {
+			name: "elm.image.bg";
+			type: IMAGE;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 1.0 0.0;
+				rel1 { relative: 0.0 0.0; to_x: "elm.rect.left.pad"; to_y: "elm.rect.top.pad"; }
+				rel2 { relative: 1.0 1.0; to_x: "elm.rect.right.pad"; to_y: "elm.rect.bottom.pad"; }
+				image {
+					normal: "00_messagebubble_bg_sent.png";
+					border: 11 1 7 12;
+					border_scale: 1;
+				}
+			}
+		}
+		part {
+			name: "elm.rect.bg.pad";
+			type: RECT;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				color: 0 0 0 0;
+				rel1 { relative: 0.0 0.0; to_y: "elm.image.bg"; }
+				rel2 { relative: 0.0 1.0; to: "elm.image.bg"; }
+			}
+		}
+		part {
+			name: "elm.swallow.content";
+			type: SWALLOW;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 1.0 0.0;
+				fixed: 1 1;
+				rel1 { relative: 0.3 1.0; to_y: "elm.rect.top.pad"; }
+				rel2 { relative: 0.0 1.0; to_x: "elm.rect.right.pad"; to_y: "elm.rect.top.pad"; }
+			}
+		}
+		part {
+			name: "elm.swallow.icon";
+			type: SWALLOW;
+			description {
+				state: "default" 0.0;
+				min: 0 0;
+				align: 1.0 0.0;
+				rel1 { relative: 0.5 1.0; to_y: "elm.rect.icon.top.pad"; }
+				rel2 { relative: 1.0 1.0; to: "elm.rect.icon.top.pad"; }
+			}
+			description {
+				state: "expand" 0.0;
+				inherit : "default" 0.0;
+				min: 0 50; //default height of icon
+				fixed: 0 1;
+			}
+		}
+		part {
+			name: "elm.swallow.sweep";
+			type: SWALLOW;
+			description {
+				state: "default" 0.0;
+				rel1 { relative: 0.0 0.0; to_y: "elm.image.bg"; }
+				rel2 { relative: 1.0 1.0; to_y: "elm.image.bg"; }
+			}
+		}
+		/*part {
+			name: "elm.info";
+			type: TEXT;
+			mouse_events:   0;
+			scale: 1;
+			description {
+				state: "default" 0.0;
+				align: 1.0 0.0;
+				fixed: 1 1;
+				rel1 {
+					relative: 1.0 0.0;
+					offset: -5 4;
+				}
+				rel2 {
+					relative: 1.0 0.0;
+					offset: -5 4;
+				}
+				color: 0 0 0 64;
+				text {
+					font: "Helvetica_:style=Bold";
+					size: 16;
+					min: 1 1;
+					max: 1 1;
+					align: 1.0 0.0;
+				}
+			}
+		}*/
+	}
+	programs {
+		program {
+			name: "text_add";
+			signal: "elm,state,text,visible";
+			source: "elm";
+			action: STATE_SET "expand" 0.0;
+			target: "elm.rect.right.pad";
+			target: "elm.text";
+		}
+		program {
+			name: "text_del";
+			signal: "elm,state,text,hidden";
+			source: "elm";
+			action: STATE_SET "default" 0.0;
+			target: "elm.rect.right.pad";
+			target: "elm.text";
+		}
+		program {
+			name: "icon_add";
+			signal: "elm,state,icon,visible";
+			source: "elm";
+			action: STATE_SET "expand" 0.0;
+			target: "elm.rect.icon.top.pad";
+			target: "elm.swallow.icon";
+			target: "elm.rect.icon.bottom.pad";
+		}
+		program {
+			name: "icon_del";
+			signal: "elm,state,icon,hidden";
+			source: "elm";
+			action: STATE_SET "default" 0.0;
+			target: "elm.rect.icon.top.pad";
+			target: "elm.swallow.icon";
+			target: "elm.rect.icon.bottom.pad";
+		}
+	}
+}
+
+   group { name: "elm/layout/bubble/readmessage/default";
+      parts {
+         part { name: "base";
+            type: RECT;
+            repeat_events: 1;
+            description { state: "default" 0.0;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "elm.select_icon.pad";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel2.relative: 0.0 0.0;
+               align: 0.0 0.0;
+               min: BUBBLE_LAYOUT_SELECT_PAD 0;
+               fixed: 1 1;
+               visible: 0;
+            }
+         }
+         part { name: "elm.swallow.select_icon";
+            clip_to: "disclip";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  to_x: "elm.select_icon.pad";
+                  to_y: "elm.icon";
+                  relative: 1.0 0.0;
+               }
+               rel2 {
+                  to_x: "elm.select_icon.pad";
+                  to_y: "elm.icon";
+                  relative: 1.0 1.0;
+               }
+               align: 0.0 0.5;
+               fixed: 1 1;
+               visible: 0;
+            }
+            description { state: "selectview" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
+         part { name: "elm.icon";
+            clip_to: "disclip";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel2 {
+                  to: "elm.bottom.pad";
+                  relative: 1.0 0.0;
+               }
+               align: 0.0 0.0;
+               fixed: 1 0;
+            }
+            description { state: "selectview" 0.0;
+               inherit: "default" 0.0;
+               rel1 {
+                  to_x: "elm.swallow.select_icon";
+                  relative: 1.0 0.0;
+               }
+            }
+         }
+         part { name: "elm.bottom.pad";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.relative: 0.0 1.0;
+               align: 0.5 1.0;
+               min: 0 BUBBLE_LAYOUT_BOTTOM_PAD;
+               fixed: 0 1;
+               visible: 0;
+            }
+         }
+         part { name: "disclip";
+             type: RECT;
+             description { state: "default" 0.0;
+             }
+             description { state: "disabled" 0.0;
+                inherit: "default" 0.0;
+                color: BUBBLE_DISCLIP_COLOR;
+             }
+         }
+      }
+      programs {
+         program { name: "go_disabled";
+            signal: "elm,state,disabled";
+            source: "elm";
+            action: STATE_SET "disabled" 0.0;
+            target: "disclip";
+         }
+         program { name: "go_enabled";
+            signal: "elm,state,enabled";
+            source: "elm";
+            action: STATE_SET "default" 0.0;
+            target: "disclip";
+         }
+         program { name: "go_defaultview";
+            signal: "elm,state,select,disable";
+            source: "elm";
+            action: STATE_SET "default" 0.0;
+            //transition: DECELERATE 0.7;
+            target: "elm.swallow.select_icon";
+            target: "elm.icon";
+         }
+         program { name: "go_selectview";
+            signal: "elm,state,select,enable";
+            source: "elm";
+            action: STATE_SET "selectview" 0.0;
+            transition: DECELERATE 0.7;
+            target: "elm.swallow.select_icon";
+            target: "elm.icon";
+         }
+      }
+   }
+
+   group { name: "elm/layout/bubble/sentmessage/default";
+      parts {
+         part { name: "base";
+            type: RECT;
+            repeat_events: 1;
+            description { state: "default" 0.0;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "elm.select_icon.pad";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel2.relative: 0.0 0.0;
+               align: 0.0 0.0;
+               min: BUBBLE_LAYOUT_SELECT_PAD 0;
+               fixed: 1 1;
+               visible: 0;
+            }
+         }
+         part { name: "elm.swallow.select_icon";
+            clip_to: "disclip";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  to_x: "elm.select_icon.pad";
+                  to_y: "elm.icon";
+                  relative: 1.0 0.0;
+               }
+               rel2 {
+                  to_x: "elm.select_icon.pad";
+                  to_y: "elm.icon";
+                  relative: 1.0 1.0;
+               }
+               align: 0.0 0.5;
+               fixed: 1 1;
+               visible: 0;
+            }
+            description { state: "selectview" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
+         part { name: "elm.icon";
+            clip_to: "disclip";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel2 {
+                  to: "elm.bottom.pad";
+                  relative: 1.0 0.0;
+               }
+               align: 0.0 0.0;
+               fixed: 1 0;
+            }
+            description { state: "selectview" 0.0;
+               inherit: "default" 0.0;
+               rel1 {
+                  to_x: "elm.swallow.select_icon";
+                  relative: 1.0 0.0;
+               }
+            }
+         }
+         part { name: "elm.bottom.pad";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.relative: 0.0 1.0;
+               align: 0.5 1.0;
+               min: 0 BUBBLE_LAYOUT_BOTTOM_PAD;
+               fixed: 0 1;
+               visible: 0;
+            }
+         }
+         part { name: "disclip";
+             type: RECT;
+             description { state: "default" 0.0;
+             }
+             description { state: "disabled" 0.0;
+                inherit: "default" 0.0;
+                color: BUBBLE_DISCLIP_COLOR;
+             }
+         }
+      }
+      programs {
+         program { name: "go_disabled";
+            signal: "elm,state,disabled";
+            source: "elm";
+            action: STATE_SET "disabled" 0.0;
+            target: "disclip";
+         }
+         program { name: "go_enabled";
+            signal: "elm,state,enabled";
+            source: "elm";
+            action: STATE_SET "default" 0.0;
+            target: "disclip";
+         }
+         program { name: "go_defaultview";
+            signal: "elm,state,select,disable";
+            source: "elm";
+            action: STATE_SET "default" 0.0;
+            //transition: DECELERATE 0.7;
+            target: "elm.swallow.select_icon";
+            target: "elm.icon";
+         }
+         program { name: "go_selectview";
+            signal: "elm,state,select,enable";
+            source: "elm";
+            action: STATE_SET "selectview" 0.0;
+            transition: DECELERATE 0.7;
+            target: "elm.swallow.select_icon";
+            target: "elm.icon";
+         }
+      }
+   }
+
+   group { name: "elm/layout/bubble/seperator/default";
+      parts {
+         part { name: "base";
+            type: RECT;
+            repeat_events: 1;
+            description { state: "default" 0.0;
+               min: 0 GENLIST_PADDING_24_INC;
+               color: 0 0 0 0;
+            }
+         }
+      }
+   }
+

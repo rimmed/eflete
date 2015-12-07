@@ -1,0 +1,38 @@
+/*
+ * Build:
+ * edje_cc  -id ../../images/tizen-hd/ -sd ../../sounds/ genlist_custom.edc
+ */
+collections {
+   #include "../../inc/tizen-hd-inc.edc"
+   #include "genlist_macro.edc"
+   #include "genlist_normal.edc" // if u want group inherting from normal styles.
+   #include "genlist_textblock_style.edc"
+   group { GENLIST_NAME("custom_test/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP
+         GENLIST_PART_PADDING_BOTTOM
+
+         GENLIST_PART_ICON("elm.icon",
+            GENLIST_DESCRIPTION_LTB("elm.padding.left", "elm.padding.top", "elm.padding.bottom",
+               fixed: 1 0;
+               min: 50 50;
+            )
+         )
+         GENLIST_PART_LISTITEM_("elm.text", GENLIST_HEIGHT_1LINE,
+            "elm.icon", "elm.padding.right",
+            "elm.padding.top", "elm.padding.bottom",
+         )
+         GENLIST_PART_FLIP
+      }
+      GENLIST_PROGRAMS_NORMAL( target: "elm.text"; target: "elm.icon"; )
+   }
+}

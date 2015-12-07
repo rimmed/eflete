@@ -1,0 +1,198 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/*
+ * vim:ts=3
+ */
+
+// 2.2.7.1 edit mode select all style
+   group { GENLIST_NAME("select_all/default")
+      alias: "elm/layout/select_all/default";
+
+      GENLIST_PROLOG
+
+      data.item: "texts" "elm.text";
+      data.item: "contents" "elm.icon";
+
+      parts {
+         part { name: "bg";
+            type: RECT;
+            description { state: "default" 0.0;
+              color: GENLIST_SELECT_ALL_BG_COLOR;
+            }
+         }
+         GENLIST_PART_BASE
+         GENLIST_PART_PADDING_LEFT
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( 1 )    // (82-80)/2
+         GENLIST_PART_PADDING_BOTTOM_SIZE( 1 ) // (82-80)/2
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon", "elm.padding.left")
+         GENLIST_PART_PADDING_L("elm.padding.icon.right", "elm.icon")
+         GENLIST_PART_LISTITEM_("elm.text", 80,
+            "elm.padding.icon.right", "elm.padding.right", "elm.padding.top", "elm.padding.bottom",
+         )
+         GENLIST_PART_FOCUS
+      }
+      programs {
+         GENLIST_PROGRAM_SOUND("elm.text")
+         GENLIST_PROGRAM_DISABLED( target: "elm.icon"; target: "elm.text"; )
+         GENLIST_PROGRAM_SOUND("bg")
+         GENLIST_PROGRAM_FOCUS
+      }
+   }
+
+// 2.2.7. Genlist Edit mode (rename)
+// Should be used as decorate all item style
+   group { GENLIST_NAME("edit_default/default")
+
+      GENLIST_PROLOG_NORMAL
+
+      data.item: "contents" "elm.edit.icon.1 elm.edit.icon.2";
+
+      parts {
+         GENLIST_PART_BASE
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_EXPANDED_PAD
+         GENLIST_PART_SPACER("elm.padding.left",
+            GENLIST_DESCRIPTION_L("elm.swallow.pad",
+               min: GENLIST_PADDING_SIZE_LEFT 0;
+               max: GENLIST_PADDING_SIZE_LEFT -1;
+               fixed: 1 0;
+            )
+            description { state: "reorder" 0.0;
+               inherit: "default" 0.0;
+               min: DIALOGUE_PADDING_SIZE_LEFT 0;
+               max: DIALOGUE_PADDING_SIZE_LEFT -1;
+            }
+         )
+         GENLIST_PART_SPACER("elm.padding.right",
+            description { state: "default" 0.0;
+               min: GENLIST_PADDING_SIZE_RIGHT 0;
+               max: GENLIST_PADDING_SIZE_RIGHT -1;
+               fixed: 1 0;
+               align: 1.0 0.5;
+               rel1.to: "base";
+               rel2.to: "base";
+               rel1.relative: 1 0;
+            }
+            description { state: "reorder" 0.0;
+               inherit: "default" 0.0;
+               min: DIALOGUE_PADDING_SIZE_RIGHT 0;
+               max: DIALOGUE_PADDING_SIZE_RIGHT -1;
+            }
+         )
+         GENLIST_PART_ICON("elm.edit.icon.1",
+            GENLIST_DESCRIPTION_L("elm.padding.left",
+               align: 1 0.5;
+               GENLIST_PARAM_ICON_CHECK_RADIO
+            )
+            description { state: "decorate" 0.0;
+               inherit: "default" 0.0;
+               align: 0 0.5;
+            }
+            description { state: "flipped" 0.0;
+               inherit: "default" 0.0;
+               rel1.relative: 0 0;
+               rel2.relative: 0 1;
+               align: 1 0.5;
+            }
+         )
+         GENLIST_PART_PADDING_L("elm.edit.icon1.right", "elm.edit.icon.1")
+         GENLIST_PART_ICON("elm.swallow.decorate.content",
+            GENLIST_DESCRIPTION_LR("elm.edit.icon1.right", "elm.edit.icon.2",
+               min: 0 GENLIST_HEIGHT_1LINE;
+            )
+         )
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_ICON("elm.edit.icon.2",
+            GENLIST_DESCRIPTION_R("elm.padding.right",
+              align: 0 0.5;
+              max: 48 48;
+            )
+            description { state: "decorate" 0.0;
+               inherit: "default" 0.0;
+               align: 1 0.5;
+            }
+            description { state: "flipped" 0.0;
+               inherit: "default" 0.0;
+               rel1.relative: 1 0;
+               rel2.relative: 1 1;
+               align: 0 0.5;
+            }
+         )
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      programs {
+         GENLIST_PROGRAM_DISABLED(
+            target: "bg";
+            target: "bg_reorder";
+            target: "bottom_line";
+            target: "bottom_line2";
+         )
+         GENLIST_PROGRAM_SELECT(
+            target: "bg";
+            target: "bg_reorder";
+            target: "bottom_line";
+            target: "bottom_line2";
+         )
+         // BG of swallowed VIEW(it) is visible 0
+         GENLIST_PROGRAM_SOUND("bg")
+         GENLIST_PROGRAM_REORDER_SOUND("bg_reorder")
+         GENLIST_PROGRAM_REORDER(
+           target: "bg_clip";
+           target: "bg_reorder_clip";
+           target: "bottom_line_clip";
+           target: "elm.padding.left";
+           target: "elm.padding.right";
+         )
+         GENLIST_PROGRAMS_DECORATE_EFFECT(
+            target: "elm.edit.icon.1";
+            target: "elm.edit.icon.2";
+         )
+         GENLIST_PROGRAM_FLIP_EFFECT_TARGET(
+            target: "elm.edit.icon.1";
+            target: "elm.edit.icon.2";
+         )
+         program { name: "flip_enabled";
+            signal:  "elm,state,flip,enabled";
+            source:  "elm";
+            script {
+               new st[31];
+               new Float:vl;
+               get_state(PART:"bg_reorder_clip", st, 30, vl);
+               if (!strcmp(st, "reorder") || !strcmp(st, "reorder_flip")) {
+                  set_state(PART:"bg_reorder_clip", "reorder_flip", 0.0);
+                }
+            }
+         }
+         program { name: "flip_disabled";
+            signal:  "elm,state,flip,disabled";
+            source:  "elm";
+            script {
+               new st[31];
+               new Float:vl;
+               get_state(PART:"bg_reorder_clip", st, 30, vl);
+               if (!strcmp(st, "reorder") || !strcmp(st, "reorder_flip")) {
+                  set_state(PART:"bg_reorder_clip", "reorder", 0.0);
+               }
+            }
+         }
+         GENLIST_PROGRAM_FOCUS_NORMAL
+      }
+   }

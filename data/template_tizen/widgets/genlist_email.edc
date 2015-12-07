@@ -1,0 +1,1031 @@
+/*
+ * efl-theme-tizen
+ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// -------------------------------------------------------------------
+// Email Style -------------------------------------------------------
+// -------------------------------------------------------------------
+// For Handling checkbox srolling issue we have increased the size of check box
+// background to 64*64 though the check image is 45*45 as per GUI. These leaves
+// 9 pixel extra space before the check image and 10 pixel after the check image.
+// So to adjust this extra space the padding is reduced from 19 to 10.
+// This means padding will be 10 pixel and extra space before the checkbox will be 9
+// So it will again get to 19 pixel as gap before the checkbox as per GUI
+
+
+#define GENLIST_EMAIL_PADDING_SIZE_LEFT                 10
+#define GENLIST_EMAIL_PADDING_SIZE_TOP_3LINE            8
+#define GENLIST_EMAIL_PADDING_SIZE_BOTTOM_3LINE         8
+#define GENLIST_EMAIL_PADDING_SIZE_SUB_TEXT_BOTTOM      3
+#define GENLIST_EMAIL_PADDING_SIZE_DEFAULT              10
+
+#define GENLIST_EMAIL_ICON_CHECK_RADIO_SIZE             45
+
+#define GENLIST_EMAIL_MAIN_TEXT_SIZE                    38
+#define GENLIST_EMAIL_SUB_TEXT_SIZE                     30
+#define GENLIST_EMAIL_COUNT_TEXT_SIZE                   28
+#define GENLIST_EMAIL_CONTENTS_TEXT_SIZE                26
+#define GENLIST_EMAIL_CONTENTS_TIME_TEXT_SIZE           24
+
+#define STYLE_TAG \
+      tag:  "br" "\n";\
+      tag:  "ps" "ps";\
+      tag:  "tab" "\t";\
+      tag:  "b" "+ font=Tizen:style=Bold";
+
+#define STYLE_TAG_MATCH_EMAIL \
+      tag:  "match" GENLIST_EMAIL_MATCH_TAG_COLOR;
+
+#define STYLE_TAG_MATCH_EMAIL_FOCUS \
+      tag:  "match" GENLIST_EMAIL_TEXT_FOCUS_COLOR_STYLE;
+
+
+   styles {
+      style { name: "email_style_main";
+         base: "font=Tizen:style=Bold font_size="GENLIST_EMAIL_MAIN_TEXT_SIZE" color="GENLIST_EMAIL_MAIN_TEXT_UNREAD_COLOR_STYLE" text_class=list_item ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_main_dim";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_MAIN_TEXT_SIZE" color="GENLIST_EMAIL_MAIN_TEXT_UNREAD_DIM_COLOR_STYLE" text_class=list_item ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_main_read";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_MAIN_TEXT_SIZE" color="GENLIST_EMAIL_MAIN_TEXT_READ_COLOR_STYLE" text_class=list_item ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_main_read_dim";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_MAIN_TEXT_SIZE" color="GENLIST_EMAIL_MAIN_TEXT_READ_DIM_COLOR_STYLE" text_class=list_item ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_main_focus";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_MAIN_TEXT_SIZE" color="GENLIST_EMAIL_TEXT_FOCUS_COLOR_STYLE" text_class=list_item ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL_FOCUS
+      }
+      style { name: "email_style_sub_unread";
+         base: "font=Tizen:style=Bold font_size="GENLIST_EMAIL_SUB_TEXT_SIZE" color="GENLIST_EMAIL_SUB_TEXT_UNREAD_COLOR_STYLE" text_class=tizen ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_sub_read";
+         base: "font=Tizen:style=Bold font_size="GENLIST_EMAIL_SUB_TEXT_SIZE" color="GENLIST_EMAIL_SUB_TEXT_READ_COLOR_STYLE" text_class=tizen ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_sub_focus";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_SUB_TEXT_SIZE" color="GENLIST_EMAIL_TEXT_FOCUS_COLOR_STYLE" text_class=tizen ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL_FOCUS
+      }
+      style { name: "email_style_contents";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_CONTENTS_TEXT_SIZE" color="GENLIST_EMAIL_CONTENTS_TEXT_COLOR_STYLE" text_class=tizen ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_contents_time";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_CONTENTS_TIME_TEXT_SIZE" color="GENLIST_EMAIL_CONTENTS_TEXT_COLOR_STYLE" text_class=tizen ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL
+      }
+      style { name: "email_style_contents_time_focus";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_CONTENTS_TIME_TEXT_SIZE" color="GENLIST_EMAIL_TEXT_FOCUS_COLOR_STYLE" text_class=tizen ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL_FOCUS
+      }
+      style { name: "email_style_contents_focus";
+         base: "font=Tizen:style=Regular font_size="GENLIST_EMAIL_CONTENTS_TEXT_SIZE" color="GENLIST_EMAIL_TEXT_FOCUS_COLOR_STYLE" text_class=tizen ellipsis=1.0";
+         STYLE_TAG
+         STYLE_TAG_MATCH_EMAIL_FOCUS
+      }
+   }
+
+// email main text
+#define PARAM_EMAIL_MAIN \
+   text { \
+      align: 0 0.5; \
+      min: 0 1; \
+      style: "email_style_main"; \
+   }
+
+#define DESCRIPTION_EMAIL_MAIN_OTHERS \
+   description { state: "disabled" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_main_dim"; \
+   } \
+   description { state: "read" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_main_read"; \
+   } \
+   description { state: "read,disabled" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_main_read_dim"; \
+   } \
+   description { state: "selected" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_main_focus"; \
+   }
+
+// email sub text
+#define PARAM_EMAIL_SUB \
+   text { \
+      align: 0 0.5; \
+      min: 0 1; \
+      style: "email_style_sub_unread"; \
+   }
+
+#define DESCRIPTION_EMAIL_SUB_OTHERS \
+   description { state: "read" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_sub_read"; \
+   } \
+   description { state: "selected" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_sub_focus"; \
+   }
+
+// email contents text
+#define PARAM_EMAIL_COUNT \
+   color: GENLIST_EMAIL_COUNT_TEXT_UNREAD_COLOR; \
+   text { \
+      align: 0 0.5; \
+      min: 0 1; \
+      font: "Tizen:style=Bold"; \
+      size: GENLIST_EMAIL_COUNT_TEXT_SIZE; \
+      text_class: "tizen"; \
+   }
+
+#define DESCRIPTION_EMAIL_COUNT_OTHERS \
+   description { state: "read" 0.0; \
+      inherit: "default" 0.0; \
+      color: GENLIST_EMAIL_COUNT_TEXT_READ_COLOR; \
+      text { \
+         align: 0 0.5; \
+         min: 0 1; \
+         font: "Tizen:style=Regular"; \
+         size: GENLIST_EMAIL_COUNT_TEXT_SIZE; \
+         text_class: "tizen"; \
+      } \
+   } \
+   description { state: "selected" 0.0; \
+      inherit: "default" 0.0; \
+      color: GENLIST_EMAIL_TEXT_FOCUS_COLOR; \
+      text { \
+         align: 0 0.5; \
+         min: 0 1; \
+         font: "Tizen:style=Regular"; \
+         size: GENLIST_EMAIL_COUNT_TEXT_SIZE; \
+         text_class: "tizen"; \
+      } \
+   }
+
+// email contents text
+#define PARAM_EMAIL_CONTENTS \
+   text { \
+      align: 0 0.5; \
+      min: 0 1; \
+      font: "Tizen:style=Regular"; \
+      style: "email_style_contents"; \
+   }
+
+#define PARAM_EMAIL_CONTENTS_TIME \
+   text { \
+      align: 0 0.5; \
+      min: 0 1; \
+      font: "Tizen:style=Regular"; \
+      style: "email_style_contents_time"; \
+   }
+
+#define DESCRIPTION_EMAIL_CONTENTS_TIME_FOCUS \
+   description { state: "selected" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_contents_time_focus"; \
+   }
+
+#define DESCRIPTION_EMAIL_CONTENTS_OTHERS \
+   description { state: "selected" 0.0; \
+      inherit: "default" 0.0; \
+      text.style: "email_style_contents_focus"; \
+   }
+
+#define GENLIST_PART_PADDING_EMAIL_BOTTOM_TO_SIZE( NAME, SIZE ) \
+         GENLIST_PART_SPACER(NAME, \
+            GENLIST_DESCRIPTION_LRT("elm.icon.2", "elm.text.5", "elm.text.2", \
+               min: 0 SIZE; \
+               fixed: 0 1; \
+            )  \
+         )
+
+#define GENLIST_PART_PADDING_EMAIL_OUTBOX_BOTTOM_TO_SIZE( NAME, SIZE ) \
+         GENLIST_PART_SPACER(NAME, \
+            GENLIST_DESCRIPTION_LRT("elm.icon.2", "elm.icon.5", "elm.text.2", \
+               min: 0 SIZE; \
+               fixed: 0 1; \
+            )  \
+         )
+
+#define GENLIST_PARAM_ICON_EMAIL_CHECK_RADIO \
+         min: GENLIST_EMAIL_ICON_CHECK_RADIO_SIZE GENLIST_EMAIL_ICON_CHECK_RADIO_SIZE; \
+         max: GENLIST_EMAIL_ICON_CHECK_RADIO_SIZE GENLIST_EMAIL_ICON_CHECK_RADIO_SIZE;
+
+#define GENLIST_PART_ICON_EMAIL_CHECK_RADIO_L(NAME, LEFT) \
+   GENLIST_PART_ICON(NAME, \
+      GENLIST_DESCRIPTION_LTB(LEFT, "elm.padding.top", "elm.padding.bottom", \
+         GENLIST_PARAM_ICON_EMAIL_CHECK_RADIO \
+         fixed: 1 1; \
+      ) \
+   )
+
+#define HEIGHT_EMAIL_MAIN         54
+#define HEIGHT_EMAIL_SUB          42
+#define HEIGHT_EMAIL_CONTENTS      38
+
+
+#define GENLIST_PROGRAMS_EMAIL( TARGET ) \
+   programs { \
+      GENLIST_PROGRAM_DEFAULT( TARGET \
+         target: "bg"; \
+         target: "bg_clip"; \
+         target: "bottom_line"; \
+         target: "bottom_line2"; \
+         target: "bottom_line_clip"; \
+         target: "bg_reorder"; \
+         target: "elm.padding.left"; \
+         target: "elm.padding.right"; \
+      ) \
+      GENLIST_PROGRAM_DISABLED( TARGET \
+         target: "bg"; \
+         target: "bottom_line"; \
+         target: "bottom_line2"; \
+         target: "bg_reorder"; \
+      ) \
+      GENLIST_PROGRAM_FOCUS_NORMAL \
+      GENLIST_PROGRAM_SELECT( TARGET \
+         target: "bg"; \
+         target: "bottom_line"; \
+         target: "bottom_line2"; \
+         target: "bg_reorder"; \
+      ) \
+      GENLIST_PROGRAM_SOUND("bg") \
+      GENLIST_PROGRAM_DECORATE_REORDER( "normal", \
+         target: "bg_clip"; \
+         target: "bg_reorder_clip"; \
+         target: "bottom_line_clip"; \
+         target: "elm.padding.left"; \
+         target: "elm.padding.right"; \
+      ) \
+      program { name: "unselected_target"; \
+         action: STATE_SET "default" 0.0; \
+         TARGET \
+      } \
+      program { name: "unselected_read"; \
+         signal: "elm,state,unselected"; \
+         source: "elm"; \
+         script { \
+            if (get_int(readed) == 1) \
+               run_program(PROGRAM:"go_read_target"); \
+            else \
+               run_program(PROGRAM:"unselected_target"); \
+         } \
+      } \
+      program { name: "go_read"; \
+         signal: "elm,state,read"; \
+         source: "*"; \
+         script { \
+           set_int(readed, 1); \
+           run_program(PROGRAM:"go_read_target"); \
+         } \
+      } \
+      program { name: "go_unread"; \
+         signal: "elm,state,unread"; \
+         source: "*"; \
+         script { \
+           set_int(readed, 0); \
+           run_program(PROGRAM:"go_unread_target"); \
+         } \
+      } \
+      program { name: "go_read_target"; \
+         action: STATE_SET "read" 0.0; \
+         target: "bg"; \
+         TARGET \
+      } \
+      program { name: "go_unread_target"; \
+         action: STATE_SET "unread" 0.0; \
+         target: "bg"; \
+         TARGET \
+      } \
+   }
+
+
+#define GENLIST_PART_BG_EMAIL_NORMAL \
+      GENLIST_PART_RECT("bg_clip", \
+         mouse_events: 0; \
+         description { state: "default" 0.0; \
+            visible: 1; \
+            color: 255 255 255 255; \
+         } \
+         description { state: "decorate" 0.0; \
+            inherit: "default" 0.0; \
+            visible: 0; \
+         } \
+         description { state: "reorder" 0.0; \
+            inherit: "default" 0.0; \
+            visible: 0; \
+         } \
+         description { state: "decorate_reorder" 0.0; \
+            inherit: "default" 0.0; \
+            visible: 0; \
+         } \
+      ) \
+      GENLIST_PART_RECT("bg_reorder_clip", \
+         mouse_events: 0; \
+         description { state: "default" 0.0; \
+            visible: 0; \
+         } \
+         description { state: "reorder" 0.0; \
+            inherit: "default" 0.0; \
+            visible: 1; \
+            color: 255 255 255 255; \
+         } \
+         description { state: "decorate_reorder" 0.0; \
+            inherit: "default" 0.0; \
+            visible: 0; \
+         } \
+         description { state: "decorate" 0.0; \
+            inherit: "default" 0.0; \
+            visible: 0; \
+         } \
+         description { state: "reorder_flip" 0.0; \
+            inherit: "default" 0.0; \
+            visible: 0; \
+         } \
+      ) \
+      GENLIST_PART_RECT("bg",  \
+         clip_to: "bg_clip"; \
+         description { state: "default" 0.0; \
+            color: GENLIST_LIST_BG_COLOR; \
+         } \
+         description { state: "selected" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_LIST_PRESS_COLOR; \
+         } \
+         description { state: "disabled" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_LIST_DIM_COLOR; \
+         } \
+          description { state: "read" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_LIST_READ_BG_COLOR; \
+         } \
+          description { state: "unread" 0.0; \
+            inherit: "default" 0.0; \
+            color: GENLIST_LIST_UNREAD_BG_COLOR; \
+         } \
+      ) \
+      GENLIST_PART_SPACER("bg_reorder_left", \
+         description { state: "default" 0.0; \
+            min: 16 0; \
+            max: 16 -1; \
+            fixed: 1 0; \
+            align: 0 0.5; \
+            rel2.relative: 0 1; \
+         } \
+      ) \
+      GENLIST_PART_SPACER("bg_reorder_right", \
+         description { state: "default" 0.0; \
+            min: 16 0; \
+            max: 16 -1; \
+            fixed: 1 0; \
+            align: 1.0 0.5; \
+            rel1.relative: 1 0; \
+         } \
+      ) \
+      GENLIST_PART_IMAGE("bg_reorder", \
+         clip_to: "bg_reorder_clip"; \
+         GENLIST_DESCRIPTION_LR("bg_reorder_left", "bg_reorder_right", \
+            image { \
+               normal: "00_list_group_bg.png"; \
+               border: 17 17 8 8; \
+               border_scale: 1; \
+            } \
+         ) \
+         description { state: "selected" 0.0; \
+            inherit: "default"; \
+            image { \
+               normal: "00_list_group_bg_press.png"; \
+               border: 17 17 8 8; \
+               border_scale: 1; \
+            } \
+         } \
+         description { state: "flipped" 0.0; \
+            inherit: "default"; \
+            visible: 0; \
+         } \
+      )
+
+// 2.2.3.5 (Email Style)
+   group { GENLIST_NAME("email.list/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.5";
+      data.item: "contents" "elm.swallow.colorbar elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4 elm.icon.4.touch";
+
+      script {
+         public readed = 0;
+      }
+      parts {
+         GENLIST_PART_BG_EMAIL_NORMAL
+         GENLIST_PART_BASE
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT_SIZE(GENLIST_EMAIL_PADDING_SIZE_LEFT)
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( GENLIST_EMAIL_PADDING_SIZE_TOP_3LINE )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( GENLIST_EMAIL_PADDING_SIZE_BOTTOM_3LINE )
+         GENLIST_PART_COLORBAR
+
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+
+// For Handling checkbox srolling issue we have increased the size of check box
+// background to 64*64 though the check image is 45*45 as per GUI. These leaves
+// 9 pixel extra space before the check image and 10 pixel after the check image.
+// So to adjust this extra space the padding is reduced from 16 to 6.
+// This means padding will be 6 pixel and extra space before the checkbox will be 10
+// So it will again get to 16 pixel as gap after the checkbox as per GUI
+         GENLIST_PART_SPACER("elm.padding.icon1.right",
+            description { state: "default" 0.0;
+               fixed: 1 0;
+               min: 6 0;
+               max: 6 -1;
+               align: 0 0.5;
+               rel1 {
+                  relative: 1 0;
+                  to_x: "elm.icon.1";
+               }
+               rel2 {
+                  relative: 1 1;
+                  to_x: "elm.icon.1";
+               }
+            }
+         )
+
+         GENLIST_PART_TEXTBLOCK("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.icon1.right", "elm.text.limit", "elm.padding.top",
+               PARAM_EMAIL_MAIN
+               min: 0 HEIGHT_EMAIL_MAIN;
+               fixed: 1 1; align: 0 0; text.max: 1 0;  // This limits text growing.
+            )
+            DESCRIPTION_EMAIL_MAIN_OTHERS
+         )
+
+         // FIXME: because script cannot be inherited, text.5 is defined here and can be inherited
+         GENLIST_PART_TEXT("elm.text.4",
+            GENLIST_DESCRIPTION_LTB("elm.text.1", "elm.padding.top", "elm.text.2",
+               PARAM_EMAIL_COUNT
+               min: 45 HEIGHT_EMAIL_MAIN;
+               max: 45 HEIGHT_EMAIL_MAIN;
+               text.min: 1 0;
+               text.align: 0.5 0.65;
+               fixed: 1 1;
+               visible: 0;
+            )
+         )
+         // Virtual part for Maxmimum right X axis of TEXT
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.icon.3",
+               min: 0 0;
+               max: 0 0;
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_ICON("elm.icon.3",
+            GENLIST_DESCRIPTION_RTB("elm.padding.icon4.left", "elm.padding.top", "elm.text.2",
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon4.left", "elm.icon.4", GENLIST_EMAIL_PADDING_SIZE_DEFAULT)
+         GENLIST_PART_ICON("elm.icon.4",
+            GENLIST_DESCRIPTION_RTB("elm.padding.right", "elm.padding.top", "elm.text.2",
+               min: 45 45;
+               max: HEIGHT_EMAIL_MAIN HEIGHT_EMAIL_MAIN;
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_ICON("elm.icon.4.touch",
+            GENLIST_DESCRIPTION_ENVELOP("elm.icon.4",
+               rel1.offset: -4 -7;
+               rel2.offset: 26 8;
+            )
+         )
+         GENLIST_PART_ICON("elm.icon.2",
+            GENLIST_DESCRIPTION_LTB("elm.padding.icon1.right", "elm.text.1", "elm.text.3",
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION_LRT("elm.icon.2", "elm.text.5", "elm.text.1",
+               PARAM_EMAIL_SUB
+               min: 0 HEIGHT_EMAIL_SUB;
+               fixed: 0 1;
+            )
+            DESCRIPTION_EMAIL_SUB_OTHERS
+         )
+         GENLIST_PART_TEXTBLOCK("elm.text.5",
+            GENLIST_DESCRIPTION_RTB("elm.padding.right", "elm.text.1", "elm.padding.text2.bottom",
+               PARAM_EMAIL_CONTENTS_TIME
+               GENLIST_PARAM_TEXT_LIMIT_RT
+               min: 0 HEIGHT_EMAIL_SUB;
+               fixed: 1 0;
+            )
+            DESCRIPTION_EMAIL_CONTENTS_TIME_FOCUS
+         )
+
+         GENLIST_PART_PADDING_EMAIL_BOTTOM_TO_SIZE( "elm.padding.text2.bottom", GENLIST_EMAIL_PADDING_SIZE_SUB_TEXT_BOTTOM)
+
+         GENLIST_PART_TEXTBLOCK("elm.text.3",
+            GENLIST_DESCRIPTION("elm.padding.icon1.right", "elm.padding.right", "elm.padding.text2.bottom", "elm.padding.bottom",
+               PARAM_EMAIL_CONTENTS
+               min: 0 HEIGHT_EMAIL_CONTENTS;
+            )
+            DESCRIPTION_EMAIL_CONTENTS_OTHERS
+         )
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_EMAIL( target: "elm.text.1";
+         target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.text.4"; target: "elm.text.5";
+         target: "elm.swallow.colorbar";
+         target: "elm.icon.1";
+         target: "elm.icon.2"; target: "elm.icon.3";
+         target: "elm.icon.4"; target: "elm.icon.4.touch";
+      )
+      GENLIST_PROGRAM_SOUND("elm.icon.4.touch")
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+      GENLIST_PROGRAM_SOUND("elm.text.5")
+   }
+
+// email list with conversation text
+   group { GENLIST_NAME("email.list.conversation/default")
+      inherit: "elm/genlist/item/email.list/default";
+
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4 elm.text.5";
+      parts {
+         GENLIST_PART_TEXT("elm.text.4",
+            GENLIST_DESCRIPTION_LTB("elm.text.1", "elm.padding.top", "elm.text.2",
+               visible: 1;
+            )
+            DESCRIPTION_EMAIL_COUNT_OTHERS
+         )
+         // Virtual part for Maxmimum right X axis of TEXT
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.icon.3",
+               min: 45 HEIGHT_EMAIL_MAIN;
+               max: 45 HEIGHT_EMAIL_MAIN;
+            )
+         )
+      }
+   }
+
+   // 2.2.3.13
+   // email outbox style
+   group { GENLIST_NAME("email.outbox/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3";
+      data.item: "contents" "elm.swallow.colorbar elm.icon.1 elm.icon.2 elm.icon.3 elm.icon.4 elm.icon.4.touch elm.icon.5";
+
+      script {
+         public readed = 0;
+      }
+      parts {
+         GENLIST_PART_BG_EMAIL_NORMAL
+         GENLIST_PART_BASE
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT_SIZE(GENLIST_EMAIL_PADDING_SIZE_LEFT)
+         GENLIST_PART_PADDING_RIGHT_EDIT
+         GENLIST_PART_PADDING_TOP_SIZE( GENLIST_EMAIL_PADDING_SIZE_TOP_3LINE )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( GENLIST_EMAIL_PADDING_SIZE_BOTTOM_3LINE )
+         GENLIST_PART_COLORBAR
+
+         GENLIST_PART_ICON_CHECK_RADIO_L("elm.icon.1", "elm.padding.left")
+
+// For Handling checkbox srolling issue we have increased the size of check box
+// background to 64*64 though the check image is 45*45 as per GUI. These leaves
+// 9 pixel extra space before the check image and 10 pixel after the check image.
+// So to adjust this extra space the padding is reduced from 16 to 6.
+// This means padding will be 6 pixel and extra space before the checkbox will be 10
+// So it will again get to 16 pixel as gap after the checkbox as per GUI
+         GENLIST_PART_SPACER("elm.padding.icon1.right",
+            description { state: "default" 0.0;
+               fixed: 1 0;
+               min: 6 0;
+               max: 6 -1;
+               align: 0 0.5;
+               rel1 {
+                  relative: 1 0;
+                  to_x: "elm.icon.1";
+               }
+               rel2 {
+                  relative: 1 1;
+                  to_x: "elm.icon.1";
+               }
+            }
+         )
+
+         GENLIST_PART_TEXTBLOCK("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.icon1.right", "elm.text.limit", "elm.padding.top",
+               PARAM_EMAIL_MAIN
+               min: 0 HEIGHT_EMAIL_MAIN;
+               fixed: 1 1; align: 0 0; text.max: 1 0;  // This limits text growing.
+            )
+            DESCRIPTION_EMAIL_MAIN_OTHERS
+         )
+         // FIXME: because script cannot be inherited, text.4 is defined here and can be inherited
+         GENLIST_PART_TEXT("elm.text.4",
+            GENLIST_DESCRIPTION_LTB("elm.text.1", "elm.padding.top", "elm.text.2",
+               PARAM_EMAIL_COUNT
+               min: 0 HEIGHT_EMAIL_MAIN;
+               max: 0 HEIGHT_EMAIL_MAIN;
+               text.min: 1 0;
+               text.align: 0.5 0.65;
+               fixed: 1 0;
+               visible: 0;
+            )
+         )
+         // Virtual part for Maxmimum right X axis of TEXT
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.icon.3",
+               min: 0 0;
+               max: 0 0;
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_ICON("elm.icon.3",
+            GENLIST_DESCRIPTION_RTB("elm.padding.icon4.left", "elm.padding.top", "elm.text.2",
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon4.left", "elm.icon.4", GENLIST_EMAIL_PADDING_SIZE_DEFAULT)
+         GENLIST_PART_ICON("elm.icon.4",
+            GENLIST_DESCRIPTION_RTB("elm.padding.right", "elm.padding.top", "elm.text.2",
+               min: 45 45;
+               max: HEIGHT_EMAIL_MAIN HEIGHT_EMAIL_MAIN;
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_ICON("elm.icon.4.touch",
+            GENLIST_DESCRIPTION_ENVELOP("elm.icon.4",
+               rel1.offset: -4 -7;
+               rel2.offset: 26 8;
+            )
+         )
+
+         GENLIST_PART_ICON("elm.icon.2",
+            GENLIST_DESCRIPTION_LTB("elm.padding.icon1.right", "elm.text.1", "elm.text.3",
+               fixed: 1 1;
+            )
+         )
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION_LRT("elm.icon.2", "elm.padding.icon5.left", "elm.text.1",
+               PARAM_EMAIL_SUB
+               min: 0 HEIGHT_EMAIL_SUB;
+               fixed: 0 1;
+            )
+            DESCRIPTION_EMAIL_SUB_OTHERS
+         )
+
+         GENLIST_PART_PADDING_EMAIL_OUTBOX_BOTTOM_TO_SIZE( "elm.padding.text2.bottom", GENLIST_EMAIL_PADDING_SIZE_SUB_TEXT_BOTTOM)
+
+         GENLIST_PART_TEXTBLOCK("elm.text.3",
+            GENLIST_DESCRIPTION("elm.padding.icon1.right", "elm.padding.icon5.left", "elm.padding.text2.bottom", "elm.padding.bottom",
+               PARAM_EMAIL_CONTENTS
+               min: 0 HEIGHT_EMAIL_CONTENTS;
+            )
+            DESCRIPTION_EMAIL_CONTENTS_OTHERS
+         )
+         GENLIST_PART_PADDING_R("elm.padding.icon5.left", "elm.icon.5")
+         GENLIST_PART_ICON("elm.icon.5",
+            GENLIST_DESCRIPTION_RTB("elm.padding.right", "elm.text.1", "elm.padding.bottom",
+               min: 180 74;
+               max: 180 74;
+               fixed: 1 1;
+            )
+         )
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_EMAIL( target: "elm.text.1"; target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.text.4";
+         target: "elm.swallow.colorbar"; target: "elm.icon.1"; target: "elm.icon.2"; target: "elm.icon.3";
+         target: "elm.icon.4"; target: "elm.icon.5";
+      )
+   }
+
+// email outbox style with conversation
+   group { GENLIST_NAME("email.outbox.conversation/default")
+      inherit: "elm/genlist/item/email.outbox/default";
+
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.4";
+
+      parts {
+         GENLIST_PART_TEXT("elm.text.4",
+            GENLIST_DESCRIPTION_LTB("elm.text.1", "elm.padding.top", "elm.icon.5",
+               min: 45 HEIGHT_EMAIL_MAIN;
+               max: 45 HEIGHT_EMAIL_MAIN;
+               visible: 1;
+            )
+            DESCRIPTION_EMAIL_COUNT_OTHERS
+         )
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.icon.3",
+               min: 45 HEIGHT_EMAIL_MAIN;
+               max: 45 HEIGHT_EMAIL_MAIN;
+            )
+         )
+      }
+   }
+
+// FIXME: This is temporary style for test purpose
+// This style has all widgets by itself
+   group { GENLIST_NAME("email.list.test/default")
+      GENLIST_PROLOG_NORMAL
+      data.item: "texts" "elm.text.1 elm.text.2 elm.text.3 elm.text.5";
+      data.item: "contents" "elm.swallow.colorbar elm.check.touch elm.icon.4.touch";
+
+      images {
+         image: "00_check_bg.png" COMP;
+         image: "00_check_dim_bg.png" COMP;
+         image: "00_check_activated_dim.png" COMP;
+         image: "00_check_activated.png" COMP;
+         image: "00_check_press_bg.png" COMP;
+      }
+
+      script {
+         public readed = 0;
+      }
+      parts {
+         GENLIST_PART_BG_NORMAL
+         GENLIST_PART_BASE
+         GENLIST_PART_BOTTOM_LINE
+         GENLIST_PART_PADDING_LEFT_SIZE(GENLIST_EMAIL_PADDING_SIZE_LEFT)
+         GENLIST_PART_PADDING_RIGHT
+         GENLIST_PART_PADDING_TOP_SIZE( GENLIST_EMAIL_PADDING_SIZE_TOP_3LINE )
+         GENLIST_PART_PADDING_BOTTOM_SIZE( GENLIST_EMAIL_PADDING_SIZE_BOTTOM_3LINE )
+         GENLIST_PART_COLORBAR
+
+         GENLIST_PART_IMAGE("elm.check.bg",
+            mouse_events: 0;
+            GENLIST_DESCRIPTION_L("elm.padding.left",
+               image.normal: "00_check_bg.png";
+               fill.smooth : 0;
+            )
+            description { state: "default" 0.0;
+               min: CHECK_STYLE_DEFAULT_BG_NORMAL_MIN_MAX_INC;
+               max: CHECK_STYLE_DEFAULT_BG_NORMAL_MIN_MAX_INC;
+               fixed: 1 1;
+               image.normal: "00_check_bg.png";
+               fill.smooth : 0;
+            }
+            description { state: "pressed" 0.0;
+               inherit: "default" 0.0;
+               image.normal: "00_check_press_bg.png";
+            }
+            description { state: "disabled" 0.0;
+               inherit: "default" 0.0;
+               image.normal: "00_check_dim_bg.png";
+            }
+         )
+         GENLIST_PART_IMAGE("elm.check",
+            mouse_events: 0;
+            GENLIST_DESCRIPTION_ENVELOP("elm.check.bg",
+               visible: 0;
+               image.normal: "00_check_activated.png";
+            )
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+            description { state: "dim" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+               image.normal: "00_check_activated_dim.png";
+            }
+            description { state: "pressed" 0.0;
+               inherit: "visible" 0.0;
+            }
+         )
+
+
+// For Handling checkbox srolling issue we have increased the size of check box
+// background to 64*64 though the check image is 45*45 as per GUI. These leaves
+// 9 pixel extra space before the check image and 10 pixel after the check image.
+// So to adjust this extra space the padding is reduced from 16 to 6.
+// This means padding will be 6 pixel and extra space before the checkbox will be 10
+// So it will again get to 16 pixel as gap after the checkbox as per GUI
+         GENLIST_PART_SPACER("elm.padding.icon1.right",
+            description { state: "default" 0.0;
+               fixed: 1 0;
+               min: 6 0;
+               max: 6 -1;
+               align: 0 0.5;
+               rel1 {
+                  relative: 1 0;
+                  to_x: "elm.check";
+               }
+               rel2 {
+                  relative: 1 1;
+                  to_x: "elm.check";
+               }
+            }
+         )
+
+         GENLIST_PART_TEXTBLOCK("elm.text.1",
+            GENLIST_DESCRIPTION_LRT("elm.padding.icon1.right", "elm.text.limit", "elm.padding.top",
+               PARAM_EMAIL_MAIN
+               min: 0 HEIGHT_EMAIL_MAIN;
+               fixed: 1 1; align: 0 0; text.max: 1 0;  // This limits text growing.
+            )
+            DESCRIPTION_EMAIL_MAIN_OTHERS
+         )
+
+         // FIXME: because script cannot be inherited, text.5 is defined here and can be inherited
+         GENLIST_PART_TEXT("elm.text.4",
+            GENLIST_DESCRIPTION_LTB("elm.text.1", "elm.padding.top", "elm.text.2",
+               PARAM_EMAIL_COUNT
+               min: 45 HEIGHT_EMAIL_MAIN;
+               max: 45 HEIGHT_EMAIL_MAIN;
+               text.min: 1 0;
+               text.align: 0.5 0.65;
+               fixed: 1 1;
+               visible: 0;
+            )
+         )
+         // Virtual part for Maxmimum right X axis of TEXT
+         GENLIST_PART_SPACER("elm.text.limit",
+            GENLIST_DESCRIPTION_R("elm.icon.3",
+               min: 0 0;
+               max: 0 0;
+               fixed: 1 0;
+            )
+         )
+         GENLIST_PART_IMAGE("elm.icon.3",
+            GENLIST_DESCRIPTION_RTB("elm.padding.icon4.left", "elm.padding.top", "elm.text.2",
+               fixed: 1 0;
+               min: 0 0;
+               max: 0 0;
+               image.normal: "00_icon_favorite_on_45x45.png";
+               visible: 0;
+            )
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               min: 45 45;
+               visible: 1;
+            }
+         )
+         GENLIST_PART_PADDING_R_SIZE("elm.padding.icon4.left", "elm.icon.4", GENLIST_EMAIL_PADDING_SIZE_DEFAULT)
+         GENLIST_PART_IMAGE("elm.icon.4",
+            GENLIST_DESCRIPTION_RTB("elm.padding.right", "elm.padding.top", "elm.text.2",
+               max: HEIGHT_EMAIL_MAIN HEIGHT_EMAIL_MAIN;
+               min: 0 0;
+               max: 0 0;
+               fixed: 1 0;
+               image.normal: "00_icon_favorite_off_45x45.png";
+               visible: 0;
+            )
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               min: 45 45;
+               visible: 1;
+            }
+            description { state: "enable" 0.0;
+               inherit: "default" 0.0;
+               image.normal: "00_icon_favorite_on_45x45.png";
+               min: 45 45;
+               visible: 1;
+            }
+         )
+         GENLIST_PART_ICON("elm.icon.4.touch",
+            GENLIST_DESCRIPTION_ENVELOP("elm.icon.4",
+               rel1.offset: -4 -7;
+               rel2.offset: 26 8;
+            )
+         )
+         GENLIST_PART_IMAGE("elm.icon.2",
+            GENLIST_DESCRIPTION_LTB("elm.padding.icon1.right", "elm.text.1", "elm.text.3",
+               min: 0 0;
+               max: 0 0;
+               fixed: 1 0;
+               image.normal: "00_icon_favorite_off_45x45.png";
+               visible: 0;
+            )
+            description { state: "visible" 0.0;
+               inherit: "default" 0.0;
+               min: 45 45;
+               visible: 1;
+            }
+         )
+         GENLIST_PART_TEXTBLOCK("elm.text.2",
+            GENLIST_DESCRIPTION_LRT("elm.icon.2", "elm.text.5", "elm.text.1",
+               PARAM_EMAIL_SUB
+               min: 0 HEIGHT_EMAIL_SUB;
+               fixed: 0 1;
+            )
+            DESCRIPTION_EMAIL_SUB_OTHERS
+         )
+         GENLIST_PART_TEXTBLOCK("elm.text.5",
+            GENLIST_DESCRIPTION_RTB("elm.padding.right", "elm.text.1", "elm.padding.text2.bottom",
+               PARAM_EMAIL_CONTENTS_TIME
+               GENLIST_PARAM_TEXT_LIMIT_RT
+               min: 0 HEIGHT_EMAIL_SUB;
+               fixed: 1 0;
+            )
+            DESCRIPTION_EMAIL_CONTENTS_TIME_FOCUS
+         )
+
+         GENLIST_PART_PADDING_EMAIL_BOTTOM_TO_SIZE( "elm.padding.text2.bottom", GENLIST_EMAIL_PADDING_SIZE_SUB_TEXT_BOTTOM)
+
+         GENLIST_PART_TEXTBLOCK("elm.text.3",
+            GENLIST_DESCRIPTION("elm.padding.icon1.right", "elm.padding.right", "elm.padding.text2.bottom", "elm.padding.bottom",
+               PARAM_EMAIL_CONTENTS
+               min: 0 HEIGHT_EMAIL_CONTENTS;
+            )
+            DESCRIPTION_EMAIL_CONTENTS_OTHERS
+         )
+         GENLIST_PART_ICON("elm.check.touch",
+            GENLIST_DESCRIPTION_ENVELOP("elm.check",
+            )
+         )
+         GENLIST_PART_FOCUS_NORMAL
+      }
+      GENLIST_PROGRAMS_EMAIL( target: "elm.text.1";
+         target: "elm.text.2"; target: "elm.text.3";
+         target: "elm.text.4"; target: "elm.text.5";
+         target: "elm.swallow.colorbar";
+         target: "elm.icon.4.touch";
+         target: "elm.check.touch";
+      )
+      program { name: "check_show";
+         signal: "elm,state,check,show";
+         source: "*";
+         action: STATE_SET "visible" 0.0;
+         target: "elm.check";
+      }
+      program { name: "check_hide";
+         signal: "elm,state,check,hide";
+         source: "*";
+         action: STATE_SET "default" 0.0;
+         target: "elm.check";
+      }
+      program { name: "icon2_show";
+         signal: "elm,state,icon2,show";
+         source: "*";
+         action: STATE_SET "visible" 0.0;
+         target: "elm.icon.2";
+      }
+      program { name: "icon3_show";
+         signal: "elm,state,icon3,show";
+         source: "*";
+         action: STATE_SET "visible" 0.0;
+         target: "elm.icon.3";
+      }
+      program { name: "icon4_show";
+         signal: "elm,state,icon4,show";
+         source: "*";
+         action: STATE_SET "visible" 0.0;
+         target: "elm.icon.4";
+      }
+      program { name: "icon4_enable";
+         signal: "elm,state,icon4,enable";
+         source: "*";
+         action: STATE_SET "enable" 0.0;
+         target: "elm.icon.4";
+      }
+      program { name: "icon4_disable";
+         signal: "elm,state,icon4,disable";
+         source: "*";
+         action: STATE_SET "visible" 0.0;
+         target: "elm.icon.4";
+      }
+      GENLIST_PROGRAM_SOUND("elm.icon.4.touch")
+      GENLIST_PROGRAM_SOUND("elm.check.touch")
+      GENLIST_PROGRAM_SOUND("elm.text.1")
+      GENLIST_PROGRAM_SOUND("elm.text.2")
+      GENLIST_PROGRAM_SOUND("elm.text.3")
+      GENLIST_PROGRAM_SOUND("elm.text.4")
+      GENLIST_PROGRAM_SOUND("elm.text.5")
+   }
