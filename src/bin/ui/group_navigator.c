@@ -384,7 +384,8 @@ _unselect_part(Part_List *pl)
    Part_ *part;
 
    assert(pl != NULL);
-   assert(pl->selected_part_item != NULL);
+   if (!pl->selected_part_item)
+     return;
 
    pl->group->current_part->current_item_name = NULL;
    pl->group->current_part = NULL;
@@ -902,10 +903,9 @@ _part_del(Part_List *pl,
    Eina_Stringshare *msg;
    Change *change;
 
-   assert(pl != NULL);
-   assert(glit != NULL);
 
    part = elm_object_item_data_get(glit);
+   assert(part);
 
    part_name = eina_stringshare_add(part->name);
    msg = eina_stringshare_printf(_("deleted part \"%s\""), part_name);
@@ -1078,12 +1078,6 @@ _on_btn_minus_clicked(void *data,
      _state_del(pl, glit);
    else if ((itc == pl->itc_item))
      _item_del(pl, glit);
-
-   TODO("Check if we still need this")
-   /* Need to save pl->group->edit_object, since we changed it */
-   editor_save_all(ap.project->global_object);
-   TODO("Remove this line once edje_edit_image_add would be added into Editor Modulei and saving would work properly")
-   ap.project->changed = true;
 }
 
 
