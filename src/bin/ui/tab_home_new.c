@@ -24,6 +24,7 @@
 #include "tabs.h"
 #include "main_window.h"
 #include "project_common.h"
+#include "config.h"
 
 struct _Widget_Item_Data
 {
@@ -88,7 +89,7 @@ struct _Tab_Home_New
 };
 
 typedef struct _Tab_Home_New Tab_Home_New;
-Tab_Home_New tab_new;
+static Tab_Home_New tab_new;
 
 /* CHECK ALL AND NOT ALL */
 static void
@@ -351,7 +352,7 @@ _edc_code_generate(Eina_Stringshare *path, Eina_Bool theme_color)
                                             "%d widgets included due to dependencies:<br><br>",
                                             deps_count), deps_count);
 
-        NOTIFY_INFO(3, "%s", eina_strbuf_string_get(dep_message));
+        INFO("%s", eina_strbuf_string_get(dep_message));
      }
    eina_strbuf_free(dep_message);
    eina_strbuf_append(edc, "data.item: \"version\" \"110\";\n\n");
@@ -486,6 +487,7 @@ _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    ecore_file_recursive_rm(tab_new.tmp_dir_path);
    eina_stringshare_del(tab_new.tmp_dir_path);
    tab_new.tmp_dir_path = NULL;
+   ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
 
    return true;
 }
@@ -494,6 +496,7 @@ static Eina_Bool
 _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
    pm_project_thread_cancel();
+   ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
 

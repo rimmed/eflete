@@ -17,10 +17,7 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include "group_manager.h"
-#include "alloc.h"
-#include "signals.h"
-#include "string_common.h"
+#include "project_manager.h"
 
 static void
 _group_name_parse(Group *group)
@@ -52,14 +49,34 @@ gm_group_edit_object_load(Project *pro, Group *group, Evas *e)
    assert(group->edit_object == NULL);
 
    group->edit_object = edje_edit_object_add(e);
-   edje_object_freeze(group->edit_object);
-   evas_object_freeze_events_set(group->edit_object, true);
+   if (!edje_object_mmap_set(group->edit_object, pro->mmap_file, group->name))
+     {
+        ERR("Can't set mmap object");
+        abort();
+     }
+}
+
+void
+gm_group_edit_object_reload(Project *pro, Group *group)
+{
+   Part *part;
+   Eina_List *l;
+
+   assert(pro != NULL);
+   assert(group != NULL);
+   assert(group->edit_object != NULL);
 
    if (!edje_object_mmap_set(group->edit_object, pro->mmap_file, group->name))
      {
         ERR("Can't set mmap object");
         abort();
      }
+
+   EINA_LIST_FOREACH(group->parts, l, part)
+      edje_edit_part_selected_state_set(group->edit_object,
+                                        part->name,
+                                        part->current_state->parsed_name,
+                                        part->current_state->parsed_val);
 }
 
 void
@@ -73,7 +90,7 @@ gm_group_edit_object_unload(Group *group)
 }
 
 State *
-gm_state_add(Project *pro, Part_ *part, const char *state_name)
+gm_state_add(Project *pro, Part *part, const char *state_name)
 {
    State *state;
    Eina_Stringshare *image_name, *name;
@@ -172,10 +189,10 @@ gm_state_add(Project *pro, Part_ *part, const char *state_name)
    return state;
 }
 
-Part_ *
+Part *
 gm_part_add(Project *pro, Group *group, const char *part_name)
 {
-   Part_ *part;
+   Part *part;
    Eina_List *states, *l;
    Eina_Stringshare *state_name, *group_name, *item_name;
 
@@ -183,7 +200,7 @@ gm_part_add(Project *pro, Group *group, const char *part_name)
    assert(group != NULL);
    assert(part_name != NULL);
 
-   part = mem_calloc(1, sizeof(Part_));
+   part = mem_calloc(1, sizeof(Part));
    part->name = eina_stringshare_add(part_name);
    part->group = group;
    part->type = edje_edit_part_type_get(group->edit_object, part_name);
@@ -250,7 +267,7 @@ _group_load(Project *pro, Group *group)
                     *state_full_name, *sample_name, *tone_name;
    Edje_Action_Type act;
    double state_val;
-   Part_ *part;
+   Part *part;
    State *state;
    Resource *program;
 
@@ -296,7 +313,7 @@ _group_load(Project *pro, Group *group)
                    eina_stringshare_del(state_name);
                    EINA_LIST_FOREACH(targets, lt, target_name)
                      {
-                        part = (Part_ *) pm_resource_unsorted_get(group->parts, target_name);
+                        part = (Part *) pm_resource_unsorted_get(group->parts, target_name);
                         state = (State *) pm_resource_get(part->states, state_full_name);
                         if (state)
                           state->used_in = eina_list_sorted_insert(state->used_in,
@@ -362,7 +379,7 @@ void
 gm_group_del(Project *pro, Group *group)
 {
    Group *alias;
-   Part_ *part;
+   Part *part;
    Resource *program;
    Eina_List *l, *ln;
 
@@ -397,6 +414,8 @@ gm_group_del(Project *pro, Group *group)
    /* delete group name after call signal, because the group name need in the
     * callbacks */
    eina_stringshare_del(group->name);
+   if (group->current_program)
+     eina_stringshare_del(group->current_program);
    free(group);
 }
 
@@ -435,7 +454,7 @@ gm_groups_free(Project *pro)
 {
    Group *group;
    Resource *program;
-   Part_ *part;
+   Part *part;
    State *state;
    Eina_Stringshare *item_name;
 
@@ -480,8 +499,8 @@ gm_groups_free(Project *pro)
 void
 gm_state_del(Project *pro, State *state)
 {
-   Eina_Stringshare *name, *image_name;
-   Eina_List *tween_list, *l;
+//   Eina_Stringshare *name, *image_name;
+//   Eina_List *tween_list, *l;
 
    assert(pro != NULL);
    assert(state != NULL);
@@ -496,6 +515,8 @@ gm_state_del(Project *pro, State *state)
         pm_resource_usage_del(USAGE_LIST, name, state); \
         edje_edit_string_free(name); \
      }
+TODO("fix usage adding on properties change before using this code")
+#if 0
    switch (state->part->type)
      {
       case EDJE_PART_TYPE_RECTANGLE:
@@ -531,6 +552,7 @@ gm_state_del(Project *pro, State *state)
       default:
          break;
      }
+#endif
    state->used_in = eina_list_free(state->used_in);
    state->part->states = eina_list_remove(state->part->states, state);
    eina_stringshare_del(state->parsed_name);
@@ -541,7 +563,38 @@ gm_state_del(Project *pro, State *state)
 }
 
 void
-gm_part_del(Project *pro, Part_* part)
+gm_part_item_add(Project *pro, Part *part, Eina_Stringshare *item_name)
+{
+   assert(pro != NULL);
+   assert(part != NULL);
+   assert(item_name != NULL);
+   assert((part->type ==  EDJE_PART_TYPE_BOX) ||
+          (part->type ==  EDJE_PART_TYPE_TABLE));
+
+   part->items = eina_list_append(part->items, eina_stringshare_ref(item_name));
+}
+
+void
+gm_part_item_del(Project *pro, Part *part, Eina_Stringshare *item_name)
+{
+   Eina_List *l;
+
+   assert(pro != NULL);
+   assert(part != NULL);
+   assert(item_name != NULL);
+   assert((part->type ==  EDJE_PART_TYPE_BOX) ||
+          (part->type ==  EDJE_PART_TYPE_TABLE));
+
+   l = eina_list_data_find_list(part->items, item_name);
+
+   assert(l != NULL);
+
+   part->items = eina_list_remove_list(part->items, l);
+   eina_stringshare_del(item_name);
+}
+
+void
+gm_part_del(Project *pro, Part* part)
 {
    State *state;
    const char *group_name, *item_name;
@@ -605,11 +658,115 @@ gm_part_del(Project *pro, Part_* part)
 }
 
 void
-gm_part_rename(Part_* part, const char *new_part_name)
+gm_part_rename(Part* part, const char *new_part_name)
 {
    assert(part != NULL);
    assert(new_part_name != NULL);
 
    eina_stringshare_del(part->name);
    part->name = eina_stringshare_add(new_part_name);
+}
+
+void
+gm_part_restack(Part *part, Part *rel_part)
+{
+   Eina_List *rel_l;
+
+   assert(part != NULL);
+
+   part->group->parts = eina_list_remove(part->group->parts, part);
+
+   if (rel_part)
+     {
+        rel_l = eina_list_data_find_list(part->group->parts, rel_part);
+        assert (rel_l != NULL);
+        part->group->parts = eina_list_prepend_relative_list(part->group->parts, part, rel_l);
+     }
+   else
+     part->group->parts = eina_list_append(part->group->parts, part);
+}
+
+void
+gm_part_item_restack(Part *part, Eina_Stringshare *part_item, Eina_Stringshare *relative_part_item)
+{
+   assert(part != NULL);
+   assert(part_item != NULL);
+
+   part->items = eina_list_remove(part->items, part_item);
+   if (relative_part_item)
+     part->items = eina_list_prepend_relative(part->items,
+                                              part_item,
+                                              relative_part_item);
+   else
+     part->items = eina_list_append(part->items, part_item);
+}
+
+void
+gm_program_add(Project *pro, Group *group, Eina_Stringshare *program_name)
+{
+   Resource *program;
+
+   assert(pro != NULL);
+   assert(program_name != NULL);
+   assert(group != NULL);
+
+   program = mem_calloc(1, sizeof(Resource));
+   program->name = eina_stringshare_add(program_name);
+   group->programs = eina_list_sorted_insert(group->programs, (Eina_Compare_Cb)resource_cmp, program);
+}
+
+void
+gm_program_del(Project *pro, Group *group, Eina_Stringshare *program_name)
+{
+   Eina_List *l;
+   Resource *program;
+
+   assert(pro != NULL);
+   assert(program_name != NULL);
+   assert(group != NULL);
+
+   program = pm_resource_get(group->programs, program_name);
+
+   assert(program != NULL);
+
+   l = eina_list_data_find_list(group->programs, program);
+
+   assert(l != NULL);
+
+   group->programs = eina_list_remove_list(group->programs, l);
+   eina_stringshare_del(program->name);
+   eina_list_free(program->used_in);
+   free(program);
+}
+
+/**
+ * ref http://docs.enlightenment.org/auto/edje/group__Edje__Object__Part.html
+ */
+static char *part_types[] = {
+     "NONE",
+     "RECTANGLE",
+     "TEXT",
+     "IMAGE",
+     "SWALLOW",
+     "TEXTBLOCK",
+     "GRADIENT",
+     "GROUP",
+     "BOX",
+     "TABLE",
+     "EXTERNAL",
+     "PROXY",
+     "SPACER",
+     "MESH NODE",
+     "LIGHT",
+     "CAMERA",
+     "SNAPSHOT"
+};
+static unsigned int part_types_count = 16;
+
+const char *
+gm_part_type_text_get(Edje_Part_Type part_type)
+{
+   assert(part_type <= part_types_count);
+
+   return part_types[part_type];
 }

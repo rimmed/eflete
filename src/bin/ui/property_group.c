@@ -28,14 +28,12 @@
 #include "property_private.h"
 #include "property_macros.h"
 #include "main_window.h"
-#include "string_common.h"
-#include "new_history.h"
-#include "editor.h"
+#include "history.h"
 #include "validator.h"
-
-#include "syntax_color.h"
-
-#include "signals.h"
+#include "group_navigator.h"
+#include "change.h"
+#include "project_manager.h"
+#include "colorsel.h"
 
 #define GROUP_PROP_DATA "group_prop_data"
 
@@ -47,15 +45,13 @@
 struct _Group_Prop_Data
 {
    Group *group;
-   Part_ *part;
+   Part *part;
    Change *change;
    int old_int_val, old_int_val2, old_int_val3, old_int_val4;
    double old_double_val;
    Evas_Object *layout;
    Evas_Object *scroller;
    Eina_Stringshare *item_name;
-   color_data *color_data;
-   Eina_Strbuf *strbuf;
    struct {
         struct {
              Evas_Object *frame;
@@ -63,8 +59,8 @@ struct _Group_Prop_Data
              Evas_Object *shared_check;
              Evas_Object *ctxpopup;
              Evas_Object *name;
-             Evas_Object *min_w, *min_h;
-             Evas_Object *max_w, *max_h;
+             Evas_Object *min_w, *min_h, *min_item;
+             Evas_Object *max_w, *max_h, *max_item;
              Evas_Object *current;
         } group;
         struct {
@@ -192,6 +188,39 @@ struct _Group_Prop_Data
              Evas_Object *position_col, *position_row, *position_item; /* Only for items in part TABLE */
              Evas_Object *span_col, *span_row; /* Only for items in part TABLE */
         } part_item;
+        struct {
+             Evas_Object *frame;
+             Evas_Object *name;
+             const char *program;
+             Evas_Object *signal;
+             Evas_Object *source;
+             Evas_Object *action;
+             Evas_Object *action_params; /* it's a frame */
+             Evas_Object *state;
+             Evas_Object *state2;
+             Evas_Object *value;
+             Evas_Object *value2;
+             Evas_Object *sample_name;
+             Evas_Object *sample_speed;
+             Evas_Object *channel;
+             Evas_Object *tone_name;
+             Evas_Object *tone_duration;
+             Evas_Object *transition;
+             Evas_Object *transition_params;
+             Evas_Object *transition_from_current;
+             Evas_Object *transition_time;
+             Evas_Object *transition_value1;
+             Evas_Object *transition_value2;
+             Evas_Object *transition_value3;
+             Evas_Object *transition_value4;
+             Evas_Object *target;
+             Evas_Object *target_box;
+             Evas_Object *targets_frame; /* it's a frame */
+             Evas_Object *after_box;
+             Evas_Object *afters_frame; /* it's a frame */
+             Evas_Object *in_from, *in_range;
+             Evas_Object *filter_part, *filter_state;
+        } program;
    } attributes;
 };
 typedef struct _Group_Prop_Data Group_Prop_Data;
@@ -279,6 +308,40 @@ static const char *edje_box_layouts[] = { N_("horizontal"),
                                           N_("stack"),
                                           // N_("Custom Layout"), not implemented yet
                                           NULL};
+static const char *
+edje_program_actions[] = { N_("None"),
+                           N_("state set"),
+                           N_("signal emit"),
+                           N_("drag value"),
+                           N_("drag value step"),
+                           N_("drag value page"),
+                           N_("play sample"),
+                           N_("play tone"),
+                           N_("action stop"),
+                           NULL};
+
+static const char *
+sound_channel[] = { N_("effect"),
+                    N_("background"),
+                    N_("music"),
+                    N_("foreground"),
+                    N_("interface"),
+                    N_("input"),
+                    N_("alert"),
+                    N_("all"),
+                    NULL };
+
+static const char *
+edje_program_transitions[] = { N_("None"),
+                               N_("linear"),
+                               N_("accelerate"),
+                               N_("decelerate"),
+                               N_("sinusoidal"),
+                               N_("devisior interpretation"),
+                               N_("bounce"),
+                               N_("spring"),
+                               N_("cubic bezier"),
+                               NULL};
 
 static void
 _ui_property_part_unset(Evas_Object *property);
@@ -287,10 +350,52 @@ static void
 _ui_property_part_state_unset(Evas_Object *property);
 
 static void
-_ui_property_part_item_set(Evas_Object *property, Part_ *part);
+_ui_property_part_item_set(Evas_Object *property, Part *part);
 
 static void
 _ui_property_part_item_unset(Evas_Object *property);
+
+static void
+_ui_property_program_set(Evas_Object *property, const char *program);
+
+static void
+_ui_property_program_unset(Evas_Object *property);
+
+static void
+prop_program_signal_update(Group_Prop_Data *pd);
+
+static void
+prop_program_source_update(Group_Prop_Data *pd);
+
+static void
+prop_program_action_update(Group_Prop_Data *pd);
+
+static void
+prop_program_transition_update(Group_Prop_Data *pd);
+
+static void
+prop_program_state_update(Group_Prop_Data *pd);
+
+static void
+prop_program_state2_update(Group_Prop_Data *pd);
+
+static void
+prop_program_sample_name_update(Group_Prop_Data *pd);
+
+static void
+prop_program_tone_name_update(Group_Prop_Data *pd);
+
+static void
+prop_program_targets_update(Group_Prop_Data *pd);
+
+static void
+prop_program_afters_update(Group_Prop_Data *pd);
+
+static void
+prop_program_filter_part_update(Group_Prop_Data *pd);
+
+static void
+prop_program_filter_state_update(Group_Prop_Data *pd);
 
 static Eina_Bool
 ui_property_state_obj_area_set(Evas_Object *property);
@@ -433,6 +538,9 @@ prop_part_item_padding_update(Group_Prop_Data *pd);
 static void
 prop_state_proxy_source_update(Group_Prop_Data *pd);
 
+static void
+prop_item_state_image_tween_update(Evas_Object *tween, Group_Prop_Data *pd);
+
 static Elm_Gengrid_Item_Class *_itc_tween = NULL;
 
 static void
@@ -476,7 +584,7 @@ _on_part_selected(void *data,
 {
    Evas_Object *property = data;
    GROUP_PROP_DATA_GET()
-   Part_ *part = event_info;
+   Part *part = event_info;
 
    if (!part)
      {
@@ -503,7 +611,7 @@ _on_part_state_selected(void *data,
 {
    Evas_Object *property = data;
    GROUP_PROP_DATA_GET()
-   Part_ *part = event_info;
+   Part *part = event_info;
 
    if (!part)
      {
@@ -513,6 +621,35 @@ _on_part_state_selected(void *data,
      }
    ui_property_part_state_set(property, part);
 }
+
+static void
+_on_program_selected(void *data,
+                     Evas_Object *obj __UNUSED__,
+                     void *event_info)
+{
+   Evas_Object *property = data;
+   GROUP_PROP_DATA_GET()
+   const char *name = event_info;
+
+   _on_part_selected(data, obj, NULL);
+   if (!name)
+     {
+        _ui_property_program_unset(property);
+        return;
+     }
+   _ui_property_program_set(property, name);
+}
+static void
+_on_program_unselected(void *data,
+                    Evas_Object *obj,
+                    void *event_info __UNUSED__)
+{
+   _on_program_selected(data, obj, NULL);
+}
+
+#define PROGRAM_ATTR_1CHECK_UPDATE(SUB, VALUE, MEMBER) \
+   elm_check_state_set(pd->attributes.program.transition_from_current, \
+                       editor_program_transition_from_current_get(pd->group->edit_object, pd->attributes.program.program));
 
 static void
 _on_editor_attribute_changed(void *data,
@@ -857,10 +994,10 @@ _on_editor_attribute_changed(void *data,
          //STATE_DOUBLEVAL_ATTR_2SPINNER_UPDATE(state_container, padding_x, padding_y, state_container, int, 1)
          break;
       case ATTRIBUTE_STATE_MINMUL_H:
-         COMMON_CHECK_UPDATE(state, minmul_h, state, STATE_ARGS);
+         COMMON_1SPINNER_UPDATE(state, minmul_h, state, double, 1, STATE_ARGS);
          break;
       case ATTRIBUTE_STATE_MINMUL_W:
-         COMMON_CHECK_UPDATE(state, minmul_w, state, STATE_ARGS);
+         COMMON_1SPINNER_UPDATE(state, minmul_w, state, double, 1, STATE_ARGS);
          break;
       case ATTRIBUTE_PART_SELECT_MODE:
          PART_ATTR_1COMBOBOX_LIST_UPDATE(part, select_mode, state_textblock);
@@ -876,6 +1013,89 @@ _on_editor_attribute_changed(void *data,
          break;
       case ATTRIBUTE_STATE_FILL_TYPE:
          STATE_ATTR_1COMBOBOX_LIST_UPDATE(state_fill, type, state_fill);
+         break;
+      case ATTRIBUTE_STATE_IMAGE_TWEEN:
+         prop_item_state_image_tween_update(pd->attributes.state_image.tween, pd);
+         break;
+      case ATTRIBUTE_PROGRAM_SIGNAL:
+         prop_program_signal_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_SOURCE:
+         prop_program_source_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_ACTION:
+         prop_program_action_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_STATE:
+         prop_program_state_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_STATE2:
+         prop_program_state2_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_VALUE:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, value, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_VALUE2:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, value2, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_TARGET:
+         prop_program_targets_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_SAMPLE_NAME:
+         prop_program_sample_name_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_SAMPLE_SPEED:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, sample_speed, program, int, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_AFTER:
+         prop_program_afters_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_CHANNEL:
+         PROGRAM_ATTR_1COMBOBOX_LIST_UPDATE(program, channel, program)
+         break;
+      case ATTRIBUTE_PROGRAM_TONE_NAME:
+         prop_program_tone_name_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_TONE_DURATION:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, tone_duration, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_TRANSITION_TYPE:
+         prop_program_transition_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_TRANSITION_TIME:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, transition_time, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_TRANSITION_VALUE1:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, transition_value1, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_TRANSITION_VALUE2:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, transition_value2, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_TRANSITION_VALUE3:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, transition_value3, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_TRANSITION_VALUE4:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, transition_value4, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_TRANSITION_FROM_CURRENT:
+         PROGRAM_ATTR_1CHECK_UPDATE(program, transition_from_current, program)
+         break;
+      case ATTRIBUTE_PROGRAM_IN_FROM:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, in_range, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_IN_RANGE:
+         PROGRAM_ATTR_1SPINNER_UPDATE(program, in_from, program, double, 1)
+         break;
+      case ATTRIBUTE_PROGRAM_FILTER_PART:
+         prop_program_filter_part_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_FILTER_STATE:
+         prop_program_filter_state_update(pd);
+         break;
+      case ATTRIBUTE_PROGRAM_API_NAME:
+      case ATTRIBUTE_PROGRAM_API_DESCRIPTION:
+      case ATTRIBUTE_PROGRAM_NAME:
+         TODO("implement");
          break;
          /* Don't add 'default:'. Compiler must warn about missing cases */
      }
@@ -905,6 +1125,8 @@ ui_property_group_add(Evas_Object *parent)
    evas_object_smart_callback_add(ap.win, SIGNAL_PART_SELECTED, _on_part_selected, pd->scroller);
    evas_object_smart_callback_add(ap.win, SIGNAL_PART_UNSELECTED, _on_part_unselected, pd->scroller);
    evas_object_smart_callback_add(ap.win, SIGNAL_PART_STATE_SELECTED, _on_part_state_selected, pd->scroller);
+   evas_object_smart_callback_add(ap.win, SIGNAL_PROGRAM_SELECTED, _on_program_selected, pd->scroller);
+   evas_object_smart_callback_add(ap.win, SIGNAL_PROGRAM_UNSELECTED, _on_program_unselected, pd->scroller);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, _on_editor_attribute_changed, pd->scroller);
 
    return pd->scroller;
@@ -951,7 +1173,7 @@ TODO("Implement rename. Note: groups list must remain sorted")
  *
  * Second: we need to get the different names for layouts and for styles. */
 #define edje_edit_group_name_get(OBJ) \
-   pd->group->name
+   eina_stringshare_add(pd->group->name)
 
 #define GROUP_ATTR_1ENTRY(TEXT, SUB, VALUE, MEMBER, VALIDATOR, TOOLTIP) \
    GROUP_ATTR_1ENTRY_UPDATE(SUB, VALUE, MEMBER) \
@@ -1161,15 +1383,17 @@ ui_property_group_set(Evas_Object *property, Group *group)
         elm_object_content_set(group_frame, box);
 
         item = prop_group_name_add(box, pd, NULL);
+        elm_object_disabled_set(pd_group.name, true);
+
         elm_box_pack_end(box, item);
-        item = prop_group_min_w_h_add(box, pd,
-                                      _("Minimum group width in pixels."),
-                                      _("Minimum group height in pixels."));
-        elm_box_pack_end(box, item);
-        item = prop_group_max_w_h_add(box, pd,
-                                      _("Maximum group width in pixels."),
-                                      _("Maximum group height in pixels."));
-        elm_box_pack_end(box, item);
+        pd_group.min_item = prop_group_min_w_h_add(box, pd,
+                                                   _("Minimum group width in pixels."),
+                                                   _("Minimum group height in pixels."));
+        elm_box_pack_end(box, pd_group.min_item);
+        pd_group.max_item = prop_group_max_w_h_add(box, pd,
+                                                   _("Maximum group width in pixels."),
+                                                   _("Maximum group height in pixels."));
+        elm_box_pack_end(box, pd_group.max_item);
 
         elm_box_pack_start(prop_box, group_frame);
         pd_group.frame = group_frame;
@@ -1192,6 +1416,16 @@ ui_property_group_set(Evas_Object *property, Group *group)
         elm_box_pack_start(prop_box, pd_group.info);
         evas_object_show(pd_group.info);
      }
+   if (group->main_group != NULL)
+     {
+        elm_object_disabled_set(pd_group.min_item, true);
+        elm_object_disabled_set(pd_group.max_item, true);
+     }
+   else
+     {
+        elm_object_disabled_set(pd_group.min_item, false);
+        elm_object_disabled_set(pd_group.max_item, false);
+     }
    elm_box_pack_start(prop_box, pd_group.shared_check);
 }
 
@@ -1210,10 +1444,11 @@ ui_property_group_unset(Evas_Object *property)
                                   _on_clicked, pd);
    evas_object_hide(pd_group.frame);
    evas_object_hide(pd_group.shared_check);
+   _ui_property_program_unset(property);
    _ui_property_part_unset(property);
    elm_scroller_policy_set(pd->scroller, ELM_SCROLLER_POLICY_OFF, ELM_SCROLLER_POLICY_OFF);
 
-  evas_object_hide(property);
+   evas_object_hide(property);
 }
 #undef pd_group
 
@@ -1225,7 +1460,8 @@ prop_part_name_update(Group_Prop_Data *pd)
    assert(pd != NULL);
 
    text = elm_entry_utf8_to_markup(pd->part->name);
-   if (strcmp(text, elm_entry_entry_get(pd->attributes.part.name)))
+   TODO("check that text is not NULL should be not needed after refactor");
+   if ((elm_entry_entry_get(pd->attributes.part.name) != NULL) && (strcmp(text, elm_entry_entry_get(pd->attributes.part.name))))
      elm_entry_entry_set(pd->attributes.part.name, pd->part->name);
    free(text);
 }
@@ -1253,7 +1489,7 @@ _on_part_name_change(void *data,
    free(value);
 }
 static void
-_on_part_name_activated(void *data,
+_on_part_name_unfocused(void *data,
                         Evas_Object *obj __UNUSED__,
                         void *ei __UNUSED__)
 {
@@ -1285,8 +1521,7 @@ prop_part_name_add(Evas_Object *parent, Group_Prop_Data *pd)
    elm_entry_entry_set(pd->attributes.part.name, pd->part->name);
    elm_object_tooltip_text_set(pd->attributes.part.name, _("Selected part name"));
    evas_object_smart_callback_add(pd->attributes.part.name, "changed,user", _on_part_name_change, pd);
-   evas_object_smart_callback_add(pd->attributes.part.name, "unfocused", _on_part_name_activated, pd);
-   evas_object_smart_callback_add(pd->attributes.part.name, "activated", _on_part_name_activated, pd);
+   evas_object_smart_callback_add(pd->attributes.part.name, "unfocused", _on_part_name_unfocused, pd);
    elm_layout_content_set(item, "elm.swallow.content", pd->attributes.part.name);
    prop_part_name_update(pd);
 
@@ -1296,7 +1531,7 @@ prop_part_name_add(Evas_Object *parent, Group_Prop_Data *pd)
 static void
 prop_part_clip_to_update(Group_Prop_Data *pd)
 {
-   Part_ *part;
+   Part *part;
    Eina_List *l;
    Eina_Stringshare *value;
 
@@ -1341,6 +1576,880 @@ PART_ATTR_PARTS_LIST(part_drag, threshold, part_drag)
 PART_ATTR_PARTS_LIST(part_drag, event, part_drag)
 
 PART_ATTR_SOURCE_UPDATE(part, source)
+
+#define PROGRAMM_ATTR_1ENTRY(TEXT, SUB, VALUE, MEMBER, VALIDATOR, TOOLTIP, DESCRIPTION) \
+   PROGRAM_ATTR_1ENTRY_UPDATE(SUB, VALUE, MEMBER) \
+   PROGRAM_ATTR_1ENTRY_CALLBACK(SUB, VALUE, VALIDATOR, DESCRIPTION) \
+   PROGRAM_ATTR_1ENTRY_ADD(TEXT, SUB, VALUE, MEMBER, VALIDATOR, TOOLTIP)
+
+#define PROGRAM_ATTR_1COMBOBOX_LIST(TEXT, SUB, VALUE, MEMBER, LIST, TYPE, DESCRIPTION, TOOLTIP) \
+   PROGRAM_ATTR_1COMBOBOX_LIST_CALLBACK(TEXT, SUB, VALUE, TYPE, DESCRIPTION) \
+   PROGRAM_ATTR_1COMBOBOX_LIST_ADD(TEXT, SUB, VALUE, MEMBER, LIST, TOOLTIP)
+
+#define PROGRAM_ATTR_1SPINNER(TEXT, SUB, VALUE, MEMBER, TYPE, MIN, MAX, STEP, FMT, \
+                              L_START, L_END, TOOLTIP, MULTIPLIER, DESCRIPTION) \
+   PROGRAM_SPINNER_CALLBACK(SUB, VALUE, MEMBER, TYPE, MULTIPLIER, DESCRIPTION) \
+   PROGRAM_ATTR_1SPINNER_ADD(TEXT, SUB, VALUE, MEMBER, MIN, MAX, STEP, FMT, \
+                             L_START, L_END, TOOLTIP, MULTIPLIER)
+#define PROGRAM_ATTR_1CHECK(TEXT, SUB, VALUE, MEMBER, TOOLTIP, DESCRIPTION) \
+   PROGRAM_ATTR_CHECK_CALLBACK(SUB, VALUE, MEMBER, DESCRIPTION) \
+   PROGRAM_ATTR_1CHECK_ADD(TEXT, SUB, VALUE, MEMBER, TOOLTIP)
+
+static void
+_on_program_name_change(void *data __UNUSED__,
+                        Evas_Object *obj __UNUSED__,
+                        void *ei __UNUSED__)
+{
+   return;
+   TODO("Implement rename. Note: program(resource) list must remain sorted")
+}
+
+static void
+_on_program_name_activated(void *data __UNUSED__,
+                           Evas_Object *obj __UNUSED__,
+                           void *ei __UNUSED__)
+{
+   return;
+   TODO("Implement rename. Note: program(resource) list must remain sorted")
+}
+
+static void
+prop_program_name_update(Group_Prop_Data *pd)
+{
+   elm_entry_entry_set(pd->attributes.program.name, pd->attributes.program.program);
+}
+
+COMMON_ENTRY_ADD(_("name"), program, name, program, NULL, _("Name of the group."))
+PROGRAMM_ATTR_1ENTRY(_("signal"), program, signal, program, NULL,
+   _("The signal name for triger"), _("signal is changed to '%s'"))
+PROGRAMM_ATTR_1ENTRY(_("source"), program, source, program, NULL,
+   _("The source of signal"), _("signal source is changed to '%s'"))
+PROGRAM_ATTR_1SPINNER("don't forgot to change this title", program, value, program, double, 0.0, 1.0, 0.1, "%.2f",
+   NULL, NULL, "", 1, _("Program action value is changed from %f to %f"))
+PROGRAM_ATTR_1SPINNER("don't forgot to change this title", program, value2, program, double, 0.0, 1.0, 0.1, "%.2f",
+   NULL, NULL, "", 1, _("Program action value2 is changed from %f to %f"))
+PROGRAM_ATTR_1SPINNER(_("sample speed"), program, sample_speed, program, int, 0.0, 9999.0, 1.0, "%.0f",
+   NULL, NULL, "", 1, _("Program sample speed is changed from %d to %d"))
+PROGRAM_ATTR_1COMBOBOX_LIST(_("sample channel"), program, channel, program, sound_channel, unsigned char,
+   _("Program action state is changed to '%s'"), "")
+PROGRAM_ATTR_1SPINNER(_("time"), program, transition_time, program, double, 0.0, 9999.0, 0.1, "%.2f",
+   NULL, NULL, "", 1, _("Program transition time is changed from %f to %f"))
+PROGRAM_ATTR_1SPINNER("don't forgot to change this title", program, transition_value1, program, double, 0.0, 9999.0, 0.1, "%.2f",
+   NULL, NULL, "", 1, _("Program transition value1 is changed from %f to %f"))
+PROGRAM_ATTR_1SPINNER("don't forgot to change this title", program, transition_value2, program, double, 0.0, 9999.0, 0.1, "%.2f",
+   NULL, NULL, "", 1, _("Program transition value1 is changed from %f to %f"))
+PROGRAM_ATTR_1SPINNER("don't forgot to change this title", program, transition_value3, program, double, 0.0, 9999.0, 0.1, "%.2f",
+   NULL, NULL, "", 1, _("Program transition value1 is changed from %f to %f"))
+PROGRAM_ATTR_1SPINNER("don't forgot to change this title", program, transition_value4, program, double, 0.0, 9999.0, 0.1, "%.2f",
+   NULL, NULL, "", 1, _("Program transition value1 is changed from %f to %f"))
+PROGRAM_ATTR_1CHECK(_("from current"), program, transition_from_current, program, "",
+                    _("Program transition attribure 'from current' is changed to %s'"))
+
+COMMON_ENTRY_UPDATE(program, state, program, PROGRAM_ARGS)
+COMMON_ENTRY_CALLBACK(program, state, NULL, PROGRAM_ARGS, _("Program action state is changed to '%s'"))
+COMMON_ENTRY_UPDATE(program, state2, program, PROGRAM_ARGS)
+COMMON_ENTRY_CALLBACK(program, state2, NULL, PROGRAM_ARGS, _("Program action state2 is changed to '%s'"))
+COMMON_SPINNER_CALLBACK(program, tone_duration, program, double, 1, PROGRAM_ARGS, _("Program action value is changed from %f to %f"))
+
+static Evas_Object *
+_prop_action_state_add(Group_Prop_Data *pd, Evas_Object *parent, const char *title, const char *tooltip)
+{
+   Eina_Stringshare *state;
+
+   PROPERTY_ITEM_ADD(parent, title, "1swallow")
+   ENTRY_ADD(item, pd->attributes.program.state, true);
+   state = edje_edit_program_state_get(pd->group->edit_object, pd->attributes.program.program);
+   elm_entry_entry_set(pd->attributes.program.state, state);
+   eina_stringshare_del(state);
+   evas_object_smart_callback_add(pd->attributes.program.state, "changed,user", _on_program_state_change, pd);
+   evas_object_smart_callback_add(pd->attributes.program.state, "activated", _on_program_state_activated, pd);
+   evas_object_smart_callback_add(pd->attributes.program.state, "unfocused", _on_program_state_activated, pd);
+   elm_object_tooltip_text_set(pd->attributes.program.state, tooltip);
+   elm_layout_content_set(item, NULL, pd->attributes.program.state);
+
+   return item;
+}
+
+static Evas_Object *
+_prop_action_state2_add(Group_Prop_Data *pd, Evas_Object *parent, const char *title, const char *tooltip)
+{
+   Eina_Stringshare *state2;
+
+   PROPERTY_ITEM_ADD(parent, title, "1swallow")
+   ENTRY_ADD(item, pd->attributes.program.state2, true)
+   state2 = edje_edit_program_state2_get(pd->group->edit_object, pd->attributes.program.program);
+   elm_entry_entry_set(pd->attributes.program.state2, state2);
+   eina_stringshare_del(state2);
+   evas_object_smart_callback_add(pd->attributes.program.state2, "changed,user", _on_program_state2_change, pd);
+   evas_object_smart_callback_add(pd->attributes.program.state2, "activated", _on_program_state2_activated, pd);
+   evas_object_smart_callback_add(pd->attributes.program.state2, "unfocused", _on_program_state2_activated, pd);
+   elm_object_tooltip_text_set(pd->attributes.program.state2, tooltip);
+   elm_layout_content_set(item, NULL, pd->attributes.program.state2);
+
+   return item;
+}
+
+static void
+prop_program_sample_name_update(Group_Prop_Data *pd)
+{
+   Eina_Stringshare *value;
+   Eina_List *l;
+   Resource *sample;
+
+   value = edje_edit_program_sample_name_get(pd->group->edit_object, pd->attributes.program.program);
+   ewe_combobox_text_set(pd->attributes.program.sample_name, value ? value : _("None"));
+   ewe_combobox_item_add(pd->attributes.program.sample_name, _("None"));
+   EINA_LIST_FOREACH(ap.project->sounds, l, sample)
+     {
+        ewe_combobox_item_add(pd->attributes.program.sample_name, sample->name);
+     }
+}
+
+static void
+prop_program_tone_name_update(Group_Prop_Data *pd)
+{
+   Eina_Stringshare *value;
+   Eina_List *l;
+   Resource *tone;
+
+   value = edje_edit_program_tone_name_get(pd->group->edit_object, pd->attributes.program.program);
+   ewe_combobox_text_set(pd->attributes.program.tone_name, value ? value : _("None"));
+   ewe_combobox_item_add(pd->attributes.program.tone_name, _("None"));
+   EINA_LIST_FOREACH(ap.project->tones, l, tone)
+     {
+        ewe_combobox_item_add(pd->attributes.program.tone_name, tone->name);
+     }
+}
+
+static void
+_on_program_sample(void *data,
+                   Evas_Object *obj __UNUSED__,
+                   void *event_info)
+{
+   Group_Prop_Data *pd = (Group_Prop_Data *)data;
+   Ewe_Combobox_Item *item = (Ewe_Combobox_Item *)event_info;
+   Change *change = change_add("Change the action sount to '%s'");
+
+   if (!editor_program_sample_name_set(pd->group->edit_object, change, false, pd->attributes.program.program, item->title))
+     {
+        ERR("Cann't apply value '%s' for attribute 'program sample'.", item->title);
+        abort();
+     }
+   history_change_add(pd->group->history, change);
+   evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
+}
+
+static Evas_Object *
+_prop_action_sample_name(Group_Prop_Data *pd, Evas_Object *parent)
+{
+   PROPERTY_ITEM_ADD(parent, "name", "1swallow")
+   EWE_COMBOBOX_ADD(item, pd->attributes.program.sample_name);
+   evas_object_smart_callback_add(pd->attributes.program.sample_name, "selected", _on_program_sample, pd);
+   elm_object_tooltip_text_set(pd->attributes.program.sample_name, "");
+   elm_layout_content_set(item, NULL, pd->attributes.program.sample_name);
+   prop_program_sample_name_update(pd);
+   return item;
+}
+
+static void
+_on_program_tone(void *data,
+                 Evas_Object *obj __UNUSED__,
+                 void *event_info)
+{
+   Group_Prop_Data *pd = (Group_Prop_Data *)data;
+   Ewe_Combobox_Item *item = (Ewe_Combobox_Item *)event_info;
+   Change *change = change_add("Change the action tone to '%s'");
+
+   if (!editor_program_tone_name_set(pd->group->edit_object, change, false, pd->attributes.program.program, item->title))
+     {
+        ERR("Cann't apply value '%s' for attribute 'program tone'.", item->title);
+        abort();
+     }
+   history_change_add(pd->group->history, change);
+   evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
+}
+
+static Evas_Object *
+_prop_action_tone_name(Group_Prop_Data *pd, Evas_Object *parent)
+{
+   PROPERTY_ITEM_ADD(parent, "name", "1swallow")
+   EWE_COMBOBOX_ADD(item, pd->attributes.program.tone_name);
+   evas_object_smart_callback_add(pd->attributes.program.tone_name, "selected", _on_program_tone, pd);
+   elm_object_tooltip_text_set(pd->attributes.program.tone_name, "");
+   elm_layout_content_set(item, NULL, pd->attributes.program.tone_name);
+   prop_program_tone_name_update(pd);
+   return item;
+}
+
+static Evas_Object *
+_prop_action_tone_duration_add(Group_Prop_Data *pd, Evas_Object *parent)
+{
+   PROPERTY_ITEM_ADD(parent, _("speed"), "2swallow")
+   SPINNER_ADD(item, pd->attributes.program.tone_duration, 0.1, 10.0, 0.1, true);
+   elm_spinner_label_format_set(pd->attributes.program.tone_duration, "%.1f");
+   elm_spinner_value_set(pd->attributes.program.tone_duration,
+                         edje_edit_program_tone_duration_get(pd->group->edit_object, pd->attributes.program.program));
+   evas_object_smart_callback_add(pd->attributes.program.tone_duration, "changed", _on_program_tone_duration_change, pd);
+   evas_object_smart_callback_add(pd->attributes.program.tone_duration, "spinner,drag,start", _on_program_tone_duration_start, pd);
+   evas_object_smart_callback_add(pd->attributes.program.tone_duration, "spinner,drag,stop", _on_program_tone_duration_stop, pd);
+   elm_object_tooltip_text_set(pd->attributes.program.tone_duration, "");
+   elm_layout_content_set(item, "swallow.content1", pd->attributes.program.tone_duration);
+
+   return item;
+}
+
+static void
+_program_action_param_set(Group_Prop_Data *pd, Edje_Action_Type type)
+{
+   Evas_Object *box, *item;
+
+   elm_frame_collapse_set(pd->attributes.program.action_params, false);
+   elm_object_disabled_set(pd->attributes.program.action_params, false);
+
+   evas_object_del(elm_object_content_get(pd->attributes.program.action_params));
+   BOX_ADD(pd->attributes.program.action_params, box, false, false)
+   elm_box_align_set(box, 0.5, 0.0);
+   elm_object_content_set(pd->attributes.program.action_params, box);
+
+   switch (type)
+     {
+      case EDJE_ACTION_TYPE_STATE_SET:
+         item = _prop_action_state_add(pd, box, _("state name"), "");
+         elm_box_pack_end(box, item);
+         item = prop_program_value_add(box, pd);
+         elm_object_text_set(item, _("state value"));
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_ACTION_TYPE_SIGNAL_EMIT:
+         item = _prop_action_state_add(pd, box, _("signal name"), "");
+         elm_box_pack_end(box, item);
+         item = _prop_action_state2_add(pd, box, _("emmiter"), "");
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_ACTION_TYPE_DRAG_VAL_SET:
+      case EDJE_ACTION_TYPE_DRAG_VAL_STEP:
+      case EDJE_ACTION_TYPE_DRAG_VAL_PAGE:
+         item = prop_program_value_add(box, pd);
+         elm_object_text_set(item, _("axis X"));
+         elm_box_pack_end(box, item);
+         item = prop_program_value2_add(box, pd);
+         elm_object_text_set(item, _("axis Y"));
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_ACTION_TYPE_SOUND_SAMPLE:
+         item = _prop_action_sample_name(pd, box);
+         elm_box_pack_end(box, item);
+         item = prop_program_sample_speed_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_channel_add(box, pd);
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_ACTION_TYPE_SOUND_TONE:
+         item = _prop_action_tone_name(pd, box);
+         elm_box_pack_end(box, item);
+         item = _prop_action_tone_duration_add(pd, box);
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_ACTION_TYPE_NONE:
+      default:
+         elm_frame_collapse_set(pd->attributes.program.action_params, true);
+         elm_object_disabled_set(pd->attributes.program.action_params, true);
+         break;
+     }
+}
+
+static void
+prop_program_action_update(Group_Prop_Data *pd)
+{
+   Edje_Action_Type type = EDJE_ACTION_TYPE_NONE;
+
+   type = edje_edit_program_action_get(pd->group->edit_object, pd->attributes.program.program);
+   switch (type)
+     {
+      case EDJE_ACTION_TYPE_NONE:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 0);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_NONE);
+         break;
+      case EDJE_ACTION_TYPE_STATE_SET:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 1);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_STATE_SET);
+         break;
+      case EDJE_ACTION_TYPE_SIGNAL_EMIT:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 2);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_SIGNAL_EMIT);
+         break;
+      case EDJE_ACTION_TYPE_DRAG_VAL_SET:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 3);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_DRAG_VAL_SET);
+         break;
+      case EDJE_ACTION_TYPE_DRAG_VAL_STEP:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 4);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_DRAG_VAL_STEP);
+         break;
+      case EDJE_ACTION_TYPE_DRAG_VAL_PAGE:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 5);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_DRAG_VAL_PAGE);
+         break;
+      case EDJE_ACTION_TYPE_SOUND_SAMPLE:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 6);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_SOUND_SAMPLE);
+         break;
+      case EDJE_ACTION_TYPE_SOUND_TONE:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 7);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_SOUND_TONE);
+         break;
+      case EDJE_ACTION_TYPE_ACTION_STOP:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 8);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_ACTION_STOP);
+         break;
+      default:
+         ewe_combobox_select_item_set(pd->attributes.program.action, 0);
+         _program_action_param_set(pd, EDJE_ACTION_TYPE_NONE);
+         break;
+     }
+}
+
+static void
+_on_program_action_change(void *data,
+                          Evas_Object *obj __UNUSED__,
+                          void *event_info)
+{
+   Group_Prop_Data *pd = (Group_Prop_Data *)data;
+   Ewe_Combobox_Item *item = (Ewe_Combobox_Item *)event_info;
+   Edje_Action_Type old_type, new_type = EDJE_ACTION_TYPE_NONE;
+   Eina_Stringshare *msg;
+   Change *change;
+
+   old_type = edje_edit_program_action_get(pd->group->edit_object, pd->attributes.program.program);
+   switch (item->index)
+     {
+      case 0:
+         new_type = EDJE_ACTION_TYPE_NONE;
+         break;
+      case 1:
+         new_type = EDJE_ACTION_TYPE_STATE_SET;
+         break;
+      case 2:
+         new_type = EDJE_ACTION_TYPE_SIGNAL_EMIT;
+         break;
+      case 3:
+         new_type = EDJE_ACTION_TYPE_DRAG_VAL_SET;
+         break;
+      case 4:
+         new_type = EDJE_ACTION_TYPE_DRAG_VAL_STEP;
+         break;
+      case 5:
+         new_type = EDJE_ACTION_TYPE_DRAG_VAL_PAGE;
+         break;
+      case 6:
+         new_type = EDJE_ACTION_TYPE_SOUND_SAMPLE;
+         break;
+      case 7:
+         new_type = EDJE_ACTION_TYPE_SOUND_TONE;
+         break;
+      case 8:
+         new_type = EDJE_ACTION_TYPE_ACTION_STOP;
+         break;
+     }
+   if (old_type == new_type) return;
+   msg = eina_stringshare_printf(_("The program action changed to '%s'"), item->title);
+   change = change_add(msg);
+   eina_stringshare_del(msg);
+   if (!editor_program_action_set(pd->group->edit_object, change, false, pd->attributes.program.program, new_type))
+     {
+        ERR("Cann't apply value '%s' for attribute 'action'.", item->title);
+        abort();
+     }
+   history_change_add(pd->group->history, change);
+   evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
+}
+
+static Evas_Object *
+prop_program_action_add(Evas_Object *parent, Group_Prop_Data *pd)
+{
+   int i;
+
+   PROPERTY_ITEM_ADD(parent, _("action"), "1swallow")
+   EWE_COMBOBOX_ADD(parent, pd->attributes.program.action)
+   for (i = 0; edje_program_actions[i]; i++)
+      ewe_combobox_item_add(pd->attributes.program.action, edje_program_actions[i]);
+   elm_object_tooltip_text_set(pd->attributes.program.action, _("The program action type"));
+   evas_object_smart_callback_add(pd->attributes.program.action, "selected", _on_program_action_change, pd);
+   elm_layout_content_set(item, "elm.swallow.content", pd->attributes.program.action);
+
+   return item;
+}
+
+static void
+_program_transition_param_set(Group_Prop_Data *pd, Edje_Tween_Mode type)
+{
+   Evas_Object *box, *item;
+
+   elm_frame_collapse_set(pd->attributes.program.transition_params, false);
+   elm_object_disabled_set(pd->attributes.program.transition_params, false);
+
+   evas_object_del(elm_object_content_get(pd->attributes.program.transition_params));
+   BOX_ADD(pd->attributes.program.transition_params, box, false, false)
+   elm_box_align_set(box, 0.5, 0.0);
+   elm_object_content_set(pd->attributes.program.transition_params, box);
+   switch (type)
+     {
+      case EDJE_TWEEN_MODE_LINEAR:
+         item = prop_program_transition_from_current_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_time_add(box, pd);
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_TWEEN_MODE_ACCELERATE_FACTOR:
+      case EDJE_TWEEN_MODE_DECELERATE_FACTOR:
+      case EDJE_TWEEN_MODE_SINUSOIDAL_FACTOR:
+         item = prop_program_transition_from_current_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_time_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value1_add(box, pd);
+         elm_object_text_set(item, "factor");
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_TWEEN_MODE_DIVISOR_INTERP:
+         item = prop_program_transition_from_current_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_time_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value1_add(box, pd);
+         elm_object_text_set(item, "gradient");
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value2_add(box, pd);
+         elm_object_text_set(item, "factor");
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_TWEEN_MODE_BOUNCE:
+         item = prop_program_transition_from_current_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_time_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value1_add(box, pd);
+         elm_object_text_set(item, "decay");
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value2_add(box, pd);
+         elm_object_text_set(item, "bounces");
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_TWEEN_MODE_SPRING:
+         item = prop_program_transition_from_current_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_time_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value1_add(box, pd);
+         elm_object_text_set(item, "decay");
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value2_add(box, pd);
+         elm_object_text_set(item, "swings");
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_TWEEN_MODE_CUBIC_BEZIER:
+         item = prop_program_transition_from_current_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_time_add(box, pd);
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value1_add(box, pd);
+         elm_object_text_set(item, "x1");
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value2_add(box, pd);
+         elm_object_text_set(item, "y1");
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value3_add(box, pd);
+         elm_object_text_set(item, "x2");
+         elm_box_pack_end(box, item);
+         item = prop_program_transition_value4_add(box, pd);
+         elm_object_text_set(item, "y2");
+         elm_box_pack_end(box, item);
+         break;
+      case EDJE_TWEEN_MODE_NONE:
+      default:
+         break;
+     }
+}
+
+static void
+prop_program_transition_update(Group_Prop_Data *pd)
+{
+   Edje_Tween_Mode type = EDJE_TWEEN_MODE_NONE;
+
+   /* disable the transition controls, and enable it if action is STATE_SET */
+   if (EDJE_ACTION_TYPE_STATE_SET != edje_edit_program_action_get(pd->group->edit_object, pd->attributes.program.program))
+     {
+        elm_object_disabled_set(pd->attributes.program.transition, true);
+        elm_object_disabled_set(pd->attributes.program.transition_params, true);
+        ewe_combobox_select_item_set(pd->attributes.program.transition, 0);
+        return;
+     }
+   elm_object_disabled_set(pd->attributes.program.transition, false);
+   elm_object_disabled_set(pd->attributes.program.transition_params, false);
+
+   type = editor_program_transition_type_get(pd->group->edit_object, pd->attributes.program.program);
+   switch (type)
+     {
+      case EDJE_TWEEN_MODE_NONE:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 0);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_NONE);
+         break;
+      case EDJE_TWEEN_MODE_LINEAR:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 1);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_LINEAR);
+         break;
+      case EDJE_TWEEN_MODE_ACCELERATE_FACTOR:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 2);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_ACCELERATE_FACTOR);
+         break;
+      case EDJE_TWEEN_MODE_DECELERATE_FACTOR:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 3);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_DECELERATE_FACTOR);
+         break;
+      case EDJE_TWEEN_MODE_SINUSOIDAL_FACTOR:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 4);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_SINUSOIDAL_FACTOR);
+         break;
+      case EDJE_TWEEN_MODE_DIVISOR_INTERP:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 5);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_DIVISOR_INTERP);
+         break;
+      case EDJE_TWEEN_MODE_BOUNCE:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 6);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_BOUNCE);
+         break;
+      case EDJE_TWEEN_MODE_SPRING:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 7);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_SPRING);
+         break;
+      case EDJE_TWEEN_MODE_CUBIC_BEZIER:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 8);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_CUBIC_BEZIER);
+         break;
+      default:
+         ewe_combobox_select_item_set(pd->attributes.program.transition, 0);
+         _program_transition_param_set(pd, EDJE_TWEEN_MODE_NONE);
+         break;
+     }
+}
+static void
+_on_program_transition_change(void *data,
+                              Evas_Object *obj __UNUSED__,
+                              void *event_info)
+{
+   Group_Prop_Data *pd = (Group_Prop_Data *)data;
+   Ewe_Combobox_Item *item = (Ewe_Combobox_Item *)event_info;
+   Edje_Tween_Mode old_type, new_type = EDJE_TWEEN_MODE_NONE;
+   Eina_Stringshare *msg;
+   Change *change;
+
+   old_type = editor_program_transition_type_get(pd->group->edit_object, pd->attributes.program.program);
+   switch (item->index)
+     {
+      case 0:
+         new_type = EDJE_TWEEN_MODE_NONE;
+         break;
+      case 1:
+         new_type = EDJE_TWEEN_MODE_LINEAR;
+         break;
+      case 2:
+         new_type = EDJE_TWEEN_MODE_ACCELERATE_FACTOR;
+         break;
+      case 3:
+         new_type = EDJE_TWEEN_MODE_DECELERATE_FACTOR;
+         break;
+      case 4:
+         new_type = EDJE_TWEEN_MODE_SINUSOIDAL_FACTOR;
+         break;
+      case 5:
+         new_type = EDJE_TWEEN_MODE_DIVISOR_INTERP;
+         break;
+      case 6:
+         new_type = EDJE_TWEEN_MODE_BOUNCE;
+         break;
+      case 7:
+         new_type = EDJE_TWEEN_MODE_SPRING;
+         break;
+      case 8:
+         new_type = EDJE_TWEEN_MODE_CUBIC_BEZIER;
+         break;
+     }
+   if (old_type == new_type) return;
+   msg = eina_stringshare_printf(_("The program transition changed to '%s'"), item->title);
+   change = change_add(msg);
+   eina_stringshare_del(msg);
+   if (!editor_program_transition_type_set(pd->group->edit_object, change, false, pd->attributes.program.program, new_type))
+     {
+        ERR("Cann't apply value '%s' for attribute 'transition'.", item->title);
+        abort();
+     }
+   history_change_add(pd->group->history, change);
+   evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
+}
+
+static Evas_Object *
+prop_program_transition_add(Evas_Object *parent, Group_Prop_Data *pd)
+{
+   int i;
+
+   PROPERTY_ITEM_ADD(parent, _("transition"), "1swallow")
+   EWE_COMBOBOX_ADD(parent, pd->attributes.program.transition)
+   for (i = 0; edje_program_transitions[i]; i++)
+      ewe_combobox_item_add(pd->attributes.program.transition, edje_program_transitions[i]);
+   elm_object_tooltip_text_set(pd->attributes.program.transition, _("The program transition type"));
+   evas_object_smart_callback_add(pd->attributes.program.transition, "selected", _on_program_transition_change, pd);
+   elm_layout_content_set(item, "elm.swallow.content", pd->attributes.program.transition);
+
+   return item;
+}
+
+PROGRAM_MULTIPLE_COMBOBOX(target, "Previous_Target", _("target can be part or program"), true)
+PROGRAM_MULTIPLE_COMBOBOX(after, "Previous_After", _("after can be program"), false)
+
+static void
+prop_program_filter_part_update(Group_Prop_Data *pd)
+{
+   Part *part;
+   Eina_List *l;
+   Eina_Stringshare *value;
+   ewe_combobox_items_list_free(pd->attributes.program.filter_part, true);
+   value = edje_edit_program_filter_part_get(pd->group->edit_object PROGRAM_ARGS);
+   ewe_combobox_item_add(pd->attributes.program.filter_part, _("None"));
+   ewe_combobox_text_set(pd->attributes.program.filter_part, value ? value : _("None"));
+   if (!value)
+     {
+        elm_object_disabled_set(pd->attributes.program.filter_state, true);
+        ewe_combobox_text_set(pd->attributes.program.filter_state, _("None"));
+     }
+   EINA_LIST_FOREACH(pd->group->parts, l, part)
+     {
+        ewe_combobox_item_add(pd->attributes.program.filter_part, part->name);
+     }
+   edje_edit_string_free(value);
+   prop_program_filter_state_update(pd);
+}
+
+static void
+prop_program_filter_state_update(Group_Prop_Data *pd)
+{
+   Part *part;
+   State *state;
+   Eina_List *l;
+   Eina_Stringshare *value, *part_name;
+   ewe_combobox_items_list_free(pd->attributes.program.filter_state, true);
+   part_name = edje_edit_program_filter_part_get(pd->group->edit_object PROGRAM_ARGS);
+   if (!part_name)
+     {
+        elm_object_disabled_set(pd->attributes.program.filter_state, true);
+        ewe_combobox_text_set(pd->attributes.program.filter_state, _("None"));
+        return;
+     }
+   else
+     elm_object_disabled_set(pd->attributes.program.filter_state, false);
+
+   value = edje_edit_program_filter_state_get(pd->group->edit_object PROGRAM_ARGS);
+   ewe_combobox_text_set(pd->attributes.program.filter_state, value);
+   part = pm_resource_unsorted_get(pd->group->parts, part_name);
+   EINA_LIST_FOREACH(part->states, l, state)
+     {
+        ewe_combobox_item_add(pd->attributes.program.filter_state, state->parsed_name);
+     }
+   edje_edit_string_free(value);
+   edje_edit_string_free(part_name);
+}
+
+static void
+_on_program_filter_part_change(void *data,
+                               Evas_Object *obj __UNUSED__,
+                               void *ei)
+{
+   Group_Prop_Data *pd = (Group_Prop_Data *)data;
+   Ewe_Combobox_Item *item = ei;
+   Eina_Bool isNone = false;
+   Eina_Stringshare *old_val = edje_edit_program_filter_part_get(pd->group->edit_object
+         PROGRAM_ARGS);
+   Part *part;
+   State *state;
+   if (((item->index != 0) && (item->title == old_val)) /*stringshares*/ ||
+       ((item->index == 0) && (old_val == NULL)))
+     {
+       eina_stringshare_del(old_val);
+       return;
+     }
+   eina_stringshare_del(old_val);
+   isNone = !strcmp(item->title, _("None"));
+   Eina_Stringshare *msg = eina_stringshare_printf(_("filter part changed to \"%s\""),
+                                                   isNone ? NULL : item->title);
+   /* making change */
+   Change *change = change_add(msg);
+   eina_stringshare_del(msg);
+
+   if (isNone)
+     {
+        editor_program_filter_state_set(pd->group->edit_object, change, false PROGRAM_ARGS,
+                                        NULL);
+     }
+   else
+     {
+        part = pm_resource_unsorted_get(pd->group->parts, item->title);
+        state = eina_list_data_get(part->states);
+        editor_program_filter_state_set(pd->group->edit_object, change, false PROGRAM_ARGS,
+                                        state->parsed_name);
+     }
+
+   editor_program_filter_part_set(pd->group->edit_object, change, false PROGRAM_ARGS,
+         isNone ? NULL : item->title);
+
+   history_change_add(pd->group->history, change);
+   evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
+   prop_program_filter_state_update(pd);
+}
+static void
+_on_program_filter_state_change(void *data,
+                                Evas_Object *obj __UNUSED__,
+                                void *ei)
+{
+   Group_Prop_Data *pd = (Group_Prop_Data *)data;
+   Ewe_Combobox_Item *item = ei;
+   Eina_Bool isNone = false;
+   Eina_Stringshare *old_val = edje_edit_program_filter_state_get(pd->group->edit_object
+         PROGRAM_ARGS);
+   if (((item->index != 0) && (item->title == old_val)) /*stringshares*/ ||
+       ((item->index == 0) && (old_val == NULL)))
+     {
+       eina_stringshare_del(old_val);
+       return;
+     }
+   eina_stringshare_del(old_val);
+
+   isNone = !strcmp(item->title, _("None"));
+   Eina_Stringshare *msg = eina_stringshare_printf(_("filter state changed to \"%s\""),
+                                                   isNone ? NULL : item->title);
+   Change *change = change_add(msg);
+   eina_stringshare_del(msg);
+   editor_program_filter_state_set(pd->group->edit_object, change, false PROGRAM_ARGS,
+         isNone ? NULL : item->title);
+   history_change_add(pd->group->history, change);
+   evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
+   prop_program_filter_state_update(pd);
+}
+
+PROGRAM_2COMBOBOX_ADD(_("filter"), program, filter_part, filter_state, program,
+                      _("Filter signals to be only accepted if the part is "
+                        "in certain state (part value)"),
+                      _("Filter signals to be only accepted if the part is "
+                        "in certain state (state value)"),
+                      _("part:"), _("state:"))
+
+#define PROGRAM_ATTR_2SPINNER(TEXT, SUB, VALUE1, VALUE2, MEMBER, MIN, MAX, STEP, FMT, \
+                              L1_START, L1_END, L2_START, L2_END, TOOLTIP1, TOOLTIP2, MULTIPLIER, \
+                              TYPE, DESC1, DESC2) \
+   PROGRAM_SPINNER_CALLBACK(SUB, VALUE1, MEMBER, TYPE, MULTIPLIER, DESC1) \
+   PROGRAM_SPINNER_CALLBACK(SUB, VALUE2, MEMBER, TYPE, MULTIPLIER, DESC2) \
+   COMMON_2SPINNER_ADD(PROGRAM, TEXT, "2swallow", SUB, VALUE1, VALUE2, MEMBER, TYPE, MIN, MAX, STEP, FMT, \
+                           L1_START, L1_END, L2_START, L2_END, TOOLTIP1, TOOLTIP2, MULTIPLIER)
+
+PROGRAM_ATTR_2SPINNER(_("in"), program, in_from, in_range, program, 0.0, 9999.0, 0.1, "%.1f", "from:", "sec", "range:", "sec",
+                    _("Constant time to wait till program would start"),
+                    _("Random number of seconds (from 0 to 'range') added to constant time"),
+                    1, double,
+                    _("in from changed from %.2f to %.2f"),
+                    _("in range changed from %.2f to %.2f"))
+
+static void
+_ui_property_program_set(Evas_Object *property, const char *program)
+{
+   Evas_Object *prop_box, *box, *item;
+   GROUP_PROP_DATA_GET()
+
+   prop_box = elm_object_content_get(pd->scroller);
+   pd->attributes.program.program = eina_stringshare_add(program);
+   if (!pd->attributes.program.frame)
+     {
+        FRAME_PROPERTY_ADD(property, pd->attributes.program.frame, true, _("Program property"), pd->scroller)
+        BOX_ADD(pd->attributes.program.frame, box, EINA_FALSE, EINA_FALSE)
+        elm_box_align_set(box, 0.5, 0.0);
+        elm_object_content_set(pd->attributes.program.frame, box);
+
+        item = prop_program_name_add(box, pd, NULL);
+        elm_object_disabled_set(pd->attributes.program.name, true);
+        elm_box_pack_end(box, item);
+        item = prop_program_signal_add(box, pd, NULL);
+        elm_box_pack_end(box, item);
+        item = prop_program_source_add(box, pd, NULL);
+        elm_box_pack_end(box, item);
+        item = prop_program_in_from_in_range_add(box, pd);
+        elm_box_pack_end(box, item);
+        item = prop_program_action_add(box, pd);
+        elm_box_pack_end(box, item);
+        item = prop_program_filter_part_filter_state_add(box, pd);
+        elm_box_pack_end(box, item);
+        FRAME_PROPERTY_ADD(box, pd->attributes.program.action_params, true, _("Action params"), pd->scroller)
+        elm_object_style_set(pd->attributes.program.action_params, "outdent_top");
+        elm_box_pack_end(box,pd->attributes.program.action_params);
+        /* as frame needed for create the action params controls, update the
+         * action ites */
+        prop_program_action_update(pd);
+        item = prop_program_transition_add(box, pd);
+        elm_box_pack_end(box, item);
+        FRAME_PROPERTY_ADD(box, pd->attributes.program.transition_params, true, _("Transition params"), pd->scroller)
+        elm_object_style_set(pd->attributes.program.transition_params, "outdent_top");
+        elm_box_pack_end(box,pd->attributes.program.transition_params);
+        /* as frame needed for create the transition params controls, update the
+         * transition ites */
+        prop_program_transition_update(pd);
+
+        /* targets */
+        FRAME_PROPERTY_ADD(box, pd->attributes.program.targets_frame, true, _("Targets"), pd->scroller)
+        elm_object_style_set(pd->attributes.program.targets_frame, "outdent_top");
+        elm_box_pack_end(box, pd->attributes.program.targets_frame);
+
+        BOX_ADD(pd->attributes.program.targets_frame, pd->attributes.program.target_box, false, false)
+        elm_box_align_set(box, 0.5, 0.0);
+        elm_object_content_set(pd->attributes.program.targets_frame, pd->attributes.program.target_box);
+        item = prop_program_target_add(pd->attributes.program.target_box, pd);
+        elm_box_pack_end(pd->attributes.program.target_box, item);
+        prop_program_targets_update(pd);
+
+        /* afters */
+        FRAME_PROPERTY_ADD(box, pd->attributes.program.afters_frame, true, _("Afters"), pd->scroller)
+        elm_object_style_set(pd->attributes.program.afters_frame, "outdent_top");
+        elm_box_pack_end(box, pd->attributes.program.afters_frame);
+
+        BOX_ADD(pd->attributes.program.targets_frame, pd->attributes.program.after_box, false, false)
+        elm_box_align_set(box, 0.5, 0.0);
+        elm_object_content_set(pd->attributes.program.afters_frame, pd->attributes.program.after_box);
+        item = prop_program_after_add(pd->attributes.program.after_box, pd);
+        elm_box_pack_end(pd->attributes.program.after_box, item);
+        prop_program_afters_update(pd);
+     }
+   else
+     {
+        prop_program_name_update(pd);
+        prop_program_signal_update(pd);
+        prop_program_source_update(pd);
+        prop_program_action_update(pd);
+        prop_program_transition_update(pd);
+        prop_program_filter_part_update(pd);
+        prop_program_filter_state_update(pd);
+        prop_program_targets_update(pd);
+        prop_program_afters_update(pd);
+     }
+   elm_box_pack_end(prop_box, pd->attributes.program.frame);
+}
+
+static void
+_ui_property_program_unset(Evas_Object *property)
+{
+   Evas_Object *prop_box;
+
+   GROUP_PROP_DATA_GET()
+
+   prop_box = elm_object_content_get(pd->scroller);
+   PROP_ITEM_UNSET(prop_box, pd->attributes.program.frame);
+   eina_stringshare_del(pd->attributes.program.program);
+   pd->attributes.program.program = NULL;
+}
 
 #define PART_ATTR_1CHECK(TEXT, SUB, VALUE, MEMBER, TOOLTIP, DESCRIPTION) \
    PART_ATTR_1CHECK_CALLBACK(SUB, VALUE, MEMBER, DESCRIPTION) \
@@ -1395,7 +2504,7 @@ PART_ATTR_1COMBOBOX(_("forward events"), part_drag, event, part_drag,
 #define pd_part pd->attributes.part
 #define pd_drag pd->attributes.part_drag
 void
-ui_property_part_set(Evas_Object *property, Part_ *part)
+ui_property_part_set(Evas_Object *property, Part *part)
 {
    Evas_Object *item;
    Evas_Object *box, *prop_box;
@@ -1408,6 +2517,7 @@ ui_property_part_set(Evas_Object *property, Part_ *part)
    pd->part = part;
    prop_box = elm_object_content_get(pd->scroller);
 
+   _ui_property_program_unset(property);
    if (!pd_part.frame)
      {
         FRAME_PROPERTY_ADD(property, pd_part.frame, true, _("Part property"), pd->scroller)
@@ -1420,7 +2530,7 @@ ui_property_part_set(Evas_Object *property, Part_ *part)
 
         item = prop_part_name_add(box, pd);
         elm_box_pack_end(box, item);
-        item = prop_part_type_add(box, _("type"), wm_part_type_get(pd->part->type));
+        item = prop_part_type_add(box, _("type"), gm_part_type_text_get(pd->part->type));
         elm_box_pack_end(box, item);
         pd->attributes.part.scale_item = prop_part_scale_add(box, pd);
         elm_box_pack_end(box, pd->attributes.part.scale_item);
@@ -1462,7 +2572,7 @@ ui_property_part_set(Evas_Object *property, Part_ *part)
    else
      {
         prop_part_name_update(pd);
-        prop_part_type_update(wm_part_type_get(pd->part->type));
+        prop_part_type_update(gm_part_type_text_get(pd->part->type));
         PART_ATTR_1CHECK_UPDATE(part, scale, part)
         PART_ATTR_1CHECK_UPDATE(part, mouse_events, part)
         PART_ATTR_1CHECK_UPDATE(part, repeat_events, part)
@@ -1608,11 +2718,10 @@ _on_state_color_class_change(void *data,
                                    pd->part->current_state->parsed_name,
                                    pd->part->current_state->parsed_val,
                                    value);
-
-   if (edje_edit_color_class_colors_get(pd->group->edit_object, item->title,
-                                        &r, &g, &b, &a,
-                                        &r2, &g2, &b2, &a2,
-                                        &r3, &g3, &b3, &a3))
+   if (value && edje_edit_color_class_colors_get(pd->group->edit_object, value,
+                                                 &r, &g, &b, &a,
+                                                 &r2, &g2, &b2, &a2,
+                                                 &r3, &g3, &b3, &a3))
      {
         evas_object_color_set(pd->attributes.state.color1, r * a / 255, g * a / 255, b * a / 255, a);
         evas_object_color_set(pd->attributes.state.color2, r2 * a2 / 255, g2 * a2 / 255, b2 * a2 / 255, a2);
@@ -1844,7 +2953,7 @@ STATE_ATTR_1COMBOBOX_LIST(_("table homogeneous"), state, table_homogeneous, stat
                           _("table homogeneous mode changed to %s"))
 
 void
-ui_property_part_state_set(Evas_Object *property, Part_ *part)
+ui_property_part_state_set(Evas_Object *property, Part *part)
 {
    Evas_Object *item;
    Evas_Object *state_frame, *box, *prop_box;
@@ -2085,12 +3194,12 @@ _on_combobox_##SUB##_##VALUE##_change(void *data, \
    evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL); \
 }
 
-#define STATE_ATTR_2COMBOBOX_V(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, DESCRIPTION1, DESCRIPTION2) \
+#define STATE_ATTR_2COMBOBOX_V(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, DESCRIPTION1, DESCRIPTION2, LABEL1, LABEL2) \
    STATE_ATTR_1COMBOBOX_CALLBACK(SUB, VALUE1, MEMBER, DESCRIPTION1) \
    STATE_ATTR_1COMBOBOX_CALLBACK(SUB, VALUE2, MEMBER, DESCRIPTION2) \
    STATE_ATTR_SOURCE_UPDATE(SUB, VALUE1, MEMBER, part->type, ==) \
    STATE_ATTR_SOURCE_UPDATE(SUB, VALUE2, MEMBER, part->type, ==) \
-   STATE_ATTR_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2)
+   STATE_ATTR_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, LABEL1, LABEL2)
 
 #define STATE_ATTR_2SPINNER_ICON(TEXT, SUB, VALUE1, VALUE2, MEMBER, MIN, MAX, STEP, FMT, \
                                  L1_START, L1_END, L2_START, L2_END, TOOLTIP1, TOOLTIP2, MULTIPLIER, \
@@ -2106,7 +3215,8 @@ STATE_ATTR_2COMBOBOX_V(_("relative to"), state, rel1_to_x, rel1_to_y, state_obje
                        _("Causes a corner to be positioned relatively to the Y axis of another "
                          "part. Setting to \"\" will un-set this value"),
                        _("rel1.to_x changed to \"%s\""),
-                       _("rel1.to_y changed to \"%s\""))
+                       _("rel1.to_y changed to \"%s\""),
+                       _("x:"), _("y:"))
 STATE_ATTR_2SPINNER_ICON(_("align"), state, rel1_relative_x, rel1_relative_y, state_object_area,
                          -500, 500, 1, NULL, "x:", "%", "y:", "%",
                          _("Define the position of left-up corner of the part's container. "
@@ -2131,7 +3241,8 @@ STATE_ATTR_2COMBOBOX_V(_("relative to"), state, rel2_to_x, rel2_to_y, state_obje
                        _("Causes a corner to be positioned relatively to the Y axis of another "
                          "part. Setting to \"\" will un-set this value"),
                        _("rel2.to_x changed to \"%s\""),
-                       _("rel2.to_y changed to \"%s\""))
+                       _("rel2.to_y changed to \"%s\""),
+                       _("x:"), _("y:"))
 STATE_ATTR_2SPINNER_ICON(_("align"), state, rel2_relative_x, rel2_relative_y, state_object_area,
                          -500, 500, 1, NULL, "x:", "%", "y:", "%",
                          _("Define the position of right-down corner of the part's container. "
@@ -2264,9 +3375,9 @@ STATE_ATTR_1ENTRY(_("text"), state, text, state_text, NULL, _("The dispalyed tex
 STATE_ATTR_1ENTRY(_("font"), state, font, state_text, pd->attributes.state_text.validator,
                   _("The text font, posible set a font style. Ex: Sans:style=italic"),
                   _("font changed to %s"))
-STATE_ATTR_1SPINNER(_("size"), state_text, size, state_text, 1, 128, 1, "%.0f", "", "pt",
+STATE_ATTR_1SPINNER(_("size"), state_text, size, state_text, 1, 128, 1, "%.0f", "", "px",
                     _("The font size"), 1, int,
-                    _("font size changed from %d to %d"))
+                    _("font size changed from %dpx to %dpx"))
 STATE_ATTR_2SPINNER(_("align"), state_text, align_x, align_y, state_text,
                     0.0, 100.0, 1.0, "%.0f", "x:", "%", "y:", "%",
                     _("Text horizontal align"), _("Text vertical align"),
@@ -2845,7 +3956,7 @@ ui_property_state_textblock_unset(Evas_Object *property)
 
 #define pd_image pd->attributes.state_image
 
-Eina_Bool
+static Eina_Bool
 _on_image_editor_done(void *data,
                       Evas_Object *obj __UNUSED__,
                       void *event_info)
@@ -2873,6 +3984,7 @@ _on_image_editor_done(void *data,
                           pd->part->current_state->parsed_val,
                           selected);
 
+   history_change_add(pd->group->history, change);
    evas_object_smart_callback_call(pd->attributes.state_image.image, "changed,user", NULL);
    evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
 
@@ -2901,23 +4013,38 @@ _del_tween_image(void *data,
                  void *event_info __UNUSED__)
 {
    Evas_Object *tween_list = (Evas_Object *)data;
-   Elm_Object_Item *it = elm_gengrid_selected_item_get(tween_list);
-   Eina_Stringshare *selected  = elm_object_item_data_get(it);
+   const Eina_List *sel_list = elm_gengrid_selected_items_get(tween_list), *l;
+   Eina_List *selected = NULL;
+   Elm_Object_Item *it;
+   const char *name;
    Group_Prop_Data *pd = evas_object_data_get(tween_list, GROUP_PROP_DATA);
 
    assert(pd != NULL);
 
-   if ((!selected) || (!it) || (!pd)) return;
-   if (edje_edit_state_tween_del(pd->group->edit_object, pd->part->name,
-                                 pd->part->current_state->parsed_name, pd->part->current_state->parsed_val,
-                                 selected))
+   EINA_LIST_FOREACH(sel_list, l, it)
      {
-        elm_object_item_del(it);
-        //project_changed(false);
+        name = elm_object_item_data_get(it);
+        selected = eina_list_append(selected, eina_stringshare_add(name));
      }
+
+   Eina_Stringshare *msg = eina_stringshare_printf(_("removed %d tween images"),
+                                                   eina_list_count(sel_list));
+   Change *change = change_add(msg);
+   eina_stringshare_del(msg);
+   EINA_LIST_FOREACH(selected, l, name)
+     {
+        editor_state_tween_del(pd->group->edit_object, change, false,
+                               pd->part->name,
+                               pd->part->current_state->parsed_name,
+                               pd->part->current_state->parsed_val,
+                               name);
+        eina_stringshare_del(name);
+     }
+   eina_list_free(selected);
+   history_change_add(pd->group->history, change);
 }
 
-Eina_Bool
+static Eina_Bool
 _on_image_editor_tween_done(void *data,
                             Evas_Object *obj __UNUSED__,
                             void *event_info)
@@ -2931,18 +4058,20 @@ _on_image_editor_tween_done(void *data,
    assert(pd != NULL);
 
    if (!selected) return false;
-
+   Eina_Stringshare *msg = eina_stringshare_printf(_("added %d tween images"),
+                                                   eina_list_count(selected));
+   Change *change = change_add(msg);
+   eina_stringshare_del(msg);
    EINA_LIST_FOREACH(selected, l, name)
      {
-        if (edje_edit_state_tween_add(pd->group->edit_object, pd->part->name,
-                                      pd->part->current_state->parsed_name,
-                                      pd->part->current_state->parsed_val, name))
-          {
-             elm_gengrid_item_append(tween_list, _itc_tween,
-                                     eina_stringshare_add(name), NULL, NULL);
-             //project_changed(false);
-          }
+        editor_state_tween_add(pd->group->edit_object, change, false,
+                               pd->part->name,
+                               pd->part->current_state->parsed_name,
+                               pd->part->current_state->parsed_val,
+                               name);
      }
+   history_change_add(pd->group->history, change);
+
    return true;
 }
 
@@ -3051,8 +4180,8 @@ _tween_image_moved(Evas_Object *data,
    //project_changed(false);
 }
 
-Evas_Object *
-prop_item_state_image_tween_add(Evas_Object *box, Group_Prop_Data *pd)
+static Evas_Object *
+_prop_item_state_image_tween_add(Evas_Object *box, Group_Prop_Data *pd)
 {
    Evas_Object *tween_frame, *tween_list, *item, *button, *icon;
    Eina_List *images_list, *l;
@@ -3075,6 +4204,7 @@ prop_item_state_image_tween_add(Evas_Object *box, Group_Prop_Data *pd)
    elm_gengrid_item_size_set(tween_list, 96, 111);
    elm_gengrid_align_set(tween_list, 0.0, 0.0);
    elm_gengrid_horizontal_set(tween_list, true);
+   elm_gengrid_multi_select_set(tween_list, true);
 
    evas_object_data_set(tween_list, GROUP_PROP_DATA, pd);
 
@@ -3130,8 +4260,9 @@ prop_item_state_image_tween_update(Evas_Object *tween, Group_Prop_Data *pd)
    assert(tween != NULL);
    assert(pd != NULL);
 
-   tween_list = elm_object_content_get(tween);
-   elm_genlist_clear(tween_list);
+   /* Tween_List -> Item(Layout) -> Frame(Tween) */
+   tween_list = elm_object_content_get(elm_object_content_get(tween));
+   elm_gengrid_clear(tween_list);
    images_list = edje_edit_state_tweens_list_get(pd->group->edit_object,
                                                  pd->part->name,
                                                  pd->part->current_state->parsed_name,
@@ -3141,10 +4272,11 @@ prop_item_state_image_tween_update(Evas_Object *tween, Group_Prop_Data *pd)
 
    EINA_LIST_FOREACH(images_list, l, image_name)
      {
-       elm_genlist_item_append(tween_list, _itc_tween, image_name, NULL,
-                               ELM_GENLIST_ITEM_NONE, NULL, NULL);
+        elm_gengrid_item_append(tween_list, _itc_tween,
+                                eina_stringshare_add(image_name), NULL, NULL);
      }
    edje_edit_string_list_free(images_list);
+   evas_object_show(tween_list);
 }
 
 #define SPINNER_SET(SUB, VALUE, SPINNER, PART) \
@@ -3266,8 +4398,25 @@ prop_##SUB##_##VALUE##_add(Evas_Object *box, Group_Prop_Data *pd) \
 ATTR_4SPINNERS(_("border"), state_image, border, state_image, NULL, STATE_ARGS,
                _("border changed to [%d %d %d %d]"))
 
-STATE_ATTR_1ENTRY(_("image"), state, image, state_image, NULL, NULL,
-                  _("image changed to %s"))
+STATE_ATTR_1ENTRY_CALLBACK(state, image, NULL, _("image changed to %s"))
+static void
+prop_state_image_update(Group_Prop_Data *pd)
+{
+   const char *value;
+   value = edje_edit_state_image_get(pd->group->edit_object STATE_ARGS);
+   if (!strcmp(value, EFLETE_DUMMY_IMAGE_NAME))
+     {
+        edje_edit_string_free(value);
+        value = eina_stringshare_add(_("None"));
+     }
+   char *text = elm_entry_utf8_to_markup(value);
+   if (strcmp(text, elm_entry_entry_get(pd->attributes.state_image.image)))
+     elm_entry_entry_set(pd->attributes.state_image.image, text);
+   edje_edit_string_free(value);
+   free(text);
+}
+STATE_ATTR_1ENTRY_ADD("image", state, image, state_image, NULL, NULL)
+
 STATE_ATTR_1COMBOBOX_LIST(_("border fill"), state_image, border_fill, state_image,\
                           edje_middle_type, NULL, unsigned char,
                           _("border fill changed to %s"))
@@ -3299,7 +4448,7 @@ ui_property_state_image_set(Evas_Object *property)
         item = prop_state_image_border_fill_add(box, pd);
         elm_box_pack_end(box, item);
 
-        pd_image.tween = prop_item_state_image_tween_add(box, pd);
+        pd_image.tween = _prop_item_state_image_tween_add(box, pd);
         elm_box_pack_end(box, pd_image.tween);
 
         elm_box_pack_end(prop_box, image_frame);
@@ -3579,7 +4728,7 @@ PART_ITEM_ATTR_2SPINNER(_("position"), part_item, position_col, position_row, pa
                         _("part item position row changed from %d to %d"))
 
 static void
-_ui_property_part_item_set(Evas_Object *property, Part_ *part)
+_ui_property_part_item_set(Evas_Object *property, Part *part)
 {
    Evas_Object *item;
    Evas_Object *box, *prop_box;

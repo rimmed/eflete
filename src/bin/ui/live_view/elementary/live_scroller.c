@@ -17,71 +17,71 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include "live_view_prop.h"
+#include "live_elementary_widgets.h"
 
 static void
 _on_scroller_swallow_check(void *data,
-                           Evas_Object *obj,
-                           void *ei __UNUSED__)
+                           Evas_Object *obj __UNUSED__,
+                           void *ei)
 {
-   Evas_Object *content = NULL, *check = NULL, *ch;
-   Eina_List *item_list = NULL, *it;
-   Eina_Bool all_checks = true;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *content, *bt;
+   Evas_Object *object = (Evas_Object *)data;
 
-   Prop_Data *pd = (Prop_Data *)data;
-
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_swallow.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
+   if (!strcmp(part->name, "elm.swallow.content"))
      {
-        if (!strcmp(part_name, "elm.swallow.content"))
-          {
-             content = elm_table_add(object);
-             Evas_Object *bt;
-             int i, j;
+        content = elm_table_add(object);
+        int i, j;
 
-             for (j = 0; j < ELEMENTS_COUNT; j++)
+        for (j = 0; j < ELEMENTS_COUNT; j++)
+          {
+             for (i = 0; i < ELEMENTS_COUNT; i++)
                {
-                  for (i = 0; i < ELEMENTS_COUNT; i++)
+                  bt = object_generate(part, content);
+                  if (bt)
                     {
-                       bt = elm_button_add(content);
-                       elm_table_pack(content, bt, i, j, 1, 1);
-                       elm_object_text_set(bt, _("Both"));
-                       evas_object_show(bt);
-                    }
-               }
-             elm_object_content_set(object, content);
-             evas_object_show(content);
-          }
-        else
-          {
-             content = evas_object_rectangle_add(object);
-             evas_object_color_set(content, HIGHLIGHT_COLOR);
-             elm_object_part_content_set(object, part_name, content);
-          }
-        item_list = elm_box_children_get(pd->prop_swallow.swallows);
+                       evas_object_color_set(part->object,
+                                             part->r,
+                                             part->g,
+                                             part->b,
+                                             part->a);
 
-        EINA_LIST_FOREACH(item_list, it, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
+                       evas_object_size_hint_min_set(part->object,
+                                                     part->min_w,
+                                                     part->min_h);
+                       evas_object_size_hint_max_set(part->object,
+                                                     part->max_w,
+                                                     part->max_h);
+                    }
+                  else
+                    return;
+                  elm_table_pack(content, bt, i, j, 1, 1);
+                  evas_object_show(bt);
+               }
           }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
+        elm_object_content_set(object, content);
+        part->object = content;
+        evas_object_show(content);
      }
    else
      {
-        if (!strcmp(part_name, "elm.swallow.content"))
-          content =  elm_object_content_unset(object);
-        else
-          content = elm_object_part_content_unset(object, part_name);
-        evas_object_del(content);
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
+        bt = object_generate(part, object);
+        if (bt)
+          {
+             evas_object_color_set(part->object,
+                                   part->r,
+                                   part->g,
+                                   part->b,
+                                   part->a);
+
+             evas_object_size_hint_min_set(part->object,
+                                           part->min_w,
+                                           part->min_h);
+             evas_object_size_hint_max_set(part->object,
+                                           part->max_w,
+                                           part->max_h);
+          }
+        elm_object_part_content_set(object, part->name, part->object);
      }
 }
 
@@ -98,7 +98,7 @@ widget_scroller_create(Evas_Object *parent, const Group *group)
    if ((strcmp(group->class, "entry") == 0) || (strcmp(group->class, "entry_single") == 0))
      {
         object = elm_entry_add(parent);
-        evas_object_data_set(object, SWALLOW_FUNC, on_swallow_check);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, on_swallow_check, object);
         elm_entry_scrollable_set(object, true);
         if (strcmp(group->class, "entry_single") == 0)
           elm_entry_single_line_set(object, true);
@@ -106,15 +106,15 @@ widget_scroller_create(Evas_Object *parent, const Group *group)
    else
      {
         object = elm_scroller_add(parent);
-        evas_object_data_set(object, SWALLOW_FUNC, _on_scroller_swallow_check);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, _on_scroller_swallow_check, object);
      }
    elm_object_style_set(object, group->style);
 
    elm_scroller_policy_set(object, ELM_SCROLLER_POLICY_ON,
                            ELM_SCROLLER_POLICY_ON);
 
-   evas_object_data_set(object, TEXT_FUNC, on_text_check);
-   evas_object_data_set(object, SIGNAL_FUNC, send_signal);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_TEXT_SET, on_text_check, object);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SIGNAL_SEND, send_signal, object);
 
    return object;
 }

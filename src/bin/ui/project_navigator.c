@@ -22,10 +22,8 @@
 
 #include "project_navigator.h"
 #include "main_window.h"
-#include "editor.h"
 #include "validator.h"
-
-#define SIG_GROUP_OPEN "group,open"
+#include "project_manager.h"
 
 typedef struct
 {
@@ -106,11 +104,14 @@ _group_item_icon_get(void *data,
 
    if (!strcmp(part, "elm.swallow.icon"))
      {
-        ICON_STANDARD_ADD(obj, icon, true, "file");
-     }
-   if ((group->main_group != NULL) && (!strcmp(part, "elm.swallow.end")))
-     {
-        IMAGE_ADD_NEW(obj, icon, "icon", "alias_link");
+        if (group->main_group == NULL)
+          {
+             ICON_STANDARD_ADD(obj, icon, true, "file")
+          }
+        else
+          {
+             IMAGE_ADD_NEW(obj, icon, "icon", "alias_link");
+          }
      }
    return icon;
 }
@@ -285,7 +286,7 @@ _on_clicked_double(void *data __UNUSED__,
    else
      {
         Group *group = (Group *)elm_object_item_data_get(glit);
-        evas_object_smart_callback_call(project_navigator.layout, SIG_GROUP_OPEN, group);
+        evas_object_smart_callback_call(project_navigator.layout, SIGNAL_GROUP_OPEN, group);
      }
 }
 
@@ -530,15 +531,24 @@ _group_del(void *data __UNUSED__,
 
    buf = eina_strbuf_new();
    group_name = (Eina_Stringshare *)event_info;
-   fprintf(stdout, "%s\n", group_name);
    item = elm_genlist_first_item_get(project_navigator.genlist);
    arr = eina_str_split_full(group_name, "/", 0, &depth);
    for (i = 0; i < depth; i++)
      {
         item  =_find_item(item, arr[i]);
         eina_strbuf_append_printf(buf, "%s", arr[i]);
-        if (i != depth - 1) eina_strbuf_append(buf, "/");
         if (!item) break;
+        if (i != depth - 1)
+          {
+             eina_strbuf_append(buf, "/");
+          }
+        else
+          {
+             if (elm_genlist_item_type_get(item) == ELM_GENLIST_ITEM_TREE)
+               item = _find_item(elm_genlist_item_next_get(item), arr[i]);
+             stack = eina_list_append(stack, item);
+             break;
+          }
         if (!elm_genlist_item_expanded_get(item) &&
             NULL != eina_list_search_sorted_list(ap.project->groups, (Eina_Compare_Cb)group_cmp, eina_strbuf_string_get(buf)))
           break;
@@ -626,14 +636,14 @@ project_navigator_add(void)
    assert(ap.win != NULL);
 
    project_navigator.itc_folder = elm_genlist_item_class_new();
-   project_navigator.itc_folder->item_style = "navigator";
+   project_navigator.itc_folder->item_style = "aligned";
    project_navigator.itc_folder->func.text_get = _folder_item_label_get;
    project_navigator.itc_folder->func.content_get = _folder_item_icon_get;
    project_navigator.itc_folder->func.state_get = NULL;
    project_navigator.itc_folder->func.del = _folder_item_del;
 
    project_navigator.itc_group = elm_genlist_item_class_new();
-   project_navigator.itc_group->item_style = "navigator";
+   project_navigator.itc_group->item_style = "aligned";
    project_navigator.itc_group->func.text_get = _group_item_label_get;
    project_navigator.itc_group->func.content_get = _group_item_icon_get;
    project_navigator.itc_group->func.state_get = NULL;
@@ -659,10 +669,12 @@ project_navigator_add(void)
    elm_object_disabled_set(project_navigator.btn_del, true);
 
    project_navigator.genlist = elm_genlist_add(project_navigator.layout);
+   elm_genlist_homogeneous_set(project_navigator.genlist, true);
    evas_object_show(project_navigator.genlist);
    elm_object_content_set(project_navigator.layout, project_navigator.genlist);
    evas_object_smart_callback_add (project_navigator.genlist, "selected", _selected_cb, NULL);
    evas_object_smart_callback_add (project_navigator.genlist, "unselected", _unselected_cb, NULL);
+   /*elm_genlist_tree_effect_enabled_set(project_navigator.genlist, EINA_TRUE);*/
 
    elm_object_text_set(project_navigator.layout, _("None"));
    elm_object_disabled_set(project_navigator.layout, true);

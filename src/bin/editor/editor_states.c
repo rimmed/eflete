@@ -17,8 +17,11 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
+#define ALLOW_DIRECT_EDJE_EDIT_CALLS
 #include "editor.h"
 #include "editor_macro.h"
+#include "change.h"
+#include "diff.h"
 
 extern int _editor_signals_blocked;
 EDITOR_STATE_DOUBLE(rel1_relative_x, ATTRIBUTE_STATE_REL1_RELATIVE_X)
@@ -52,6 +55,7 @@ EDITOR_STATE_DOUBLE_SAVE(container_align_y, ATTRIBUTE_STATE_CONTAINER_ALIGN_Y)
 
 EDITOR_STATE_DOUBLE(minmul_h, ATTRIBUTE_STATE_MINMUL_H)
 EDITOR_STATE_DOUBLE(minmul_w, ATTRIBUTE_STATE_MINMUL_W)
+
 #define MAX_SET(VAL, VAL_CAPS) \
 Eina_Bool \
 editor_state_max_## VAL ##_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, \
@@ -157,17 +161,17 @@ EDITOR_STATE_BOOL(visible, ATTRIBUTE_STATE_VISIBLE)
 EDITOR_STATE_BOOL(container_min_h, ATTRIBUTE_STATE_CONTAINER_MIN_H)
 EDITOR_STATE_BOOL(container_min_v, ATTRIBUTE_STATE_CONTAINER_MIN_V)
 
-EDITOR_STATE_STRING(rel1_to_x, ATTRIBUTE_STATE_REL1_TO_X)
-EDITOR_STATE_STRING(rel1_to_y, ATTRIBUTE_STATE_REL1_TO_Y)
-EDITOR_STATE_STRING(rel2_to_x, ATTRIBUTE_STATE_REL2_TO_X)
-EDITOR_STATE_STRING(rel2_to_y, ATTRIBUTE_STATE_REL2_TO_Y)
-EDITOR_STATE_STRING(proxy_source, ATTRIBUTE_STATE_PROXY_SOURCE)
+EDITOR_STATE_STRING_WITH_RESET(rel1_to_x, ATTRIBUTE_STATE_REL1_TO_X, true, rel1_relative_x)
+EDITOR_STATE_STRING_WITH_RESET(rel1_to_y, ATTRIBUTE_STATE_REL1_TO_Y, true, rel1_relative_y)
+EDITOR_STATE_STRING_WITH_RESET(rel2_to_x, ATTRIBUTE_STATE_REL2_TO_X, true, rel2_relative_x)
+EDITOR_STATE_STRING_WITH_RESET(rel2_to_y, ATTRIBUTE_STATE_REL2_TO_Y, true, rel2_relative_y)
+EDITOR_STATE_STRING(proxy_source, ATTRIBUTE_STATE_PROXY_SOURCE, true)
 
 TODO("Fix edje_edit API")
 //EDITOR_STATE_STRING(box_layout, ATTRIBUTE_STATE_BOX_LAYOUT)
 //EDITOR_STATE_STRING(box_alt_layout, ATTRIBUTE_STATE_BOX_ALT_LAYOUT)
 
-EDITOR_STATE_STRING(color_class, ATTRIBUTE_STATE_COLOR_CLASS)
+EDITOR_STATE_STRING(color_class, ATTRIBUTE_STATE_COLOR_CLASS, true)
 
 TODO("Replace with image stub")
 EDITOR_STATE_STRING_WITH_FALLBACK(image, ATTRIBUTE_STATE_IMAGE, NULL)
@@ -187,10 +191,87 @@ EDITOR_STATE_INT_SAVE(container_padding_x, ATTRIBUTE_STATE_CONTAINER_PADING_X)
 EDITOR_STATE_INT_SAVE(container_padding_y, ATTRIBUTE_STATE_CONTAINER_PADING_Y)
 
 Eina_Bool
+editor_state_tween_add(Evas_Object *edit_object, Change *change, Eina_Bool merge,
+                       const char *part_name, const char *state_name, double state_val,
+                       Eina_Stringshare *name)
+{
+   Diff *diff;
+   Attribute attribute = ATTRIBUTE_STATE_IMAGE_TWEEN;
+   assert(edit_object != NULL);
+   assert(part_name != NULL);
+   assert(state_name != NULL);
+   if (change)
+     {
+        diff = mem_calloc(1, sizeof(Diff));
+        diff->redo.type = FUNCTION_TYPE_STRING_STRING_DOUBLE_STRING;
+        diff->redo.function = editor_state_tween_add;
+        diff->redo.args.type_ssds.s1 = eina_stringshare_add(part_name);
+        diff->redo.args.type_ssds.s2 = eina_stringshare_add(state_name);
+        diff->redo.args.type_ssds.d3 = state_val;
+        diff->redo.args.type_ssds.s4 = eina_stringshare_add(name);
+        diff->undo.type = FUNCTION_TYPE_STRING_STRING_DOUBLE_STRING;
+        diff->undo.function = editor_state_tween_del;
+        diff->undo.args.type_ssds.s1 = eina_stringshare_add(part_name);
+        diff->undo.args.type_ssds.s2 = eina_stringshare_add(state_name);
+        diff->undo.args.type_ssds.d3 = state_val;
+        diff->undo.args.type_ssds.s4 = eina_stringshare_add(name);
+        if (merge)
+          change_diff_merge_add(change, diff);
+        else
+          change_diff_add(change, diff);
+     }
+   if (!edje_edit_state_tween_add(edit_object, part_name, state_name, state_val, name))
+     return false;
+   _editor_project_changed();
+   if (!_editor_signals_blocked)
+     evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+   return true;
+}
+Eina_Bool
+editor_state_tween_del(Evas_Object *edit_object, Change *change, Eina_Bool merge,
+                       const char *part_name, const char *state_name, double state_val,
+                       Eina_Stringshare *name)
+{
+   Diff *diff;
+   Attribute attribute = ATTRIBUTE_STATE_IMAGE_TWEEN;
+   assert(edit_object != NULL);
+   assert(part_name != NULL);
+   assert(state_name != NULL);
+   if (change)
+     {
+        diff = mem_calloc(1, sizeof(Diff));
+        diff->redo.type = FUNCTION_TYPE_STRING_STRING_DOUBLE_STRING;
+        diff->redo.function = editor_state_tween_del;
+        diff->redo.args.type_ssds.s1 = eina_stringshare_add(part_name);
+        diff->redo.args.type_ssds.s2 = eina_stringshare_add(state_name);
+        diff->redo.args.type_ssds.d3 = state_val;
+        diff->redo.args.type_ssds.s4 = eina_stringshare_add(name);
+        diff->undo.type = FUNCTION_TYPE_STRING_STRING_DOUBLE_STRING;
+        diff->undo.function = editor_state_tween_add;
+        diff->undo.args.type_ssds.s1 = eina_stringshare_add(part_name);
+        diff->undo.args.type_ssds.s2 = eina_stringshare_add(state_name);
+        diff->undo.args.type_ssds.d3 = state_val;
+        diff->undo.args.type_ssds.s4 = eina_stringshare_add(name);
+        if (merge)
+          change_diff_merge_add(change, diff);
+        else
+          change_diff_add(change, diff);
+     }
+   if (!edje_edit_state_tween_del(edit_object, part_name, state_name, state_val, name))
+     return false;
+   _editor_project_changed();
+   if (!_editor_signals_blocked)
+     evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+   return true;
+}
+
+Eina_Bool
 editor_state_reset(Evas_Object *edit_object, Change *change, Eina_Bool merge __UNUSED__,
                    const char *part_name, const char *state_name, double state_val)
 {
    Eina_Bool res = true;
+   Eina_List *tweens, *l;
+   Eina_Stringshare *tween;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -236,6 +317,11 @@ editor_state_reset(Evas_Object *edit_object, Change *change, Eina_Bool merge __U
          res = res && editor_state_image_border_reset(edit_object, change, part_name, state_name, state_val);
          res = res && editor_state_image_border_fill_reset(edit_object, change, part_name, state_name, state_val);
          res = res && editor_state_image_reset(edit_object, change, part_name, state_name, state_val);
+
+         tweens = edje_edit_state_tweens_list_get(edit_object, part_name, state_name, state_val);
+         EINA_LIST_FOREACH(tweens, l, tween)
+            res = res && editor_state_tween_del(edit_object, change, false, part_name, state_name, state_val, tween);
+         edje_edit_string_list_free(tweens);
          break;
       case EDJE_PART_TYPE_PROXY:
          res = res && editor_state_fill_origin_relative_x_reset(edit_object, change, part_name, state_name, state_val);
@@ -303,6 +389,7 @@ editor_state_add(Evas_Object *edit_object, Change *change, Eina_Bool merge __UNU
 {
    Diff *diff;
    Editor_State event_info;
+   Edje_Part_Type type;
 
    assert(edit_object != NULL);
 
@@ -327,8 +414,13 @@ editor_state_add(Evas_Object *edit_object, Change *change, Eina_Bool merge __UNU
 
    /* fix incorrect default values */
    TODO("Fix edje_edit")
-   if (edje_edit_part_type_get(edit_object, part_name) == EDJE_PART_TYPE_BOX)
+   type = edje_edit_part_type_get(edit_object, part_name);
+   if (type == EDJE_PART_TYPE_BOX)
      edje_edit_state_box_layout_set(edit_object, part_name, state_name, state_val, "horizontal");
+
+   /* apply our default values */
+   if (!editor_state_reset(edit_object, NULL, false, part_name, state_name, state_val))
+     return false;
 
    _editor_project_changed();
    event_info.part_name = eina_stringshare_add(part_name);

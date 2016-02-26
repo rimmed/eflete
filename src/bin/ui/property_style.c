@@ -18,10 +18,9 @@
  */
 #include "property_private.h"
 #include "property_macros.h"
-#include "signals.h"
-#include "style_editor.h"
+#include "main_window.h"
 #include "colorsel.h"
-
+#include "project_manager.h"
 
 struct _Style_Prop_Data
 {
@@ -37,11 +36,13 @@ struct _Style_Prop_Data
    Evas_Object *vert_align;
    Evas_Object *left_margin;
    Evas_Object *right_margin;
+   Evas_Object *wrap;
    Evas_Object *box_frame_position;
    // Text format frame data
    Evas_Object *tab_stops;
    Evas_Object *line_size;
    Evas_Object *relative_size;
+   Evas_Object *check_ellipsis;
    Evas_Object *replace_ellisis;
    Evas_Object *check_psw;
    Evas_Object *check_color;
@@ -68,6 +69,7 @@ struct _Style_Prop_Data
 typedef struct _Style_Prop_Data Style_Prop_Data;
 
 #define MIN_SP - 1.0
+#define ELLIPSIS_MIN_SP 0.0
 #define MARGIN_MIN_SP 0.0
 #define MAX_SP 9999.0
 #define MAX_PERCENT 100.0
@@ -162,6 +164,12 @@ static const char *font_horizontal_valign[] = { N_("top"),
                                                 N_("base"),
                                                 NULL};
 
+static const char *text_wrap[] = { N_("none"),
+                                   N_("word"),
+                                   N_("char"),
+                                   N_("mixed"),
+                                   NULL};
+
 static const char *font_glow_list[] = { N_("none"),
                                         N_("plain"),
                                         N_("shadow"),
@@ -229,6 +237,16 @@ Ewe_Combobox_Item *item = ei; \
 const char *value; \
 value = eina_stringshare_add(item->title);
 
+#define COMBOBOX_NONE_VALUE \
+Ewe_Combobox_Item *item = ei; \
+const char *value; \
+value = eina_stringshare_add(item->title); \
+if (!strcmp(value, _("none"))) \
+{ \
+   eina_stringshare_del(value); \
+   value = eina_stringshare_add(""); \
+}
+
 #define PERCENT_SPINNER_VALUE \
 const char *value = NULL; \
 if (!ei) \
@@ -261,6 +279,9 @@ _on_##VALUE##_change(void *data, \
    _lines_colors_update(pd, TEXT); \
    _style_edit_update(pd); \
    eina_stringshare_del(value); \
+   editor_save(ap.project->global_object); \
+   TODO("Remove this line once edje_edit API would be added into Editor Module and saving would work properly") \
+   ap.project->changed = true; \
 }
 
 static void
@@ -356,6 +377,7 @@ _tag_parse(Style_Prop_Data *pd, const char *value, const char *text)
    eina_strbuf_append(tag, CURRENT.stvalue);
    edje_edit_obj = ap.project->global_object;
    stolen_buf = eina_strbuf_string_steal(tag);
+
    token = strtok(stolen_buf, " =+");
    while (token)
      {
@@ -369,8 +391,11 @@ _tag_parse(Style_Prop_Data *pd, const char *value, const char *text)
         else if (strstr(token, "shadow"))
           {
              style_table[DIRECTION_NUM][1] = eina_stringshare_add(strchr(token, ','));
-             style_length = (int)(strlen(token) - strlen(style_table[DIRECTION_NUM][1]));
-             style_table[exist][1] = eina_stringshare_add_length(token, style_length);
+             if (style_table[DIRECTION_NUM][1])
+               {
+                  style_length = (int)(strlen(token) - strlen(style_table[DIRECTION_NUM][1]));
+                  style_table[exist][1] = eina_stringshare_add_length(token, style_length);
+               }
           }
         else
           {
@@ -443,6 +468,7 @@ _tag_value_get(const char* text_style, char* a_tag)
 
    strcpy(tag_list_copy, text_style);
    token = strtok(tag_list_copy, " ");
+
    while (token)
      {
         char* equals_sign = strchr(token, '=');
@@ -452,7 +478,11 @@ _tag_value_get(const char* text_style, char* a_tag)
              if (!strcmp(token, a_tag))
                {
                   equals_sign++;
-                  result = eina_tmpstr_add(equals_sign);
+
+                  if (equals_sign[strlen(equals_sign) - 1] != '\'')
+                    result = eina_tmpstr_add(equals_sign);
+                  else
+                    result = eina_tmpstr_add_length(equals_sign, strlen(equals_sign) - 1);
                   if (!strstr(FONT_DEFAULT, a_tag)) break;
                }
           }
@@ -485,7 +515,6 @@ _lines_colors_update(Style_Prop_Data *pd, const char *param)
 
    if (!strcmp(param, "underline"))
      {
-        printf("lines update\n");
         _lines_update(pd);
         val = _tag_value_get(CURRENT.stvalue, "underline_color");
         if (!val) _tag_parse(pd, WHITE_COLOR, "underline_color");
@@ -580,6 +609,7 @@ _add_1check_color_item(const char *text,
    Evas_Object *layout;
    PROPERTY_ITEM_ADD(box, text, "2swallow")
    CHECK_ADD(item, *object_left)
+   elm_object_style_set(*object_left, "toggle");
 
    ADD_COLOR_ELEMENT(*object_right, item, layout)
 
@@ -597,6 +627,7 @@ _add_1check_2button_item(const char *text,
 {
    PROPERTY_ITEM_ADD(box, text, "2swallow")
    CHECK_ADD(item, *object_left)
+   elm_object_style_set(*object_left, "toggle");
 
    SEGMENT_CONTROL_ADD(item, *object_right)
    elm_segment_control_item_add(*object_right, NULL, "single");
@@ -608,6 +639,23 @@ _add_1check_2button_item(const char *text,
    elm_box_pack_end(box, item);
 }
 
+static void
+_add_1check_spinner_item(const char *text,
+                         Evas_Object *box,
+                         Evas_Object **object_left,
+                         Evas_Object **object_right)
+{
+   PROPERTY_ITEM_ADD(box, text, "2swallow")
+   CHECK_ADD(item, *object_left)
+   elm_object_style_set(*object_left, "toggle");
+
+   SPINNER_ADD(item, *object_right, ELLIPSIS_MIN_SP, MAX_SP, STEP_SP, true)
+
+   elm_layout_content_set(item, "swallow.content1", *object_left);
+   elm_layout_content_set(item, "swallow.content2", *object_right);
+
+   elm_box_pack_end(box, item);
+}
 
 #define CALLBACKS_COLOR_ADD(VALUE, TAG) \
 static void \
@@ -627,6 +675,9 @@ _on_##VALUE##_change(void *data, \
    evas_object_color_set(color, r*a/255, g*a/255, b*a/255, a); \
    _style_edit_update(pd); \
    eina_stringshare_del(value); \
+   editor_save(ap.project->global_object); \
+   TODO("Remove this line once edje_edit API would be added into Editor Module and saving would work properly") \
+   ap.project->changed = true; \
 } \
 static void \
 _on_##VALUE##_dismissed(void *data, \
@@ -687,11 +738,38 @@ CHANGE_CALLBACK(relative_size, "linerelsize", SPINNER, NULL)
 CHANGE_CALLBACK(check_psw, "password", CHECK, NULL)
 CHANGE_CALLBACK(check_color, "backing", CHECK, NULL)
 CHANGE_CALLBACK(replace_ellisis, "ellipsis", PERCENT_SPINNER, NULL)
+static void
+_on_check_ellipsis_change(void *data,
+                          Evas_Object *obj EINA_UNUSED,
+                          void *ei EINA_UNUSED)
+{
+   Style_Prop_Data *pd = (Style_Prop_Data *)data;
+   assert(pd != NULL);
+   Eina_Stringshare *value;
+   if (!elm_check_state_get(obj))
+     {
+        value = eina_stringshare_add("-1.0");
+        elm_object_disabled_set(pd->replace_ellisis, true);
+     }
+   else
+     {
+        value = eina_stringshare_add("0.0");
+        elm_object_disabled_set(pd->replace_ellisis, false);
+     }
+
+   elm_spinner_value_set(pd->replace_ellisis, 0.0);
+   _tag_parse(pd, value, "ellipsis");
+
+   _lines_colors_update(pd, "ellipsis");
+   _style_edit_update(pd);
+   eina_stringshare_del(value);
+}
 
 CHANGE_CALLBACK(hor_align, "align", COMBOBOX, NULL)
 CHANGE_CALLBACK(left_margin, "left_margin", SPINNER, NULL)
 CHANGE_CALLBACK(vert_align, "valign", COMBOBOX, NULL)
 CHANGE_CALLBACK(right_margin, "right_margin", SPINNER, NULL)
+CHANGE_CALLBACK(wrap, "wrap", COMBOBOX_NONE, NULL)
 CHANGE_CALLBACK(style, "style", COMBOBOX, _glow_shadow_update(pd))
 
 CHANGE_CALLBACK(check_s_color, "strikethrough", CHECK, NULL)
@@ -701,17 +779,17 @@ CHANGE_CALLBACK(segment_ctrl, "underline", SEGMENT, NULL)
 static void
 _add_text_part(Style_Prop_Data *pd)
 {
-   ADD_1SWALLOW_ITEM(_("Font name:"), pd->box_frame_text, pd->font_name, item, EWE_COMBOBOX);
-   ADD_1SWALLOW_ITEM(_("Font style:"), pd->box_frame_text, pd->font_style, item, EWE_COMBOBOX);
+   ADD_1SWALLOW_ITEM(_("font name"), pd->box_frame_text, pd->font_name, item, EWE_COMBOBOX);
+   ADD_1SWALLOW_ITEM(_("font style"), pd->box_frame_text, pd->font_style, item, EWE_COMBOBOX);
    evas_object_smart_callback_add(pd->font_style, "selected", _on_font_style_change, pd);
    ADD_1SWALLOW_ITEM(_(""), pd->box_frame_text, pd->font_weight, item, EWE_COMBOBOX);
    evas_object_smart_callback_add(pd->font_weight, "selected", _on_font_weight_change, pd);
 
-   _prop_text_color_add(_("Color:"), pd->box_frame_text, &pd->font_color);
+   _prop_text_color_add(_("color"), pd->box_frame_text, &pd->font_color);
    evas_object_event_callback_add(pd->font_color, EVAS_CALLBACK_MOUSE_DOWN,
                                   _on_font_color_clicked, pd);
 
-   _prop_spin_add(_("Size:"), _(""), _("px"),
+   _prop_spin_add(_("size"), _(""), _("px"),
                   pd->box_frame_text, &pd->font_size, MIN_SP, MAX_SP, STEP_SP);
 
    evas_object_smart_callback_add(pd->font_size, "changed", _on_font_size_change, pd);
@@ -734,17 +812,20 @@ _add_text_frame(Style_Prop_Data *pd, Evas_Object *parent)
 static void
 _add_position_part(Style_Prop_Data *pd)
 {
-   ADD_1SWALLOW_ITEM(_("Horizontal align:"), pd->box_frame_position, pd->hor_align, item, EWE_COMBOBOX);
+   ADD_1SWALLOW_ITEM(_("horizontal align"), pd->box_frame_position, pd->hor_align, item, EWE_COMBOBOX);
    evas_object_smart_callback_add(pd->hor_align, "selected", _on_hor_align_change, pd);
 
-   ADD_1SWALLOW_ITEM(_("Vertical align:"), pd->box_frame_position, pd->vert_align, item, EWE_COMBOBOX);
+   ADD_1SWALLOW_ITEM(_("vertical align"), pd->box_frame_position, pd->vert_align, item, EWE_COMBOBOX);
    evas_object_smart_callback_add(pd->vert_align, "selected", _on_vert_align_change, pd);
 
-   _prop_spin_add(_("Margin:"), _("left"), _("px"), pd->box_frame_position, &pd->left_margin, MARGIN_MIN_SP, MAX_SP, STEP_SP);
+   _prop_spin_add(_("margin"), _("left"), _("px"), pd->box_frame_position, &pd->left_margin, MARGIN_MIN_SP, MAX_SP, STEP_SP);
    evas_object_smart_callback_add(pd->left_margin, "changed", _on_left_margin_change, pd);
 
    _prop_spin_add(_(""), _("right"), _("px"), pd->box_frame_position, &pd->right_margin, MARGIN_MIN_SP, MAX_SP, STEP_SP);
    evas_object_smart_callback_add(pd->right_margin, "changed", _on_right_margin_change, pd);
+
+   ADD_1SWALLOW_ITEM(_("wrap"), pd->box_frame_position, pd->wrap, item, EWE_COMBOBOX);
+   evas_object_smart_callback_add(pd->wrap, "selected", _on_wrap_change, pd);
 }
 
 static Evas_Object *
@@ -764,24 +845,25 @@ _add_position_frame(Style_Prop_Data *pd, Evas_Object *parent)
 static void
 _add_text_format_part(Style_Prop_Data *pd)
 {
-   _prop_spin_add(_("Text tabstops:"), _(""), _("px"), pd->box_format_frame, &pd->tab_stops, MIN_SP, MAX_SP, STEP_SP);
+   _prop_spin_add(_("text tabstops"), _(""), _("px"), pd->box_format_frame, &pd->tab_stops, MIN_SP, MAX_SP, STEP_SP);
    evas_object_smart_callback_add(pd->tab_stops, "changed", _on_tab_stops_change, pd);
 
-   _prop_spin_add(_("Line size:"), _(""), _("px"), pd->box_format_frame, &pd->line_size, MIN_SP, MAX_SP, STEP_SP);
+   _prop_spin_add(_("line size"), _(""), _("px"), pd->box_format_frame, &pd->line_size, MIN_SP, MAX_SP, STEP_SP);
    evas_object_smart_callback_add(pd->line_size, "changed", _on_line_size_change, pd);
 
-   _add_1check_color_item(_("Background color"), pd->box_format_frame, &pd->check_color, &pd->bg_color);
+   _add_1check_color_item(_("background color"), pd->box_format_frame, &pd->check_color, &pd->bg_color);
    evas_object_smart_callback_add(pd->check_color, "changed", _on_check_color_change, pd);
    evas_object_event_callback_add(pd->bg_color, EVAS_CALLBACK_MOUSE_DOWN,
                                   _on_bg_color_clicked, pd);
 
-   ADD_1SWALLOW_ITEM(_("Password field:"), pd->box_format_frame, pd->check_psw, item, CHECK);
+   ADD_1SWALLOW_ITEM(_("password field"), pd->box_format_frame, pd->check_psw, item, CHECK);
    evas_object_smart_callback_add(pd->check_psw, "changed", _on_check_psw_change, pd);
 
-   _prop_spin_add(_("Replace overflow characters with ellisis:"), _(""), _(""), pd->box_format_frame, &pd->replace_ellisis, MIN_SP, MAX_PERCENT, STEP_SP);
+   _add_1check_spinner_item(_("ellisis"), pd->box_format_frame, &pd->check_ellipsis, &pd->replace_ellisis);
    evas_object_smart_callback_add(pd->replace_ellisis, "changed", _on_replace_ellisis_change, pd);
+   evas_object_smart_callback_add(pd->check_ellipsis, "changed", _on_check_ellipsis_change, pd);
 
-   _prop_spin_add(_("Line relative size:"), _(""), _("px"), pd->box_format_frame, &pd->relative_size, MIN_SP, MAX_SP, STEP_SP);
+   _prop_spin_add(_("line relative size"), _(""), _("px"), pd->box_format_frame, &pd->relative_size, MIN_SP, MAX_SP, STEP_SP);
    evas_object_smart_callback_add(pd->relative_size, "changed", _on_relative_size_change, pd);
 }
 
@@ -817,14 +899,14 @@ _add_glow_shadow_frame(Style_Prop_Data *pd, Evas_Object *parent)
 static void
 _add_inner_outer_part(Style_Prop_Data *pd)
 {
-   ADD_1SWALLOW_ITEM(_("Style:"), pd->box_glow_shadow, pd->style, item, EWE_COMBOBOX);
+   ADD_1SWALLOW_ITEM(_("style"), pd->box_glow_shadow, pd->style, item, EWE_COMBOBOX);
    evas_object_smart_callback_add(pd->style, "selected", _on_style_change, pd);
 
-   _prop_text_color_add(_("Outer glow color:"), pd->box_glow_shadow, &pd->outer_gl_color);
+   _prop_text_color_add(_("outer glow color"), pd->box_glow_shadow, &pd->outer_gl_color);
    evas_object_event_callback_add(pd->outer_gl_color, EVAS_CALLBACK_MOUSE_DOWN,
                                   _on_outer_gl_color_clicked, pd);
 
-   _prop_text_color_add(_("Inner glow color:"), pd->box_glow_shadow, &pd->inner_gl_color);
+   _prop_text_color_add(_("inner glow color"), pd->box_glow_shadow, &pd->inner_gl_color);
    evas_object_event_callback_add(pd->inner_gl_color, EVAS_CALLBACK_MOUSE_DOWN,
                                   _on_inner_gl_color_clicked, pd);
 }
@@ -835,7 +917,7 @@ _add_direction_item(Evas_Object *parent)
    Evas_Object *item_direction = elm_layout_add(parent);
    elm_layout_theme_set(item_direction, "layout", "style_editor", "direction");
    evas_object_show(item_direction);
-   PROPERTY_ITEM_ADD(parent, _("Direction:"), "1swallow_direction")
+   PROPERTY_ITEM_ADD(parent, _("direction"), "1swallow_direction")
    elm_layout_content_set(item, NULL, item_direction);
    elm_box_pack_end(parent, item);
 
@@ -845,10 +927,10 @@ _add_direction_item(Evas_Object *parent)
 static Evas_Object *
 _add_shadow_part(Style_Prop_Data *pd)
 {
-   ADD_1SWALLOW_ITEM(_("Style:"), pd->box_glow_shadow, pd->style, item, EWE_COMBOBOX);
+   ADD_1SWALLOW_ITEM(_("style"), pd->box_glow_shadow, pd->style, item, EWE_COMBOBOX);
    evas_object_smart_callback_add(pd->style, "selected", _on_style_change, pd);
 
-   _prop_text_color_add(_("Сolor:"), pd->box_glow_shadow, &pd->shadow_color);
+   _prop_text_color_add(_("color"), pd->box_glow_shadow, &pd->shadow_color);
    evas_object_event_callback_add(pd->shadow_color, EVAS_CALLBACK_MOUSE_DOWN,
                                   _on_shadow_color_clicked, pd);
 
@@ -858,16 +940,16 @@ _add_shadow_part(Style_Prop_Data *pd)
 static void
 _add_lines_part(Style_Prop_Data *pd)
 {
-   _add_1check_color_item(_("Strikethrough color"), pd->box_lines_frame, &pd->check_s_color, &pd->s_color);
+   _add_1check_color_item(_("strikethrough color"), pd->box_lines_frame, &pd->check_s_color, &pd->s_color);
    evas_object_smart_callback_add(pd->check_s_color, "changed", _on_check_s_color_change, pd);
    evas_object_event_callback_add(pd->s_color, EVAS_CALLBACK_MOUSE_DOWN,
                                   _on_s_color_clicked, pd);
 
-   _add_1check_2button_item(_("Underline"), pd->box_lines_frame, &pd->check_unline, &pd->segment_ctrl);
+   _add_1check_2button_item(_("underline"), pd->box_lines_frame, &pd->check_unline, &pd->segment_ctrl);
    evas_object_smart_callback_add(pd->check_unline, "changed", _on_check_unline_change, pd);
    evas_object_smart_callback_add(pd->segment_ctrl, "changed", _on_segment_ctrl_change, pd);
 
-   _prop_text_2color_add(_("Underline color:"), pd->box_lines_frame, &pd->outer_color_singl, &pd->outer_color_double);
+   _prop_text_2color_add(_("underline color"), pd->box_lines_frame, &pd->outer_color_singl, &pd->outer_color_double);
    evas_object_event_callback_add(pd->outer_color_singl, EVAS_CALLBACK_MOUSE_DOWN,
                                   _on_outer_color_singl_clicked, pd);
    evas_object_event_callback_add(pd->outer_color_double, EVAS_CALLBACK_MOUSE_DOWN,
@@ -904,6 +986,8 @@ _position_text_option_update(Style_Prop_Data *pd, const char *value)
         if (!valign) valign = eina_tmpstr_add("baseline");
         Eina_Tmpstr *rmargin = _tag_value_get(value, "right_margin");
         if (!rmargin) rmargin = eina_tmpstr_add("0");
+        Eina_Tmpstr *vwrap = _tag_value_get(value, "wrap");
+        if (!vwrap) vwrap = eina_tmpstr_add("none");
 
         ewe_combobox_text_set(pd->hor_align, align);
         for (i = 0; font_horizontal_align[i] != NULL; i++)
@@ -914,9 +998,15 @@ _position_text_option_update(Style_Prop_Data *pd, const char *value)
         for (i = 0; font_horizontal_valign[i] != NULL; i++)
           ewe_combobox_item_add(pd->vert_align, font_horizontal_valign[i]);
         elm_spinner_value_set(pd->right_margin, atof(rmargin));
+
+        ewe_combobox_text_set(pd->wrap, vwrap);
+        for (i = 0; text_wrap[i] != NULL; i++)
+          ewe_combobox_item_add(pd->wrap, text_wrap[i]);
+
         eina_tmpstr_del(align);
         eina_tmpstr_del(lmargin);
         eina_tmpstr_del(valign);
+        eina_tmpstr_del(vwrap);
         eina_tmpstr_del(rmargin);
      }
 
@@ -931,8 +1021,19 @@ _position_text_option_update(Style_Prop_Data *pd, const char *value)
         Eina_Tmpstr *password = _tag_value_get(value, "password");
         if ((!password) || (!strcmp(password, "off"))) pass = EINA_FALSE;
         else pass = EINA_TRUE;
+
         Eina_Tmpstr *ellipsis = _tag_value_get(value, "ellipsis");
-        if (!ellipsis) ellipsis = eina_tmpstr_add("0");
+        if (!ellipsis) ellipsis = eina_tmpstr_add("-1.0");
+
+        Eina_Tmpstr *check_ellipsis = _tag_value_get(value, "check_ellipsis");
+        if ((!check_ellipsis) || (!strcmp(check_ellipsis, "off")))
+          {
+             elm_object_disabled_set(pd->replace_ellisis, true);
+             ellipsis = eina_tmpstr_add("-1.0");
+          }
+        else
+          elm_object_disabled_set(pd->replace_ellisis, false);
+
         Eina_Tmpstr *bground = _tag_value_get(value, "backing");
         if ((!bground) || (!strcmp(bground, "off"))) bg = EINA_FALSE;
         else bg = EINA_TRUE;
@@ -952,7 +1053,7 @@ _position_text_option_update(Style_Prop_Data *pd, const char *value)
         if (!_hex_to_rgb(bcolor, &r, &g, &b, &a))
           ERR("This error should not happen in style editor... Contact devs please!");
         evas_object_color_set(pd->bg_color, r*a/255, g*a/255, b*a/255, a);
-        elm_spinner_value_set(pd->replace_ellisis, atof(ellipsis));
+        elm_spinner_value_set(pd->replace_ellisis, atof(ellipsis) * 100);
         eina_tmpstr_del(tabstops);
         eina_tmpstr_del(linesize);
         eina_tmpstr_del(linerelsize);
@@ -997,6 +1098,24 @@ DIRECT_ADD(r, "right", "r", 4)
 DIRECT_ADD(tl, "top_left", "tl", 5)
 DIRECT_ADD(t, "top", "t", 6)
 DIRECT_ADD(tr, "top_right", "tr", 7)
+
+static Eina_Bool
+_check_value(const char *list[], const char *value)
+{
+   Eina_Bool not_exist = true;
+   int i = 0;
+
+   for (i = 0; list[i] != NULL; i++)
+     {
+        if (!strcmp(value, list[i]))
+          {
+             not_exist = false;
+             break;
+          }
+     }
+
+   return not_exist;
+}
 
 static void
 _glow_shadow_prop_update(Style_Prop_Data *pd, const char *value)
@@ -1054,6 +1173,13 @@ _glow_shadow_prop_update(Style_Prop_Data *pd, const char *value)
              token = strtok(0, " ");
           }
         free(style_copy);
+
+        if (!_check_value(font_glow_list, style))
+          {
+             eina_tmpstr_del(style);
+             style = eina_tmpstr_add("none");
+             ERR("Wrong style name. Find who did this loaded Edj-Theme and slap his face.");
+          }
 
         if (strstr(style, "shadow"))
           {
@@ -1229,8 +1355,10 @@ _on_style_selected(void *data ,
    Evas_Object *property = (Evas_Object *)data;
    STYLE_PROP_DATA_GET()
 
-   CURRENT = *current_style;
    _clear_prop_style(pd);
+   if (!current_style) return;
+
+   CURRENT = *current_style;
    if (!CURRENT.is_parent_item)
      {
         _add_text_part(pd);
@@ -1302,6 +1430,7 @@ ui_property_style_add(Evas_Object *parent)
 #undef ADD_COLOR_ELEMENT
 #undef SPINNER_VALUE
 #undef COMBOBOX_VALUE
+#undef COMBOBOX_NONE_VALUE
 #undef PERCENT_SPINNER_VALUE
 #undef CHECK_VALUE
 #undef SEGMENT_VALUE

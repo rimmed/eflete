@@ -1,4 +1,4 @@
-EFLETE_VERSION([0], [5], [0], [dev])
+EFLETE_VERSION([0], [6], [0], [release])
 AC_INIT([eflete], [eflete_version], [enlightenment-devel@lists.sourceforge.net],
         [eflete])
 AC_PREREQ([2.60])
@@ -13,10 +13,10 @@ AM_INIT_AUTOMAKE([1.13 dist-bzip2 subdir-objects color-tests foreign])
 LT_INIT([win32-dll disable-static pic-only])
 
 dnl m4_define([package], "EFL\ Edje\ Theme\ Editor")
-m4_define([efl_version], [1.16])
-m4_define([elm_version], [1.16])
-m4_define([efl_version_max], [1.16.1])
-m4_define([elm_version_max], [1.16.1])
+m4_define([efl_version], [1.17])
+m4_define([elm_version], [1.17])
+m4_define([efl_version_max], [1.17.9999])
+m4_define([elm_version_max], [1.17.9999])
 
 m4_define([enventor_version], [0.4.0])
 
@@ -240,9 +240,9 @@ echo "                   ${os_remark}"
 echo "  efl............: ${have_efl}"
 echo "  elementary.....: ${have_elm}"
 echo ""
-echo "Features:"
-echo "  enventor.......: ${summery_enventor}"
-echo ""
+dnl echo "Features:"
+dnl echo "  enventor.......: ${summery_enventor}"
+dnl echo ""
 echo "edje-cc path.....: ${edje_cc}"
 echo ""
 echo "Testing:"

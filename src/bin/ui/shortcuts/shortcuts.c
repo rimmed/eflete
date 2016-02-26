@@ -19,12 +19,9 @@
 
 #include "shortcuts.h"
 #include "main_window.h"
-#include "style_editor.h"
-#include "image_editor.h"
-#include "sound_editor.h"
-#include "animator.h"
 #include "tabs.h"
-#include "signals.h"
+#include "workspace.h"
+#include "config.h"
 
 #ifdef HAVE_ENVENTOR
    #define SKIP_IN_ENVENTOR_MODE \
@@ -153,7 +150,7 @@ _random_name_generate(char *part_name, unsigned int length)
    project_changed(true);
 
 #define PART_ADD(TYPE, FUNC) \
-Eina_Bool \
+static Eina_Bool \
 _##FUNC##_part_add_cb(void) \
 { \
    PART_FUNCTIONALITY(TYPE, NULL) \
@@ -174,7 +171,7 @@ PART_ADD(EDJE_PART_TYPE_BOX, box)
 /* different adding is for image */
 /*
 static void
-_on_image_editor_done(void *data __UNUSED__,
+_on_image_manager_done(void *data __UNUSED__,
                       Evas_Object *obj __UNUSED__,
                       void *event_info)
 {
@@ -191,8 +188,8 @@ _image_part_choose_cb(void)
    Evas_Object *img_edit;
 
 
-   img_edit = image_editor_window_add(ap.project, SINGLE);
-   evas_object_smart_callback_add(img_edit, SIG_IMAGE_SELECTED, _on_image_editor_done, NULL);
+   img_edit = image_manager_window_add(ap.project, SINGLE);
+   evas_object_smart_callback_add(img_edit, SIG_IMAGE_SELECTED, _on_image_manager_done, NULL);
    return true;
 }
 */
@@ -256,7 +253,7 @@ _item_delete_cb(void)
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _separate_mode_change_cb(void)
 {
    Evas_Object *workspace = tabs_current_workspace_get();
@@ -276,7 +273,7 @@ _separate_mode_change_cb(void)
 }
 
 TODO("Please remake this shortcut since there are no TABS anymore")
-Eina_Bool
+static Eina_Bool
 _new_style_create_cb(void)
 {
 /*
@@ -315,10 +312,10 @@ _new_style_create_cb(void)
 }
 
 TODO("Please remake this shortcut since there are no TABS anymore")
-Eina_Bool
+/*
+static Eina_Bool
 _style_delete_cb(void)
 {
-/*
    SKIP_IN_ENVENTOR_MODE
    Elm_Object_Item *glit = NULL;
    Style *_style = NULL;
@@ -346,13 +343,15 @@ _style_delete_cb(void)
         if (_style->__type != WIDGET)
           evas_object_smart_callback_call(ap.block.left_top, "wl,style,del", NULL);
      }
-*/
    return true;
 }
+*/
 
-Eina_Bool
+static Eina_Bool
 _new_theme_cb(void)
 {
+   if (ap.colorsel)
+     evas_object_smart_callback_call(ap.colorsel, "dismissed", NULL);
    tabs_menu_tab_open(TAB_HOME_NEW_PROJECT);
    return true;
 }
@@ -368,28 +367,32 @@ _open_edc_cb(void)
 }
 */
 
-Eina_Bool
+static Eina_Bool
 _open_project_cb(void)
 {
+   if (ap.colorsel)
+     evas_object_smart_callback_call(ap.colorsel, "dismissed", NULL);
    tabs_menu_tab_open(TAB_HOME_OPEN_PROJECT);
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _import_edj_cb(void)
 {
+   if (ap.colorsel)
+     evas_object_smart_callback_call(ap.colorsel, "dismissed", NULL);
    tabs_menu_tab_open(TAB_HOME_IMPORT_EDJ);
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _save_cb(void)
 {
    project_save();
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _save_as_cb(void)
 {
    if (!ap.project) return false;
@@ -397,7 +400,7 @@ _save_as_cb(void)
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _export_cb(void)
 {
    if (!ap.project) return false;
@@ -406,7 +409,7 @@ _export_cb(void)
 }
 
 TODO("Remove? Or modify since we don't have EWE_TABS anymore?")
-Eina_Bool
+static Eina_Bool
 _visual_tab_cb(void)
 {
 /*
@@ -421,7 +424,7 @@ _visual_tab_cb(void)
 }
 
 TODO("Remove? Or modify since we don't have EWE_TABS anymore?")
-Eina_Bool
+static Eina_Bool
 _code_tab_cb(void)
 {
 /*
@@ -436,14 +439,14 @@ _code_tab_cb(void)
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _quit_cb(void)
 {
    ui_main_window_del();
    return true;
 }
 /* close currently opened group tab */
-Eina_Bool
+static Eina_Bool
 _close_tab_cb(void)
 {
    if (!ap.project) return false;
@@ -451,51 +454,57 @@ _close_tab_cb(void)
    return true;
 }
 
-Eina_Bool
-_style_editor_open_cb(void)
+static Eina_Bool
+_style_manager_open_cb(void)
 {
+   if (ap.colorsel)
+     evas_object_smart_callback_call(ap.colorsel, "dismissed", NULL);
    if (ap.project)
      tabs_menu_tab_open(TAB_STYLE_EDITOR);
    return true;
 }
 
-Eina_Bool
-_image_editor_open_cb(void)
+static Eina_Bool
+_image_manager_open_cb(void)
 {
+   if (ap.colorsel)
+     evas_object_smart_callback_call(ap.colorsel, "dismissed", NULL);
    if (ap.project)
      tabs_menu_tab_open(TAB_IMAGE_EDITOR);
    return true;
 }
 
-Eina_Bool
-_sound_editor_open_cb(void)
+static Eina_Bool
+_sound_manager_open_cb(void)
 {
+   if (ap.colorsel)
+     evas_object_smart_callback_call(ap.colorsel, "dismissed", NULL);
    if (ap.project)
      tabs_menu_tab_open(TAB_SOUND_EDITOR);
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _colorclass_manager_open_cb(void)
 {
+   if (ap.colorsel)
+     evas_object_smart_callback_call(ap.colorsel, "dismissed", NULL);
    if (ap.project)
      tabs_menu_tab_open(TAB_COLORCLASS_EDITOR);
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _animator_open_cb(void)
 {
-   if ((ap.project) && (tabs_current_group_get()))
-     animator_window_add(ap.project);
+/*   if ((ap.project) && (tabs_current_group_get()))
+     animator_window_add(ap.project);*/
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _highlight_align_show_switch_cb(void)
 {
-   assert(ap.project != NULL);
-
    Evas_Object *workspace = tabs_current_workspace_get();
 
    if (!workspace) return false;
@@ -507,7 +516,7 @@ _highlight_align_show_switch_cb(void)
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _object_area_show_switch_cb(void)
 {
    Evas_Object *workspace = tabs_current_workspace_get();
@@ -519,7 +528,7 @@ _object_area_show_switch_cb(void)
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _zoom_in_cb(void)
 {
    Evas_Object *workspace = tabs_current_workspace_get();
@@ -532,7 +541,7 @@ _zoom_in_cb(void)
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _zoom_out_cb(void)
 {
    Evas_Object *workspace = tabs_current_workspace_get();
@@ -545,26 +554,22 @@ _zoom_out_cb(void)
    return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _undo_cb(void)
 {
    SKIP_IN_ENVENTOR_MODE
-/*   if ((ap.project) && (ap.project->current_style))
-     history_undo(ap.project->current_style->obj, 1);
-   return true;*/
-   return false;
-   TODO("Implement undo shortcut");
+
+   evas_object_smart_callback_call(ap.win, SIGNAL_SHORTCUT_UNDO, NULL);
+   return true;
 }
 
-Eina_Bool
+static Eina_Bool
 _redo_cb(void)
 {
    SKIP_IN_ENVENTOR_MODE
-/*   if ((ap.project) && (ap.project->current_style))
-     history_redo(ap.project->current_style->obj, 1);
-   return true;*/
-   return false;
-   TODO("Implement redo shortcut");
+
+   evas_object_smart_callback_call(ap.win, SIGNAL_SHORTCUT_REDO, NULL);
+   return true;
 }
 
 /*========================================================*/
@@ -647,10 +652,10 @@ static Function_Set _sc_func_set_init[] =
      {"close", _close_tab_cb},
      {"undo", _undo_cb},
      {"redo", _redo_cb},
-     {"tab.style_editor", _style_editor_open_cb},
-     {"tab.image_editor", _image_editor_open_cb},
-     {"tab.sound_editor", _sound_editor_open_cb},
-     {"tab.colorclass_viewer", _colorclass_manager_open_cb},
+     {"tab.style_manager", _style_manager_open_cb},
+     {"tab.image_manager", _image_manager_open_cb},
+     {"tab.sound_manager", _sound_manager_open_cb},
+     {"tab.colorclass_manager", _colorclass_manager_open_cb},
      {"animator", _animator_open_cb},
      {NULL, NULL}
 };
@@ -664,7 +669,7 @@ _key_press_event_cb(void *data __UNUSED__, int type __UNUSED__, void *event)
    Key_Pair *key = mem_malloc(sizeof(Key_Pair));
 
 
-   if ((!ap.popup) && (!ap.modal_editor))
+   if (!ap.popup)
      {
         /*
          *  (ev->modifiers && 255) because modifiers contain both locks and modifs,
@@ -697,7 +702,7 @@ _key_unpress_event_cb(void *data __UNUSED__, int type __UNUSED__, void *event)
    Eina_List *l;
 
 
-   if ((!ap.popup) && (!ap.modal_editor))
+   if (!ap.popup)
      {
         EINA_LIST_FOREACH(ap.shortcuts->holded_functions, l, sc_func)
           {

@@ -19,6 +19,7 @@
 
 #include "main_window.h"
 #include "tabs.h"
+#include "project_manager.h"
 #include "project_navigator.h"
 
 static Eina_Bool
@@ -37,12 +38,12 @@ _progress_end(void *data __UNUSED__, PM_Project_Result result)
      {
       case PM_PROJECT_ERROR:
         {
-           NOTIFY_INFO(3, _("Error: project not saved."));
+           ERR(_("Error: project not saved."));
            break;
         }
       case PM_PROJECT_CANCEL:
         {
-           NOTIFY_INFO(3, _("Saving canceled."));
+           INFO(_("Saving canceled."));
            break;
         }
       case PM_PROJECT_SUCCESS:
@@ -114,10 +115,6 @@ _teardown_save_splash(void *data __UNUSED__, Splash_Status status)
      STATUSBAR_PROJECT_SAVE_TIME_UPDATE();
 
    ap.project->changed = false;
-
-   TODO("Check if this recalc is necessary");
-   if (ap.project->current_style)
-     workspace_edit_object_recalc(ap.workspace);
    pm_project_thread_free();
 
    eflete_main_loop_quit();
@@ -181,9 +178,6 @@ project_close(void)
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_STYLE_ONLY, true);
    project_navigator_project_unset();
    tabs_clean();
-   //ui_property_style_unset(Evas_Object *property);
-   //ui_signal_list_data_unset(Evas_Object *object);
-   //history_clear(History *history);
 
    pm_project_close(ap.project);
    ap.project = NULL;

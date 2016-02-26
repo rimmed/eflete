@@ -55,19 +55,19 @@
 EFLETE_TEST (workspace_zoom_factor_set_test_p)
 {
    //Style *style = NULL;
-
+ck_assert(false);
    elm_init(0, 0);
    app_init();
 
    ui_main_window_add();
    ap.project = setup("workspace_zoom_factor_get_test_p");
-   wm_widgets_list_objects_load(ap.project->widgets,
-                                evas_object_evas_get(ap.win), ap.project->mmap_file);
-   blocks_show();
+//  wm_widgets_list_objects_load(ap.project->widgets,
+//                                evas_object_evas_get(ap.win), ap.project->mmap_file);
+   //blocks_show();
    //style = wm_style_object_find(ap.project->widgets, "elm/radio/base/def");
    //ui_style_clicked(style);
 
-   ck_assert_msg(workspace_zoom_factor_set(ap.workspace, 1.5), "Failed get zoom factor");
+//   ck_assert_msg(workspace_zoom_factor_set(ap.workspace, 1.5), "Failed get zoom factor");
 
    pm_project_close(ap.project);
    ap.project = NULL;

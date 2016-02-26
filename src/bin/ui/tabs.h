@@ -27,7 +27,7 @@
  * Tabs provide a open more the one layout to edit. Have a 'home' tab, where
  * user can create new, open, or import Eflete project.
  */
-#include "group_manager.h"
+#include "eflete.h"
 
 typedef enum {
    TAB_HOME_PROJECT_INFO = 0,
@@ -59,6 +59,14 @@ tabs_add(void);
  */
 void
 tabs_menu_tab_open(Tabs_Menu view);
+
+/**
+ * Fill the import edj tab fields
+ *
+ * @ingroup Tabs
+ */
+void
+tabs_menu_import_edj_data_set(const char *name, const char *path, const char *edj);
 
 /**
  * Add new tab. This tab consist a workspace and a liveview.

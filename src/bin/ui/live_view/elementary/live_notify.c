@@ -17,118 +17,65 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include "live_view_prop.h"
+#include "live_elementary_widgets.h"
 
 static void
 _on_notify_swallow_check(void *data,
-                         Evas_Object *obj,
+                         Evas_Object *obj __UNUSED__,
                          void *ei __UNUSED__)
 {
-   Evas_Object *rect = NULL, *notify_obj = NULL, *check = NULL, *ch;
-   Eina_List *item_list = NULL, *it;
-   Eina_Bool all_checks = true;
-   Eina_List *notify_list = NULL;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *object = (Evas_Object *) data;
 
-   Prop_Data *pd = (Prop_Data *)data;
+   int content_type = part->swallow_content;
 
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   notify_list = elm_box_children_get(object);
-   notify_obj = eina_list_nth(notify_list, 1);
-   check = elm_object_part_content_get(pd->prop_swallow.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
+   if (part->change)
      {
-        rect = evas_object_rectangle_add(notify_obj);
-        evas_object_color_set(rect, HIGHLIGHT_COLOR);
-        evas_object_size_hint_min_set(rect, 25, 25);
-        elm_object_content_set(notify_obj, rect);
-        item_list = elm_box_children_get(pd->prop_swallow.swallows);
-
-        EINA_LIST_FOREACH(item_list, it, ch)
+        /* if NONE - delete object */
+        if ((content_type == CONTENT_NONE) && (part->object))
           {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
+             elm_box_unpack_all(object);
+             evas_object_del(part->object);
+             part->object = NULL;
           }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
+
+        elm_box_unpack(object, part->object);
+        part->object = object_generate(part, object);
+        evas_object_show(part->object);
+        part->change = false;
+        elm_box_pack_end(object, part->object);
      }
-   else
+
+   if (part->object)
      {
-        rect = elm_object_content_unset(notify_obj);
-        evas_object_del(rect);
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
+        evas_object_color_set(part->object,
+                              part->r,
+                              part->g,
+                              part->b,
+                              part->a);
+
+        evas_object_size_hint_min_set(part->object,
+                                      part->min_w,
+                                      part->min_h);
+        evas_object_size_hint_max_set(part->object,
+                                      part->max_w,
+                                      part->max_h);
      }
-
-   eina_list_free(notify_list);
-}
-
-static void
-_on_notify_text_check(void *data,
-                      Evas_Object *obj,
-                      void *ei __UNUSED__)
-{
-   Evas_Object *notify_obj = NULL, *check = NULL, *ch;
-   Eina_List *item_list = NULL, *it;
-   Eina_Bool all_checks = true;
-   Eina_List *notify_list = NULL;
-
-   Prop_Data *pd = (Prop_Data *)data;
-
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   notify_list = elm_box_children_get(object);
-   notify_obj = eina_list_nth(notify_list, 1);
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_swallow.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
-     {
-        elm_object_part_text_set(notify_obj, part_name, _("Text Example"));
-        item_list = elm_box_children_get(pd->prop_text.texts);
-
-        EINA_LIST_FOREACH(item_list, it, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
-          }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
-     }
-   else
-     {
-        elm_object_part_text_set(notify_obj, part_name, "");
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
-     }
-
-   eina_list_free(notify_list);
 }
 
 static void
 _notify_send_signal(void *data,
-                    Evas_Object *obj,
-                    void *ei __UNUSED__)
+                    Evas_Object *obj __UNUSED__,
+                    void *ei)
 {
-   Evas_Object *notify_obj = NULL;
+   Demo_Signal *sig = (Demo_Signal *)ei;
+   Evas_Object *object = (Evas_Object *)data;
 
-   assert(data != NULL);
+   assert(sig != NULL);
+   assert(sig->sig_name != NULL);
+   assert(sig->source_name != NULL);
 
-   Eina_List *notify_list = elm_box_children_get(data);
-   notify_obj = eina_list_nth(notify_list, 1);
-
-   const char *name = evas_object_data_get(obj, SIGNAL_NAME);
-   const char *source = evas_object_data_get(obj, SIGNAL_SOURCE);
-
-   assert(name != NULL);
-   assert(source != NULL);
-
-   elm_layout_signal_emit(notify_obj, name, source);
-
-   eina_list_free(notify_list);
+   elm_layout_signal_emit(object, sig->sig_name, sig->source_name);
 }
 
 static void
@@ -210,7 +157,7 @@ widget_notify_create(Evas_Object *parent, const Group *group)
    assert(group->class != NULL);
    assert(group->style != NULL);
 
-   Evas_Object *content, *noti, *bx, *btn, *object = NULL;
+   Evas_Object *noti, *bx, *btn, *object = NULL;
    double horizontal, vertical;
 
    assert(group->class != NULL);
@@ -224,18 +171,15 @@ widget_notify_create(Evas_Object *parent, const Group *group)
    elm_notify_timeout_set(noti, 3);
    BOX_ADD(parent, bx, false, false);
    elm_object_content_set(noti, bx);
-   LABEL_ADD(parent, content, _("Text example. Timeout 3 sec"));
-   elm_box_pack_end(bx, content);
 
    evas_object_smart_callback_add(btn, "clicked", _on_click, noti);
 
    object = elm_box_add(parent);
    elm_box_pack_end(object, btn);
 
-   evas_object_data_set(object, SWALLOW_FUNC, _on_notify_swallow_check);
-   evas_object_data_set(object, TEXT_FUNC, _on_notify_text_check);
-   evas_object_data_set(object, SIGNAL_FUNC, _notify_send_signal);
-
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, _on_notify_swallow_check, bx);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_TEXT_SET, on_text_check, noti);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SIGNAL_SEND, _notify_send_signal, noti);
    elm_object_style_set(noti, group->style);
    return object;
 }

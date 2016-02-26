@@ -18,6 +18,7 @@
  */
 
 #include "main_window.h"
+#include "project_manager.h"
 
 Eina_Bool
 exist_permission_check(const char *path, const char *name,
@@ -65,17 +66,17 @@ progress_end(void *data __UNUSED__, PM_Project_Result result)
      {
       case PM_PROJECT_ERROR:
         {
-           NOTIFY_INFO(3, _("Can't open project."));
+           ERR( _("Can't open project."));
            break;
         }
       case PM_PROJECT_CANCEL:
         {
-           NOTIFY_INFO(3, _("Project opening canceled."));
+           ERR(_("Project opening canceled."));
            break;
         }
       case PM_PROJECT_SUCCESS:
         {
-           NOTIFY_INFO(3, _("Project '%s' is opened."), ap.project->name);
+           INFO(_("Project '%s' is opened."), ap.project->name);
            STATUSBAR_PROJECT_PATH(ap.project->pro_path);
            STATUSBAR_PROJECT_SAVE_TIME_UPDATE();
            break;

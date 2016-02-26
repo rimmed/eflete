@@ -17,44 +17,19 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include "live_view_prop.h"
+#include "live_elementary_widgets.h"
 
 static void
-_on_gengrid_swallow_check(void *data,
-                          Evas_Object *obj,
+_on_gengrid_swallow_check(void *data __UNUSED__,
+                          Evas_Object *obj __UNUSED__,
                           void *ei __UNUSED__)
 {
-   Evas_Object *check = NULL, *ch;
-   Eina_List *item_list = NULL;
-   Eina_Bool all_checks = true;
-
-   Prop_Data *pd = (Prop_Data *)data;
-
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *object = (Evas_Object *)data;
    Eina_List *part_list = evas_object_data_get(object, SWALLOW_LIST);
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_swallow.frame, "elm.swallow.check");
 
-   if (elm_check_state_get(obj) && (!eina_list_data_find(part_list, part_name)))
-     {
-        part_list =  eina_list_append(part_list, part_name);
-        item_list = elm_box_children_get(pd->prop_swallow.swallows);
-        EINA_LIST_FREE(item_list, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
-          }
-        if (all_checks)
-          elm_check_state_set(check, true);
-     }
-   else if (!elm_check_state_get(obj) && (eina_list_data_find(part_list, part_name)))
-     {
-        part_list = eina_list_remove(part_list, part_name);
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
-     }
-
+   if (!eina_list_data_find(part_list, part->name))
+     part_list =  eina_list_append(part_list, part);
    evas_object_data_set(object, SWALLOW_LIST, part_list);
 
    Elm_Object_Item *item = NULL;
@@ -67,41 +42,16 @@ _on_gengrid_swallow_check(void *data,
 }
 
 static void
-_on_gengrid_text_check(void *data,
-                       Evas_Object *obj,
+_on_gengrid_text_check(void *data __UNUSED__,
+                       Evas_Object *obj __UNUSED__,
                        void *ei __UNUSED__)
 {
-   Evas_Object *check = NULL, *ch;
-   Eina_List *item_list = NULL;
-   Eina_Bool all_checks = true;
-
-   Prop_Data *pd = (Prop_Data *)data;
-
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *object = (Evas_Object *)data;
    Eina_List *part_list = evas_object_data_get(object, TEXT_LIST);
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_text.frame, "elm.swallow.check");
 
-   if (elm_check_state_get(obj) && (!eina_list_data_find(part_list, part_name)))
-     {
-        part_list =  eina_list_append(part_list, part_name);
-        item_list = elm_box_children_get(pd->prop_text.texts);
-        EINA_LIST_FREE(item_list, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
-          }
-        if (all_checks)
-          elm_check_state_set(check, true);
-     }
-   else if (!elm_check_state_get(obj) && (eina_list_data_find(part_list, part_name)))
-     {
-        part_list = eina_list_remove(part_list, part_name);
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
-     }
-
+   if (!eina_list_data_find(part_list, part->name))
+     part_list =  eina_list_append(part_list, part);
    evas_object_data_set(object, TEXT_LIST, part_list);
 
    Elm_Object_Item *item = NULL;
@@ -115,44 +65,46 @@ _on_gengrid_text_check(void *data,
 
 static void
 _gengrid_send_signal(void *data,
-                     Evas_Object *obj,
+                     Evas_Object *obj __UNUSED__,
                      void *ei __UNUSED__)
 {
+   Demo_Signal *sig = (Demo_Signal *)ei;
    Elm_Object_Item *item = NULL;
 
    assert(data != NULL);
 
    item = elm_gengrid_first_item_get(data);
-
-   const char *name = evas_object_data_get(obj, SIGNAL_NAME);
-   const char *source = evas_object_data_get(obj, SIGNAL_SOURCE);
-
-   assert(name != NULL);
-   assert(source != NULL);
+   assert(sig != NULL);
+   assert(sig->sig_name != NULL);
+   assert(sig->source_name != NULL);
 
    while (item)
      {
-        elm_object_item_signal_emit(item, name, source);
+        elm_object_item_signal_emit(item, sig->sig_name, sig->source_name);
         item = elm_gengrid_item_next_get(item);
      }
 }
 
 
 /*********** GEN GRID CREATING FUNCTIONS ****************/
-char *
-_grid_text_get(void        *data,
+static char *
+_grid_text_get(void *data __UNUSED__,
                Evas_Object *obj,
                const char  *part)
 {
    Eina_List *part_list = evas_object_data_get(obj, TEXT_LIST);
+   Demo_Part *demo_part;
    Eina_List *l = NULL;
-   const char *part_name = NULL;
-   const char *text = (char *) data;
 
-   EINA_LIST_FOREACH(part_list, l, part_name)
+   EINA_LIST_FOREACH(part_list, l, demo_part)
      {
-        if (!strcmp(part_name, part))
-          return strdup(text);
+        if (!strcmp(demo_part->name, part))
+          {
+             if (!demo_part->text_content)
+               return NULL;
+             else
+               return strdup(demo_part->text_content);
+          }
      }
 
    return NULL;
@@ -164,16 +116,35 @@ _grid_content_get(void *data __UNUSED__,
                   const char  *part)
 {
    Eina_List *part_list = evas_object_data_get(obj, SWALLOW_LIST);
+   Demo_Part *demo_part;
    Eina_List *l = NULL;
-   const char *part_name = NULL;
 
-   EINA_LIST_FOREACH(part_list, l, part_name)
+   EINA_LIST_FOREACH(part_list, l, demo_part)
      {
-        if (!strcmp(part_name, part))
+        if (!strcmp(demo_part->name, part))
           {
-             Evas_Object *rect = evas_object_rectangle_add(obj);
-             evas_object_color_set(rect, HIGHLIGHT_COLOR);
-             return rect;
+             if ((demo_part->swallow_content == CONTENT_NONE) && (demo_part->object))
+               demo_part->object = NULL;
+             else if (demo_part->swallow_content != CONTENT_NONE)
+               demo_part->object = object_generate(demo_part, obj);
+
+             if (demo_part->object)
+               {
+                  evas_object_color_set(demo_part->object,
+                                        demo_part->r,
+                                        demo_part->g,
+                                        demo_part->b,
+                                        demo_part->a);
+
+                  evas_object_size_hint_min_set(demo_part->object,
+                                                demo_part->min_w,
+                                                demo_part->min_h);
+                  evas_object_size_hint_max_set(demo_part->object,
+                                                demo_part->max_w,
+                                                demo_part->max_h);
+               }
+
+             return demo_part->object;
           }
      }
 
@@ -243,9 +214,9 @@ widget_gengrid_create(Evas_Object *parent, const Group *group)
    item_style = strcmp(group->class, "item") == 0;
    object = _create_gengrid(parent, item_style, group->style);
 
-   evas_object_data_set(object, SWALLOW_FUNC, _on_gengrid_swallow_check);
-   evas_object_data_set(object, TEXT_FUNC, _on_gengrid_text_check);
-   evas_object_data_set(object, SIGNAL_FUNC, _gengrid_send_signal);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, _on_gengrid_swallow_check, object);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_TEXT_SET, _on_gengrid_text_check, object);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SIGNAL_SEND, _gengrid_send_signal, object);
 
    evas_object_data_set(object, SWALLOW_LIST, swallow_list);
    evas_object_data_set(object, TEXT_LIST, text_list);

@@ -75,8 +75,12 @@ config_recent_add(const char *name, const char *path)
    assert(path != NULL);
 
    EINA_LIST_FOREACH_SAFE(config->recents, l, l_n, r)
-      if (!strcmp(path, r->path))
-        config->recents = eina_list_remove_list(config->recents, l);
+     {
+        if (!strcmp(path, r->path))
+          config->recents = eina_list_remove_list(config->recents, l);
+        if (!ecore_file_exists(r->path))
+          config->recents = eina_list_remove(config->recents, r);
+     }
 
    if (eina_list_count(config->recents) > 9)
      config->recents = eina_list_remove_list(config->recents, eina_list_last(config->recents));
@@ -266,13 +270,12 @@ _default_shortcuts_get()
    Shortcuts *shortcut;
 
 #define ADD_SHORTCUT(Name, Keycode, Modifiers, Descr, Holdable)              \
-   shortcut = mem_calloc(1, sizeof(Shortcuts));                                  \
-   if (!shortcut) return shortcuts;                                          \
+   shortcut = mem_calloc(1, sizeof(Shortcuts));                              \
    shortcut->keyname = eina_stringshare_add_length(Name, strlen(Name));      \
    shortcut->keycode = Keycode;                                              \
    shortcut->modifiers = Modifiers;                                          \
    shortcut->description = eina_stringshare_add_length(Descr, strlen(Descr));\
-   shortcut->holdable = Holdable;                                             \
+   shortcut->holdable = Holdable;                                            \
    shortcuts = eina_list_append(shortcuts, shortcut);
 
    /* No modifiers */
@@ -291,10 +294,10 @@ _default_shortcuts_get()
    ADD_SHORTCUT("y", 29, CTRL, "redo", false);
 
    ADD_SHORTCUT("1", 10, CTRL, "open_edj", false);
-   ADD_SHORTCUT("2", 11, CTRL, "tab.image_editor", false);
-   ADD_SHORTCUT("3", 12, CTRL, "tab.sound_editor", false);
-   ADD_SHORTCUT("4", 13, CTRL, "tab.style_editor", false);
-   ADD_SHORTCUT("5", 14, CTRL, "tab.colorclass_viewer", false);
+   ADD_SHORTCUT("2", 11, CTRL, "tab.image_manager", false);
+   ADD_SHORTCUT("3", 12, CTRL, "tab.sound_manager", false);
+   ADD_SHORTCUT("4", 13, CTRL, "tab.style_manager", false);
+   ADD_SHORTCUT("5", 14, CTRL, "tab.colorclass_manager", false);
    ADD_SHORTCUT("6", 15, CTRL, "animator", false);
 
    ADD_SHORTCUT("equal", 21, CTRL, "zoom.in", false);
@@ -394,12 +397,25 @@ _config_default_new(void)
    conf->window.y =           0;
    conf->window.w =           1366;
    conf->window.h =           768;
-   conf->panes.left =         0.0;
+   conf->panes.left =         0.2;
    conf->panes.right =        1.0;
    conf->panes.tabs_size =    0.3;
    conf->profile = strdup("default");
 
    return conf;
+}
+
+static void
+_update_recents(Config *conf)
+{
+   Recent *r;
+   Eina_List *l, *l_n;
+
+   EINA_LIST_FOREACH_SAFE(conf->recents, l, l_n, r)
+     {
+        if (!ecore_file_exists(r->path))
+          conf->recents = eina_list_remove(conf->recents, r);
+     }
 }
 
 void
@@ -420,6 +436,8 @@ config_load(void)
      config = _config_default_new();
 
    profile_load(config->profile);
+
+   _update_recents(config);
 
    shortcuts_profile_load(profile_get());
 #ifdef HAVE_ENVENTOR

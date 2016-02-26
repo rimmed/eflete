@@ -19,6 +19,7 @@
 
 #include "tabs_private.h"
 #include "tabs.h"
+#include "main_window.h"
 
 struct _Tab_Home_Info
 {
@@ -29,7 +30,7 @@ struct _Tab_Home_Info
    Meta_Data_Controls meta;
 };
 typedef struct _Tab_Home_Info Tab_Home_Info;
-Tab_Home_Info tab_info;
+static Tab_Home_Info tab_info;
 
 #define PROJECT_INFO \
    "<linegap=6>" \

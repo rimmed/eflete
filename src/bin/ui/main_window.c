@@ -27,6 +27,8 @@
 #include "tabs.h"
 #include "shortcuts.h"
 #include "cursor.h"
+#include "config.h"
+#include "property.h"
 
 static void
 _project_navigator_group_open(void *data __UNUSED__,
@@ -71,38 +73,41 @@ ui_main_window_del(void)
 
    config_save();
    INFO("%s %s - Finished...", PACKAGE_NAME, VERSION);
-   /* FIXME: when be implemented multi workspace feature, remove this line */
-   evas_object_del(ap.workspace);
    elm_exit();
 
    return true;
 }
-
-/*
- * It's necessary to avoid warning: implicit declaration of function
- * 'elm_widget_sub_object_add' on compilation stage, which occurrs because of
- * Elementary.h file isn't contain directly elm_widget.h file (where
- * 'elm_widget_sub_object_add' function declared)
- */
-Eina_Bool elm_widget_sub_object_add(Evas_Object *obj, Evas_Object *sobj);
 
 static void
 _history_click(void *data __UNUSED__,
                Evas_Object *obj __UNUSED__,
                void *event_info __UNUSED__)
 {
-   evas_object_hide(elm_layout_content_unset(ap.block.right_top, NULL));
-   elm_widget_sub_object_add(ap.block.right_top, ap.block.property);
-   elm_layout_content_set(ap.block.right_top, NULL, ap.block.history);
+   elm_layout_signal_emit(ap.block.right_top, "history,show", "eflete");
 }
 static void
 _property_click(void *data __UNUSED__,
                 Evas_Object *obj __UNUSED__,
                 void *event_info __UNUSED__)
 {
-   evas_object_hide(elm_layout_content_unset(ap.block.right_top, NULL));
-   elm_widget_sub_object_add(ap.block.right_top, ap.block.history);
-   elm_layout_content_set(ap.block.right_top, NULL, ap.block.property);
+   elm_layout_signal_emit(ap.block.right_top, "property,show", "eflete");
+}
+
+static void
+_show_history(void *data __UNUSED__,
+              Evas_Object *obj __UNUSED__,
+              void *event_info __UNUSED__)
+{
+   elm_object_item_disabled_set(ap.block.item_history, false);
+}
+
+static void
+_hide_history(void *data __UNUSED__,
+              Evas_Object *obj __UNUSED__,
+              void *event_info __UNUSED__)
+{
+   elm_object_item_disabled_set(ap.block.item_history, true);
+   elm_toolbar_item_selected_set(ap.block.item_property, true);
 }
 
 Eina_Bool
@@ -135,7 +140,7 @@ ui_main_window_add(void)
 
    bg = elm_bg_add(ap.win);
    elm_win_resize_object_add(ap.win, bg);
-   evas_object_size_hint_min_set(bg, 1024, 600);
+   evas_object_size_hint_min_set(bg, 1366, 768);
    evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    elm_win_focus_highlight_enabled_set(ap.win, false);
    evas_object_show(bg);
@@ -165,7 +170,7 @@ ui_main_window_add(void)
    elm_panes_content_right_size_set(ap.panes.right, config->panes.tabs_size);
 
    project_navigator = project_navigator_add();
-   evas_object_smart_callback_add(project_navigator, "group,open", _project_navigator_group_open, NULL);
+   evas_object_smart_callback_add(project_navigator, SIGNAL_GROUP_OPEN, _project_navigator_group_open, NULL);
    elm_object_part_content_set(ap.panes.left, "left", project_navigator);
 
    tabs = tabs_add();
@@ -173,7 +178,7 @@ ui_main_window_add(void)
 
    /* add tabs with history and signals */
    ap.block.right_top = elm_layout_add(ap.win);
-   elm_layout_theme_set(ap.block.right_top, "layout", "tabs", "default");
+   elm_layout_theme_set(ap.block.right_top, "layout", "tabs", "property");
 
    toolbar = elm_toolbar_add(ap.block.right_top);
    elm_object_style_set(toolbar, "editor_tabs_horizontal");
@@ -184,29 +189,35 @@ ui_main_window_add(void)
    evas_object_size_hint_align_set(toolbar, EVAS_HINT_FILL, EVAS_HINT_FILL);
    elm_toolbar_align_set(toolbar, 0.0);
 
-   elm_toolbar_item_append(toolbar, NULL, _("Properties"), _property_click, NULL);
-   elm_toolbar_item_append(toolbar, NULL, _("History"), _history_click, NULL);
+   ap.block.item_property = elm_toolbar_item_append(toolbar, NULL, _("Properties"), _property_click, NULL);
+   ap.block.item_history = elm_toolbar_item_append(toolbar, NULL, _("History"), _history_click, NULL);
+   elm_object_item_disabled_set(ap.block.item_history, true);
+
+   evas_object_smart_callback_add(ap.win, SIGNAL_DIFFERENT_TAB_CLICKED, _hide_history, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_IMAGE_EDITOR_TAB_CLICKED, _hide_history, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SOUND_EDITOR_TAB_CLICKED, _hide_history, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_STYLE_EDITOR_TAB_CLICKED, _hide_history, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_COLOR_EDITOR_TAB_CLICKED, _hide_history, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_TAB_CHANGED, _show_history, NULL);
 
    ap.block.property = ui_property_add(ap.win);
-   elm_layout_content_set(ap.block.right_top, NULL, ap.block.property);
+   elm_layout_content_set(ap.block.right_top, "elm.swallow.property", ap.block.property);
    ap.block.history = history_ui_add();
-   evas_object_hide(ap.block.history);
-   elm_layout_content_set(ap.block.right_top, NULL, ap.block.property);
+   elm_layout_content_set(ap.block.right_top, "elm.swallow.history", ap.block.history);
    elm_object_part_content_set(ap.panes.right, "right", ap.block.right_top);
 
    ap.menu = ui_menu_add();
 
    //ui_panes_add();
    //ap.workspace = workspace_add(ap.block.canvas);
-   //ui_block_ws_set(ap.workspace);
    //evas_object_show(ap.workspace);
    //ap.live_view = live_view_add(ap.block.bottom_right, false);
-   //ui_block_live_view_set(ap.live_view->layout);
    //ap.colorsel = colorselector_add(ap.win);
    #ifdef HAVE_ENVENTOR
      ap.enventor= enventor_object_init(ap.win);
    #endif /* HAVE_ENVENTOR */
    //register_callbacks();
 
+   elm_config_window_auto_focus_enable_set(false);
    return true;
 }

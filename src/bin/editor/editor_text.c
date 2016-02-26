@@ -17,8 +17,11 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
+#define ALLOW_DIRECT_EDJE_EDIT_CALLS
 #include "editor.h"
 #include "editor_macro.h"
+#include "diff.h"
+#include "change.h"
 
 extern int _editor_signals_blocked;
 EDITOR_STATE_DOUBLE(text_align_x, ATTRIBUTE_STATE_TEXT_ALIGN_X)
@@ -73,9 +76,9 @@ EDITOR_STATE_BOOL(text_max_y, ATTRIBUTE_STATE_TEXT_MAX_Y)
 EDITOR_STATE_BOOL(text_min_x, ATTRIBUTE_STATE_TEXT_MIN_X)
 EDITOR_STATE_BOOL(text_min_y, ATTRIBUTE_STATE_TEXT_MIN_Y)
 
-EDITOR_STATE_STRING(text_source, ATTRIBUTE_STATE_TEXT_SOURCE)
-EDITOR_STATE_STRING(text_text_source, ATTRIBUTE_STATE_TEXT_TEXT_SOURCE)
-EDITOR_STATE_STRING(text, ATTRIBUTE_STATE_TEXT)
+EDITOR_STATE_STRING(text_source, ATTRIBUTE_STATE_TEXT_SOURCE, true)
+EDITOR_STATE_STRING(text_text_source, ATTRIBUTE_STATE_TEXT_TEXT_SOURCE, true)
+EDITOR_STATE_STRING(text, ATTRIBUTE_STATE_TEXT, true)
 
 EDITOR_STATE_STRING_WITH_FALLBACK(font, ATTRIBUTE_STATE_FONT, NULL)
 TODO("Add style fallback here")

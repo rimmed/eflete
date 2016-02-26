@@ -20,11 +20,6 @@
 #ifndef PROJECT_MANAGER_H
 #define PROJECT_MANAGER_H
 
-#ifdef HAVE_CONFIG_H
-   #include "eflete_config.h"
-#endif /* include eflete_config.h */
-
-
 /**
  * @defgroup ProjectManager Project Manager
  * @ingroup Eflete
@@ -38,13 +33,11 @@
  * information about project in the current folder.
  */
 
-#include "widget_manager.h"
-#include "logger.h"
-#include <Eet.h>
-#include <assert.h>
+#include "eflete.h"
+#include "group_manager.h"
 
 /* don't forget to update on major changes */
-#define PROJECT_FILE_VERSION 3
+#define PROJECT_FILE_VERSION 4
 
 typedef struct _Enventor_Data Enventor_Data;
 
@@ -79,13 +72,6 @@ struct _Project
    Eina_Stringshare *develop_path;
    /** compile options for release edj file. see edje_cc reference */
    Eina_Stringshare *release_options;
-
-   /** current editing group */
-   Style *current_style;
-   /** list of widgets and they styles in that theme */
-   Eina_Inlist *widgets;
-   /**< list of custom layouts int loaded theme */
-   Eina_Inlist *layouts;
 
    Eina_List *groups;
    Eina_List *images;
@@ -147,12 +133,6 @@ enum _PM_Project_Result
    PM_PROJECT_ERROR,
    PM_PROJECT_LAST
 };
-
-/**
- * @typedef Project
- * @ingroup ProjectManager
- */
-typedef struct _Project Project;
 
 /**
  * @typedef Build
@@ -436,20 +416,24 @@ Eina_Bool
 pm_project_resource_export(Project *pro, const char* dir_path);
 
 /**
- * Export the source code of Style (edje object) to file.
- * If file is NULL, file will be saved to develop folder of project by name
- * "tmp.edc"
+ * Export the source code of Group (edje object) to file.
  *
  * @param pro The opened project;
- * @param style The style to save the source code;
- * @param file The file for save.
- *
- * @return EINA_TRUE on success, otherwise EINA_FALSE.
+ * @param group The group to save the source code;
+ * @param path The path for export source code;
+ * @param func_progress The user func for print export progress;
+ * @param func_end The user func for handle the end of export;
+ * @param data The user data;
  *
  * @ingroup ProjectManager.
  */
-Eina_Bool
-pm_project_style_source_code_export(Project *pro, Style *style, const char *file);
+void
+pm_group_source_code_export(Project *project,
+                            Group *group,
+                            const char *path,
+                            PM_Project_Progress_Cb func_progress,
+                            PM_Project_End_Cb func_end,
+                            const void *data);
 
 /**
  * Export the source code of Project (for each style edje objects) to a directory
@@ -492,6 +476,27 @@ pm_project_develop_export(Project *pro,
                           const void *data) EINA_ARG_NONNULL(1, 2);
 
 /**
+ * Export the edj release file from current project. The develop edj file
+ * exclude unused images, sounds, fonts and data files.
+ *
+ * @param pro The opened project;
+ * @param path Path to save the edj file.
+ * @param func_progress The progress callback;
+ * @param func_end The end callback, this callback be called on the end of
+ *        Project progress;
+ * @param data The user data.
+ *
+ * @ingroup ProjectManager.
+ */
+void
+pm_project_release_export(Project *pro,
+                          const char *path,
+                          PM_Project_Progress_Cb func_progress,
+                          PM_Project_End_Cb func_end,
+                          const void *data) EINA_ARG_NONNULL(1, 2);
+
+
+/**
  * Save the current editing style as edj file.
  *
  * @param project The project what should be saved.
@@ -529,8 +534,8 @@ pm_project_enventor_save(Project *project,
  *
  * @ingroup ProjectManager.
  */
-Eina_Bool
-pm_style_resource_export(Project *pro, Style *style, Eina_Stringshare *path);
+//Eina_Bool
+//pm_style_resource_export(Project *pro, Style *style, Eina_Stringshare *path);
 
 
 /**
@@ -546,12 +551,6 @@ struct _Resource
    Eina_Stringshare *name;
    Eina_List *used_in;
 };
-
-/**
- * @typedef Resource
- * @ingroup ProjectManager
- */
-typedef struct _Resource Resource;
 
 /**
  * @struct _External_Resource
@@ -749,6 +748,12 @@ pm_resource_usage_del(Eina_List *list, Eina_Stringshare *name, void *usage_data)
 
    l_del = eina_list_search_sorted_list(res->used_in, (Eina_Compare_Cb)resource_cmp, usage_data);
 
+   TODO("remove this after fixing resource managment");
+   if (!l_del)
+     {
+        ERR("Can't delete resource \"%s\"", name);
+        return;
+     }
    assert(l_del);
 
    res->used_in = eina_list_remove_list(res->used_in, l_del);
@@ -773,6 +778,12 @@ pm_resource_usage_unsorted_del(Eina_List *list, Eina_Stringshare *name, void *us
 
    l_del = eina_list_search_sorted_list(res->used_in, (Eina_Compare_Cb)resource_cmp, usage_data);
 
+   TODO("remove this after fixing resource managment");
+   if (!l_del)
+     {
+        ERR("Can't delete resource \"%s\"", name);
+        return;
+     }
    assert(l_del);
 
    res->used_in = eina_list_remove_list(res->used_in, l_del);

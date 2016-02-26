@@ -20,9 +20,8 @@
 #ifndef TABS_PRIVATE
 #define TABS_PRIVATE
 
-#include "main_window.h"
-#include "project_navigator.h"
-#include "project_common.h"
+#include "eflete.h"
+#include "project_manager.h"
 
 struct _Meta_Data_Controls
 {
@@ -51,6 +50,9 @@ _tab_open_project_recents_update();
 
 Evas_Object *
 _tab_import_edj_add(void);
+
+void
+_tab_import_edj_data_set(const char *name, const char *path, const char *edj);
 
 Evas_Object *
 _tab_import_edc_add(void);

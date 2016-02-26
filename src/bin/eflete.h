@@ -46,6 +46,21 @@
    #define NGETTEXT(single, plur, n) (((n)==1)? (single):(plur))
 #endif /* localization */
 
+typedef struct _Shortcut_Module Shortcut_Module;
+typedef struct _Menu Menu;
+typedef struct _Live_View Live_View;
+typedef struct _Project Project;
+typedef struct _Profile Profile;
+typedef struct _Resource Resource;
+typedef struct _Change Change;
+typedef struct _Diff_ Diff;
+typedef struct _Group Group;
+typedef struct _History History;
+typedef struct _State State;
+typedef struct _Part Part;
+typedef struct _Shortcuts Shortcuts;
+typedef struct _ColorClassData ColorClassData;
+
 #include "common_macro.h"
 TODO("delete it, and remake all strings to eina_stringshare or eina_strbuff")
 #ifndef PATH_MAX
@@ -57,22 +72,15 @@ TODO("delete it, and remake all strings to eina_stringshare or eina_strbuff")
 
 /* do not allow unsafe sprintf. use snprintf instead */
 #pragma GCC poison sprintf
-#include "banned_edje_edit_api.h"
 
+#include <Elementary.h>
 #include "logger.h"
-#include "group_manager.h"
-#include "live_view.h"
-#include "notify.h"
+#include "string_common.h"
+#include "editor.h"
+#include "signals.h"
 
-/**
- * @typedef Shortcut_Module
- * Private Structure, using for Shortcuts module, containing important
- * information for it.
- * @ingroup Eflete
- */
-typedef struct _Shortcut_Module Shortcut_Module;
-
-typedef struct _Menu Menu;
+#define EFLETE_INTERNAL_GROUP_NAME "___eflete_internal_group___"
+#define EFLETE_DUMMY_IMAGE_NAME "___eflete_dummy_image___.png"
 
 struct _App_Data
 {
@@ -86,7 +94,6 @@ struct _App_Data
    Evas_Object *colorsel; /**< global colorselector. the one colorselector for
                             application. */
    Evas_Object *statusbar; /**< The statusbar object, which contain some items */
-   int modal_editor; /**< count of open editors */
    struct {
       Evas_Object *left;
       Evas_Object *right;
@@ -99,9 +106,9 @@ struct _App_Data
       Evas_Object *signal_list;
       Evas_Object *bottom_right;
       Evas_Object *right_top, *history, *property;
+      Elm_Object_Item *item_history, *item_property;
       Evas_Object *canvas;
    } block;
-   Evas_Object *workspace;
    Live_View *live_view;
    Project *project;
    Shortcut_Module *shortcuts; /**< Structure with data from shortcuts module */

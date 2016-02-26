@@ -4,13 +4,62 @@ LOCALE_DIR = @LOCALE_DIR@
 
 bin_PROGRAMS = eflete
 
+includesub_HEADERS = \
+	eflete.h \
+	alloc/alloc.h \
+	common/common_macro.h \
+	common/signals.h \
+	common/string_common.h \
+	common/validator.h \
+	common/widget_macro.h \
+	common/win32.h \
+	config/config.h \
+	editor/banned_edje_edit_api.h \
+	editor/change.h \
+	editor/default.h \
+	editor/diff.h \
+	editor/editor.h \
+	editor/editor_macro.h \
+	editor/history.h \
+	external/enventor_module.h \
+	external/syntax_color.h \
+	logger/logger.h \
+	project_manager/group_manager.h \
+	project_manager/project_manager.h \
+	ui/cursor.h \
+	ui/demo_group.h \
+	ui/group_navigator.h \
+	ui/history_ui.h \
+	ui/main_window.h \
+	ui/project_common.h \
+	ui/project_navigator.h \
+	ui/property.h \
+	ui/property_macros.h \
+	ui/property_private.h \
+	ui/tabs.h \
+	ui/tabs_private.h \
+	ui/container/container.h \
+	ui/dialogs/about_window.h \
+	ui/dialogs/colorsel.h \
+	ui/live_view/demo.h \
+	ui/live_view/live_widget.h \
+	ui/live_view/live_widgets.h \
+	ui/live_view/elementary/live_elementary_widgets.h \
+	ui/modal_window/modal_window.h \
+	ui/preference/preference.h \
+	ui/shortcuts/shortcuts.h \
+	ui/workspace/groupedit.h \
+	ui/workspace/groupedit_private.h \
+	ui/workspace/highlight.h\
+	ui/workspace/workspace.h
+includesubdir = $(pkgincludedir)-@VMAJ@
+
 noinst_LIBRARIES = libete.a
 libete_a_SOURCES = \
 ../../src/bin/eflete.c \
 ../../src/bin/common/string_common.c \
 ../../src/bin/common/validator.c \
 ../../src/bin/project_manager/group_manager.c \
-../../src/bin/project_manager/widget_manager.c \
 ../../src/bin/project_manager/project_manager.c \
 ../../src/bin/logger/logger.c \
 ../../src/bin/config/config.c \
@@ -18,15 +67,17 @@ libete_a_SOURCES = \
 ../../src/bin/external/enventor_module.c \
 ../../src/bin/editor/diff.c \
 ../../src/bin/editor/change.c \
-../../src/bin/editor/new_history.c \
+../../src/bin/editor/history.c \
 ../../src/bin/editor/default.c \
 ../../src/bin/editor/editor_general.c \
 ../../src/bin/editor/editor_group.c \
 ../../src/bin/editor/editor_part.c \
 ../../src/bin/editor/editor_states.c \
 ../../src/bin/editor/editor_text.c \
+../../src/bin/editor/editor_program.c \
 ../../src/bin/ui/history_ui.c \
 ../../src/bin/ui/group_navigator.c \
+../../src/bin/ui/demo_group.c \
 ../../src/bin/ui/cursor.c \
 ../../src/bin/ui/menu.c \
 ../../src/bin/ui/main_window.c \
@@ -34,25 +85,17 @@ libete_a_SOURCES = \
 ../../src/bin/ui/project_common.c \
 ../../src/bin/ui/project_close.c \
 ../../src/bin/ui/project_export.c \
-../../src/bin/ui/connector.c \
 ../../src/bin/ui/splash.c \
 ../../src/bin/ui/shortcuts/shortcuts.c \
 ../../src/bin/ui/container/container.c \
-../../src/bin/ui/preference/preference.c \
-../../src/bin/ui/editors/style_editor.c \
-../../src/bin/ui/editors/image_editor.c \
-../../src/bin/ui/editors/sound_editor.c \
-../../src/bin/ui/editors/colorclass_manager.c \
-../../src/bin/ui/editors/animator.c \
-../../src/bin/ui/editors/animator_program_editor.c \
-../../src/bin/ui/editors/animator_program_sequence.c \
-../../src/bin/ui/dialogs/part_dialog.c \
-../../src/bin/ui/dialogs/style_dialog.c \
+../../src/bin/ui/style_manager.c \
+../../src/bin/ui/sound_manager.c \
 ../../src/bin/ui/dialogs/about_window.c \
 ../../src/bin/ui/dialogs/colorsel.c \
-../../src/bin/ui/dialogs/item_dialog.c \
 ../../src/bin/ui/modal_window/modal_window.c \
 ../../src/bin/ui/project_navigator.c \
+../../src/bin/ui/image_manager.c \
+../../src/bin/ui/colorclass_manager.c \
 ../../src/bin/ui/tabs.c \
 ../../src/bin/ui/tab_home_common.c \
 ../../src/bin/ui/tab_home_open.c \
@@ -60,24 +103,20 @@ libete_a_SOURCES = \
 ../../src/bin/ui/tab_home_import_edj.c \
 ../../src/bin/ui/tab_home_import_edc.c \
 ../../src/bin/ui/tab_home_info.c \
-../../src/bin/ui/blocks/ui_block.c \
 ../../src/bin/ui/property.c \
 ../../src/bin/ui/property_group.c \
 ../../src/bin/ui/property_image.c \
 ../../src/bin/ui/property_sound.c \
 ../../src/bin/ui/property_style.c \
-../../src/bin/ui/blocks/ui_widget_list.c \
-../../src/bin/ui/blocks/ui_signal_list.c \
-../../src/bin/ui/blocks/ui_states_list.c \
+../../src/bin/ui/property_color.c \
+../../src/bin/ui/property_demo_swallow.c \
+../../src/bin/ui/property_demo_text.c \
 ../../src/bin/ui/workspace/workspace.c \
 ../../src/bin/ui/workspace/groupedit_calc.c \
 ../../src/bin/ui/workspace/groupedit.c \
 ../../src/bin/ui/workspace/highlight.c \
 ../../src/bin/ui/live_view/demo.c \
-../../src/bin/ui/live_view/live_view_prop.c \
-../../src/bin/ui/live_view/live_view.c \
 ../../src/bin/ui/live_view/live_widget.c \
-../../src/bin/ui/live_view/live_prog_edit.c \
 ../../src/bin/ui/live_view/elementary/live_widget_common.c \
 ../../src/bin/ui/live_view/elementary/live_custom_layout.c \
 ../../src/bin/ui/live_view/elementary/live_actionslider.c \
@@ -111,8 +150,7 @@ libete_a_SOURCES = \
 ../../src/bin/ui/live_view/elementary/live_spinner.c \
 ../../src/bin/ui/live_view/elementary/live_progressbar.c \
 ../../src/bin/ui/live_view/elementary/live_toolbar.c \
-../../src/bin/ui/live_view/elementary/live_naviframe.c \
-../../src/bin/ui/notification/notify.c
+../../src/bin/ui/live_view/elementary/live_naviframe.c
 
 eflete_SOURCES  = ../../src/bin/main.c
 

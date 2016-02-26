@@ -17,130 +17,91 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include "live_view_prop.h"
+#include "live_elementary_widgets.h"
+#include "widget_macro.h"
 
 static void
 _on_frame_swallow_check(void *data,
-                        Evas_Object *obj,
-                        void *ei __UNUSED__)
+                        Evas_Object *obj __UNUSED__,
+                        void *ei)
 {
-   Evas_Object *rect = NULL, *frame_obj = NULL, *check = NULL, *ch, *box __UNUSED__;
-   Eina_List* frame_list = NULL, *item_list = NULL, *it;
-   Eina_List *l = NULL;
-   Eina_Bool all_checks = true;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *frame_obj = NULL;
+   Evas_Object *content = NULL;
 
-   Prop_Data *pd = (Prop_Data *)data;
+   assert(data != NULL);
+   Eina_List *frame_list = elm_box_children_get(data);
 
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   frame_list = elm_box_children_get(object);
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_swallow.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
+   EINA_LIST_FREE(frame_list, frame_obj)
      {
-        EINA_LIST_FOREACH(frame_list, l, frame_obj)
-          {
-             rect = evas_object_rectangle_add(frame_obj);
-             if (!strcmp(part_name, "elm.swallow.content"))
-               evas_object_size_hint_min_set(rect, 120, 70);
-             evas_object_color_set(rect, HIGHLIGHT_COLOR);
-             elm_object_part_content_set(frame_obj, part_name, rect);
-          }
-        item_list = elm_box_children_get(pd->prop_swallow.swallows);
+        int content_type = part->swallow_content;
 
-        EINA_LIST_FOREACH(item_list, it, ch)
+        if (part->change)
           {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
+             if ((content_type == CONTENT_NONE) && (part->object))
+               {
+                  content = elm_object_part_content_unset(frame_obj, part->name);
+                  evas_object_del(content);
+                  content = NULL;
+                  part->object = NULL;
+               }
+
+             content = object_generate(part, frame_obj);
+             part->change = false;
+             part->object = content;
+             elm_object_part_content_set(frame_obj, part->name, content);
           }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
-     }
-   else
-     {
-        EINA_LIST_FOREACH(frame_list, l, frame_obj)
+
+        if (part->object)
           {
-             rect = elm_object_part_content_unset(frame_obj, part_name);
-             evas_object_del(rect);
+             evas_object_color_set(content,
+                                   part->r,
+                                   part->g,
+                                   part->b,
+                                   part->a);
+
+             evas_object_size_hint_min_set(content,
+                                           part->min_w,
+                                           part->min_h);
+             evas_object_size_hint_max_set(content,
+                                           part->max_w,
+                                           part->max_h);
           }
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
      }
-   eina_list_free(frame_list);
 }
 
 static void
 _on_frame_text_check(void *data,
-                     Evas_Object *obj,
-                     void *ei __UNUSED__)
+                     Evas_Object *obj __UNUSED__,
+                     void *ei)
 {
-   Evas_Object *frame_obj = NULL, *check = NULL, *ch;
-   Eina_List* frame_list = NULL, *item_list = NULL, *it;
-   Eina_List *l = NULL;
-   Eina_Bool all_checks = true;
-   const char *default_text;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *frame_obj = NULL;
 
-   Prop_Data *pd = (Prop_Data *)data;
+   assert(data != NULL);
+   Eina_List *frame_list = elm_box_children_get(data);
 
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   frame_list = elm_box_children_get(object);
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_text.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
-     {
-        frame_obj = eina_list_data_get(frame_list);
-        default_text = elm_object_part_text_get(frame_obj, part_name);
-        if (default_text)
-          eina_hash_add(pd->prop_text.default_text, part_name, eina_stringshare_add(default_text));
-
-        EINA_LIST_FOREACH(frame_list, l, frame_obj)
-          elm_object_part_text_set(frame_obj, part_name, _("Text Example"));
-
-        item_list = elm_box_children_get(pd->prop_text.texts);
-        EINA_LIST_FOREACH(item_list, it, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
-          }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
-     }
-   else
-     {
-        default_text = eina_hash_find(pd->prop_text.default_text, part_name);
-        eina_hash_del(pd->prop_text.default_text, part_name, NULL);
-        EINA_LIST_FOREACH(frame_list, l, frame_obj)
-          elm_object_part_text_set(frame_obj, part_name, default_text);
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
-     }
-   eina_list_free(frame_list);
+   EINA_LIST_FREE(frame_list, frame_obj)
+     elm_object_part_text_set(frame_obj, part->name, part->text_content);
 }
 
 static void
 _frame_send_signal(void *data,
-                   Evas_Object *obj,
-                   void *ei __UNUSED__)
+                   Evas_Object *obj __UNUSED__,
+                   void *ei)
 {
+   Demo_Signal *sig = (Demo_Signal *)ei;
    Evas_Object *frame_obj = NULL;
 
    assert(data != NULL);
 
    Eina_List* frame_list = elm_box_children_get(data);
-
-   const char *name = evas_object_data_get(obj, SIGNAL_NAME);
-   const char *source = evas_object_data_get(obj, SIGNAL_SOURCE);
-
-   assert(name != NULL);
-   assert(source != NULL);
+   assert(sig != NULL);
+   assert(sig->sig_name != NULL);
+   assert(sig->source_name != NULL);
 
    EINA_LIST_FREE(frame_list, frame_obj)
-     elm_layout_signal_emit(frame_obj, name, source);
+     elm_layout_signal_emit(frame_obj, sig->sig_name, sig->source_name);
 }
 
 Evas_Object *
@@ -162,9 +123,9 @@ widget_frame_create(Evas_Object *parent, const Group *group)
    elm_box_pack_end(object, frame);
    elm_object_style_set(frame, group->style);
 
-   evas_object_data_set(object, SWALLOW_FUNC, _on_frame_swallow_check);
-   evas_object_data_set(object, TEXT_FUNC, _on_frame_text_check);
-   evas_object_data_set(object, SIGNAL_FUNC, _frame_send_signal);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, _on_frame_swallow_check, object);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_TEXT_SET, _on_frame_text_check, object);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SIGNAL_SEND, _frame_send_signal, object);
 
    return object;
 }

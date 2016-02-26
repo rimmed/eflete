@@ -32,8 +32,9 @@ alayouts_DATA = eflete.edj
 
 aimagesdir = $(datadir)/eflete/images
 aimages_DATA = \
-   ${srcdir}/images/*.png \
-   ${srcdir}/images/toolbar_icons/*.png
+	${srcdir}/images/*.png \
+	${srcdir}/images/eflete.svg \
+	${srcdir}/images/toolbar_icons/*.png
 
 aresourcesdir = $(datadir)/eflete/
 
@@ -49,42 +50,52 @@ colors_DATA = color.eet
 ewedir = $(datadir)/ewe/themes
 ewe_DATA = ewe.edj
 
-ewe.edj: Makefile \
+ewe_deps = \
 	$(top_srcdir)/data/*.edc \
 	$(top_srcdir)/data/themes/ewe/*.edc \
 	$(top_srcdir)/data/themes/ewe/widgets/*.edc \
 	$(top_srcdir)/data/themes/ewe/widgets/images/*.png \
 	$(top_srcdir)/data/themes/ewe/fonts/*.ttf
+
+eflete_deps = \
+	$(top_srcdir)/data/*.edc \
+	$(top_srcdir)/data/layouts/*.edc \
+	$(top_srcdir)/data/layouts/edje/*.edc \
+	$(top_srcdir)/data/fonts/*.ttf \
+	$(top_srcdir)/data/layouts/images/*.png
+
+eflete_elm_deps = \
+	$(top_srcdir)/data/*.edc \
+	$(top_srcdir)/data/themes/default/*.edc \
+	$(top_srcdir)/data/themes/default/widgets/*.edc \
+	$(top_srcdir)/data/themes/default/widgets/layouts/*.edc \
+	$(top_srcdir)/data/themes/default/images/*.png \
+	$(top_srcdir)/data/fonts/*.ttf \
+	$(top_srcdir)/data/themes/default/images/splash/*.png
+
+color_eet_deps = \
+	$(top_srcdir)/data/color/color.src
+
+ewe.edj: Makefile $(ewe_deps)
 	$(AM_V_EDJ)$(EDJE_CC) \
 	-fd $(top_srcdir)/data/themes/ewe/fonts \
 	-id $(top_srcdir)/data/themes/ewe/widgets/images \
 	$(top_srcdir)/data/themes/ewe/default.edc \
 	$(top_builddir)/data/ewe.edj
 
-eflete.edj: Makefile \
-	$(top_srcdir)/data/*.edc \
-	$(top_srcdir)/data/layouts/*.edc \
-	$(top_srcdir)/data/layouts/edje/*.edc \
-	$(top_srcdir)/data/layouts/images/*.png
+eflete.edj: Makefile $(eflete_deps)
 	$(AM_V_EDJ)$(EDJE_CC) \
 		$(EDJE_FLAGS) \
 	$(top_srcdir)/data/layouts/eflete.edc \
 	$(top_builddir)/data/eflete.edj
 
-eflete_elm.edj: Makefile \
-	$(top_srcdir)/data/*.edc \
-	$(top_srcdir)/data/themes/default/*.edc \
-	$(top_srcdir)/data/themes/default/widgets/*.edc \
-	$(top_srcdir)/data/themes/default/widgets/layouts/*.edc \
-	$(top_srcdir)/data/themes/default/images/*.png \
-	$(top_srcdir)/data/themes/default/images/splash/*.png
+eflete_elm.edj: Makefile $(eflete_elm_deps)
 	$(AM_V_EDJ)$(EDJE_CC) \
 		$(EDJE_FLAGS_DEFAULT) \
 	$(top_srcdir)/data/themes/default/default.edc \
 	$(top_builddir)/data/eflete_elm.edj
 
-color.eet: Makefile \
-	$(top_srcdir)/data/color/color.src
+color.eet: Makefile $(color_eet_deps)
 	$(AM_V_EET)$(EET_EET) -e \
 	$(top_builddir)/data/color.eet color \
 	$(top_srcdir)/data/color/color.src 1
@@ -96,3 +107,6 @@ install-exec-hook:
 	mkdir -p $(TEMPLATE_IMAGE_COPY_INTO) && \
 	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/dark $(TEMPLATE_IMAGE_COPY_INTO) && \
 	cp -r $(TEMPLATE_IMAGE_COPY_FROM)/light $(TEMPLATE_IMAGE_COPY_INTO)
+
+EXTRA_DIST = $(aimages_DATA) $(ewe_deps) $(eflete_deps) $(eflete_elm_deps) \
+	$(color_eet_deps) $(template_edc_DATA) $(template_img_DATA) $(template_snd_DATA)

@@ -27,8 +27,22 @@
  * This folder mostly contains only Elementary Widgets
  */
 
+#include "eflete.h"
+#include "project_manager.h"
 #include "live_widgets.h"
-#include <Elementary.h>
+#include "demo_group.h"
+#include "widget_macro.h"
+
+/**
+ * Common function that generate one object to set into demo's swallow.
+ *
+ * @param part demo part for setting object into.
+ * @param object parent for generated object.
+ *
+ * @ingroup Live_Elementary_Widgets
+ */
+Evas_Object *
+object_generate(Demo_Part *part, Evas_Object *object);
 
 /**
  * Common Swallow callback that is used in most of simple widgets.
@@ -74,7 +88,7 @@ send_signal(void *data, Evas_Object *obj, void *event_info);
  * !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  ! *
  *****************************************************/
 Evas_Object *
-layout_custom_create(Evas_Object *parent);
+layout_custom_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
 widget_actionslider_create(Evas_Object *parent, const Group *group);

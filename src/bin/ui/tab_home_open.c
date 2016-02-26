@@ -19,6 +19,9 @@
 
 #include "tabs_private.h"
 #include "tabs.h"
+#include "main_window.h"
+#include "project_common.h"
+#include "config.h"
 
 struct _Tab_Home_Open {
    Evas_Object *layout;
@@ -27,7 +30,7 @@ struct _Tab_Home_Open {
 };
 
 typedef struct _Tab_Home_Open Tab_Home_Open;
-Tab_Home_Open tab;
+static Tab_Home_Open tab;
 
 static Eina_Bool
 _eflete_filter(const char *path,

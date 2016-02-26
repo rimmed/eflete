@@ -17,136 +17,88 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include "live_view_prop.h"
+#include "live_elementary_widgets.h"
 
 static void
 _on_multibutton_swallow_check(void *data,
-                              Evas_Object *obj,
-                              void *ei __UNUSED__)
+                              Evas_Object *obj __UNUSED__,
+                              void *ei)
 {
-   Evas_Object *rect = NULL, *check = NULL, *ch;
-   Eina_List *item_list = NULL, *it;
-   Eina_Bool all_checks = true;
-   Elm_Object_Item *multi_item = NULL;
+   Demo_Part *part = (Demo_Part *)ei;
+   Elm_Object_Item *multi_item = elm_multibuttonentry_first_item_get(data);
+   Evas_Object *content;
+   int content_type = part->swallow_content;
 
-   Prop_Data *pd = (Prop_Data *)data;
-
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_swallow.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
+   while (multi_item)
      {
-        multi_item = elm_multibuttonentry_first_item_get(object);
-        while (multi_item)
+        if (part->change)
           {
-             rect = evas_object_rectangle_add(object);
-             evas_object_color_set(rect, RECT_COLOR);
-             elm_object_part_content_set(multi_item, part_name, rect);
-             multi_item = elm_multibuttonentry_item_next_get(multi_item);
-          }
-        item_list = elm_box_children_get(pd->prop_swallow.swallows);
+             /* if NONE - delete object */
+             if ((content_type == CONTENT_NONE) && (part->object))
+               {
+                  content = elm_object_part_content_unset(multi_item, part->name);
+                  evas_object_del(content);
+                  content = NULL;
+                  part->object = NULL;
+               }
 
-        EINA_LIST_FOREACH(item_list, it, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
+             part->object = object_generate(part, multi_item);
+             part->change = false;
+             elm_object_part_content_set(multi_item, part->name, part->object);
           }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
-     }
-   else
-     {
-        multi_item = elm_multibuttonentry_first_item_get(object);
-        while (multi_item)
+
+        if (part->object)
           {
-             rect = elm_object_part_content_unset(multi_item, part_name);
-             evas_object_del(rect);
-             multi_item = elm_multibuttonentry_item_next_get(multi_item);
+             evas_object_color_set(part->object,
+                                   part->r,
+                                   part->g,
+                                   part->b,
+                                   part->a);
+
+             evas_object_size_hint_min_set(part->object,
+                                           part->min_w,
+                                           part->min_h);
+             evas_object_size_hint_max_set(part->object,
+                                           part->max_w,
+                                           part->max_h);
           }
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
+        multi_item = elm_multibuttonentry_item_next_get(multi_item);
      }
 }
 
 static void
 _on_multibutton_text_check(void *data,
-                           Evas_Object *obj,
-                           void *ei __UNUSED__)
+                           Evas_Object *obj __UNUSED__,
+                           void *ei)
 {
-   Evas_Object *check = NULL, *ch;
-   Eina_List *item_list = NULL, *it;
-   Eina_Bool all_checks = true;
-   Elm_Object_Item *multi_item = NULL;
-   const char *default_text;
+   Demo_Part *part = (Demo_Part *)ei;
+   Elm_Object_Item *multi_item = elm_multibuttonentry_first_item_get(data);
 
-   Prop_Data *pd = (Prop_Data *)data;
-
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_text.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
+   while (multi_item)
      {
-        multi_item = elm_multibuttonentry_first_item_get(object);
-        default_text = elm_object_item_part_text_get(multi_item, part_name);
-        if (default_text)
-          eina_hash_add(pd->prop_text.default_text, part_name, eina_stringshare_add(default_text));
-        while (multi_item)
-          {
-             elm_object_item_part_text_set(multi_item, part_name,
-                                 _("Look at it! This is absolutely and totally text"));
-             multi_item = elm_multibuttonentry_item_next_get(multi_item);
-          }
-        item_list = elm_box_children_get(pd->prop_text.texts);
-
-        EINA_LIST_FOREACH(item_list, it, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
-          }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
-     }
-   else
-     {
-        default_text = eina_hash_find(pd->prop_text.default_text, part_name);
-        eina_hash_del(pd->prop_text.default_text, part_name, NULL);
-        multi_item = elm_multibuttonentry_first_item_get(object);
-        while (multi_item)
-          {
-             elm_object_item_part_text_set(multi_item, part_name, default_text);
-             multi_item = elm_multibuttonentry_item_next_get(multi_item);
-          }
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
+        elm_object_item_part_text_set(multi_item, part->name, part->text_content);
+        multi_item = elm_multibuttonentry_item_next_get(multi_item);
      }
 }
 
 static void
 _multibutton_send_signal(void *data,
-                         Evas_Object *obj,
-                         void *ei __UNUSED__)
+                         Evas_Object *obj __UNUSED__,
+                         void *ei)
 {
+   Demo_Signal *sig = (Demo_Signal *)ei;
    Elm_Object_Item *item = NULL;
 
    assert(data != NULL);
 
    item = elm_multibuttonentry_first_item_get(data);
-
-   const char *name = evas_object_data_get(obj, SIGNAL_NAME);
-   const char *source = evas_object_data_get(obj, SIGNAL_SOURCE);
-
-   assert(name != NULL);
-   assert(source != NULL);
+   assert(sig != NULL);
+   assert(sig->sig_name != NULL);
+   assert(sig->source_name != NULL);
 
    while (item)
      {
-        elm_object_item_signal_emit(item, name, source);
+        elm_object_item_signal_emit(item, sig->sig_name, sig->source_name);
         item = elm_multibuttonentry_item_next_get(item);
      }
 }
@@ -177,15 +129,15 @@ widget_multibuttonentry_create(Evas_Object *parent, const Group *group)
    /** in case when we edit button gorup, we need to apply changes to items */
    if (strcmp(group->class, "btn") == 0)
      {
-        evas_object_data_set(object, SWALLOW_FUNC, _on_multibutton_swallow_check);
-        evas_object_data_set(object, TEXT_FUNC, _on_multibutton_text_check);
-        evas_object_data_set(object, SIGNAL_FUNC, _multibutton_send_signal);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, _on_multibutton_swallow_check, object);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_TEXT_SET,    _on_multibutton_text_check, object);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SIGNAL_SEND, _multibutton_send_signal, object);
      }
    else /** on all other cases we need to apply changes to whole object */
      {
-        evas_object_data_set(object, SWALLOW_FUNC, on_swallow_check);
-        evas_object_data_set(object, TEXT_FUNC, on_text_check);
-        evas_object_data_set(object, SIGNAL_FUNC, send_signal);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, on_swallow_check, object);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_TEXT_SET, on_text_check, object);
+        evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SIGNAL_SEND, send_signal, object);
      }
 
    /** closed button is group used for showing collapsed multibuttonentry only */

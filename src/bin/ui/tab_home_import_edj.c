@@ -24,6 +24,7 @@
 #include "tabs.h"
 #include "main_window.h"
 #include "project_common.h"
+#include "config.h"
 
 struct _Tab_Home_Edj
 {
@@ -38,7 +39,7 @@ struct _Tab_Home_Edj
 };
 
 typedef struct _Tab_Home_Edj Tab_Home_Edj;
-Tab_Home_Edj tab_edj;
+static Tab_Home_Edj tab_edj;
 
 static void
 _progress_end(void *data, PM_Project_Result result)
@@ -74,6 +75,7 @@ static Eina_Bool
 _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
    pm_project_thread_free();
+   ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
 
@@ -81,6 +83,7 @@ static Eina_Bool
 _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
    pm_project_thread_cancel();
+   ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
 
@@ -125,7 +128,8 @@ _validate(void *data __UNUSED__,
           void *event_info __UNUSED__)
 {
    if ((elm_validator_regexp_status_get(tab_edj.name_validator) != ELM_REG_NOERROR) ||
-       !eina_str_has_extension(elm_entry_entry_get(tab_edj.edj), ".edj"))
+       !eina_str_has_extension(elm_entry_entry_get(tab_edj.edj), ".edj") ||
+       !ecore_file_exists(elm_entry_entry_get(tab_edj.edj)))
      elm_object_disabled_set(tab_edj.btn_create, true);
    else
      elm_object_disabled_set(tab_edj.btn_create, false);
@@ -195,4 +199,17 @@ _tab_import_edj_add(void)
    meta_controls_add(tab_edj.layout, &tab_edj.meta);
 
    return tab_edj.layout;
+}
+
+void
+_tab_import_edj_data_set(const char *name, const char *path, const char *edj)
+{
+   assert(tab_edj.layout != NULL);
+
+   elm_entry_entry_set(tab_edj.name, name);
+
+   if (path) elm_entry_entry_set(tab_edj.name, path);
+   else elm_entry_entry_set(tab_edj.path, profile_get()->general.projects_folder);
+
+   elm_entry_entry_set(tab_edj.edj, edj);
 }

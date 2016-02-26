@@ -30,20 +30,13 @@
  */
 
 #include "eflete.h"
-#include "enventor_module.h"
-#include "config.h"
-#include "common_macro.h"
-#include "ui_widget_list.h"
-#include "ui_signal_list.h"
-#include "ui_block.h"
-#include "notify.h"
-#include "string_common.h"
+#include "widget_macro.h"
 
-#include "part_dialog.h"
-#include "style_dialog.h"
-#include "item_dialog.h"
-#include "colorsel.h"
-#include "colorclass_manager.h"
+#ifdef HAVE_AUDIO
+TODO("Check pulse_audio on configure and add COREAUDIO support")
+   #define HAVE_PULSE 1
+   #include <Ecore_Audio.h>
+#endif
 
 enum Menu_Item
 {
@@ -70,15 +63,13 @@ enum Menu_Item
       MENU_VIEW_WORKSPACE,
          MENU_VIEW_WORKSPACE_ZOOM_IN,
          MENU_VIEW_WORKSPACE_ZOOM_OUT,
-         MENU_VIEW_WORKSPACE_SEPARATE,
          MENU_VIEW_WORKSPACE_OBJECT_AREA,
-      MENU_VIEW_RULERS,
-         MENU_VIEW_RULERS_SHOW,
-         MENU_VIEW_RULERS_ABS,
-         MENU_VIEW_RULERS_REL,
-         MENU_VIEW_RULERS_BOTH,
+         MENU_VIEW_RULERS,
+            MENU_VIEW_RULERS_SHOW,
+            MENU_VIEW_RULERS_ABS,
+            MENU_VIEW_RULERS_REL,
+            MENU_VIEW_RULERS_BOTH,
    MENU_EDITORS,
-      MENU_EDITORS_ANIMATOR,
       MENU_EDITORS_IMAGE,
       MENU_EDITORS_SOUND,
       MENU_EDITORS_COLORCLASS,
@@ -214,19 +205,6 @@ void
 ui_state_select(Evas_Object *obj, Eina_Stringshare *state);
 
 /**
- * Show information about properties of part. Highlight part object
- * on workspace.
- * Moved to own method for the separation of the interaction between the blocks.
- *
- * @param part The Part pointer.
- *
- * @return Evas_object pointer. States gen list object.
- * @ingroup Window
- */
-Evas_Object *
-ui_part_select(Part* part);
-
-/**
  * Load project data to App_Data structure. Turn to work state for application.
  * Moved to own method for the separation of the interaction between the blocks.
  *
@@ -240,27 +218,6 @@ Eina_Bool
 ui_edj_load(const char *selected_file);
 
 /**
- * Delete selected style/class/layout from current widget
- *
- * @param group_type type of group to be deleted.
- * @return EINA_TRUE if successful, EINA_FALSE otherwise.
- *
- * @ingroup Window
- */
-Eina_Bool
-ui_group_delete(Type group_type);
-
-/**
- * Open new theme from template file.
- *
- * @return EINA_TRUE if successful, EINA_FALSE otherwise.
- *
- * @ingroup Window
- */
-Eina_Bool
-new_theme_create(void);
-
-/**
  * Ask user if he wants to close project
  *
  * @param msg The explanation text that will be shown to user. NULL for default message.
@@ -270,53 +227,6 @@ new_theme_create(void);
  */
 Eina_Bool
 ui_close_project_request(const char *msg);
-
-/**
- * Get data of widget user currently works with.
- *
- * @return Widget data structure.
- */
-Widget *
-ui_widget_from_ap_get(void);
-
-/**
- * Get data of class user currently works with.
- *
- * @return Class data structure.
- */
-Class *
-ui_class_from_ap_get(void);
-
-/* FIXME: Add comments */
-Eina_Bool
-register_callbacks(void);
-
-/**
- * Add callbacks to widget list. Callbacks are using next signals:
- * "wl,group,select"
- * "wl,part,select",
- * "wl,part,back",
- * "wl,group,back",
- *
- * @param wd_list A pointer to widget list object.
- * @return EINA_TRUE if succeed, EINA_FALSE otherwise.
- */
-Eina_Bool
-add_callbacks_wd(Evas_Object *wd_list);
-
-/**
- * Switch code editing mode ON or OFF.
- * The Code Editing mode means that Workspace, States, History and Signals
- * blocks are hidden and only Widget List, Life Wiew and Code tab are available
- * for user.
- *
- * @param is_on value to toggle Code Editing mode ON/OFF.
- * @return EINA_TRUE if succeed, EINA_FALSE otherwise.
- *
- * @ingroup Window
- */
-Eina_Bool
-code_edit_mode_switch(Eina_Bool is_on);
 
 /**
  * The splash window with animation and info line.
@@ -349,30 +259,12 @@ void
 splash_del(Evas_Object *obj);
 
 /**
- * Show the main layout blocks.
- *
- * @return EINA_TRUE on success, otherwise EINA_FALSE.
- *
- * @ingroup Window
- */
-Eina_Bool
-blocks_show(void);
-
-/**
- * Open existing project.
- *
- * @ingroup Window
- */
-void
-project_open();
-
-/**
  * Save opened project.
  *
  * @ingroup Window
  */
 void
-project_save();
+project_save(void);
 
 /**
  * Requesting to change project (need to close it, to hide blocks, unset data,
@@ -448,6 +340,11 @@ popup_fileselector_image_helper(const char *title, Evas_Object *follow_up, const
                                 Eina_Bool multi, Eina_Bool is_save);
 
 void
+popup_fileselector_sound_helper(const char *title, Evas_Object *follow_up, const char *path,
+                                Helper_Done_Cb func, void *data,
+                                Eina_Bool multi, Eina_Bool is_save);
+
+void
 popup_log_message_helper(const char *msg);
 
 void
@@ -463,6 +360,14 @@ popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
  */
 void
 project_export_develop(void);
+
+/**
+ * Export project as release edj file.
+ *
+ * @ingroup Window
+ */
+void
+project_export_release(void);
 
 /**
  * Update Statusbar field that contains time of last save of current
@@ -504,5 +409,86 @@ project_export_edc_project(void);
 void
 project_export_edc_group(void);
 
+/**
+ * Add new image editor layout for setting into tab.
+ *
+ * @return Pointer to layout object, which contain image grid and buttons.
+ *
+ * @ingroup Window
+ */
+Evas_Object *
+image_manager_add(void);
+
+typedef struct _Colorclass_Item Colorclass_Item;
+struct _Colorclass_Item
+{
+   Eina_Stringshare *name;
+   int r1, g1, b1, a1;
+   int r2, g2, b2, a2;
+   int r3, g3, b3, a3;
+};
+
+struct _ColorClassData
+{
+   Colorclass_Item *current_ccl;
+   Evas_Object *edje_preview;
+};
+
+/**
+ * Add new colorclass manager layout object.
+ *
+ * @return Pointer to layout object, which contain list of colorclasses,
+ * control buttons, etc.
+ *
+ * @ingroup Window
+ */
+Evas_Object *
+colorclass_manager_add();
+
+struct _Style_Data
+{
+   const char *st_name;
+   const char *st_tag;
+   Eina_Stringshare *stvalue;
+   Eina_Strbuf *style;
+   Evas_Object *textblock_style;
+   Eina_Bool is_parent_item;
+};
+typedef struct _Style_Data Style_Data;
+
+/**
+ * Add new style manager layout object.
+ *
+ * @return Pointer to layout object, which contain list of styles,
+ * control buttons, etc.
+ *
+ * @ingroup Window
+ */
+Evas_Object *
+style_manager_add();
+
+typedef enum {
+   SOUND_TYPE_SAMPLE,
+   SOUND_TYPE_TONE
+} Sound_Type;
+
+struct _Sound_Data {
+   Sound_Type type;
+   Resource *resource; /* for SAMPLE it's External_Resource, TONE - Tone_Resource */
+   Eina_Stringshare *name;
+   Eina_Stringshare *type_label;
+};
+typedef struct _Sound_Data Sound_Data;
+
+/**
+ * Add new sound manager layout object.
+ *
+ * @return Pointer to layout object, which contain list of sounds,
+ * control buttons, etc.
+ *
+ * @ingroup Window
+ */
+Evas_Object *
+sound_manager_add(void);
 
 #endif /* UI_MAIN_WINDOW_H */

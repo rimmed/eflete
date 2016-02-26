@@ -17,128 +17,86 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include "live_view_prop.h"
+#include "live_elementary_widgets.h"
 
 static void
-_on_radio_swallow_check(void *data,
-                        Evas_Object *obj,
+_on_radio_swallow_check(void *data __UNUSED__,
+                        Evas_Object *obj __UNUSED__,
                         void *ei __UNUSED__)
 {
-   Evas_Object *rect = NULL, *radio_obj = NULL, *check = NULL, *ch;
-   Eina_List* radio_list = NULL, *item_list = NULL, *it;
-   Eina_List *l = NULL;
-   Eina_Bool all_checks = true;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *object = (Evas_Object *) data;
+   Eina_List* radio_list = elm_box_children_get(object);
+   Evas_Object *content, *radio_obj;
 
-   Prop_Data *pd = (Prop_Data *)data;
+   int content_type = part->swallow_content;
 
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   radio_list = elm_box_children_get(object);
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_swallow.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
+   EINA_LIST_FREE(radio_list, radio_obj)
      {
-        EINA_LIST_FOREACH(radio_list, l, radio_obj)
+        content = elm_object_part_content_unset(radio_obj, part->name);
+        if (part->change)
           {
-             rect = evas_object_rectangle_add(radio_obj);
-             evas_object_color_set(rect, HIGHLIGHT_COLOR);
-             elm_object_part_content_set(radio_obj, part_name, rect);
-          }
-        item_list = elm_box_children_get(pd->prop_swallow.swallows);
+             part->objects = eina_list_remove(part->objects, content);
+             evas_object_del(content);
+             content = NULL;
 
-        EINA_LIST_FOREACH(item_list, it, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
+             /* if NONE - delete object */
+             if (content_type != CONTENT_NONE)
+               {
+                  content = object_generate(part, object);
+                  part->objects = eina_list_append(part->objects, content);
+                  elm_object_part_content_set(radio_obj, part->name, content);
+               }
           }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
-     }
-   else
-     {
-        EINA_LIST_FOREACH(radio_list, l, radio_obj)
+
+        if (content)
           {
-             rect = elm_object_part_content_unset(radio_obj, part_name);
-             evas_object_del(rect);
+             evas_object_color_set(content,
+                                   part->r,
+                                   part->g,
+                                   part->b,
+                                   part->a);
+
+             evas_object_size_hint_min_set(content,
+                                           part->min_w,
+                                           part->min_h);
+             evas_object_size_hint_max_set(content,
+                                           part->max_w,
+                                           part->max_h);
           }
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
      }
-   eina_list_free(radio_list);
 }
 
 static void
-_on_radio_text_check(void *data,
-                     Evas_Object *obj,
-                     void *ei __UNUSED__)
+_on_radio_text_check(void *data __UNUSED__,
+                        Evas_Object *obj __UNUSED__,
+                        void *ei __UNUSED__)
 {
-   Evas_Object *radio_obj = NULL, *check = NULL, *ch;
-   Eina_List* radio_list = NULL, *item_list = NULL, *it;
-   Eina_List *l = NULL;
-   Eina_Bool all_checks = true;
-   const char *default_text;
+   Demo_Part *part = (Demo_Part *)ei;
+   Evas_Object *object = (Evas_Object *) data;
+   Eina_List* radio_list = elm_box_children_get(object);
+   Evas_Object *radio_obj;
 
-   Prop_Data *pd = (Prop_Data *)data;
-
-   assert(pd != NULL);
-
-   Evas_Object *object = pd->live_object;
-   radio_list = elm_box_children_get(object);
-   const char *part_name = elm_object_part_text_get(obj, NULL);
-   check = elm_object_part_content_get(pd->prop_text.frame, "elm.swallow.check");
-
-   if (elm_check_state_get(obj))
-     {
-        radio_obj = eina_list_data_get(radio_list);
-        default_text = elm_object_part_text_get(radio_obj, part_name);
-        if (default_text)
-          eina_hash_add(pd->prop_text.default_text, part_name,
-                        eina_stringshare_add(default_text));
-        EINA_LIST_FOREACH(radio_list, l, radio_obj)
-          elm_object_part_text_set(radio_obj, part_name, _("Text Example"));
-
-        item_list = elm_box_children_get(pd->prop_text.texts);
-        EINA_LIST_FOREACH(item_list, it, ch)
-          {
-             if (elm_check_state_get(ch) == false)
-               all_checks = false;
-          }
-        if (all_checks)
-          elm_check_state_set(check, true);
-        eina_list_free(item_list);
-     }
-   else
-     {
-        default_text = eina_hash_find(pd->prop_text.default_text, part_name);
-        eina_hash_del(pd->prop_text.default_text, part_name, NULL);
-        EINA_LIST_FOREACH(radio_list, l, radio_obj)
-          elm_object_part_text_set(radio_obj, part_name, default_text);
-        if (elm_check_state_get(check)) elm_check_state_set(check, false);
-     }
-   eina_list_free(radio_list);
+   EINA_LIST_FREE(radio_list, radio_obj)
+     elm_object_part_text_set(radio_obj, part->name, part->text_content);
 }
 
 static void
 _radio_send_signal(void *data,
-                   Evas_Object *obj,
+                   Evas_Object *obj __UNUSED__,
                    void *ei __UNUSED__)
 {
+   Demo_Signal *sig = (Demo_Signal *)ei;
+   Evas_Object *object = (Evas_Object *)data;
+   Eina_List* radio_list = elm_box_children_get(object);
    Evas_Object *radio_obj = NULL;
 
-   assert(data != NULL);
-
-   Eina_List* radio_list = elm_box_children_get(data);
-
-   const char *name = evas_object_data_get(obj, SIGNAL_NAME);
-   const char *source = evas_object_data_get(obj, SIGNAL_SOURCE);
-
-   assert(name != NULL);
-   assert(source != NULL);
+   assert(sig != NULL);
+   assert(sig->sig_name != NULL);
+   assert(sig->source_name != NULL);
 
    EINA_LIST_FREE(radio_list, radio_obj)
-     elm_layout_signal_emit(radio_obj, name, source);
+     elm_layout_signal_emit(radio_obj, sig->sig_name, sig->source_name);
 }
 
 Evas_Object *
@@ -168,9 +126,9 @@ widget_radio_create(Evas_Object *parent, const Group *group)
 
    elm_radio_value_set(rdg, 2);
 
-   evas_object_data_set(object, SWALLOW_FUNC, _on_radio_swallow_check);
-   evas_object_data_set(object, TEXT_FUNC, _on_radio_text_check);
-   evas_object_data_set(object, SIGNAL_FUNC, _radio_send_signal);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SWALLOW_SET, _on_radio_swallow_check, object);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_TEXT_SET, _on_radio_text_check, object);
+   evas_object_smart_callback_add(ap.win, SIGNAL_DEMO_SIGNAL_SEND, _radio_send_signal, object);
 
    return object;
 }

@@ -20,13 +20,9 @@
 #include "property_private.h"
 #include "property_macros.h"
 #include "main_window.h"
-#include "string_common.h"
-#include "common_macro.h"
-#include "new_history.h"
-#include "editor.h"
+#include "history.h"
 #include "validator.h"
-
-#include "signals.h"
+#include "project_manager.h"
 
 #define IMAGE_PROP_DATA "image_prop_data"
 
@@ -79,7 +75,7 @@ static const char *edje_image_compression[] = { N_("RAW"),
                                                 NULL};
 
 static Evas_Object *
-prop_image_editor_compression_type_add(Evas_Object *property, Image_Prop_Data *pd);
+prop_image_manager_compression_type_add(Evas_Object *property, Image_Prop_Data *pd);
 
 static Evas_Object *
 prop_item_label_add(Evas_Object *parent,
@@ -98,7 +94,7 @@ prop_item_label_add(Evas_Object *parent,
 
 /* TODO this is not implemented yet, please remake it!!! */
 static Evas_Object *
-prop_image_editor_compression_quality_add(Evas_Object *parent,
+prop_image_manager_compression_quality_add(Evas_Object *parent,
                                           Image_Prop_Data *pd)
 {
    PROPERTY_ITEM_ADD(parent, _("compression quality/rate"), "2swallow")
@@ -122,7 +118,7 @@ _on_image_compression_type_change(void *data,
      }
 }
 static Evas_Object *
-prop_image_editor_compression_type_add(Evas_Object *parent, Image_Prop_Data *pd)
+prop_image_manager_compression_type_add(Evas_Object *parent, Image_Prop_Data *pd)
 {
    int i;
    PROPERTY_ITEM_ADD(parent, _("image compression type"), "1swallow");
@@ -312,6 +308,7 @@ _on_image_selected(void *data,
 
         image_name = evas_object_data_get(image, "image_name");
         pd->selected_image = image_name;
+        elm_object_text_set(pd->name, image_name);
 
         comp =  edje_edit_image_compression_type_get(ap.project->global_object, image_name);
         if (comp != EDJE_EDIT_IMAGE_COMP_USER)
@@ -355,6 +352,9 @@ _on_image_selected(void *data,
         ewe_combobox_select_item_set(pd->compression_type, 0);
         elm_spinner_value_set(pd->compression_quality, 0);
         pd->selected_image = NULL;
+
+        elm_genlist_clear(pd->usage_genlist);
+        _image_info_update_usage_info(pd, 0);
      }
 }
 
@@ -391,7 +391,7 @@ _search_next_genlist_item_cb(void *data,
                         &(pd->usage_search_data), start_from);
 }
 static inline Evas_Object *
-_image_editor_search_field_create(Evas_Object *parent)
+_image_manager_search_field_create(Evas_Object *parent)
 {
    Evas_Object *entry, *icon;
 
@@ -415,7 +415,7 @@ _image_usage_layout_create(Image_Prop_Data *pd)
    parent = pd->usage_frame;
 
    layout = elm_layout_add(parent);
-   elm_layout_theme_set(layout, "layout", "image_editor", "usage_info");
+   elm_layout_theme_set(layout, "layout", "image_manager", "usage_info");
    evas_object_size_hint_weight_set(layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(layout);
@@ -427,7 +427,7 @@ _image_usage_layout_create(Image_Prop_Data *pd)
    elm_object_part_content_set(layout, "eflete.swallow.genlist", genlist);
    pd->usage_genlist = genlist;
 
-   entry = _image_editor_search_field_create(layout);
+   entry = _image_manager_search_field_create(layout);
    elm_object_part_content_set(layout, "eflete.swallow.search_line", entry);
    evas_object_smart_callback_add(entry, "changed",
                                   _on_usage_search_entry_changed_cb, pd);
@@ -458,7 +458,7 @@ ui_property_image_add(Evas_Object *parent)
    /* Frame with preview */
    FRAME_PROPERTY_ADD(pd->box, pd->preview_frame, true, _("Preview"), pd->box)
    pd->preview_image = elm_layout_add(parent);
-   elm_layout_theme_set(pd->preview_image, "layout", "image_editor", "preview");
+   elm_layout_theme_set(pd->preview_image, "layout", "image_manager", "preview");
    evas_object_size_hint_weight_set(pd->preview_image, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(pd->preview_image, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(pd->preview_image);
@@ -475,9 +475,9 @@ ui_property_image_add(Evas_Object *parent)
    elm_box_pack_end(box, item);
    item = prop_item_label_add(box, &pd->type, _("type"), _(" - "));
    elm_box_pack_end(box, item);
-   item = prop_image_editor_compression_type_add(box, pd);
+   item = prop_image_manager_compression_type_add(box, pd);
    elm_box_pack_end(box, item);
-   item = prop_image_editor_compression_quality_add(box, pd);
+   item = prop_image_manager_compression_quality_add(box, pd);
    elm_box_pack_end(box, item);
    item = prop_item_label_add(box, &pd->size_width, _("image width"), _(" - "));
    elm_box_pack_end(box, item);

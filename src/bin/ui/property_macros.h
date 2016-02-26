@@ -66,10 +66,51 @@ evas_object_smart_callback_add(FRAME, "clicked", _on_frame_click, SCROLLER);
 #define PART_ARGS , pd->part->name
 #define PART_ITEM_ARGS , pd->part->name, pd->item_name
 #define STATE_ARGS , pd->part->name, pd->part->current_state->parsed_name, pd->part->current_state->parsed_val
+#define PROGRAM_ARGS , pd->attributes.program.program
 
 /*****************************************************************************/
 /*                      COMMON ATTRIBUTE CONTOLS MACRO                       */
 /*****************************************************************************/
+/**
+ * Macro defines a functions that create an item with label and 1 spinners.
+ *
+ * @param TEXT The label text
+ * @param SUB The prefix of main parameter of state attribute
+ * @param VALUE The value of state attribute
+ * @param MEMBER The spinner member from Group_Prop_Data structure
+ * @param MIN The min value of spinner
+ * @param MAX The max value of spinner
+ * @param STEP The step to increment or decrement the spinner value
+ * @param FMT The format string of the displayed label
+ * @param L_START The text of label before first swallow
+ * @param L_END The text of label after first swallow
+ * @param TOOLTIP The first spinner tooltip
+ * @param MULTIPLIER The multiplier to convert the value to percent. If it not
+ *        needed set 1
+ *
+ * @ingroup Property_Macro
+ */
+#define COMMON_1SPINNER_ADD(PREFIX, TEXT, SUB, VALUE, MEMBER, MIN, MAX, STEP, FMT, \
+                            L_START, L_END, TOOLTIP, MULTIPLIER) \
+static Evas_Object * \
+prop_##MEMBER##_##VALUE##_add(Evas_Object *parent, Group_Prop_Data *pd) \
+{ \
+   PROPERTY_ITEM_ADD(parent, TEXT, "2swallow") \
+   SPINNER_ADD(item, pd->attributes.MEMBER.VALUE, MIN, MAX, STEP, true) \
+   elm_spinner_label_format_set(pd->attributes.MEMBER.VALUE, FMT); \
+   elm_layout_content_set(item, "swallow.content1", pd->attributes.MEMBER.VALUE); \
+   elm_layout_text_set(item, "label.swallow1.start", L_START); \
+   elm_layout_text_set(item, "label.swallow1.end", L_END); \
+   if (TOOLTIP) elm_object_tooltip_text_set(pd->attributes.MEMBER.VALUE, TOOLTIP); \
+   evas_object_event_callback_priority_add(pd->attributes.MEMBER.VALUE, EVAS_CALLBACK_MOUSE_WHEEL, \
+                                           EVAS_CALLBACK_PRIORITY_BEFORE, \
+                                          _on_spinner_mouse_wheel, NULL); \
+   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE, "spinner,drag,start", _on_##MEMBER##_##VALUE##_start, pd); \
+   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE, "spinner,drag,stop", _on_##MEMBER##_##VALUE##_stop, pd); \
+   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE, "changed", _on_##MEMBER##_##VALUE##_change, pd); \
+   PREFIX##_ATTR_1SPINNER_UPDATE(SUB, VALUE, MEMBER, TYPE, MULTIPLIER) \
+   return item; \
+}
 /**
  * Macro defines a functions that create an item with label and 2 spinners.
  *
@@ -574,7 +615,7 @@ _on_##SUB##_##VALUE##_activated(void *data, \
      return; \
    if (!pd->change) \
      return; \
-   Eina_Stringshare * val = edje_edit_##SUB##_##VALUE##_get(pd->group->edit_object ARGS); \
+   Eina_Stringshare *val = edje_edit_##SUB##_##VALUE##_get(pd->group->edit_object ARGS); \
    Eina_Stringshare *msg = eina_stringshare_printf(DESCRIPTION, val); \
    change_description_set(pd->change, msg); \
    history_change_add(pd->group->history, pd->change); \
@@ -582,6 +623,43 @@ _on_##SUB##_##VALUE##_activated(void *data, \
    prop_##SUB##_##VALUE##_update(pd); \
    eina_stringshare_del(msg); \
    eina_stringshare_del(val); \
+}
+
+/**
+ * Macro defines a creating of COMMON_ATTR_2COMBOBOX.
+ *
+ * @param TEXT Text of attribute mix
+ * @param SUB The prefix of main parameter of attribute
+ * @param VALUE1 The first value of attribute
+ * @param VALUE2 The second value of attribute
+ * @param MEMBER position of attribute controls in struct
+ * @param TOOLTIP1 tooltip for first control
+ * @param TOOLTIP2 tooltip for second control
+ * @param LABEL1 label for first control
+ * @param LABEL2 label for second control
+ *
+ * @ingroup Property_Macro
+ */
+#define COMMON_ATTR_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, LABEL1, LABEL2) \
+static Evas_Object * \
+prop_##MEMBER##_##VALUE1##_##VALUE2##_add(Evas_Object *parent, Group_Prop_Data *pd) \
+{ \
+   PROPERTY_ITEM_ADD(parent, TEXT, "2swallow_vertical_pad") \
+   elm_object_part_text_set(item, "label.swallow1.start", LABEL1); \
+   EWE_COMBOBOX_ADD(item, pd->attributes.MEMBER.VALUE1) \
+   if (TOOLTIP1) elm_object_tooltip_text_set(pd->attributes.MEMBER.VALUE1, TOOLTIP1); \
+   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE1, "selected", \
+                                  _on_##MEMBER##_##VALUE1##_change, pd); \
+   elm_object_part_content_set(item, "swallow.content1", pd->attributes.MEMBER.VALUE1); \
+   elm_object_part_text_set(item, "label.swallow2.start", LABEL2); \
+   EWE_COMBOBOX_ADD(item, pd->attributes.MEMBER.VALUE2) \
+   if (TOOLTIP2) elm_object_tooltip_text_set(pd->attributes.MEMBER.VALUE2, TOOLTIP2); \
+   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE2, "selected", \
+                                  _on_##MEMBER##_##VALUE2##_change, pd); \
+   elm_object_part_content_set(item, "swallow.content2", pd->attributes.MEMBER.VALUE2); \
+   prop_##MEMBER##_##VALUE1##_update(pd); \
+   prop_##MEMBER##_##VALUE2##_update(pd); \
+   return item; \
 }
 
 /*****************************************************************************/
@@ -774,7 +852,175 @@ _on_group_##SUB1##_##VALUE##_change(void *data, \
 #define GROUP_ATTR_1ENTRY_CALLBACK(SUB, VALUE, VALIDATOR, DESCRIPTION) \
    COMMON_ENTRY_CALLBACK(SUB, VALUE, VALIDATOR, GROUP_ARGS, DESCRIPTION) \
 
+/*****************************************************************************/
+/*                        PROGRAM 1 ENTRY CONTROL                            */
+/*****************************************************************************/
+/**
+ * Macro defines functions that create an item with label and 1 entry for program
+ * attribute.
+ *
+ * @see COMMON_ENTRY_ADD
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1ENTRY_ADD(TEXT, SUB, VALUE, MEMBER, VALIDATOR, TOOLTIP) \
+   COMMON_ENTRY_ADD(TEXT, SUB, VALUE, MEMBER, VALIDATOR, TOOLTIP)
 
+/**
+ * Macro defines a function that updates control by PROGRAM_ATTR_1ENTRY_ADD macro.
+ *
+ * @see COMMON_ENTRY_UPDATE
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1ENTRY_UPDATE(SUB, VALUE, MEMBER) \
+   COMMON_ENTRY_UPDATE(SUB, VALUE, MEMBER, PROGRAM_ARGS) \
+
+/**
+ * Macro defines a callback for STATE_ATTR_1ENTRY_ADD.
+ *
+ * @param SUB The prefix of main parameter of part attribute
+ * @param VALUE The value of part attribute
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1ENTRY_CALLBACK(SUB, VALUE, VALIDATOR, DESCRIPTION) \
+   COMMON_ENTRY_CALLBACK(SUB, VALUE, VALIDATOR, PROGRAM_ARGS, DESCRIPTION) \
+
+/*****************************************************************************/
+/*                   PROGRAM 1 COMBOBOX LIST CONTROL                         */
+/*****************************************************************************/
+/**
+ * Macro defines functions that create an item with label and 1 combobox for program
+ * attribute. A predefined list fill the combobox.
+ *
+ * @param TEXT The label text
+ * @param SUB The prefix of main parameter of part attribute
+ * @param VALUE The value of part attribute
+ * @param MEMBER The combobox member from Group_Prop_Data structure
+ * @param LIST The predefined strings list
+ * @param TOOLTIP The combobox tooltip
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1COMBOBOX_LIST_ADD(TEXT, SUB, VALUE, MEMBER, LIST, TOOLTIP) \
+   COMMON_COMBOBOX_LIST_ADD(PROGRAM, TEXT, SUB, VALUE, MEMBER, LIST, TOOLTIP, PROGRAM_ARGS)
+
+/**
+ * Macro defines a function that updates control by PROGRAM_ATTR_1COMBOBOX_LIST_ADD macro.
+ *
+ * @param SUB The prefix of main parameter of part attribute
+ * @param VALUE The value of part attribute
+ * @param MEMBER
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1COMBOBOX_LIST_UPDATE(SUB, VALUE, MEMBER) \
+   COMMON_COMBOBOX_LIST_UPDATE(SUB, VALUE, MEMBER, PROGRAM_ARGS)
+
+/**
+ * Macro defines a callback for PROGRAM_ATTR_1COMBOBOX_ADD.
+ *
+ * @param TEXT The attribute name, for error message
+ * @param SUB The prefix of main parameter of part attribute
+ * @param VALUE The value of part attribute
+ * @param TYPE The type of given attribute
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1COMBOBOX_LIST_CALLBACK(TEXT, SUB, VALUE, TYPE, DESCRIPTION) \
+   COMMON_COMBOBOX_LIST_CALLBACK(TEXT, SUB, VALUE, TYPE, PROGRAM_ARGS, DESCRIPTION)
+
+/*****************************************************************************/
+/*                   PROGRAM 1 NORMAL COMBOBOX                               */
+/*****************************************************************************/
+
+/**
+ * Macro for functions that create an item with label and 1 combobox for state
+ * attribute.
+ *
+ * @param TEXT The label text
+ * @param SUB The prefix of main parameter of state attribute
+ * @param VALUE1 The first value of state attribute
+ * @param VALUE2 The second value of state attribute
+ * @param MEMEBER The combobox member from Group_Prop_Data structure
+ * @paramram TOOLTIP1 The tooltip for first combobox
+ * @paramram TOOLTIP2 The tooltip for second combobox
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, LABEL1, LABEL2) \
+   COMMON_ATTR_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, LABEL1, LABEL2)
+
+/*****************************************************************************/
+/*                         PROGRAM 1 SPINNER CONTROL                         */
+/*****************************************************************************/
+/**
+ * Macro defines a functions that create an item with label and 1 spinners.
+ *
+ * @param TEXT The label text
+ * @param SUB The prefix of main parameter of state attribute
+ * @param VALUE The value of state attribute
+ * @param MEMBER The spinner member from Group_Prop_Data structure
+ * @param MIN The min value of spinner
+ * @param MAX The max value of spinner
+ * @param STEP The step to increment or decrement the spinner value
+ * @param FMT The format string of the displayed label
+ * @param L_START The text of label before first swallow
+ * @param L_END The text of label after first swallow
+ * @param TOOLTIP The first spinner tooltip
+ * @param MULTIPLIER The multiplier to convert the value to percent. If it not
+ *        needed set 1
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1SPINNER_ADD(TEXT, SUB, VALUE, MEMBER, MIN, MAX, STEP, FMT, \
+                                  L_START, L_END, TOOLTIP, MULTIPLIER) \
+COMMON_1SPINNER_ADD(PROGRAM, TEXT, SUB, VALUE, MEMBER, MIN, MAX, STEP, FMT, \
+                    L_START, L_END, TOOLTIP, MULTIPLIER) \
+
+#define PROGRAM_ATTR_1SPINNER_UPDATE(SUB, VALUE, MEMBER, TYPE, MULTIPLIER) \
+   COMMON_1SPINNER_UPDATE(SUB, VALUE, MEMBER, TYPE,  MULTIPLIER, PROGRAM_ARGS)
+
+/**
+ * Macro defines a callback for STATE_ATTR_1(2)SPINNER_ADD.
+ *
+ * @param SUB The prefix of main parameter of state attribute;
+ * @param VALUE The value of state attribute.
+ * @param TYPE The spinner value type: int, double
+ * @param MULTIPLIER The multiplier to convert the value to percent
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_SPINNER_CALLBACK(SUB, VALUE, MEMBER, TYPE, MULTIPLIER, DESCRIPTION) \
+   COMMON_SPINNER_CALLBACK(SUB, VALUE, MEMBER, TYPE, MULTIPLIER, PROGRAM_ARGS, DESCRIPTION)
+
+#define PROGRAM_ATTR_2SPINNER_UPDATE(SUB, VALUE1, VALUE2, MEMBER, TYPE, MULTIPLIER) \
+   COMMON_1SPINNER_UPDATE(SUB, VALUE1, MEMBER, TYPE,  MULTIPLIER, PROGRAM_ARGS) \
+   COMMON_1SPINNER_UPDATE(SUB, VALUE2, MEMBER, TYPE,  MULTIPLIER, PROGRAM_ARGS)
+
+/*****************************************************************************/
+/*                       PROGRAM 1 CHECK CONTROL                             */
+/*****************************************************************************/
+/**
+ * Macro defines a functions that create an item with label and 1 check
+ *
+ * @see COMMON_2CHECK_ADD
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_1CHECK_ADD(TEXT, SUB, VALUE, MEMBER, TOOLTIP) \
+   COMMON_CHECK_ADD(PROGRAM, TEXT, SUB, VALUE, MEMBER, TOOLTIP, PROGRAM_ARGS)
+
+/**
+ * Macro defines a callback for attribute that controled by check.
+ *
+ * @see COMMON_CHECK_CALLBACK
+ *
+ * @ingroup Property_Macro
+ */
+#define PROGRAM_ATTR_CHECK_CALLBACK(SUB, VALUE, MEMBER, DESCRIPTION) \
+   COMMON_CHECK_CALLBACK(SUB, VALUE, MEMBER, PROGRAM_ARGS, DESCRIPTION)
 
 /*****************************************************************************/
 /*                         PART 1 CHECK CONTROL                              */
@@ -969,6 +1215,266 @@ prop_##MEMBER##_##VALUE##_update(Group_Prop_Data *pd) \
 }
 
 /*****************************************************************************/
+/*                      PROGRAM MULTIPLE COMBOBOX                            */
+/*****************************************************************************/
+/**
+ * Macro for afters and list. An list of items that is created by this defined
+ * function consists a combobox, to pick program or part as target/after and
+ * buttons to add new combobox, and remove old
+ *
+ * @param TEXT The label text
+ * @param SUB The prefix of main parameter of part attribute
+ * @param VALUE1 The value of first drag parametr (turn on/off)
+ * @param VALUE2 The value of second drag parametr (drag step)
+ *
+ * @ingroup Property_Macro
+ */
+
+#define PROGRAM_MULTIPLE_COMBOBOX(PARAM, COMBOBOX_PREVIOUS, TOOLTIP, ISNOTAFTER) \
+static void \
+_add_##PARAM(void *data, Evas_Object *obj, void *event_info); \
+static void \
+_del_##PARAM(void *data, \
+             Evas_Object *obj __UNUSED__, \
+             void *event_info __UNUSED__) \
+{ \
+   Evas_Object *item = (Evas_Object *)data; \
+   Evas_Object *ic, *button, *new_item, *combo, *first_item; \
+   Group_Prop_Data *pd = evas_object_data_get(item, GROUP_PROP_DATA); \
+   Eina_List *items = elm_box_children_get(pd->attributes.program.PARAM##_box); \
+   Eina_Stringshare *current_title; \
+   /* User clicked on Delete button while there are only one target. \
+    * In here we should just disable button and clear Combobox into NULL */ \
+   if (eina_list_count(items) == 1) \
+     { \
+        first_item = eina_list_data_get(items); \
+        combo = elm_layout_content_get(first_item, NULL); \
+        ewe_combobox_text_set(combo, NULL); \
+        button = elm_layout_content_get(first_item, "swallow.button_del"); \
+        elm_object_disabled_set(button, true); \
+     } \
+   /* check the first item, if deleted object the first in the list, we need to \
+    * set the label to next item and move btn_add */ \
+   if ((eina_list_data_get(items) == item) && (eina_list_count(items) != 1)) \
+     { \
+        new_item = eina_list_data_get(eina_list_next(items)); \
+        button = elm_button_add(new_item); \
+        ic = elm_icon_add(button); \
+        elm_icon_standard_set(ic, "plus"); \
+        elm_object_part_content_set(button, NULL, ic); \
+        elm_layout_content_set(item, "swallow.button_add", button); \
+        evas_object_smart_callback_add(button, "clicked", _add_##PARAM, pd); \
+        elm_layout_content_set(new_item, "swallow.button_add", button); \
+     } \
+   combo = elm_layout_content_get(item, NULL); \
+   Eina_Stringshare *value = evas_object_data_get(combo, COMBOBOX_PREVIOUS); \
+   if (value) \
+     { \
+        Eina_Stringshare *msg = eina_stringshare_printf(_("removed "#PARAM" %s from program %s"), \
+                                                        value, \
+                                                        pd->attributes.program.program); \
+        Change *change = change_add(msg); \
+        eina_stringshare_del(msg); \
+        editor_program_##PARAM##_del(pd->group->edit_object, change, false, \
+                                     pd->attributes.program.program, \
+                                     value); \
+        history_change_add(pd->group->history, change); \
+        current_title = evas_object_data_get(combo, COMBOBOX_PREVIOUS); \
+        eina_stringshare_del(current_title); \
+        evas_object_data_del(combo, COMBOBOX_PREVIOUS); \
+        eina_stringshare_del(value); \
+     } \
+   /* detele and unpack object if there were more than one item */ \
+   if (eina_list_count(items) != 1) \
+     { \
+        elm_box_unpack(pd->attributes.program.PARAM##_box, item); \
+        evas_object_del(item); \
+     } \
+   /* do a final check, if there are no items (only one) and its empty then \
+    * just disable button */ \
+   items = elm_box_children_get(pd->attributes.program.PARAM##_box); \
+   if (eina_list_count(items) == 1) \
+     { \
+        first_item = eina_list_data_get(items); \
+        combo = elm_layout_content_get(first_item, NULL); \
+        current_title = evas_object_data_get(combo, COMBOBOX_PREVIOUS); \
+        if (!current_title) \
+          { \
+             button = elm_layout_content_get(first_item, "swallow.button_del"); \
+             elm_object_disabled_set(button, true); \
+          } \
+     } \
+} \
+static void \
+_on_##PARAM##_change(void *data, \
+                     Evas_Object *obj, \
+                     void *ei) \
+{ \
+   Group_Prop_Data *pd = (Group_Prop_Data *)data; \
+   Ewe_Combobox_Item *item = ei; \
+   Evas_Object *first_item, *button; \
+   Eina_List *items; \
+   Eina_Stringshare *old_val = evas_object_data_get(obj, COMBOBOX_PREVIOUS); \
+   if ((old_val) && (item->title == old_val)) \
+     { \
+       eina_stringshare_del(old_val); \
+       return; \
+     } \
+   items = elm_box_children_get(pd->attributes.program.PARAM##_box); \
+   if (item->title) \
+     { \
+        first_item = eina_list_data_get(items); \
+        button = elm_layout_content_get(first_item, "swallow.button_del"); \
+        elm_object_disabled_set(button, false); \
+     } \
+   Eina_Stringshare *msg = eina_stringshare_printf(_("changing "#PARAM" from %s to %s in program %s"), \
+                                                   old_val, item->title, \
+                                                   pd->attributes.program.program); \
+   Change *change = change_add(msg); \
+   if (old_val) \
+     { \
+        eina_stringshare_del(msg); \
+        editor_program_##PARAM##_del(pd->group->edit_object, change, false, \
+                                     pd->attributes.program.program, \
+                                     old_val); \
+        evas_object_data_del(obj, COMBOBOX_PREVIOUS); \
+        eina_stringshare_del(old_val); \
+     } \
+   evas_object_data_set(obj, COMBOBOX_PREVIOUS, eina_stringshare_add(item->title)); \
+   editor_program_##PARAM##_add(pd->group->edit_object, change, false, \
+                                pd->attributes.program.program, \
+                                item->title); \
+   history_change_add(pd->group->history, change); \
+} \
+static void \
+_add_##PARAM(void *data, \
+             Evas_Object *obj __UNUSED__, \
+             void *event_info __UNUSED__) \
+{ \
+   Group_Prop_Data *pd = (Group_Prop_Data *) data; \
+   Evas_Object *combo, *ic, *button, *item; \
+   Eina_List *items = elm_box_children_get(pd->attributes.program.PARAM##_box); \
+   Eina_List *l; \
+   Resource *program; \
+   Part *part; \
+   if (eina_list_count(items) == 1) \
+     { \
+        /* enable the 'del' button of first item, make posible to delete the \
+         * first item */ \
+        button = elm_layout_content_get(eina_list_data_get(items), "swallow.button_del"); \
+        elm_object_disabled_set(button, false); \
+     } \
+   LAYOUT_PROP_ADD(pd->attributes.program.PARAM##_box, NULL, "tab_home", "item") \
+   evas_object_data_set(item, GROUP_PROP_DATA, pd); \
+   EWE_COMBOBOX_ADD(item, combo); \
+   ewe_combobox_text_set(combo, _("None")); \
+   /* fill up with part and program list */ \
+   if (ISNOTAFTER) \
+     EINA_LIST_FOREACH(pd->group->parts, l, part) \
+       { \
+          ewe_combobox_item_add(combo, part->name); \
+       } \
+   Edje_Action_Type type = edje_edit_program_action_get(pd->group->edit_object, \
+                                                        pd->attributes.program.program); \
+   if ((type == EDJE_ACTION_TYPE_ACTION_STOP) || (!ISNOTAFTER))\
+     { \
+        EINA_LIST_FOREACH(pd->group->programs, l, program) \
+          { \
+             ewe_combobox_item_add(combo, program->name); \
+          } \
+     } \
+   elm_object_tooltip_text_set(combo, TOOLTIP); \
+   elm_layout_content_set(item, NULL, combo); \
+   button = elm_button_add(item); \
+   ic = elm_icon_add(button); \
+   elm_icon_standard_set(ic, "minus"); \
+   elm_object_part_content_set(button, NULL, ic); \
+   evas_object_smart_callback_add(button, "clicked", _del_##PARAM, item); \
+   elm_layout_content_set(item, "swallow.button_del", button); \
+   evas_object_smart_callback_add(combo, "selected", \
+                                  _on_##PARAM##_change, pd); \
+   elm_box_pack_end(pd->attributes.program.PARAM##_box, item); \
+} \
+static Evas_Object * \
+prop_program_##PARAM##_add(Evas_Object *parent, Group_Prop_Data *pd) \
+{ \
+   Evas_Object *item, *combo, *button, *ic; \
+   Eina_List *l; \
+   Resource *program; \
+   Part *part; \
+   LAYOUT_PROP_ADD(parent, NULL, "tab_home", "item") \
+   evas_object_data_set(item, GROUP_PROP_DATA, pd); \
+   button = elm_button_add(item); \
+   ic = elm_icon_add(button); \
+   elm_icon_standard_set(ic, "plus"); \
+   elm_object_part_content_set(button, NULL, ic); \
+   elm_layout_content_set(item, "swallow.button_add", button); \
+   evas_object_smart_callback_add(button, "clicked", _add_##PARAM, pd); \
+   EWE_COMBOBOX_ADD(item, combo); \
+   ewe_combobox_text_set(combo, _("None")); \
+   /* fill up with part and program list */ \
+   if (ISNOTAFTER) \
+     EINA_LIST_FOREACH(pd->group->parts, l, part) \
+       { \
+          ewe_combobox_item_add(combo, part->name); \
+       } \
+   Edje_Action_Type type = edje_edit_program_action_get(pd->group->edit_object, \
+                                                        pd->attributes.program.program); \
+   if ((type == EDJE_ACTION_TYPE_ACTION_STOP) || (!ISNOTAFTER))\
+     { \
+        EINA_LIST_FOREACH(pd->group->programs, l, program) \
+          { \
+             ewe_combobox_item_add(combo, program->name); \
+          } \
+     } \
+   elm_object_tooltip_text_set(combo, TOOLTIP); \
+   elm_layout_content_set(item, NULL, combo); \
+   button = elm_button_add(item); \
+   elm_object_disabled_set(button, true); \
+   ic = elm_icon_add(button); \
+   elm_icon_standard_set(ic, "minus"); \
+   elm_object_part_content_set(button, NULL, ic); \
+   elm_layout_content_set(item, "swallow.button_del", button); \
+   evas_object_smart_callback_add(button, "clicked", _del_##PARAM, item); \
+   elm_object_disabled_set(button, true); \
+   evas_object_smart_callback_add(combo, "selected", \
+                                  _on_##PARAM##_change, pd); \
+   return item; \
+} \
+static void \
+prop_program_##PARAM##s_update(Group_Prop_Data *pd) \
+{ \
+   Evas_Object *combo, *item; \
+   int i = 0; \
+   Eina_List *l; \
+   Eina_Stringshare *value; \
+   Eina_List *list = edje_edit_program_##PARAM##s_get(pd->group->edit_object, \
+                                                      pd->attributes.program.program); \
+   list = eina_list_sort(list, eina_list_count(list), (Eina_Compare_Cb) strcmp); \
+   elm_box_clear(pd->attributes.program.PARAM##_box); \
+   elm_box_pack_end(pd->attributes.program.PARAM##_box, prop_program_##PARAM##_add(pd->attributes.program.PARAM##_box, pd)); \
+   int list_count = eina_list_count(list); \
+   for (i = 0; i < list_count; i++) \
+     _add_##PARAM(pd, NULL, NULL); \
+   /* fill up with part and program list */ \
+   Eina_Stringshare *to_del; \
+   Eina_List *items = elm_box_children_get(pd->attributes.program.PARAM##_box); \
+   EINA_LIST_FOREACH(items, l, item) \
+     { \
+        combo = elm_layout_content_get(item, NULL); \
+        value = eina_list_data_get(list); \
+        ewe_combobox_text_set(combo, value); \
+        to_del = evas_object_data_get(combo, COMBOBOX_PREVIOUS); \
+        eina_stringshare_del(to_del); \
+        evas_object_data_del(combo, COMBOBOX_PREVIOUS); \
+        evas_object_data_set(combo, COMBOBOX_PREVIOUS, eina_stringshare_add(value)); \
+        if (!value) \
+          ewe_combobox_text_set(combo, _("None")); \
+        list = eina_list_next(list); \
+     } \
+}
+
+/*****************************************************************************/
 /*                        PART 1CHECK 1SPINNER DRAG                          */
 /*****************************************************************************/
 /**
@@ -1132,7 +1638,7 @@ _on_part_drag_##VALUE2##_change(void *data, \
 static void \
 prop_##MEMBER##_##VALUE##_update(Group_Prop_Data *pd) \
 { \
-   Part_ *part; \
+   Part *part; \
    Eina_List *l; \
    Eina_Stringshare *value; \
    ewe_combobox_items_list_free(pd->attributes.MEMBER.VALUE, true); \
@@ -1342,30 +1848,24 @@ COMMON_2SPINNER_ADD(PART_ITEM, TEXT, STYLE, SUB, VALUE1, VALUE2, MEMBER, TYPE, \
  *
  * @ingroup Property_Macro
  */
-#define STATE_ATTR_1SPINNER_ADD(TEXT, SUB, VALUE, MEMBER, \
-                                MIN, MAX, STEP, FMT, \
-                                L_START, L_END, \
-                                TOOLTIP, MULTIPLIER) \
-static Evas_Object * \
-prop_##MEMBER##_##VALUE##_add(Evas_Object *parent, \
-                              Group_Prop_Data *pd) \
-{ \
-   PROPERTY_ITEM_ADD(parent, TEXT, "2swallow") \
-   SPINNER_ADD(item, pd->attributes.MEMBER.VALUE, MIN, MAX, STEP, true) \
-   elm_spinner_label_format_set(pd->attributes.MEMBER.VALUE, FMT); \
-   elm_layout_content_set(item, "swallow.content1", pd->attributes.MEMBER.VALUE); \
-   elm_layout_text_set(item, "label.swallow1.start", L_START); \
-   elm_layout_text_set(item, "label.swallow1.end", L_END); \
-   if (TOOLTIP) elm_object_tooltip_text_set(pd->attributes.MEMBER.VALUE, TOOLTIP); \
-   evas_object_event_callback_priority_add(pd->attributes.MEMBER.VALUE, EVAS_CALLBACK_MOUSE_WHEEL, \
-                                           EVAS_CALLBACK_PRIORITY_BEFORE, \
-                                          _on_spinner_mouse_wheel, NULL); \
-   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE, "spinner,drag,start", _on_##MEMBER##_##VALUE##_start, pd); \
-   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE, "spinner,drag,stop", _on_##MEMBER##_##VALUE##_stop, pd); \
-   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE, "changed", _on_##MEMBER##_##VALUE##_change, pd); \
-   COMMON_1SPINNER_UPDATE(SUB, VALUE, MEMBER, TYPE, MULTIPLIER, STATE_ARGS) \
-   return item; \
-}
+#define STATE_ATTR_1SPINNER_ADD(TEXT, SUB, VALUE, MEMBER, MIN, MAX, STEP, FMT, \
+                                L_START, L_END, TOOLTIP, MULTIPLIER) \
+COMMON_1SPINNER_ADD(STATE, TEXT, SUB, VALUE, MEMBER, MIN, MAX, STEP, FMT, \
+                    L_START, L_END, TOOLTIP, MULTIPLIER)
+
+/**
+ * Macro defines a function that updates control by STATE_ATTR_1SPINNER_ADD macro.
+ *
+ * @param SUB The prefix of main parameter of drag attribute
+ * @param VALUE1 The first value of state attribute
+ * @param MEMBER The spinner member from Group_Prop_Data structure
+ * @param MULTIPLIER The multiplier to convert the value to percent. If it not
+ *        needed set 1
+ *
+ * @ingroup Property_Macro
+ */
+#define STATE_ATTR_1SPINNER_UPDATE(SUB, VALUE, MEMBER, TYPE, MULTIPLIER) \
+   COMMON_1SPINNER_UPDATE(SUB, VALUE, MEMBER, TYPE,  MULTIPLIER, STATE_ARGS)
 
 /**
  * Macro defines a callback for STATE_ATTR_1(2)SPINNER_ADD.
@@ -1740,6 +2240,7 @@ _on_##MEMBER##_##VALUE##_change(void *data, \
 /*****************************************************************************/
 /*                       STATE 2 COMBOBOX CONTROL                            */
 /*****************************************************************************/
+
 /**
  * Macro for functions that create an item with label and 1 combobox for state
  * attribute.
@@ -1754,27 +2255,8 @@ _on_##MEMBER##_##VALUE##_change(void *data, \
  *
  * @ingroup Property_Macro
  */
-#define STATE_ATTR_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2) \
-static Evas_Object * \
-prop_##MEMBER##_##VALUE1##_##VALUE2##_add(Evas_Object *parent, Group_Prop_Data *pd) \
-{ \
-   PROPERTY_ITEM_ADD(parent, TEXT, "2swallow_vertical_pad") \
-   elm_object_part_text_set(item, "label.swallow1.start", _("x:")); \
-   EWE_COMBOBOX_ADD(item, pd->attributes.MEMBER.VALUE1) \
-   if (TOOLTIP1) elm_object_tooltip_text_set(pd->attributes.MEMBER.VALUE1, TOOLTIP1); \
-   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE1, "selected", \
-                                  _on_##MEMBER##_##VALUE1##_change, pd); \
-   elm_object_part_content_set(item, "swallow.content1", pd->attributes.MEMBER.VALUE1); \
-   elm_object_part_text_set(item, "label.swallow2.start", _("y:")); \
-   EWE_COMBOBOX_ADD(item, pd->attributes.MEMBER.VALUE2) \
-   if (TOOLTIP2) elm_object_tooltip_text_set(pd->attributes.MEMBER.VALUE2, TOOLTIP2); \
-   evas_object_smart_callback_add(pd->attributes.MEMBER.VALUE2, "selected", \
-                                  _on_##MEMBER##_##VALUE2##_change, pd); \
-   elm_object_part_content_set(item, "swallow.content2", pd->attributes.MEMBER.VALUE2); \
-   prop_##MEMBER##_##VALUE1##_update(pd); \
-   prop_##MEMBER##_##VALUE2##_update(pd); \
-   return item; \
-}
+#define STATE_ATTR_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, LABEL1, LABEL2) \
+   COMMON_ATTR_2COMBOBOX_ADD(TEXT, SUB, VALUE1, VALUE2, MEMBER, TOOLTIP1, TOOLTIP2, LABEL1, LABEL2)
 
 /*****************************************************************************/
 /*                       STATE 1COMBOBOX SOURCE UPDATE                       */
@@ -1795,7 +2277,7 @@ prop_##MEMBER##_##VALUE1##_##VALUE2##_add(Evas_Object *parent, Group_Prop_Data *
 static void \
 prop_##MEMBER##_##VALUE##_update(Group_Prop_Data *pd) \
 { \
-   Part_ *part; \
+   Part *part; \
    Eina_List *l; \
    Eina_Stringshare *value; \
    ewe_combobox_items_list_free(pd->attributes.MEMBER.VALUE, true); \

@@ -24,6 +24,7 @@
 #include "tabs.h"
 #include "main_window.h"
 #include "project_common.h"
+#include "config.h"
 
 struct _Dir_Data
 {
@@ -54,7 +55,7 @@ struct _Tab_Home_Edc
 };
 typedef struct _Tab_Home_Edc Tab_Home_Edc;
 
-Tab_Home_Edc tab_edc;
+static Tab_Home_Edc tab_edc;
 
 static void
 _img_dir_add(void *data, Evas_Object *obj, void *event_info);
@@ -96,7 +97,8 @@ _validate(void *data __UNUSED__,
           void *event_info __UNUSED__)
 {
    if ((elm_validator_regexp_status_get(tab_edc.name_validator) != ELM_REG_NOERROR) ||
-       !eina_str_has_extension(elm_entry_entry_get(tab_edc.edc), ".edc"))
+       !eina_str_has_extension(elm_entry_entry_get(tab_edc.edc), ".edc") ||
+       !ecore_file_exists(elm_entry_entry_get(tab_edc.edc)))
      elm_object_disabled_set(tab_edc.btn_create, true);
    else
      elm_object_disabled_set(tab_edc.btn_create, false);
@@ -236,21 +238,21 @@ _dir_item_add(Evas_Smart_Cb del_func)
 }
 
 static void
-_dir_add(Eina_List *dirs_list, Evas_Smart_Cb del_func)
+_dir_add(Eina_List **dirs_list, Evas_Smart_Cb del_func)
 {
    Dir_Data *dir_data, *tmp;
 
    dir_data = _dir_item_add(del_func);
-   if (eina_list_count(dirs_list) == 1)
+   if (eina_list_count(*dirs_list) == 1)
      {
         /* enable the 'del' button of first item, make posible to delete the
          * first item */
-        tmp = eina_list_data_get(dirs_list);
+        tmp = eina_list_data_get(*dirs_list);
         elm_object_disabled_set(tmp->btn_del, false);
      }
-   tmp = eina_list_data_get(eina_list_last(dirs_list));
+   tmp = eina_list_data_get(eina_list_last(*dirs_list));
    elm_box_pack_after(tab_edc.box, dir_data->item, tmp->item);
-   dirs_list = eina_list_append(dirs_list, dir_data);
+   *dirs_list = eina_list_append(*dirs_list, dir_data);
 }
 
 static void
@@ -258,7 +260,7 @@ _img_dir_add(void *data __UNUSED__,
              Evas_Object *obj __UNUSED__,
              void *event_info __UNUSED__)
 {
-   _dir_add(tab_edc.img_dirs, _img_dir_del);
+   _dir_add(&tab_edc.img_dirs, _img_dir_del);
 }
 
 static void
@@ -266,7 +268,7 @@ _fnt_dir_add(void *data __UNUSED__,
              Evas_Object *obj __UNUSED__,
              void *event_info __UNUSED__)
 {
-   _dir_add(tab_edc.fnt_dirs, _fnt_dir_del);
+   _dir_add(&tab_edc.fnt_dirs, _fnt_dir_del);
 }
 
 static void
@@ -274,7 +276,7 @@ _snd_dir_add(void *data __UNUSED__,
              Evas_Object *obj __UNUSED__,
              void *event_info __UNUSED__)
 {
-   _dir_add(tab_edc.snd_dirs, _snd_dir_del);
+   _dir_add(&tab_edc.snd_dirs, _snd_dir_del);
 }
 
 /*
@@ -283,7 +285,7 @@ _vbr_dir_add(void *data __UNUSED__,
              Evas_Object *obj __UNUSED__,
              void *event_info __UNUSED__)
 {
-   _dir_add(tab_edc.vbr_dirs, _vbr_dir_del);
+   _dir_add(&tab_edc.vbr_dirs, _vbr_dir_del);
 }
 */
 
@@ -292,7 +294,7 @@ _data_dir_add(void *data __UNUSED__,
               Evas_Object *obj __UNUSED__,
               void *event_info __UNUSED__)
 {
-   _dir_add(tab_edc.data_dirs, _data_dir_del);
+   _dir_add(&tab_edc.data_dirs, _data_dir_del);
 }
 
 static Eina_Strbuf * /* need free by user side */
@@ -306,47 +308,47 @@ _edje_cc_opt_build(void)
    EINA_LIST_FOREACH(tab_edc.img_dirs, l, dir_data)
      {
         if (elm_entry_is_empty(dir_data->entry)) continue;
-        eina_strbuf_append_printf(buf, "-id \"%s\"", elm_entry_entry_get(dir_data->entry));
+        eina_strbuf_append_printf(buf, " -id \"%s\"", elm_entry_entry_get(dir_data->entry));
      }
    EINA_LIST_FOREACH(tab_edc.fnt_dirs, l, dir_data)
      {
         if (elm_entry_is_empty(dir_data->entry)) continue;
-        eina_strbuf_append_printf(buf, "-fd \"%s\"", elm_entry_entry_get(dir_data->entry));
+        eina_strbuf_append_printf(buf, " -fd \"%s\"", elm_entry_entry_get(dir_data->entry));
      }
    EINA_LIST_FOREACH(tab_edc.snd_dirs, l, dir_data)
      {
         if (elm_entry_is_empty(dir_data->entry)) continue;
-        eina_strbuf_append_printf(buf, "-sd \"%s\"", elm_entry_entry_get(dir_data->entry));
+        eina_strbuf_append_printf(buf, " -sd \"%s\"", elm_entry_entry_get(dir_data->entry));
      }
    /*
    EINA_LIST_FOREACH(tab_edc.vbr_dirs, l, dir_data)
      {
         if (elm_entry_is_empty(dir_data->entry)) continue;
-        eina_strbuf_append_printf(buf, "-vd \"%s\"", elm_entry_entry_get(dir_data->entry));
+        eina_strbuf_append_printf(buf, " -vd \"%s\"", elm_entry_entry_get(dir_data->entry));
      }
    */
    EINA_LIST_FOREACH(tab_edc.data_dirs, l, dir_data)
      {
         if (elm_entry_is_empty(dir_data->entry)) continue;
-        eina_strbuf_append_printf(buf, "-dd \"%s\"", elm_entry_entry_get(dir_data->entry));
+        eina_strbuf_append_printf(buf, " -dd \"%s\"", elm_entry_entry_get(dir_data->entry));
      }
 
    return buf;
 }
 
 static void
-_dirs_cleanup(Eina_List *list, Evas_Smart_Cb del_func)
+_dirs_cleanup(Eina_List **list, Evas_Smart_Cb del_func)
 {
    Dir_Data *data;
 
-   while (1 != eina_list_count(list))
+   while (1 != eina_list_count(*list))
      {
-        data = eina_list_data_get(eina_list_last(list));
+        data = eina_list_data_get(eina_list_last(*list));
         del_func(data, NULL, NULL);
      }
 }
 
-Eina_Bool
+static Eina_Bool
 _progress_print(void *data, Eina_Stringshare *progress_string)
 {
    eina_strbuf_append_printf(tab_edc.log, "%s<br>", progress_string);
@@ -363,11 +365,11 @@ _progress_end(void *data, PM_Project_Result result)
         elm_entry_entry_set(tab_edc.name, NULL);
         elm_entry_entry_set(tab_edc.path, profile_get()->general.projects_folder);
         elm_entry_entry_set(tab_edc.edc, NULL);
-        _dirs_cleanup(tab_edc.img_dirs, _img_dir_del);
-        _dirs_cleanup(tab_edc.fnt_dirs, _fnt_dir_del);
-        _dirs_cleanup(tab_edc.snd_dirs, _snd_dir_del);
-        /* _dirs_cleanup(tab_edc.vbr_dirs, _vbr_dir_del); */
-        _dirs_cleanup(tab_edc.data_dirs, _data_dir_del);
+        _dirs_cleanup(&tab_edc.img_dirs, _img_dir_del);
+        _dirs_cleanup(&tab_edc.fnt_dirs, _fnt_dir_del);
+        _dirs_cleanup(&tab_edc.snd_dirs, _snd_dir_del);
+        /* _dirs_cleanup(&tab_edc.vbr_dirs, _vbr_dir_del); */
+        _dirs_cleanup(&tab_edc.data_dirs, _data_dir_del);
         elm_entry_entry_set(tab_edc.meta.version, NULL);
         elm_entry_entry_set(tab_edc.meta.authors, NULL);
         elm_entry_entry_set(tab_edc.meta.licenses, NULL);
@@ -398,6 +400,7 @@ static Eina_Bool
 _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
    pm_project_thread_free();
+   ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
 
@@ -405,6 +408,7 @@ static Eina_Bool
 _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
    pm_project_thread_cancel();
+   ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
 

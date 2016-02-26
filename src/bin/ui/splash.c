@@ -18,6 +18,7 @@
  */
 
 #include "main_window.h"
+#include "widget_macro.h"
 
 struct _Splash_Data
 {
@@ -31,7 +32,7 @@ struct _Splash_Data
 
 typedef struct _Splash_Data Splash_Data;
 
-Splash_Data sdata;
+static Splash_Data sdata;
 
 static void
 _on_teardown(void *data __UNUSED__,

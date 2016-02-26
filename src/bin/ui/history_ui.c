@@ -18,14 +18,19 @@
  */
 
 #include "history_ui.h"
-#include "signals.h"
+#include "change.h"
+#include "project_manager.h"
+#include "history.h"
+#include "widget_macro.h"
+#include "main_window.h"
 
 typedef struct {
    Evas_Object *layout;
    Evas_Object *genlist;
    Evas_Object *btn_undo_all;
    Evas_Object *btn_clean;
-   History_ *history;
+   History *history;
+   Group *group;
    Elm_Genlist_Item_Class *itc_change;
    Elm_Genlist_Item *active_item;
 } History_UI_data;
@@ -82,12 +87,13 @@ _item_selected(void *data __UNUSED__, Evas_Object *obj __UNUSED__, void *ei)
         /* undo */
         while (eina_list_data_get(hd.history->current_change) != change)
           {
-             if (!history_undo_(hd.history))
+             if (!history_undo(hd.history))
                {
                   ERR("Can't undo change. Something is wrong with object");
                   TODO("Add error handling here");
                   abort();
                }
+             elm_genlist_item_fields_update(hd.active_item, "reverted", ELM_GENLIST_ITEM_FIELD_STATE);
              hd.active_item = elm_genlist_item_prev_get(hd.active_item);
           }
      }
@@ -96,18 +102,19 @@ _item_selected(void *data __UNUSED__, Evas_Object *obj __UNUSED__, void *ei)
         /* redo */
         while (eina_list_data_get(hd.history->current_change) != change)
           {
-             if (!history_redo_(hd.history))
+             if (!history_redo(hd.history))
                {
                   ERR("Can't redo change. Something is wrong with object");
                   TODO("Add error handling here");
                   abort();
                }
+             elm_genlist_item_fields_update(hd.active_item, "unselected", ELM_GENLIST_ITEM_FIELD_STATE);
              hd.active_item = (hd.active_item != NULL)?
                 elm_genlist_item_next_get(hd.active_item):
                 elm_genlist_first_item_get(hd.genlist);
           }
      }
-   elm_genlist_realized_items_update(hd.genlist);
+   elm_genlist_item_fields_update(hd.active_item, "selected", ELM_GENLIST_ITEM_FIELD_STATE);
    TODO("Add update workspace callback here");
 
    evas_object_smart_callback_call(ap.win, SIGNAL_PROPERTY_ATTRIBUTE_CHANGED, NULL);
@@ -136,6 +143,8 @@ _on_change_added(void *data __UNUSED__, Evas_Object *obj __UNUSED__, void *ei)
                                   _item_selected,
                                   NULL);
 
+   /* unselect active item */
+   elm_genlist_item_fields_update(hd.active_item, "unselected", ELM_GENLIST_ITEM_FIELD_STATE);
    /* making item active before selection allows to skip callback */
    hd.active_item = glit;
    elm_genlist_item_selected_set(glit, true);
@@ -155,6 +164,7 @@ _history_set(void *data __UNUSED__,
    hd.active_item = NULL;
 
    hd.history = (group) ? group->history : NULL;
+   hd.group = group;
    if (!hd.history)
      return;
 
@@ -177,6 +187,71 @@ _history_set(void *data __UNUSED__,
      }
 }
 
+static void
+_undo_shortcut(void *data __UNUSED__,
+               Evas_Object *obj __UNUSED__,
+               void * ei __UNUSED__)
+{
+   Elm_Genlist_Item *glit;
+
+   if (!hd.history)
+     return;
+
+   assert(hd.active_item != NULL);
+
+   glit = elm_genlist_item_prev_get(hd.active_item);
+   if (glit)
+     elm_genlist_item_selected_set(glit, true);
+}
+
+static void
+_redo_shortcut(void *data __UNUSED__,
+               Evas_Object *obj __UNUSED__,
+               void * ei __UNUSED__)
+{
+   Elm_Genlist_Item *glit;
+
+   if (!hd.history)
+     return;
+
+   assert(hd.active_item != NULL);
+
+   glit = elm_genlist_item_next_get(hd.active_item);
+   if (glit)
+     elm_genlist_item_selected_set(glit, true);
+}
+
+static void
+_on_undo_all(void *data __UNUSED__,
+             Evas_Object *obj __UNUSED__,
+             void *ei __UNUSED__)
+{
+   elm_genlist_item_selected_set(elm_genlist_first_item_get(hd.genlist), true);
+}
+
+static void
+_on_clean(void *data __UNUSED__,
+          Evas_Object *obj __UNUSED__,
+          void *ei __UNUSED__)
+{
+   Popup_Button btn_res;
+   Change *change;
+
+   btn_res = popup_want_action(_("Confirm history clean-up"),
+                               _("Are you sure you want to clean history?<br>"
+                                 "This action can't be undone."),
+                               NULL, NULL, BTN_OK|BTN_CANCEL, NULL, NULL);
+   if (BTN_CANCEL == btn_res) return;
+
+   history_del(hd.group->history);
+   hd.group->history = history_add(hd.group);
+
+   change = change_add(_("history cleaned"));
+   history_change_add(hd.group->history, change);
+
+   _history_set(NULL, NULL, hd.group);
+}
+
 Evas_Object *
 history_ui_add(void)
 {
@@ -196,12 +271,15 @@ history_ui_add(void)
 
    hd.genlist = elm_genlist_add(hd.layout);
    elm_genlist_mode_set(hd.genlist, ELM_LIST_COMPRESS);
+   elm_genlist_homogeneous_set(hd.genlist, true);
 
    hd.btn_clean = elm_button_add(hd.layout);
    ICON_STANDARD_ADD(hd.btn_clean, ic, true, "delete");
    elm_object_part_content_set(hd.btn_clean, NULL, ic);
+   evas_object_smart_callback_add(hd.btn_clean, "clicked", _on_clean, NULL);
    hd.btn_undo_all = elm_button_add(hd.layout);
    elm_object_text_set(hd.btn_undo_all, _("Discard"));
+   evas_object_smart_callback_add(hd.btn_undo_all, "clicked", _on_undo_all, NULL);
 
    elm_layout_content_set(hd.layout, NULL, hd.genlist);
    elm_layout_content_set(hd.layout, "elm.swallow.btn_clean", hd.btn_clean);
@@ -209,6 +287,8 @@ history_ui_add(void)
 
    evas_object_smart_callback_add(ap.win, SIGNAL_HISTORY_CHANGE_ADDED, _on_change_added, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_TAB_CHANGED, _history_set, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_UNDO, _undo_shortcut, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_REDO, _redo_shortcut, NULL);
 
    TODO("Add clean-up callbacks here")
    return hd.layout;

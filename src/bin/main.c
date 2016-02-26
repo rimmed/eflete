@@ -21,7 +21,12 @@
 #include <regex.h>
 #include "main_window.h"
 #include "project_navigator.h"
-#include "signals.h"
+#include "project_manager.h"
+#include "project_common.h"
+#include "tabs.h"
+/* it's really bad idia, but need haven't time to make it correctly */
+#include "tabs_private.h"
+#include "config.h"
 
 static char *open = NULL;
 static char *import_edj = NULL;
@@ -53,93 +58,55 @@ static const Ecore_Getopt options = {
    }
 };
 
-static void
-_import_end(void *data __UNUSED__, PM_Project_Result result)
+static Eina_Bool
+_setup_open_splash(void *data, Splash_Status status __UNUSED__)
 {
-   Project *pro;
+   Eina_Stringshare *path = data;
 
-   if (result == PM_PROJECT_SUCCESS)
-     {
-        pro = pm_project_thread_project_get();
-        ap.project = pro;
+   assert(path != NULL);
 
-        ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
-        ui_menu_disable_set(ap.menu, MENU_FILE_CLOSE_PROJECT, false);
-        project_navigator_project_set();
+   pm_project_open(path, progress_print, _tabs_progress_end, NULL);
+   eina_stringshare_del(path);
 
-        STATUSBAR_PROJECT_PATH(ap.project->pro_path);
-        STATUSBAR_PROJECT_SAVE_TIME_UPDATE();
-
-        NOTIFY_INFO(3, _("Project '%s' is opened."), pro->name);
-        evas_object_smart_callback_call(ap.win, SIGNAL_PROJECT_OPENED, NULL);
-     }
-   evas_object_show(ap.win);
-}
-
-void
-_open_end(void *data __UNUSED__, PM_Project_Result result)
-{
-   Project *pro;
-
-   if (result == PM_PROJECT_SUCCESS)
-     {
-        pro = pm_project_thread_project_get();
-        ap.project = pro;
-
-        ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
-        ui_menu_disable_set(ap.menu, MENU_FILE_CLOSE_PROJECT, false);
-        project_navigator_project_set();
-
-        NOTIFY_INFO(3, _("Project '%s' is opened."), pro->name);
-        STATUSBAR_PROJECT_PATH(ap.project->pro_path);
-        STATUSBAR_PROJECT_SAVE_TIME_UPDATE();
-        evas_object_smart_callback_call(ap.win, SIGNAL_PROJECT_OPENED, NULL);
-     }
-   evas_object_show(ap.win);
+   return true;
 }
 
 static Eina_Bool
-_message_print(void *data __UNUSED__, Eina_Stringshare *progress_string)
+_teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
-   fprintf(stdout, "%s\n", progress_string);
+   pm_project_thread_free();
+   return true;
+}
+
+static Eina_Bool
+_cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
+{
+   pm_project_thread_cancel();
    return true;
 }
 
 static void
 _open_project(void *data __UNUSED__)
 {
-   /* Ugly hack, but we need to do this.
-    * When we try to import edj file while ecore main loop not fully started
-    * we get a freeze. So for use the ecore and eina threads in the project
-    * manager need to itarate the main loop for initialize it.
-    * DO NOT DELETE: whith out iterate import from command line not worked! */
-   ecore_main_loop_iterate();
-
-   pm_project_open(open,
-                   _message_print,
-                   _open_end,
-                   NULL);
+   ap.splash = splash_add(ap.win,
+                          _setup_open_splash,
+                          _teardown_open_splash,
+                          _cancel_open_splash,
+                          (void *)eina_stringshare_add(open));
+   evas_object_show(ap.splash);
 }
 
 static void
 _import_edj(void *data __UNUSED__)
 {
-   /* Ugly hack, but we need to do this.
-    * When we try to import edj file while ecore main loop not fully started
-    * we get a freeze. So for use the ecore and eina threads in the project
-    * manager need to itarate the main loop for initialize it.
-    * DO NOT DELETE: whith out iterate import from command line not worked! */
-   ecore_main_loop_iterate();
-
-   pm_project_import_edj(pro_name, pro_path, import_edj,
-                         _message_print, _import_end, NULL);
+   tabs_menu_import_edj_data_set(pro_name, pro_path, import_edj);
+   tabs_menu_tab_open(TAB_HOME_IMPORT_EDJ);
 }
 
 EAPI_MAIN int
 elm_main(int argc, char **argv)
 {
    Eina_Bool info_only = false, reopen = false;
-   Eina_Stringshare *pro_folder;
    Config *config;
    Recent *r;
 
@@ -209,49 +176,12 @@ elm_main(int argc, char **argv)
           }
         if (import_edj)
           {
-            if (!ecore_file_exists(import_edj))
-              {
-                 fprintf(stderr, N_("ERROR: cann't find file: '%s'.\n"), import_edj);
-                 return -1;
-              }
-            if (!pro_name)
-              {
-                 fprintf(stderr, N_("ERROR: missing name for imported project.\n"));
-                 fprintf(stderr, N_("ERROR: invalid options found. See --help.\n"));
-                 return -1;
-              }
-            else
-              {
-                 regex_t regex;
-                 regcomp(&regex, NAME_REGEX, REG_EXTENDED | REG_NOSUB);
-                 if (regexec(&regex, pro_name, (size_t)0, NULL, 0))
-                   {
-                      fprintf(stderr, N_("ERROR: invalid name. Name can contain only next characters: a-zA-z0-9_.\n"));
-                      return -1;
-                   }
-                 regfree(&regex);
-              }
-            if (!pro_path) pro_path = eina_file_path_sanitize(".");
-            pro_folder = eina_stringshare_printf("%s/%s", pro_path, pro_name);
-            if (ecore_file_exists(pro_folder))
-              {
-                 if (!pro_replace)
-                   {
-                      fprintf(stderr, N_("ERROR: can't import file '%s'. Project '%s' exist.\n"),
-                              import_edj, pro_folder);
-                      fprintf(stderr, N_("ERROR: to replace existing project use option '--replace'.\n"));
-                      fprintf(stderr, N_("ERROR: invalid options found. See --help.\n"));
-                      return -1;
-                   }
-                 else  ecore_file_recursive_rm(pro_folder);
-              }
             ecore_job_add(_import_edj, NULL);
-            eina_stringshare_del(pro_folder); pro_folder = NULL;
             goto run;
           }
 
-        evas_object_show(ap.win);
 run:
+        evas_object_show(ap.win);
         elm_run();
 #ifdef HAVE_ENVENTOR
         enventor_shutdown();

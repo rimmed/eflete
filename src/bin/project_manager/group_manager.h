@@ -20,33 +20,7 @@
 #ifndef GROUP_MANAGER_H
 #define GROUP_MANAGER_H
 
-#define EDJE_EDIT_IS_UNSTABLE_AND_I_KNOW_ABOUT_IT
-
-#include <Eina.h>
-#include <Ecore_Evas.h>
-#include <Edje_Edit.h>
-#include <assert.h>
-#include "project_manager.h"
-#define EFLETE_INTERNAL_GROUP_NAME "___eflete_internal_group___"
-
-typedef struct _History_ History_;
-/**
- * @typedef State
- * @ingroup GroupManager
- */
-typedef struct _State State;
-
-/**
- * @typedef Part_
- * @ingroup GroupManager
- */
-typedef struct _Part_ Part_;
-
-/**
- * @typedef Group
- * @ingroup GroupManager
- */
-typedef struct _Group Group;
+#include "eflete.h"
 
 struct _State
 {
@@ -55,10 +29,10 @@ struct _State
 
    Eina_Stringshare *parsed_name;  /**< parsed state name */
    double parsed_val;          /**< parsed state value */
-   Part_ *part;                /**< pointer to part */
+   Part *part;                /**< pointer to part */
 };
 
-struct _Part_
+struct _Part
 {
    Eina_Stringshare *name;    /**< part name */
    Eina_List *used_in;        /**< list of programs where part is used */
@@ -86,9 +60,10 @@ struct _Group
    Eina_List *programs;       /**< list of programs */
 
    Evas_Object *edit_object;  /**< object needed to access group with edje_edit functions. Should be NULL if group is not open */
-   Part_ *current_part;        /**< pointer to selected part */
+   Part *current_part;        /**< pointer to selected part */
+   Eina_Stringshare *current_program; /**< pointer to selected program */
 
-   History_ *history;          /**< history of changes in the group */
+   History *history;          /**< history of changes in the group */
 };
 
 void
@@ -101,13 +76,19 @@ void
 gm_group_edit_object_load(Project *pro, Group *group, Evas *e);
 
 void
+gm_group_edit_object_reload(Project *pro, Group *group);
+
+void
 gm_group_edit_object_unload(Group *group);
 
 State *
-gm_state_add(Project *pro, Part_ *part, const char *state_name);
+gm_state_add(Project *pro, Part *part, const char *state_name);
 
-Part_ *
+Part *
 gm_part_add(Project *pro, Group *group, Eina_Stringshare *part_name);
+
+void
+gm_part_item_add(Project *pro, Part *part, Eina_Stringshare *item_name);
 
 Group *
 gm_group_add(Project *pro, const char *group_name);
@@ -119,9 +100,26 @@ void
 gm_state_del(Project *pro, State *state);
 
 void
-gm_part_del(Project *pro, Part_* part);
+gm_part_del(Project *pro, Part* part);
 
 void
-gm_part_rename(Part_* part, const char *new_part_name);
+gm_part_item_del(Project *pro, Part *part, Eina_Stringshare *item_name);
 
+void
+gm_part_rename(Part* part, const char *new_part_name);
+
+void
+gm_part_restack(Part *part, Part *rel_part);
+
+void
+gm_part_item_restack(Part *part, Eina_Stringshare *part_item, Eina_Stringshare *relative_part_item);
+
+void
+gm_program_add(Project *pro, Group *group, Eina_Stringshare *program);
+
+void
+gm_program_del(Project *pro, Group *group, Eina_Stringshare *program);
+
+const char *
+gm_part_type_text_get(Edje_Part_Type part_type);
 #endif /* GROUP_MANAGER_H */
