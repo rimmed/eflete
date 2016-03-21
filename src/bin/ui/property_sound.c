@@ -221,7 +221,10 @@ _snd_file_tell(void *data, Eo *eo_obj EINA_UNUSED)
 #endif
 
 static Eina_Bool
-_play_finished_cb(void *data, const Eo_Event *event __UNUSED__)
+_play_finished_cb(void *data,
+                  Eo *in EINA_UNUSED,
+                  const Eo_Event_Description *desc EINA_UNUSED,
+                  void *event_info EINA_UNUSED)
 {
    Sound_Prop_Data *edit = (Sound_Prop_Data *)data;
 
@@ -235,9 +238,12 @@ _play_finished_cb(void *data, const Eo_Event *event __UNUSED__)
 }
 
 static Eina_Bool
-_out_fail(void *data EINA_UNUSED, const Eo_Event *event)
+_out_fail(void *data EINA_UNUSED,
+          Eo *output,
+          const Eo_Event_Description *desc EINA_UNUSED,
+          void *event_info EINA_UNUSED)
 {
-   eo_del(event->obj);
+   eo_del(output);
    return true;
 }
 
