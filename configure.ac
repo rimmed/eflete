@@ -17,6 +17,7 @@ m4_define([efl_version], [1.16])
 m4_define([elm_version], [1.16])
 m4_define([efl_version_max], [1.16.2])
 m4_define([elm_version_max], [1.16.2])
+
 m4_define([enventor_version], [0.5.0])
 
 EWE_INIT
