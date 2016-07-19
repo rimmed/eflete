@@ -109,19 +109,27 @@ _player_units_free(char *str)
    elm_object_part_text_set(ITEM, "elm.text", TEXT); \
    evas_object_show(ITEM);
 
-static void
-_play_finished_cb(void *data __UNUSED__, const Eo_Event *event __UNUSED__)
+static Eina_Bool
+_play_finished_cb(void *data __UNUSED__,
+                  Eo *in_unused EINA_UNUSED,
+                  const Eo_Event_Description *desc EINA_UNUSED,
+                  void *event_info EINA_UNUSED)
 {
-   eo_unref(in);
+   eo_del(in);
    in = NULL;
-   eo_unref(out);
+   eo_del(out);
    out = NULL;
+   return true;
 }
 
-static void
-_out_fail(void *data __UNUSED__, const Eo_Event *event)
+static Eina_Bool
+_out_fail(void *data EINA_UNUSED,
+          Eo *output,
+          const Eo_Event_Description *desc EINA_UNUSED,
+          void *event_info EINA_UNUSED)
 {
-   eo_unref(event->object);
+   eo_del(output);
+   return true;
 }
 
 static Eina_Bool
@@ -152,7 +160,7 @@ _on_rewin_cb(void *data __UNUSED__,
               void *event_info __UNUSED__)
 {
    double value = elm_slider_value_get(rewin);
-   ecore_audio_obj_in_seek(in, value, SEEK_SET);
+   eo_do(in, ecore_audio_obj_in_seek(value, SEEK_SET));
 }
 static void
 _create_io_stream()
@@ -161,10 +169,10 @@ _create_io_stream()
    assert(in != NULL);
    out = eo_add(ECORE_AUDIO_OUT_PULSE_CLASS, NULL);
    assert(out != NULL);
-   eo_event_callback_add(out, ECORE_AUDIO_OUT_PULSE_EVENT_CONTEXT_FAIL,
-                         _out_fail, NULL);
-   eo_event_callback_add(in, ECORE_AUDIO_IN_EVENT_IN_STOPPED,
-                         _play_finished_cb, NULL);
+   eo_do(out, eo_event_callback_add(ECORE_AUDIO_OUT_PULSE_EVENT_CONTEXT_FAIL,
+                         _out_fail, NULL));
+   eo_do(in, eo_event_callback_add(ECORE_AUDIO_IN_EVENT_IN_STOPPED,
+                         _play_finished_cb, NULL));
 }
 static void
 _tone_play()
@@ -178,19 +186,19 @@ _tone_play()
    if (!in)
      {
         in = eo_add(ECORE_AUDIO_IN_TONE_CLASS, NULL);
-        ecore_audio_obj_name_set(in, tone->name);
-        eo_key_data_set(in, ECORE_AUDIO_ATTR_TONE_FREQ, &tone->freq);
-        ecore_audio_obj_in_length_set(in, TONE_PLAYING_DURATION);
-        eo_event_callback_add(in, ECORE_AUDIO_IN_EVENT_IN_STOPPED,
-                              _play_finished_cb, NULL);
+        eo_do(in, ecore_audio_obj_name_set(tone->name));
+        eo_do(in, eo_key_data_set(ECORE_AUDIO_ATTR_TONE_FREQ, &tone->freq));
+        eo_do(in, ecore_audio_obj_in_length_set(TONE_PLAYING_DURATION));
+        eo_do(in, eo_event_callback_add(ECORE_AUDIO_IN_EVENT_IN_STOPPED,
+                              _play_finished_cb, NULL));
      }
 
    if (!out)
-     out = eo_add(ECORE_AUDIO_OUT_PULSE_CLASS, NULL,
-                           eo_event_callback_add(eo_self, ECORE_AUDIO_OUT_PULSE_EVENT_CONTEXT_FAIL,
+     out = eo_add(ECORE_AUDIO_OUT_PULSE_CLASS, NULL);
+     eo_do(out, eo_event_callback_add(ECORE_AUDIO_OUT_PULSE_EVENT_CONTEXT_FAIL,
                                                  _out_fail, NULL));
 
-   ret = ecore_audio_obj_out_input_attach(out, in);
+   eo_do(out, ret = ecore_audio_obj_out_input_attach(in));
    if (!ret)
      {
         ERR("Couldn't attach input and output!");
@@ -201,7 +209,7 @@ _tone_play()
 
    value = elm_slider_value_get(rewin);
    if (value)
-     ecore_audio_obj_in_seek(in, value, SEEK_SET);
+     eo_do(in, ecore_audio_obj_in_seek(value, SEEK_SET));
 
    timer = ecore_timer_add(UPDATE_FREQUENCY, _rewind_cb, NULL);
 }
@@ -216,20 +224,20 @@ _sample_play()
      {
         sample = (External_Resource *)snd->resource;
         _create_io_stream();
-        ecore_audio_obj_name_set(in, sample->source);
-        ret = ecore_audio_obj_source_set(in, sample->source);
+        eo_do(in, ecore_audio_obj_name_set(sample->source));
+        eo_do(in, ret = ecore_audio_obj_source_set(sample->source));
         if (!ret)
           {
              ERR("Can not set source obj for added sample");
              return;
           }
-        len = ecore_audio_obj_in_length_get(in);
+        eo_do(in, len = ecore_audio_obj_in_length_get());
         elm_slider_min_max_set(rewin, 0, len);
         elm_slider_value_set(rewin, 0.0);
         length = ecore_file_size(sample->source);
      }
 
-   ret = ecore_audio_obj_out_input_attach(out, in);
+   eo_do(out, ret = ecore_audio_obj_out_input_attach(in));
    if (!ret)
      {
         ERR("Couldn't attach input and output!");
@@ -238,7 +246,7 @@ _sample_play()
 
    value = elm_slider_value_get(rewin);
    if (value)
-     ecore_audio_obj_in_seek(in, value, SEEK_SET);
+     eo_do(in, ecore_audio_obj_in_seek(value, SEEK_SET));
 
    timer = ecore_timer_add(UPDATE_FREQUENCY, _rewind_cb, NULL);
 }
@@ -257,10 +265,10 @@ _on_play_cb(void *data __UNUSED__,
 
         if (in)
           {
-             paused = ecore_audio_obj_paused_get(in);
+             eo_do(in, paused = ecore_audio_obj_paused_get());
              if (paused)
                {
-                  ecore_audio_obj_paused_set(in, false);
+                  eo_do(in, ecore_audio_obj_paused_set(false));
                   ecore_timer_thaw(timer);
                   return;
                }
@@ -281,7 +289,7 @@ _on_play_cb(void *data __UNUSED__,
         elm_icon_standard_set(icon, "media_player/play");
         playing = false;
 
-        ecore_audio_obj_paused_set(in, true);
+        eo_do(in, ecore_audio_obj_paused_set(true));
         ecore_timer_freeze(timer);
      }
 }
@@ -293,10 +301,10 @@ _interrupt_playing()
    Evas_Object *icon;
 
    if (!in) return; /* case when previous sound playing is finished */
-   ret = ecore_audio_obj_paused_get(in);
+   eo_do(in, ret = ecore_audio_obj_paused_get());
    if (ret)
      {
-        ret = ecore_audio_obj_out_input_detach(out, in);
+        eo_do(out, ret = ecore_audio_obj_out_input_detach(in));
         if (!ret) ERR("Could not detach input");
 
         ecore_timer_del(timer);
@@ -337,10 +345,10 @@ void
 sound_player_sound_unset(void)
 {
 #ifdef HAVE_AUDIO
-   ecore_audio_obj_paused_set(in, true);
+   eo_do(in, ecore_audio_obj_paused_set(true));
    ecore_timer_freeze(timer);
 
-   _play_finished_cb(NULL, NULL);
+   _play_finished_cb(NULL, NULL, NULL, NULL);
 #endif
 }
 
