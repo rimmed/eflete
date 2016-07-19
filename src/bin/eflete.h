@@ -195,4 +195,15 @@ eflete_main_loop_quit(void);
 
 #include "alloc.h"
 
+/* tmp combobox replacement */
+static inline Evas_Object*
+elm_combobox_add(Evas_Object *parent)
+{
+   return elm_layout_add(parent);
+}
+static inline void
+elm_combobox_hover_end(Evas_Object *combo __UNUSED__)
+{
+}
+
 #endif /* EFLETE_H */
