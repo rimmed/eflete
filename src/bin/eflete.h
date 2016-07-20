@@ -73,6 +73,7 @@ TODO("delete it, and remake all strings to eina_stringshare or eina_strbuff")
 #define BUFF_MAX 512
 
 #include <Ewe.h>
+#include <Elementary_Combobox.h>
 
 /* do not allow unsafe sprintf. use snprintf instead */
 #pragma GCC poison sprintf
@@ -194,16 +195,5 @@ eflete_main_loop_quit(void);
 }
 
 #include "alloc.h"
-
-/* tmp combobox replacement */
-static inline Evas_Object*
-elm_combobox_add(Evas_Object *parent)
-{
-   return elm_layout_add(parent);
-}
-static inline void
-elm_combobox_hover_end(Evas_Object *combo __UNUSED__)
-{
-}
 
 #endif /* EFLETE_H */
