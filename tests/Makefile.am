@@ -19,6 +19,8 @@ check_PROGRAMS = ${TESTS}
 
 FLAGS = \
 -I${top_srcdir}/src/lib \
+-I${top_srcdir}/src/lib/ewe \
+-I${top_srcdir}/src/lib/elementary_combobox \
 -I${top_srcdir}/src/bin \
 -I${top_srcdir}/src/bin/alloc \
 -I${top_srcdir}/src/bin/external \
@@ -39,13 +41,16 @@ FLAGS = \
 -I${top_srcdir}/src/bin/ui/live_view/elementary \
 -I${top_srcdir}/tests \
 @EFL_CFLAGS@ \
+@ELEMENTARY_CFLAGS@ \
 @EFLETE_DEFINE@ \
 @CHECK_CFLAGS@
 
 LD = $(top_builddir)/src/bin/libete.a \
 @CHECK_LIBS@ \
 @EFL_LIBS@ \
-${top_builddir}/src/lib/libewe.la
+@ELEMENTARY_LIBS@ \
+${top_builddir}/src/lib/ewe/libewe.la \
+${top_builddir}/src/lib/elementary_combobox/libcmb.la
 
 include_HEADERS = \
 	../tests/test_common.h \

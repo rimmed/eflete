@@ -28,6 +28,8 @@
 #include "Enventor.h"
 #endif
 
+#include "eflete.h"
+
 #define EFLETE_TEST(__testname) \
 void __testname (int _i CK_ATTRIBUTE_UNUSED) \
 { \
