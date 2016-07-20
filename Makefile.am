@@ -19,7 +19,9 @@ EXTRA_DIST = \
 	m4/eflete.m4 \
 	m4/eflete_binary.m4 \
 	m4/ewe.m4 \
-	m4/ewe_binary.m4
+	m4/ewe_binary.m4 \
+	m4/cmb.m4 \
+	m4/cmb_binary.m4
 
 .PHONY: doc update-po report report_debug coverage
 if HAVE_DOXYGEN

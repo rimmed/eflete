@@ -162,7 +162,8 @@ libete_a_SOURCES = \
 eflete_SOURCES  = ../../src/bin/main.c
 
 eflete_CPPFLAGS = \
--I${top_srcdir}/src/lib \
+-I${top_srcdir}/src/lib/ewe \
+-I${top_srcdir}/src/lib/elementary_combobox \
 -I${top_srcdir}/src/bin/alloc \
 -I${top_srcdir}/src/bin/editor \
 -I${top_srcdir}/src/bin/external \
@@ -184,7 +185,7 @@ eflete_CPPFLAGS = \
 -I${top_srcdir}/src/bin/ui/live_view \
 -I${top_srcdir}/src/bin/ui/live_view/elementary \
 -I${top_srcdir}/src/bin/ui/preference \
-@EFL_CFLAGS@ \
+@ELEMENTARY_CFLAGS@ \
 @EFLETE_DEFINE@
 
 libete_a_CPPFLAGS = ${eflete_CPPFLAGS} \
@@ -193,7 +194,9 @@ libete_a_CPPFLAGS = ${eflete_CPPFLAGS} \
 eflete_LDADD = \
 libete.a \
 @EFL_LIBS@ \
-${top_builddir}/src/lib/libewe.la \
+@ELEMENTARY_LIBS@ \
+${top_builddir}/src/lib/ewe/libewe.la \
+${top_builddir}/src/lib/elementary_combobox/libcmb.la \
 @LTLIBINTL@
 
 #Enable after Enventor compabitility will be implement

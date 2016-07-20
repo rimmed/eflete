@@ -837,7 +837,6 @@ _ewe_ruler_evas_object_smart_move(Eo *obj,
                                   Evas_Coord x,
                                   Evas_Coord y)
 {
-
    eo_do_super(obj, MY_CLASS, evas_obj_smart_move(x, y));
 
    evas_object_move(sd->clip, x, y);

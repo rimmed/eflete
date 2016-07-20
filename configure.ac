@@ -17,10 +17,10 @@ m4_define([efl_version], [1.16])
 m4_define([elm_version], [1.16])
 m4_define([efl_version_max], [1.16.2])
 m4_define([elm_version_max], [1.16.2])
-
 m4_define([enventor_version], [0.5.0])
 
 EWE_INIT
+CMB_INIT
 EFLETE_INIT
 AC_CONFIG_HEADERS([eflete_config.h])
 AH_TOP([
@@ -83,11 +83,14 @@ PKG_CHECK_MODULES([EFL],
     eldbus >= efl_version        eldbus < efl_version_max
     efreet >= efl_version        efreet < efl_version_max
     efreet-mime >= efl_version   efreet-mime < efl_version_max
-    elementary >= efl_version    elementary < efl_version_max
    ],
    [have_efl="${GREEN}yes${RESET}"],
    [have_efl="${RED}no${RESET} (version < efl_version or > efl_version_max)"]
 )
+
+PKG_CHECK_MODULES([ELEMENTARY], [elementary >= elm_version],
+   [have_elm="${GREEN}yes${RESET}"],
+   [have_elm="${RED}no${RESET} (version < elm_version)"])
 
 PKG_CHECK_MODULES([CHECK], [check],
    [have_check="${GREEN}yes${RESET}"],
@@ -109,6 +112,8 @@ EFLETE_WITH_BIN([edje], [edje_cc], [edje_cc])
 EFLETE_WITH_BIN([eet], [eet-eet], [eet])
 EWE_WITH_BIN([edje], [edje_cc], [edje_cc])
 EWE_WITH_BIN([eolian], [eolian-gen], [eolian_gen])
+CMB_WITH_BIN([edje], [edje_cc], [edje_cc])
+CMB_WITH_BIN([eolian], [eolian-gen], [eolian_gen])
 
 dnl locale, gettext
 AM_GNU_GETTEXT_VERSION(0.18.1)
@@ -228,6 +233,8 @@ Makefile
 src/Makefile
 src/bin/Makefile
 src/lib/Makefile
+src/lib/ewe/Makefile
+src/lib/elementary_combobox/Makefile
 data/Makefile
 data/eflete.desktop
 tests/Makefile
@@ -256,6 +263,7 @@ echo "Configuration Options Summary:"
 echo "  os.............: ${host_os}"
 echo "                   ${os_remark}"
 echo "  efl............: ${have_efl}"
+echo "  elementary.....: ${have_elm}"
 echo ""
 echo "Features:"
 echo "  tizen..........: ${summary_tizen}"
