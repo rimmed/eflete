@@ -116,23 +116,6 @@ _on_hover_clicked(void *data EINA_UNUSED,
 }
 
 static void
-_hover_end_finished(void *data,
-                    Evas_Object *obj EINA_UNUSED,
-                    const char *emission EINA_UNUSED,
-                    const char *source EINA_UNUSED)
-{
-   const char *dismissstr;
-   ELM_COMBOBOX_DATA_GET(data, sd);
-   dismissstr = elm_layout_data_get(sd->hover, "dismiss");
-   if (dismissstr && !strcmp(dismissstr, "on"))
-     {
-        sd->expanded = EINA_FALSE;
-        evas_object_hide(sd->hover);
-        eo_do(data, eo_event_callback_call(ELM_HOVERSEL_EVENT_DISMISSED, NULL));
-     }
-}
-
-static void
 count_items_genlist(void *data)
 {
    ELM_COMBOBOX_DATA_GET(data, sd);
@@ -376,8 +359,6 @@ _elm_combobox_eo_base_constructor(Eo *obj, Elm_Combobox_Data *sd)
 
    eo_do(sd->hover, eo_event_callback_add
      (EVAS_CLICKABLE_INTERFACE_EVENT_CLICKED, _on_hover_clicked, obj));
-   elm_layout_signal_callback_add
-     (sd->hover, "elm,action,hide,finished", "elm", _hover_end_finished, obj);
 
    //table
    sd->tbl = elm_table_add(obj);
