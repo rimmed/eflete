@@ -1,0 +1,1820 @@
+From 8f82e933683f671d881fd41662932657ea105e40 Mon Sep 17 00:00:00 2001
+From: Vyacheslav Reutskiy <v.reutskiy@samsung.com>
+Date: Thu, 2 Jun 2016 17:40:00 +0300
+Subject: [PATCH 59/79] edje_edit: add API for get part item attributes by item
+ index
+
+Cedric revert patch 6f7608befd006f8076d237bee5d17c9e9e1e09ac same days
+ago.
+
+<quote Cedric>
+Your patch 6f7608befd006f8076d237bee5d17c9e9e1e09ac did break elemines
+which does relly on the proper index to be given to it. I think
+Edje_Edit should be fine and use the index if no name is provided (See
+edje_load.c around L1180). In all case this was clearly an ABI break and
+needed to be reverted.
+</quote Cedric>
+
+So now edje_cc not guarantee name for part items. This is bad, because
+edje_edit use item name for access to item attributes. If item have not
+name we cann't get it attributes, because edje_edit compare the given
+name with part items name from edj-file, strcmp dislake NULL args.
+For now I see one way mark all edje_edit_part_item* APIs as deprecated
+and add new APIs for manage part items by index.
+
+For clearly and history:
+The eason for revert - https://phab.enlightenment.org/D3820
+The proposed solution - https://phab.enlightenment.org/D3907
+---
+ src/lib/edje/Edje_Edit.h | 833 ++++++++++++++++++++++++++++++++++++++++++-----
+ src/lib/edje/edje_edit.c | 436 +++++++++++++++++++++++++
+ 2 files changed, 1182 insertions(+), 87 deletions(-)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 8a6996f..1135703 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -2580,7 +2580,6 @@ edje_edit_state_container_align_get(Evas_Object *obj, const char *part, const ch
+  */
+ EAPI double
+ edje_edit_state_container_align_x_get(Evas_Object *obj, const char *part, const char *state, double value);
+-
+ /** Get y align for BOX or TABLE part.
+  *
+  * @param obj Object being edited.
+@@ -2625,9 +2624,24 @@ EAPI Eina_Bool edje_edit_part_item_append(Evas_Object *obj, const char *part, co
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.18
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool
+ edje_edit_part_item_insert_before(Evas_Object *obj, const char *part, const char *item_name, const char *item_before, const char *source_group);
+ 
++/** Insert new item to box or table part before specified existing item.
++ *
++ * @param obj Object being edited.
++ * @param part Part to add a new item. This part should have BOX or TABLE type.
++ * @param item_name Name of new item that is not exist in BOX or TABLE yet.
++ * @param index Index of repated item that is exist in BOX or TABLE.
++ * @param source_group Source (means group name) of the new item.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_insert_before_index(Evas_Object *obj, const char *part, const char *item_name, unsigned int index, const char *source_group);
++
+ /** Insert new item to box or table part after specified existing item.
+  *
+  * @param obj Object being edited.
+@@ -2639,9 +2653,24 @@ edje_edit_part_item_insert_before(Evas_Object *obj, const char *part, const char
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.18
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool
+ edje_edit_part_item_insert_after(Evas_Object *obj, const char *part, const char *item_name, const char *item_after, const char *source_group);
+ 
++/** Insert new item to box or table part after specified existing item.
++ *
++ * @param obj Object being edited.
++ * @param part Part to add a new item. This part should have BOX or TABLE type.
++ * @param item_name Name of new item that is not exist in BOX or TABLE yet.
++ * @param index Index of repated item that is exist in BOX or TABLE.
++ * @param source_group Source (means group name) of the new item.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_insert_after_index(Evas_Object *obj, const char *part, const char *item_name, unsigned int index, const char *source_group);
++
+ /** Insert new item to box or table part directly into specified position.
+  *
+  * @param obj Object being edited.
+@@ -2666,9 +2695,22 @@ edje_edit_part_item_insert_at(Evas_Object *obj, const char *part, const char *it
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.18
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool
+ edje_edit_part_item_move_above(Evas_Object *obj, const char *part, const char *item_name);
+ 
++/** Restack existing item above.
++ *
++ * @param obj Object being edited.
++ * @param part Part which contain items. This part should have BOX or TABLE type.
++ * @param index Index of item that will be moved above.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_move_above_index(Evas_Object *obj, const char *part, unsigned int index);
++
+ /** Restack existing item below.
+  *
+  * @param obj Object being edited.
+@@ -2678,9 +2720,22 @@ edje_edit_part_item_move_above(Evas_Object *obj, const char *part, const char *i
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.18
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool
+ edje_edit_part_item_move_below(Evas_Object *obj, const char *part, const char *item_name);
+ 
++/** Restack existing item below.
++ *
++ * @param obj Object being edited.
++ * @param part Part which contain items. This part should have BOX or TABLE type.
++ * @param index Index of item that will be moved below.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_move_below_index(Evas_Object *obj, const char *part, unsigned int index);
++
+ /** Get the list of all part items in the given edje.
+  *
+  * @param obj Object being edited.
+@@ -2689,8 +2744,20 @@ edje_edit_part_item_move_below(Evas_Object *obj, const char *part, const char *i
+  * @return A List containing all part items names found in the edje file.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_List * edje_edit_part_items_list_get(Evas_Object *obj, const char *part);
+ 
++/** Get the conunt of part items in the given edje.
++ *
++ * @param obj Object being edited.
++ * @param part Name of part which is TABLE or BOX part and contain items.
++ *
++ * @return A count part items in case of success, and -1 otherwise.
++ * @since 1.18
++ */
++EAPI int
++edje_edit_part_items_count_get(Evas_Object *obj, const char *part);
++
+ /** Delete item from box or table part.
+  *
+  * @param obj Object being edited.
+@@ -2700,8 +2767,21 @@ EAPI Eina_List * edje_edit_part_items_list_get(Evas_Object *obj, const char *par
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_del(Evas_Object *obj, const char *part, const char* name);
+ 
++/** Delete item from box or table part by index.
++ *
++ * @param obj Object being edited.
++ * @param part Part to delete exist item. This part should have BOX or TABLE type.
++ * @param index Index of exist item to delete it from BOX or TABLE.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_del(Evas_Object *obj, const char *part, unsigned int index);
++
+ /** Set source for item from table or box items.
+  *
+  * @param obj Object being edited.
+@@ -2712,8 +2792,22 @@ EAPI Eina_Bool edje_edit_part_item_del(Evas_Object *obj, const char *part, const
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_source_set(Evas_Object *obj, const char *part, const char *item_name, const char *source_group);
+ 
++/** Set source for item from table or box items.
++ *
++ * @param obj Object being edited.
++ * @param part Part to change item's source. This part should have BOX or TABLE type.
++ * @param index Index of item
++ * @param source_group New gorup name.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_source_set(Evas_Object *obj, const char *part, unsigned int index, const char *source_group);
++
+ /** Get source for item from table or box items.
+  *
+  * @param obj Object being edited.
+@@ -2723,8 +2817,21 @@ EAPI Eina_Bool edje_edit_part_item_source_set(Evas_Object *obj, const char *part
+  * @return source of the given item.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI const char * edje_edit_part_item_source_get(Evas_Object *obj, const char *part, const char *item_name);
+ 
++/** Get source for item from table or box items.
++ *
++ * @param obj Object being edited.
++ * @param part Part to return item's source. This part should have BOX or TABLE type.
++ * @param index Index of item.
++ *
++ * @return source of the given item.
++ * @since 1.18
++ */
++EAPI const char *
++edje_edit_part_item_index_source_get(Evas_Object *obj, const char *part, unsigned int index);
++
+ /** Get the minimum width value of a part's item.
+  *
+  * @param obj Object being edited.
+@@ -2734,6 +2841,7 @@ EAPI const char * edje_edit_part_item_source_get(Evas_Object *obj, const char *p
+  * @return The minimum width value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_min_w_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the minimum width value of a part's item.
+@@ -2747,6 +2855,7 @@ EAPI int edje_edit_part_item_min_w_get(Evas_Object *obj, const char *part, const
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_min_w_set(Evas_Object *obj, const char *part, const char *item, int min_w);
+ 
+ /** Get the minimum height value of a part's item.
+@@ -2758,6 +2867,7 @@ EAPI Eina_Bool edje_edit_part_item_min_w_set(Evas_Object *obj, const char *part,
+  * @return The minimum height value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_min_h_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the minimum height value of a part's item.
+@@ -2771,6 +2881,7 @@ EAPI int edje_edit_part_item_min_h_get(Evas_Object *obj, const char *part, const
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_min_h_set(Evas_Object *obj, const char *part, const char *item, int min_h);
+ 
+ /** Get the maximum width value of a part's item.
+@@ -2782,6 +2893,7 @@ EAPI Eina_Bool edje_edit_part_item_min_h_set(Evas_Object *obj, const char *part,
+  * @return The maximum width value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_max_w_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the maximum width value of a part's item.
+@@ -2797,6 +2909,7 @@ EAPI int edje_edit_part_item_max_w_get(Evas_Object *obj, const char *part, const
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_max_w_set(Evas_Object *obj, const char *part, const char *item, int max_w);
+ 
+ /** Get the maximum height value of a part's item.
+@@ -2808,6 +2921,7 @@ EAPI Eina_Bool edje_edit_part_item_max_w_set(Evas_Object *obj, const char *part,
+  * @return The maximum height value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_max_h_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the maximum height value of a part's item.
+@@ -2823,6 +2937,7 @@ EAPI int edje_edit_part_item_max_h_get(Evas_Object *obj, const char *part, const
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_max_h_set(Evas_Object *obj, const char *part, const char *item, int max_h);
+ 
+ /** Get the aspect width value of a part's item.
+@@ -2834,6 +2949,7 @@ EAPI Eina_Bool edje_edit_part_item_max_h_set(Evas_Object *obj, const char *part,
+  * @return The aspect width value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_aspect_w_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the aspect width value of a part's item.
+@@ -2846,6 +2962,7 @@ EAPI int edje_edit_part_item_aspect_w_get(Evas_Object *obj, const char *part, co
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_aspect_w_set(Evas_Object *obj, const char *part, const char *item, int aspect_w);
+ 
+ /** Get the aspect height value of a part's item.
+@@ -2857,6 +2974,7 @@ EAPI Eina_Bool edje_edit_part_item_aspect_w_set(Evas_Object *obj, const char *pa
+  * @return The maximum height value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_aspect_h_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the aspect height value of a part's item.
+@@ -2869,6 +2987,7 @@ EAPI int edje_edit_part_item_aspect_h_get(Evas_Object *obj, const char *part, co
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_aspect_h_set(Evas_Object *obj, const char *part, const char *item, int aspect_h);
+ 
+ /** Get the prefer width value of a part's item.
+@@ -2880,6 +2999,7 @@ EAPI Eina_Bool edje_edit_part_item_aspect_h_set(Evas_Object *obj, const char *pa
+  * @return The prefer width value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_prefer_w_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Get aspect mode for an item of TABLE or BOX.
+@@ -2898,6 +3018,7 @@ EAPI int edje_edit_part_item_prefer_w_get(Evas_Object *obj, const char *part, co
+  * @return One of possible enum Edje_Aspect_Control.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Edje_Aspect_Control
+ edje_edit_part_item_aspect_mode_get(Evas_Object *obj, const char *part, const char *item);
+ 
+@@ -2918,6 +3039,7 @@ edje_edit_part_item_aspect_mode_get(Evas_Object *obj, const char *part, const ch
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_aspect_mode_set(Evas_Object *obj, const char *part, const char *item, Edje_Aspect_Control mode);
+ 
+ /** Set the prefer width value of a part's item.
+@@ -2930,6 +3052,7 @@ EAPI Eina_Bool edje_edit_part_item_aspect_mode_set(Evas_Object *obj, const char
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_prefer_w_set(Evas_Object *obj, const char *part, const char *item, int prefer_w);
+ 
+ /** Get the prefer height value of a part's item.
+@@ -2941,6 +3064,7 @@ EAPI Eina_Bool edje_edit_part_item_prefer_w_set(Evas_Object *obj, const char *pa
+  * @return The maximum height value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_prefer_h_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the prefer height value of a part's item.
+@@ -2953,6 +3077,7 @@ EAPI int edje_edit_part_item_prefer_h_get(Evas_Object *obj, const char *part, co
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_prefer_h_set(Evas_Object *obj, const char *part, const char *item, int prefer_h);
+ 
+ /** Get the spread width value of a part's item.
+@@ -2964,6 +3089,7 @@ EAPI Eina_Bool edje_edit_part_item_prefer_h_set(Evas_Object *obj, const char *pa
+  * @return The spread width value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_spread_w_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the spread width value of a part's item.
+@@ -2981,6 +3107,7 @@ EAPI int edje_edit_part_item_spread_w_get(Evas_Object *obj, const char *part, co
+  * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_spread_w_set(Evas_Object *obj, const char *part, const char *item, int spread_w);
+ 
+ /** Get the spread height value of a part's item.
+@@ -2997,6 +3124,7 @@ EAPI Eina_Bool edje_edit_part_item_spread_w_set(Evas_Object *obj, const char *pa
+  * @return The spread height value.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI int edje_edit_part_item_spread_h_get(Evas_Object *obj, const char *part, const char *item);
+ 
+ /** Set the spread height value of a part's item.
+@@ -3009,147 +3137,597 @@ EAPI int edje_edit_part_item_spread_h_get(Evas_Object *obj, const char *part, co
+  * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
+  * @since 1.11
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_spread_h_set(Evas_Object *obj, const char *part, const char *item, int spread_h);
+ 
+-/** Get paddings of the part's item.
++/** Get the minimum width value of a part's item.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item_name The name of the item.
+- * @param l A pointer to store the left padding value.
+- * @param r A pointer to store the right padding value.
+- * @param t A pointer to store the top padding value.
+- * @param b A pointer to store the bottom padding value.
++ * @param part Part that contain state.
++ * @param index Index of the item to get minimum width.
+  *
+- * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+- * @since 1.11
++ * @return The minimum width value.
++ * @since 1.18
+  */
+-EAPI Eina_Bool edje_edit_part_item_padding_get(Evas_Object *obj, const char *part, const char *item_name, int *l, int *r, int *t, int *b);
++EAPI int
++edje_edit_part_item_index_min_w_get(Evas_Object *obj, const char *part, unsigned int index);
+ 
+-/** Set paddings of the part's item.
++/** Set the minimum width value of a part's item.
++ * The minimum width should be greater than 0.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item_name The name of the item.
+- * @param l Value of the left padding.
+- * @param r Value of the right padding.
+- * @param t Value of the top padding.
+- * @param b Value of the bottom padding.
++ * @param part Part that contain state.
++ * @param index Index of the item to set minimum width.
++ * @param min_w Minimum width value.
+  *
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+- * @since 1.11
++ * @since 1.18
+  */
+-EAPI Eina_Bool edje_edit_part_item_padding_set(Evas_Object *obj, const char *part, const char *item_name, int l, int r, int t, int b);
++EAPI Eina_Bool
++edje_edit_part_item_index_min_w_set(Evas_Object *obj, const char *part, unsigned int index, int min_w);
+ 
+-/** Get the horizontal align value of a part state.
++/** Get the minimum height value of a part's item.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item The name of the item to get horizontal align value.
++ * @param part Part that contain state.
++ * @param index Index of the item to get minimum height.
+  *
+- * @return The horizontal align value for the given align (value is between -1.0 and 1.0)
+- * @since 1.11
++ * @return The minimum height value.
++ * @since 1.18
+  */
+-EAPI double edje_edit_part_item_align_x_get(Evas_Object *obj, const char *part, const char *item);
++EAPI int
++edje_edit_part_item_index_min_h_get(Evas_Object *obj, const char *part, unsigned int index);
+ 
+-/** Set the horizontal align value of a part state.
++/** Set the minimum height value of a part's item.
++ * The minimum height should be greater than 0.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain itemf
+- * @param item The name of the item to set horizontal align value.
+- * @param align_x New value of the horizontal align.
++ * @param part Part that contain state.
++ * @param index Index of the item to set minimum height.
++ * @param min_h Minimum height value.
+  *
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+- * @since 1.11
++ * @since 1.18
+  */
+-EAPI Eina_Bool edje_edit_part_item_align_x_set(Evas_Object *obj, const char *part, const char *item, double align_x);
++EAPI Eina_Bool
++edje_edit_part_item_index_min_h_set(Evas_Object *obj, const char *part, unsigned int index, int min_h);
+ 
+-/** Get the vertical align value of a part state.
++/** Get the maximum width value of a part's item.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item The name of the item to get vertical align value.
++ * @param part Part that contain state.
++ * @param index Index of the item to get maximum width.
+  *
+- * @return The vertical align value for the given align (value is between -1.0 and 1.0)
+- * @since 1.11
++ * @return The maximum width value.
++ * @since 1.18
+  */
+-EAPI double edje_edit_part_item_align_y_get(Evas_Object *obj, const char *part, const char *item);
++EAPI int
++edje_edit_part_item_index_max_w_get(Evas_Object *obj, const char *part, unsigned int index);
+ 
+-/** Set the vertical align value of a part state.
++/** Set the maximum width value of a part's item.
++ * The maximum width should be greater than -1.
++ * The value -1 means that state doesn't have any boundaries on width direction.
++ * (it can be any size that is bigger than it's min)
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item The name of the item to set vertical align value.
+- * @param align_y New value of the vertical align.
++ * @param part Part that contain state.
++ * @param index Index of the item to set maximum width.
++ * @param max_w Maximum width value.
+  *
+  * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
+- * @since 1.11
++ * @since 1.18
+  */
+-EAPI Eina_Bool edje_edit_part_item_align_y_set(Evas_Object *obj, const char *part, const char *item, double align_y);
++EAPI Eina_Bool
++edje_edit_part_item_index_max_w_set(Evas_Object *obj, const char *part, unsigned int index, int max_w);
+ 
+-/** Get the horizontal weight value of a part item.
++/** Get the maximum height value of a part's item.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item The name of the item to get horizontal weight value.
++ * @param part Part that contain state.
++ * @param index Index of the item to get maximum height.
+  *
+- * @return The horizontal weight value for the given item (value is between -1.0 and 1.0)
+- * @since 1.11
++ * @return The maximum height value.
++ * @since 1.18
+  */
+-EAPI double edje_edit_part_item_weight_x_get(Evas_Object *obj, const char *part, const char *item);
++EAPI int
++edje_edit_part_item_index_max_h_get(Evas_Object *obj, const char *part, unsigned int index);
+ 
+-/** Set the horizontal we value of a part item.
++/** Set the maximum height value of a part's item.
++ * The maximum height should be greater than -1.
++ * The value -1 means that state doesn't have any boundaries on height direction.
++ * (it can be any size that is bigger than it's min)
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain itemf
+- * @param item The name of the item to set horizontal weight value.
+- * @param weight_x New value of the horizontal weight.
++ * @param part Part that contain state.
++ * @param index Index of the item to set maximum height.
++ * @param max_h Maximum height value.
+  *
+- * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
+- * @since 1.11
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
+  */
+-EAPI Eina_Bool edje_edit_part_item_weight_x_set(Evas_Object *obj, const char *part, const char *item, double weight_x);
++EAPI Eina_Bool
++edje_edit_part_item_index_max_h_set(Evas_Object *obj, const char *part, unsigned int index, int max_h);
+ 
+-/** Get the vertical weight value of a part item.
++/** Get the aspect width value of a part's item.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item The name of the item to get vertical weight value.
++ * @param part Part that contain state.
++ * @param index Index of the item to get aspect width.
+  *
+- * @return The vertical weight value for the given item (value is between -1.0 and 1.0)
+- * @since 1.11
++ * @return The aspect width value.
++ * @since 1.18
+  */
+-EAPI double edje_edit_part_item_weight_y_get(Evas_Object *obj, const char *part, const char *item);
++EAPI int
++edje_edit_part_item_index_aspect_w_get(Evas_Object *obj, const char *part, unsigned int index);
+ 
+-/** Set the vertical weight value of a part item.
++/** Set the aspect width value of a part's item.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item The name of the item to set vertical weight value.
+- * @param weight_y New value of the vertical weight.
++ * @param part Part that contain state.
++ * @param index Index of the item to set aspect width.
++ * @param aspect_w Aspect width value.
+  *
+- * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
+- * @since 1.11
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
+  */
+-EAPI Eina_Bool edje_edit_part_item_weight_y_set(Evas_Object *obj, const char *part, const char *item, double weight_y);
++EAPI Eina_Bool
++edje_edit_part_item_index_aspect_w_set(Evas_Object *obj, const char *part, unsigned int index, int aspect_w);
+ 
+-/** Get column/row position of the part's item.
++/** Get the aspect height value of a part's item.
+  *
+  * @param obj Object being edited.
+- * @param part Part that contain item.
+- * @param item_name The name of the item.
+- * @param col Column item position.
+- * @param row Row item position.
+- *
+- * @deprecated Use edje_edit_part_item_position_col_get() and
+- * edje_edit_part_item_position_row_get() instead.
++ * @param part Part that contain state.
++ * @param index Index of the item to get aspect height.
+  *
+- * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
+- * @since 1.11
++ * @return The maximum height value.
++ * @since 1.18
+  */
+-EINA_DEPRECATED
++EAPI int
++edje_edit_part_item_index_aspect_h_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the aspect height value of a part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to set aspect height.
++ * @param aspect_h Aspect height value.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_aspect_h_set(Evas_Object *obj, const char *part, unsigned int index, int aspect_h);
++
++/** Get the prefer width value of a part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to get prefer width.
++ *
++ * @return The prefer width value.
++ * @since 1.18
++ */
++EAPI int
++edje_edit_part_item_index_prefer_w_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Get aspect mode for an item of TABLE or BOX.
++ *
++ * This may return next values:
++ * - EDJE_ASPECT_CONTROL_NONE
++ * - EDJE_ASPECT_CONTROL_NEITHER
++ * - EDJE_ASPECT_CONTROL_HORIZONTAL
++ * - EDJE_ASPECT_CONTROL_VERTICAL
++ * - EDJE_ASPECT_CONTROL_BOTH
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to set aspect mode.
++ *
++ * @return One of possible enum Edje_Aspect_Control.
++ * @since 1.18
++ */
++EAPI Edje_Aspect_Control
++edje_edit_part_item_index_aspect_mode_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set aspect mode for an item of TABLE or BOX.
++ *
++ * Mode may be next:
++ * - EDJE_ASPECT_CONTROL_NONE
++ * - EDJE_ASPECT_CONTROL_NEITHER
++ * - EDJE_ASPECT_CONTROL_HORIZONTAL
++ * - EDJE_ASPECT_CONTROL_VERTICAL
++ * - EDJE_ASPECT_CONTROL_BOTH
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to set aspect mode.
++ * @param mode One of possible enum from Edje_Aspect_Control:
++
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_aspect_mode_set(Evas_Object *obj, const char *part, unsigned int index, Edje_Aspect_Control mode);
++
++/** Set the prefer width value of a part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to set prefer width.
++ * @param prefer_w Prefer width value.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_prefer_w_set(Evas_Object *obj, const char *part, unsigned int index, int prefer_w);
++
++/** Get the prefer height value of a part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to get prefer height.
++ *
++ * @return The maximum height value.
++ * @since 1.18
++ */
++EAPI int
++edje_edit_part_item_index_prefer_h_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the prefer height value of a part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to set prefer height.
++ * @param prefer_h Prefer height value.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_prefer_h_set(Evas_Object *obj, const char *part, unsigned int index, int prefer_h);
++
++/** Get the spread width value of a part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to get spread width.
++ *
++ * @return The spread width value.
++ * @since 1.18
++ */
++EAPI int
++edje_edit_part_item_index_spread_w_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the spread width value of a part's item.
++ *
++ * @attention be careful, if you set up huge number (like 10 or 100). width and height of
++ * spread is being multiplied and you will get huge number of objects that may "eat"
++ * all of your processor performance at once... Or if you want, you may
++ * get some coffee and wait until it will recalculate all of those objects :)
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to set spread width.
++ * @param spread_w Maximum width value.
++ *
++ * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_spread_w_set(Evas_Object *obj, const char *part, unsigned int index, int spread_w);
++
++/** Get the spread height value of a part's item.
++ *
++ * @attention be careful, if you set up huge number (like 10 or 100). width and height of
++ * spread is being multiplied and you will get huge number of objects that may "eat"
++ * all of your processor performance at once... Or if you want, you may
++ * get some coffee and wait until it will recalculate all of those objects :)
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to get spread height.
++ *
++ * @return The spread height value.
++ * @since 1.18
++ */
++EAPI int
++edje_edit_part_item_index_spread_h_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the spread height value of a part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param index Index of the item to set spread height.
++ * @param spread_h spread height value.
++ *
++ * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_spread_h_set(Evas_Object *obj, const char *part, unsigned int index, int spread_h);
++
++/** Get paddings of the part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item_name The name of the item.
++ * @param l A pointer to store the left padding value.
++ * @param r A pointer to store the right padding value.
++ * @param t A pointer to store the top padding value.
++ * @param b A pointer to store the bottom padding value.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool edje_edit_part_item_padding_get(Evas_Object *obj, const char *part, const char *item_name, int *l, int *r, int *t, int *b);
++
++/** Set paddings of the part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item_name The name of the item.
++ * @param l Value of the left padding.
++ * @param r Value of the right padding.
++ * @param t Value of the top padding.
++ * @param b Value of the bottom padding.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool edje_edit_part_item_padding_set(Evas_Object *obj, const char *part, const char *item_name, int l, int r, int t, int b);
++
++/** Get paddings of the part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item.
++ * @param l A pointer to store the left padding value.
++ * @param r A pointer to store the right padding value.
++ * @param t A pointer to store the top padding value.
++ * @param b A pointer to store the bottom padding value.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_padding_get(Evas_Object *obj, const char *part, unsigned int index, int *l, int *r, int *t, int *b);
++
++/** Set paddings of the part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item.
++ * @param l Value of the left padding.
++ * @param r Value of the right padding.
++ * @param t Value of the top padding.
++ * @param b Value of the bottom padding.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_padding_set(Evas_Object *obj, const char *part, unsigned int index, int l, int r, int t, int b);
++
++/** Get the horizontal align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item The name of the item to get horizontal align value.
++ *
++ * @return The horizontal align value for the given align (value is between -1.0 and 1.0)
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI double edje_edit_part_item_align_x_get(Evas_Object *obj, const char *part, const char *item);
++
++/** Set the horizontal align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain itemf
++ * @param item The name of the item to set horizontal align value.
++ * @param align_x New value of the horizontal align.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool edje_edit_part_item_align_x_set(Evas_Object *obj, const char *part, const char *item, double align_x);
++
++/** Get the vertical align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item The name of the item to get vertical align value.
++ *
++ * @return The vertical align value for the given align (value is between -1.0 and 1.0)
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI double edje_edit_part_item_align_y_get(Evas_Object *obj, const char *part, const char *item);
++
++/** Set the vertical align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item The name of the item to set vertical align value.
++ * @param align_y New value of the vertical align.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool edje_edit_part_item_align_y_set(Evas_Object *obj, const char *part, const char *item, double align_y);
++
++/** Get the horizontal weight value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item The name of the item to get horizontal weight value.
++ *
++ * @return The horizontal weight value for the given item (value is between -1.0 and 1.0)
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI double edje_edit_part_item_weight_x_get(Evas_Object *obj, const char *part, const char *item);
++
++/** Set the horizontal we value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain itemf
++ * @param item The name of the item to set horizontal weight value.
++ * @param weight_x New value of the horizontal weight.
++ *
++ * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool edje_edit_part_item_weight_x_set(Evas_Object *obj, const char *part, const char *item, double weight_x);
++
++/** Get the vertical weight value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item The name of the item to get vertical weight value.
++ *
++ * @return The vertical weight value for the given item (value is between -1.0 and 1.0)
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI double edje_edit_part_item_weight_y_get(Evas_Object *obj, const char *part, const char *item);
++
++/** Set the vertical weight value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item The name of the item to set vertical weight value.
++ * @param weight_y New value of the vertical weight.
++ *
++ * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
++ * @since 1.11
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool edje_edit_part_item_weight_y_set(Evas_Object *obj, const char *part, const char *item, double weight_y);
++
++/** Get column/row position of the part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item_name The name of the item.
++ * @param col Column item position.
++ * @param row Row item position.
++ *
++ * @deprecated Use edje_edit_part_item_position_col_get() and
++ * edje_edit_part_item_position_row_get() instead.
++ *
++ * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
++ * @since 1.11
++ */
++EINA_DEPRECATED
+ EAPI Eina_Bool edje_edit_part_item_position_get(Evas_Object *obj, const char *part, const char *item_name, unsigned short *col, unsigned short *row);
+ 
++/** Get the horizontal align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to get horizontal align value.
++ *
++ * @return The horizontal align value for the given align (value is between -1.0 and 1.0)
++ * @since 1.18
++ */
++EAPI double
++edje_edit_part_item_item_align_x_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the horizontal align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain itemf
++ * @param index Index of the item to set horizontal align value.
++ * @param align_x New value of the horizontal align.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_item_align_x_set(Evas_Object *obj, const char *part, unsigned int index, double align_x);
++
++/** Get the vertical align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to get vertical align value.
++ *
++ * @return The vertical align value for the given align (value is between -1.0 and 1.0)
++ * @since 1.18
++ */
++EAPI double
++edje_edit_part_item_item_align_y_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the vertical align value of a part state.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to set vertical align value.
++ * @param align_y New value of the vertical align.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_item_align_y_set(Evas_Object *obj, const char *part, unsigned int index, double align_y);
++
++/** Get the horizontal weight value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to get horizontal weight value.
++ *
++ * @return The horizontal weight value for the given item (value is between -1.0 and 1.0)
++ * @since 1.18
++ */
++EAPI double
++edje_edit_part_item_item_weight_x_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the horizontal we value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain itemf
++ * @param index Index of the item to set horizontal weight value.
++ * @param weight_x New value of the horizontal weight.
++ *
++ * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_item_weight_x_set(Evas_Object *obj, const char *part, unsigned int index, double weight_x);
++
++/** Get the vertical weight value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to get vertical weight value.
++ *
++ * @return The vertical weight value for the given item (value is between -1.0 and 1.0)
++ * @since 1.18
++ */
++EAPI double
++edje_edit_part_item_item_weight_y_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Set the vertical weight value of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item to set vertical weight value.
++ * @param weight_y New value of the vertical weight.
++ *
++ * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_item_weight_y_set(Evas_Object *obj, const char *part, unsigned int index, double weight_y);
++
+ /** Get column position of the part's item.
+  *
+  * @param obj Object being edited.
+@@ -3159,6 +3737,7 @@ EAPI Eina_Bool edje_edit_part_item_position_get(Evas_Object *obj, const char *pa
+  * @return The item column value.
+  * @since 1.16
+  */
++EINA_DEPRECATED
+ EAPI unsigned short
+ edje_edit_part_item_position_col_get(Evas_Object *obj, const char *part, const char *item_name);
+ 
+@@ -3171,9 +3750,34 @@ edje_edit_part_item_position_col_get(Evas_Object *obj, const char *part, const c
+  * @return The item row value.
+  * @since 1.16
+  */
++EINA_DEPRECATED
+ EAPI unsigned short
+ edje_edit_part_item_position_row_get(Evas_Object *obj, const char *part, const char *item_name);
+ 
++/** Get column position of the part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item.
++ *
++ * @return The item column value.
++ * @since 1.18
++ */
++EAPI unsigned short
++edje_edit_part_item_index_position_col_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Get row position of the part's item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item.
++ *
++ * @return The item row value.
++ * @since 1.18
++ */
++EAPI unsigned short
++edje_edit_part_item_index_position_row_get(Evas_Object *obj, const char *part, unsigned int index);
++
+ /** Set column/row position of a new part's item.
+  *
+  * @param obj Object being edited.
+@@ -3201,6 +3805,7 @@ EAPI Eina_Bool edje_edit_part_item_position_set(Evas_Object *obj, const char *pa
+  * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
+  * @since 1.16
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool
+ edje_edit_part_item_position_col_set(Evas_Object *obj, const char *part, const char *item_name, unsigned short col);
+ 
+@@ -3214,9 +3819,37 @@ edje_edit_part_item_position_col_set(Evas_Object *obj, const char *part, const c
+  * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
+  * @since 1.16
+  */
++EINA_DEPRECATED
+ EAPI Eina_Bool
+ edje_edit_part_item_position_row_set(Evas_Object *obj, const char *part, const char *item_name, unsigned short row);
+ 
++/** Set column position of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item.
++ * @param col Column item position.
++ *
++ * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_position_col_set(Evas_Object *obj, const char *part, unsigned int index, unsigned short col);
++
++/** Set row position of a part item.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item.
++ * @param row Row item position.
++ *
++ * @return @c EINA_TRUE If successful, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_position_row_set(Evas_Object *obj, const char *part, unsigned int index, unsigned short row);
++
++
+ /** Retrieves the how many columns and rows will span for use by item.
+  *
+  * @param obj object being edited.
+@@ -3242,6 +3875,7 @@ EAPI void edje_edit_part_item_span_get(Evas_Object *obj, const char *part, const
+  * @return The count of span columns.
+  * @since 1.16
+  */
++EINA_DEPRECATED
+ EAPI unsigned short
+ edje_edit_part_item_span_col_get(Evas_Object *obj, const char *part, const char *item);
+ 
+@@ -3254,6 +3888,7 @@ edje_edit_part_item_span_col_get(Evas_Object *obj, const char *part, const char
+  * @return The count of span rows.
+  * @since 1.16
+  */
++EINA_DEPRECATED
+ EAPI unsigned short
+ edje_edit_part_item_span_row_get(Evas_Object *obj, const char *part, const char *item);
+ 
+@@ -3275,27 +3910,51 @@ EAPI Eina_Bool edje_edit_part_item_span_set(Evas_Object *obj, const char *part,
+  *
+  * @param obj Object being edited.
+  * @param part Part that contain item.
+- * @param item The name of the item.
++ * @param index Index of the item.
+  * @param col new count of the columns spans.
+  *
+  * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
+- * @since 1.16
++ * @since 1.18
+  */
+ EAPI Eina_Bool
+-edje_edit_part_item_span_col_set(Evas_Object *obj, const char *part, const char *item, unsigned short col);
++edje_edit_part_item_index_span_col_set(Evas_Object *obj, const char *part, unsigned int index, unsigned short col);
+ 
+ /** Set the count of rows which this item will spans for use.
+  *
+  * @param obj Object being edited.
+  * @param part Part that contain item.
+- * @param item The name of the item.
++ * @param index Index of the item.
+  * @param row new count of the rows spans.
+  *
+  * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
+- * @since 1.16
++ * @since 1.18
+  */
+ EAPI Eina_Bool
+-edje_edit_part_item_span_row_set(Evas_Object *obj, const char *part, const char *item, unsigned short row);
++edje_edit_part_item_index_span_row_set(Evas_Object *obj, const char *part, unsigned int index, unsigned short row);
++
++/** Get the number of span columns.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item of part.
++ *
++ * @return The count of span columns.
++ * @since 1.18
++ */
++EAPI unsigned short
++edje_edit_part_item_index_span_col_get(Evas_Object *obj, const char *part, unsigned int index);
++
++/** Get the number of span rows.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param index Index of the item of part.
++ *
++ * @return The count of span rows.
++ * @since 1.18
++ */
++EAPI unsigned short
++edje_edit_part_item_index_span_row_get(Evas_Object *obj, const char *part, unsigned int index);
+ 
+ //@}
+ /******************************************************************************/
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 0fdd1a1..2e98460 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -4805,6 +4805,7 @@ edje_edit_part_item_append(Evas_Object *obj, const char *part, const char *item_
+    return EINA_TRUE;
+ }
+ 
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_insert_before(Evas_Object *obj, const char *part, const char *item_name, const char *item_before, const char *source_group)
+ {
+@@ -4843,6 +4844,32 @@ edje_edit_part_item_insert_before(Evas_Object *obj, const char *part, const char
+ }
+ 
+ EAPI Eina_Bool
++edje_edit_part_item_insert_before_index(Evas_Object *obj, const char *part, const char *item_name, unsigned int index, const char *source_group)
++{
++   Edje_Part *ep;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a source group is exists. */
++   if (!eina_hash_find(ed->file->collection, source_group))
++     return EINA_FALSE;
++
++   _edje_edit_part_item_insert(ep, index, item_name, source_group);
++
++   return EINA_TRUE;
++}
++
++/* deprecated */
++EAPI Eina_Bool
+ edje_edit_part_item_insert_after(Evas_Object *obj, const char *part, const char *item_name, const char *item_after, const char *source_group)
+ {
+    Edje_Part *ep;
+@@ -4881,6 +4908,32 @@ edje_edit_part_item_insert_after(Evas_Object *obj, const char *part, const char
+ }
+ 
+ EAPI Eina_Bool
++edje_edit_part_item_insert_after_index(Evas_Object *obj, const char *part, const char *item_name, unsigned int index, const char *source_group)
++{
++   Edje_Part *ep;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a source group is exists. */
++   if (!eina_hash_find(ed->file->collection, source_group))
++     return EINA_FALSE;
++
++   _edje_edit_part_item_insert(ep, index, item_name, source_group);
++
++   return EINA_TRUE;
++}
++
++/* deprecated */
++EAPI Eina_Bool
+ edje_edit_part_item_insert_at(Evas_Object *obj, const char *part, const char *item_name, const char *source_group, unsigned int place)
+ {
+    Edje_Part *ep;
+@@ -4914,6 +4967,7 @@ edje_edit_part_item_insert_at(Evas_Object *obj, const char *part, const char *it
+    return EINA_TRUE;
+ }
+ 
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_move_below(Evas_Object *obj, const char *part, const char *item_name)
+ {
+@@ -4953,6 +5007,31 @@ edje_edit_part_item_move_below(Evas_Object *obj, const char *part, const char *i
+ }
+ 
+ EAPI Eina_Bool
++edje_edit_part_item_move_below_index(Evas_Object *obj, const char *part, unsigned int index)
++{
++   Edje_Part *ep;
++   Edje_Pack_Element *item;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   item = ep->items[index - 1];
++   ep->items[index - 1] = ep->items[index];
++   ep->items[index] = item;
++
++   return EINA_TRUE;
++}
++
++/* deprecated */
++EAPI Eina_Bool
+ edje_edit_part_item_move_above(Evas_Object *obj, const char *part, const char *item_name)
+ {
+    Edje_Part *ep;
+@@ -4990,6 +5069,31 @@ edje_edit_part_item_move_above(Evas_Object *obj, const char *part, const char *i
+    return EINA_TRUE;
+ }
+ 
++EAPI Eina_Bool
++edje_edit_part_item_move_above_index(Evas_Object *obj, const char *part, unsigned int index)
++{
++   Edje_Part *ep;
++   Edje_Pack_Element *item;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   item = ep->items[index + 1];
++   ep->items[index + 1] = ep->items[index];
++   ep->items[index] = item;
++
++   return EINA_TRUE;
++}
++
++/* deprecated */
+ EAPI Eina_List *
+ edje_edit_part_items_list_get(Evas_Object *obj, const char *part)
+ {
+@@ -5011,6 +5115,24 @@ edje_edit_part_items_list_get(Evas_Object *obj, const char *part)
+    return items_list;
+ }
+ 
++EAPI int
++edje_edit_part_items_count_get(Evas_Object *obj, const char *part)
++{
++   Edje_Part *ep;
++
++   GET_RP_OR_RETURN(-1);
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return -1;
++
++   ep = rp->part;
++   if (!ed->file) return -1;
++
++   return  ep->items_count;
++}
++
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_del(Evas_Object *obj, const char *part, const char *name)
+ {
+@@ -5069,6 +5191,53 @@ edje_edit_part_item_del(Evas_Object *obj, const char *part, const char *name)
+ }
+ 
+ EAPI Eina_Bool
++edje_edit_part_item_index_del(Evas_Object *obj, const char *part, unsigned int index)
++{
++   Edje_Part *ep;
++   Edje_Pack_Element *item;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++   ep = rp->part;
++   if (!ed->file) return EINA_FALSE;
++
++   item = ep->items[index];
++   {
++      Edje_Pack_Element **tmp;
++      _edje_if_string_free(ed, &item->name);
++      --ep->items_count;
++
++      while (index < ep->items_count)
++        {
++           ep->items[index] = ep->items[index + 1];
++           index++;
++        }
++
++      if (ep->items_count != 0)
++        {
++           tmp = realloc(ep->items, sizeof(Edje_Pack_Element *) * ep->items_count);
++           if (!tmp)
++             {
++                free(item);
++                return EINA_FALSE;
++             }
++           ep->items = tmp;
++        }
++      else
++        ep->items = NULL;
++   }
++
++   GET_EED_OR_RETURN(EINA_FALSE);
++   _edje_edit_flag_script_dirty(eed, EINA_TRUE);
++
++   return EINA_TRUE;
++}
++
++/* deprecated */
++EAPI Eina_Bool
+ edje_edit_part_item_source_set(Evas_Object *obj, const char *part, const char *item_name, const char *source_group)
+ {
+    Edje_Part *ep;
+@@ -5106,6 +5275,32 @@ edje_edit_part_item_source_set(Evas_Object *obj, const char *part, const char *i
+    return EINA_TRUE;
+ }
+ 
++EAPI Eina_Bool
++edje_edit_part_item_index_source_set(Evas_Object *obj, const char *part, unsigned int index, const char *source_group)
++{
++   Edje_Part *ep;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a source group is exists. */
++   if (!eina_hash_find(ed->file->collection, source_group))
++     return EINA_FALSE;
++
++   ep->items[index]->source = eina_stringshare_add(source_group);
++
++   return EINA_TRUE;
++}
++
++EINA_DEPRECATED
+ EAPI const char *
+ edje_edit_part_item_source_get(Evas_Object *obj, const char *part, const char *item_name)
+ {
+@@ -5138,6 +5333,26 @@ edje_edit_part_item_source_get(Evas_Object *obj, const char *part, const char *i
+    return eina_stringshare_add(item->source);
+ }
+ 
++EAPI const char *
++edje_edit_part_item_index_source_get(Evas_Object *obj, const char *part, unsigned int index)
++{
++   Edje_Part *ep;
++
++   GET_RP_OR_RETURN(NULL);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return NULL;
++
++   ep = rp->part;
++
++   if (!ed->file) return NULL;
++
++   return eina_stringshare_add(ep->items[index]->source);
++}
++
++/* deprecated */
+ #define FUNC_PART_ITEM_INT(Class, Value, Min)                                                                    \
+   EAPI int                                                                                                       \
+   edje_edit_part_item_##Class##_##Value##_get(Evas_Object * obj, const char *part, const char *item_name)        \
+@@ -5198,6 +5413,49 @@ FUNC_PART_ITEM_INT(prefer, h, 0);
+ FUNC_PART_ITEM_INT(spread, w, 0);
+ FUNC_PART_ITEM_INT(spread, h, 0);
+ 
++#define FUNC_PART_ITEM_INDEX_INT(Class, Value, Min)                                                                 \
++  EAPI int                                                                                                          \
++  edje_edit_part_item_index_##Class##_##Value##_get(Evas_Object * obj, const char *part, unsigned int index)        \
++  {                                                                                                                 \
++     Edje_Part *ep;                                                                                                 \
++     if ((!obj) || (!part))                                                                                         \
++       return Min;                                                                                                  \
++     GET_RP_OR_RETURN(Min);                                                                                         \
++     ep = rp->part;                                                                                                 \
++     if (index >= ep->items_count)                                                                                  \
++       return Min;                                                                                                  \
++     return ep->items[index]->Class.Value;                                                                          \
++  }                                                                                                                 \
++  EAPI Eina_Bool                                                                                                    \
++  edje_edit_part_item_index_##Class##_##Value##_set(Evas_Object * obj, const char *part, unsigned int index, int v) \
++  {                                                                                                                 \
++     Edje_Part *ep;                                                                                                 \
++     if ((!obj) || (!part))                                                                                         \
++       return EINA_FALSE;                                                                                           \
++     if (v < Min) return EINA_FALSE;                                                                                \
++     GET_RP_OR_RETURN(EINA_FALSE);                                                                                  \
++     ep = rp->part;                                                                                                 \
++     if ((rp->part->type != EDJE_PART_TYPE_BOX) &&                                                                  \
++         (rp->part->type != EDJE_PART_TYPE_TABLE))                                                                  \
++       return EINA_FALSE;                                                                                           \
++     if (index >= ep->items_count)                                                                                  \
++       return Min;                                                                                                  \
++     ep->items[index]->Class.Value = v;                                                                             \
++     return EINA_TRUE;                                                                                              \
++  }
++
++FUNC_PART_ITEM_INDEX_INT(min, w, 0);
++FUNC_PART_ITEM_INDEX_INT(min, h, 0);
++FUNC_PART_ITEM_INDEX_INT(max, w, -1);
++FUNC_PART_ITEM_INDEX_INT(max, h, -1);
++FUNC_PART_ITEM_INDEX_INT(aspect, w, 0);
++FUNC_PART_ITEM_INDEX_INT(aspect, h, 0);
++FUNC_PART_ITEM_INDEX_INT(prefer, w, 0);
++FUNC_PART_ITEM_INDEX_INT(prefer, h, 0);
++FUNC_PART_ITEM_INDEX_INT(spread, w, 0);
++FUNC_PART_ITEM_INDEX_INT(spread, h, 0);
++
++/* deprecated */
+ EAPI Edje_Aspect_Control
+ edje_edit_part_item_aspect_mode_get(Evas_Object *obj, const char *part, const char *item_name)
+ {
+@@ -5224,6 +5482,7 @@ edje_edit_part_item_aspect_mode_get(Evas_Object *obj, const char *part, const ch
+    return item->aspect.mode;
+ }
+ 
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_aspect_mode_set(Evas_Object *obj, const char *part, const char *item_name, Edje_Aspect_Control mode)
+ {
+@@ -5257,6 +5516,48 @@ edje_edit_part_item_aspect_mode_set(Evas_Object *obj, const char *part, const ch
+    return EINA_TRUE;
+ }
+ 
++EAPI Edje_Aspect_Control
++edje_edit_part_item_index_aspect_mode_get(Evas_Object *obj, const char *part, unsigned int index)
++{
++   Edje_Part *ep;
++
++   if ((!obj) || (!part))
++     return EDJE_ASPECT_CONTROL_NONE;
++
++   GET_RP_OR_RETURN(EDJE_ASPECT_CONTROL_NONE);
++
++   ep = rp->part;
++   if (index >= ep->items_count)
++     return EDJE_ASPECT_CONTROL_NONE;
++
++   return ep->items[index]->aspect.mode;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_index_aspect_mode_set(Evas_Object *obj, const char *part, unsigned int index, Edje_Aspect_Control mode)
++{
++   Edje_Part *ep;
++
++   if ((!obj) || (!part))
++     return EINA_FALSE;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (index >= ep->items_count)
++     return EINA_FALSE;
++
++   ep->items[index]->aspect.mode = mode;
++
++   return EINA_TRUE;
++}
++
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_padding_get(Evas_Object *obj, const char *part, const char *item_name, int *l, int *r, int *t, int *b)
+ {
+@@ -5288,6 +5589,7 @@ edje_edit_part_item_padding_get(Evas_Object *obj, const char *part, const char *
+    return EINA_TRUE;
+ }
+ 
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_padding_set(Evas_Object *obj, const char *part, const char *item_name, int l, int r, int t, int b)
+ {
+@@ -5323,6 +5625,49 @@ edje_edit_part_item_padding_set(Evas_Object *obj, const char *part, const char *
+    return EINA_TRUE;
+ }
+ 
++EAPI Eina_Bool
++edje_edit_part_item_index_padding_get(Evas_Object *obj, const char *part, unsigned int index, int *l, int *r, int *t, int *b)
++{
++   Edje_Part *ep;
++
++   if ((!obj) || (!part))
++     return EINA_FALSE;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   ep = rp->part;
++   if (l) *l = ep->items[index]->padding.l;
++   if (t) *t = ep->items[index]->padding.t;
++   if (r) *r = ep->items[index]->padding.r;
++   if (b) *b = ep->items[index]->padding.b;
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_index_padding_set(Evas_Object *obj, const char *part, unsigned int index, int l, int r, int t, int b)
++{
++   Edje_Part *ep;
++
++   if ((!obj) || (!part))
++     return EINA_FALSE;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   ep = rp->part;
++   if (l > -1) ep->items[index]->padding.l = l;
++   else return EINA_FALSE;
++   if (t > -1) ep->items[index]->padding.t = t;
++   else return EINA_FALSE;
++   if (r > -1) ep->items[index]->padding.r = r;
++   else return EINA_FALSE;
++   if (b > -1) ep->items[index]->padding.b = b;
++   else return EINA_FALSE;
++
++   return EINA_TRUE;
++}
++
++/* deprecated */
+ #define FUNC_PART_ITEM_DOUBLE(Name, Value, Min, Max)                                                     \
+   EAPI double                                                                                            \
+   edje_edit_part_item_##Name##_get(Evas_Object * obj, const char *part, const char *item_name)           \
+@@ -5380,6 +5725,42 @@ FUNC_PART_ITEM_DOUBLE(weight_y, weight.y, 0.0, 99999.990);
+ 
+ #undef FUNC_PART_ITEM_DOUBLE
+ 
++#define FUNC_PART_ITEM_INDEX_DOUBLE(Name, Value, Min, Max)                                                  \
++  EAPI double                                                                                               \
++  edje_edit_part_item_index_##Name##_get(Evas_Object * obj, const char *part, unsigned int index)           \
++  {                                                                                                         \
++     Edje_Part *ep;                                                                                         \
++     if ((!obj) || (!part))                                                                                 \
++       return 0.0;                                                                                          \
++     GET_RP_OR_RETURN(0.0);                                                                                 \
++     ep = rp->part;                                                                                         \
++     return TO_DOUBLE(ep->items[index]->Value);                                                             \
++  }                                                                                                         \
++  EAPI Eina_Bool                                                                                            \
++  edje_edit_part_item_index_##Name##_set(Evas_Object * obj, const char *part, unsigned int index, double v) \
++  {                                                                                                         \
++     Edje_Part *ep;                                                                                         \
++     if ((!obj) || (!part))                                                                                 \
++       return EINA_FALSE;                                                                                   \
++     if ((v < Min) || (v > Max))                                                                            \
++       return EINA_FALSE;                                                                                   \
++     GET_RP_OR_RETURN(EINA_FALSE);                                                                          \
++     ep = rp->part;                                                                                         \
++     if ((rp->part->type != EDJE_PART_TYPE_BOX) &&                                                          \
++         (rp->part->type != EDJE_PART_TYPE_TABLE))                                                          \
++       return EINA_FALSE;                                                                                   \
++     ep->items[index]->Value = FROM_DOUBLE(v);                                                              \
++     return EINA_TRUE;                                                                                      \
++  }
++
++FUNC_PART_ITEM_INDEX_DOUBLE(align_x, align.x, -1.0, 1.0);
++FUNC_PART_ITEM_INDEX_DOUBLE(align_y, align.y, -1.0, 1.0);
++FUNC_PART_ITEM_INDEX_DOUBLE(weight_x, weight.x, 0.0, 99999.990);
++FUNC_PART_ITEM_INDEX_DOUBLE(weight_y, weight.y, 0.0, 99999.990);
++
++#undef FUNC_PART_ITEM_INDEX_DOUBLE
++
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_position_get(Evas_Object *obj, const char *part, const char *item_name, unsigned short *col, unsigned short *row)
+ {
+@@ -5404,6 +5785,7 @@ edje_edit_part_item_position_get(Evas_Object *obj, const char *part, const char
+    return EINA_TRUE;
+ }
+ 
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_position_set(Evas_Object *obj, const char *part, const char *item_name, unsigned short col, unsigned short row)
+ {
+@@ -5480,6 +5862,33 @@ FUNC_PART_ITEM_USHORT(position, row)
+ 
+ #undef FUNC_PART_ITEM_USHORT
+ 
++#define FUNC_PART_ITEM_INDEX_USHORT(CLASS, VALUE) \
++EAPI unsigned short \
++edje_edit_part_item_index_##CLASS##_##VALUE##_get(Evas_Object *obj, const char *part, unsigned int index) \
++{ \
++   Edje_Part *ep; \
++   GET_RP_OR_RETURN(0); \
++   ep = rp->part; \
++   if (ep->type != EDJE_PART_TYPE_TABLE) return 0; \
++   return ep->items[index]->VALUE; \
++} \
++EAPI Eina_Bool \
++edje_edit_part_item_index_##CLASS##_##VALUE##_set(Evas_Object *obj, const char *part, unsigned int index, unsigned short new_val) \
++{ \
++   Edje_Part *ep; \
++   GET_RP_OR_RETURN(EINA_FALSE); \
++   ep = rp->part; \
++   if (ep->type != EDJE_PART_TYPE_TABLE) return EINA_FALSE; \
++   ep->items[index]->VALUE = new_val; \
++   return EINA_TRUE; \
++}
++
++FUNC_PART_ITEM_INDEX_USHORT(position, col)
++FUNC_PART_ITEM_INDEX_USHORT(position, row)
++
++#undef FUNC_PART_ITEM_INDEX_USHORT
++
++/* deprecated */
+ EAPI void
+ edje_edit_part_item_span_get(Evas_Object *obj, const char *part, const char *item_name, unsigned char *col, unsigned char *row)
+ {
+@@ -5504,6 +5913,7 @@ edje_edit_part_item_span_get(Evas_Object *obj, const char *part, const char *ite
+    return;
+ }
+ 
++/* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_span_set(Evas_Object *obj, const char *part, const char *item_name, unsigned char col, unsigned char row)
+ {
+@@ -5581,6 +5991,32 @@ FUNC_PART_ITEM_USHORT(span, row, rowspan)
+ 
+ #undef FUNC_PART_ITEM_USHORT
+ 
++#define FUNC_PART_ITEM_INDEX_USHORT(CLASS, VALUE, MEMBER) \
++EAPI unsigned short \
++edje_edit_part_item_index_##CLASS##_##VALUE##_get(Evas_Object *obj, const char *part, unsigned int index) \
++{ \
++   Edje_Part *ep; \
++   GET_RP_OR_RETURN(0); \
++   ep = rp->part; \
++   if (rp->part->type != EDJE_PART_TYPE_TABLE) return EINA_FALSE; \
++   return  ep->items[index]->MEMBER; \
++} \
++EAPI Eina_Bool \
++edje_edit_part_item_index_##CLASS##_##VALUE##_set(Evas_Object *obj, const char *part, unsigned int index, unsigned short new_val) \
++{ \
++   Edje_Part *ep; \
++   GET_RP_OR_RETURN(EINA_FALSE); \
++   ep = rp->part; \
++   if (rp->part->type != EDJE_PART_TYPE_TABLE) return EINA_FALSE; \
++   ep->items[index]->MEMBER = new_val; \
++   return EINA_TRUE; \
++}
++
++FUNC_PART_ITEM_INDEX_USHORT(span, col, colspan)
++FUNC_PART_ITEM_INDEX_USHORT(span, row, rowspan)
++
++#undef FUNC_PART_ITEM_INDEX_USHORT
++
+ /*********************/
+ /*  PART STATES API  */
+ /*********************/
+-- 
+2.7.4
+

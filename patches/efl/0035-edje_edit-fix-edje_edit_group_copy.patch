@@ -1,0 +1,47 @@
+From 0413c26f82fb5a9ffcbd02158536e7c39a34d22e Mon Sep 17 00:00:00 2001
+From: Andrii Kroitor <an.kroitor@samsung.com>
+Date: Tue, 10 May 2016 15:44:30 -0700
+Subject: [PATCH 46/79] edje_edit: fix edje_edit_group_copy
+
+Summary:
+Writing copy directly to file.
+Old way (adding directly to collection cache) leads to possible segfaults
+on edje_collection_cache_flush.
+
+Reviewers: reutskiy.v.v, cedric
+
+Subscribers: jpeg
+
+Differential Revision: https://phab.enlightenment.org/D3904
+
+Signed-off-by: Cedric Bail <cedric@osg.samsung.com>
+---
+ src/lib/edje/edje_edit.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index bd5552a..38a26e0 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -1712,7 +1712,8 @@ edje_edit_group_copy(Evas_Object *obj, const char *group_name, const char *copy_
+ 
+    epc->id = id;
+    epc->part = eina_stringshare_add(copy_name);
+-   ed->file->collection_cache = eina_list_prepend(ed->file->collection_cache, epc);
++   snprintf(buf, sizeof(buf), "edje/collections/%i", epc->id);
++   eet_data_write(eetf, _edje_edd_edje_part_collection, buf, epc, 1);
+ 
+    /* Copying Scripts */
+    snprintf(buf, sizeof(buf), "edje/scripts/embryo/compiled/%d", e->id);
+@@ -1743,6 +1744,8 @@ edje_edit_group_copy(Evas_Object *obj, const char *group_name, const char *copy_
+         free(keys);
+      }
+ 
++   _edje_edit_edje_file_save(eetf, ed->file);
++   _edje_collection_free(ed->file, epc, de);
+    eet_close(eetf);
+ 
+    return EINA_TRUE;
+-- 
+2.7.4
+

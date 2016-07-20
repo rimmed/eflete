@@ -1,0 +1,37 @@
+From 1caea1570328cb79bddad03fbbee5127b9a7ac67 Mon Sep 17 00:00:00 2001
+From: Yeshwanth Reddivari <r.yeshwanth@samsung.com>
+Date: Mon, 23 Nov 2015 18:51:08 +0900
+Subject: [PATCH 01/79] Edje: Remove duplicate NULL reassignment
+
+Summary:
+Remove duplicate code of variable 's' assignment to NULL in edje_edit_style_del.
+
+Signed-off-by: Yeshwanth Reddivari <r.yeshwanth@samsung.com>
+
+Reviewers: Hermet, alok25, mvsovani, singh.amitesh, jpeg
+
+Reviewed By: jpeg
+
+Subscribers: sachin.dev, cedric
+
+Differential Revision: https://phab.enlightenment.org/D3358
+---
+ src/lib/edje/edje_edit.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 8d09e45..7922d78 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -2705,8 +2705,6 @@ edje_edit_style_del(Evas_Object *obj, const char *style)
+         t = NULL;
+      }
+    free(s);
+-   s = NULL;
+-   s = NULL;
+    return EINA_TRUE;
+ }
+ 
+-- 
+2.7.4
+

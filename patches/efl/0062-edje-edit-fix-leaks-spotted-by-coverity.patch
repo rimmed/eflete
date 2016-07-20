@@ -1,0 +1,33 @@
+From bfbb7b15f2074fef83d0d78d1cfc3f03605b74d0 Mon Sep 17 00:00:00 2001
+From: "Carsten Haitzler (Rasterman)" <raster@rasterman.com>
+Date: Fri, 8 Jul 2016 15:33:19 +0900
+Subject: [PATCH 78/79] edje edit - fix leaks spotted by coverity
+
+fixes CID 1356630
+---
+ src/lib/edje/edje_edit.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 94ee615..4a74f0b 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -9677,6 +9677,7 @@ edje_edit_image_replace(Evas_Object *obj, const char *name, const char *new_name
+    if (!eetf)
+      {
+         ERR("Unable to open \"%s\" for writing output", ed->path);
++        eina_iterator_free(it);
+         return EINA_FALSE;
+      }
+ 
+@@ -9706,6 +9707,7 @@ edje_edit_image_replace(Evas_Object *obj, const char *name, const char *new_name
+              if (!_edje_edit_collection_save(eetf, pce->ref))
+                {
+                   eet_close(eetf);
++                  eina_iterator_free(it);
+                   return EINA_FALSE;
+                }
+           }
+-- 
+2.7.4
+

@@ -1,0 +1,133 @@
+From 0d0e9e13bdbeecc9f40ad9611e1e9eac251d4fc8 Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Wed, 27 Apr 2016 16:23:43 +0300
+Subject: [PATCH 38/79] Edje_Edit: functions to set and get set's images border
+
+edje_edit_image_set_image_border_set
+edje_edit_image_set_image_border_get
+---
+ src/lib/edje/Edje_Edit.h | 34 ++++++++++++++++++++++++++
+ src/lib/edje/edje_edit.c | 62 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 96 insertions(+)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 4af9beb..2aafa8a 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -5690,6 +5690,40 @@ edje_edit_image_set_image_max_get(Evas_Object *obj, const char *set_name, unsign
+ EAPI Eina_Bool
+ edje_edit_image_set_image_max_set(Evas_Object *obj, const char *set_name, unsigned int place, int w, int h);
+ 
++/** Get border of set's image.
++ *
++ * @param obj Object being edited.
++ * @param set_name name of image set.
++ * @param place position of image.
++ * @param l Where to store the left border value.
++ * @param r Where to store the right border value.
++ * @param b Where to store the bottom border value.
++ * @param t Where to store the top border value.
++ *
++ * @return @c EINA_TRUE on success, @c EINA_FALSE otherwise.
++ *
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_image_set_image_border_get(Evas_Object *obj, const char *set_name, unsigned int place, int *l, int *r, int *b, int *t);
++
++/** Set border of set's image.
++ *
++ * @param obj Object being edited.
++ * @param set_name name of image set.
++ * @param place position of image.
++ * @param l New value of left border value.
++ * @param r New value of right border value.
++ * @param b New value of bottom border value.
++ * @param t New value of top border value.
++ *
++ * @return @c EINA_TRUE on success, @c EINA_FALSE otherwise.
++ *
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_image_set_image_border_set(Evas_Object *obj, const char *set_name, unsigned int place, int l, int r, int b, int t);
++
+ //@}
+ /******************************************************************************/
+ /**************************   IMAGES API   ************************************/
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 7056e66..1274087 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -8692,6 +8692,68 @@ edje_edit_image_set_image_del(Evas_Object *obj, const char *set_name, unsigned i
+ FUNC_IMAGE_SET_API_SIZE(min);
+ FUNC_IMAGE_SET_API_SIZE(max);
+ 
++EAPI Eina_Bool
++edje_edit_image_set_image_border_get(Evas_Object *obj, const char *set_name, unsigned int place, int *l, int *r, int *b, int *t)
++{
++   Edje_Image_Directory_Set *de = NULL;
++   Edje_Image_Directory_Set_Entry *dim = NULL;
++   unsigned int i;
++
++   GET_ED_OR_RETURN(EINA_FALSE);
++
++   if (!ed->file) return EINA_FALSE;
++   if (!ed->file->image_dir) return EINA_FALSE;
++
++   for (i = 0; i < ed->file->image_dir->sets_count; ++i)
++     {
++        de = ed->file->image_dir->sets + i;
++        if ((de->name) && (!strcmp(set_name, de->name)))
++          break;
++     }
++   if (i == ed->file->image_dir->sets_count) return EINA_FALSE;
++
++   dim = eina_list_nth(de->entries, place);
++   if (!dim) return EINA_FALSE;
++
++   if (l) *l = dim->border.l;
++   if (r) *r = dim->border.r;
++   if (b) *b = dim->border.b;
++   if (t) *t = dim->border.t;
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_image_set_image_border_set(Evas_Object *obj, const char *set_name, unsigned int place, int l, int r, int b, int t)
++{
++   Edje_Image_Directory_Set *de = NULL;
++   Edje_Image_Directory_Set_Entry *dim = NULL;
++   unsigned int i;
++
++   GET_ED_OR_RETURN(EINA_FALSE);
++
++   if (!ed->file) return EINA_FALSE;
++   if (!ed->file->image_dir) return EINA_FALSE;
++
++   for (i = 0; i < ed->file->image_dir->sets_count; ++i)
++     {
++        de = ed->file->image_dir->sets + i;
++        if ((de->name) && (!strcmp(set_name, de->name)))
++          break;
++     }
++   if (i == ed->file->image_dir->sets_count) return EINA_FALSE;
++
++   dim = eina_list_nth(de->entries, place);
++   if (!dim) return EINA_FALSE;
++
++   if (l >= 0) dim->border.l = l;
++   if (r >= 0) dim->border.r = r;
++   if (b >= 0) dim->border.b = b;
++   if (t >= 0) dim->border.t = t;
++
++   return EINA_TRUE;
++}
++
+ /****************/
+ /*  IMAGES API  */
+ /****************/
+-- 
+2.7.4
+

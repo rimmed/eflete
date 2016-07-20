@@ -1,0 +1,47 @@
+From 802e671cda7e5790705acd13be19d7a6d1da0a38 Mon Sep 17 00:00:00 2001
+From: Andrii Kroitor <an.kroitor@samsung.com>
+Date: Tue, 26 Apr 2016 14:34:14 -0700
+Subject: [PATCH] elementary: fix genlist tree filters
+
+Summary:
+In tree mode if parent item is hidden all its subitems should also be hidden.
+@fix
+
+Reviewers: Hermet, raster, cedric
+
+Reviewed By: cedric
+
+Subscribers: jpeg, reutskiy.v.v
+
+Differential Revision: https://phab.enlightenment.org/D3918
+
+Signed-off-by: Cedric Bail <cedric@osg.samsung.com>
+---
+ src/lib/elm_genlist.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/src/lib/elm_genlist.c b/src/lib/elm_genlist.c
+index 378c5f0..e71a2d5 100644
+--- a/src/lib/elm_genlist.c
++++ b/src/lib/elm_genlist.c
+@@ -7507,11 +7507,13 @@ static void
+ _filter_item_internal(Elm_Gen_Item *it)
+ {
+    ELM_GENLIST_DATA_GET_FROM_ITEM(it, sd);
+-   if (sd->filter_data && it->itc->func.filter_get)
++   if (sd->filter_data)
+      {
+-        if (!it->itc->func.filter_get(
+-               (void *)WIDGET_ITEM_DATA_GET(EO_OBJ(it)),
+-                WIDGET(it), sd->filter_data))
++        if ((it->parent && !_item_filtered_get(it->parent)) ||
++            (it->itc->func.filter_get &&
++             !it->itc->func.filter_get(
++                (void *)WIDGET_ITEM_DATA_GET(EO_OBJ(it)),
++                WIDGET(it), sd->filter_data)))
+           {
+              it->hide = EINA_TRUE;
+              it->item->block->changed = EINA_TRUE;
+-- 
+2.7.4
+

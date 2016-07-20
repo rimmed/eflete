@@ -1,0 +1,68 @@
+From e8138ee7b5d664dad148970988fd9fe904e74dfd Mon Sep 17 00:00:00 2001
+From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
+Date: Fri, 29 Apr 2016 11:25:41 +0300
+Subject: [PATCH 43/79] Edje edit: remove color generate from SPACER source.
+
+It is possible situation when SPACER structure has colors values.
+For example:
+group { name: "abc";
+  parts {
+    part { name: "rect"; type: RECT;
+      description { "default" 0.0;
+        color: 7 7 7 255;
+      }
+    }
+  }
+}
+group { name:"abc_2";
+  inherit: "abc";
+  parts {
+    part { name: "rect"; type: SPACER;
+    }
+  }
+}
+To avoid failing compilation of generated source code, need avoid
+generate color source code for a SPACER part.
+---
+ src/lib/edje/edje_edit.c | 25 ++++++++++++++-----------
+ 1 file changed, 14 insertions(+), 11 deletions(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 7739521..e97c44f 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -13263,17 +13263,20 @@ _edje_generate_source_of_state(Evas_Object *obj, const char *part, const char *s
+    if (pd->aspect.prefer)
+      BUF_APPENDF(I5 "aspect_preference: %s;\n", prefers[(int)pd->aspect.prefer]);
+ 
+-   if (pd->color_class)
+-     BUF_APPENDF(I5 "color_class: \"%s\";\n", pd->color_class);
+-
+-   if (pd->color.r != 255 || pd->color.g != 255 ||
+-       pd->color.b != 255 || pd->color.a != 255)
+-     BUF_APPENDF(I5 "color: %d %d %d %d;\n",
+-                 pd->color.r, pd->color.g, pd->color.b, pd->color.a);
+-   if (pd->color2.r != 0 || pd->color2.g != 0 ||
+-       pd->color2.b != 0 || pd->color2.a != 255)
+-     BUF_APPENDF(I5 "color2: %d %d %d %d;\n",
+-                 pd->color2.r, pd->color2.g, pd->color2.b, pd->color2.a);
++   if (rp->part->type != EDJE_PART_TYPE_SPACER)
++     {
++        if (pd->color_class)
++          BUF_APPENDF(I5 "color_class: \"%s\";\n", pd->color_class);
++
++        if (pd->color.r != 255 || pd->color.g != 255 ||
++            pd->color.b != 255 || pd->color.a != 255)
++          BUF_APPENDF(I5 "color: %d %d %d %d;\n",
++                      pd->color.r, pd->color.g, pd->color.b, pd->color.a);
++        if (pd->color2.r != 0 || pd->color2.g != 0 ||
++            pd->color2.b != 0 || pd->color2.a != 255)
++          BUF_APPENDF(I5 "color2: %d %d %d %d;\n",
++                      pd->color2.r, pd->color2.g, pd->color2.b, pd->color2.a);
++     }
+ 
+    if (rp->part->type == EDJE_PART_TYPE_TEXT
+        || rp->part->type == EDJE_PART_TYPE_TEXTBLOCK)
+-- 
+2.7.4
+

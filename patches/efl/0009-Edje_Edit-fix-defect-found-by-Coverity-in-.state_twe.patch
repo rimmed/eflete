@@ -1,0 +1,32 @@
+From 5c0c87cbe8012d7ecffc4f1b4e5a33b6e8343b63 Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Fri, 19 Feb 2016 11:22:07 +0000
+Subject: [PATCH 09/79] Edje_Edit: fix defect found by Coverity in
+ ...state_tween_insert_at
+
+Check constraits before creating image structures
+
+CID 1351558
+---
+ src/lib/edje/edje_edit.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 96d8cf5..7f30907 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -8761,7 +8761,10 @@ edje_edit_state_tween_insert_at(Evas_Object *obj, const char *part, const char *
+    img = (Edje_Part_Description_Image *)pd;
+ 
+    if ((unsigned)place > img->image.tweens_count)
+-     return EINA_FALSE;
++     {
++        free(i);
++        return EINA_FALSE;
++     }
+ 
+    /* add to tween list */
+    tmp = realloc(img->image.tweens,
+-- 
+2.7.4
+

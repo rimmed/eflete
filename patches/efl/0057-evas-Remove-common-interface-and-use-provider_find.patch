@@ -1,0 +1,30 @@
+From 269fc4f7a643358ac943b5454bafc14b5d14836c Mon Sep 17 00:00:00 2001
+From: Jean-Philippe Andre <jp.andre@samsung.com>
+Date: Tue, 21 Jun 2016 15:45:31 +0900
+Subject: [PATCH 73/79] evas: Remove common interface and use provider_find
+
+Evas.Common_Interface not only had a bad name, it also
+wasn't in line with how we can get a loop object, for
+instance.
+
+Use eo_provider_find in each implementing class.
+---
+ src/lib/edje/edje_edit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index ded6c81..e4f3c2a 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -353,7 +353,7 @@ _edje_real_part_free(Edje *ed, Edje_Real_Part *rp)
+    if ((rp->type == EDJE_RP_TYPE_SWALLOW) && (rp->typedata.swallow)
+        && (rp->typedata.swallow->swallowed_object))
+      {
+-        eo_parent_set(rp->typedata.swallow->swallowed_object, evas_common_evas_get(ed->obj));
++        eo_parent_set(rp->typedata.swallow->swallowed_object, evas_object_evas_get(ed->obj));
+         evas_object_smart_member_del(rp->typedata.swallow->swallowed_object);
+         evas_object_event_callback_del(rp->typedata.swallow->swallowed_object,
+                                        EVAS_CALLBACK_FREE, _edje_object_part_swallow_free_cb);
+-- 
+2.7.4
+

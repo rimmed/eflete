@@ -1,0 +1,60 @@
+From ac9dc723c47492b94ffc3b8a65785e7a56d94520 Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Tue, 26 Apr 2016 14:43:47 +0300
+Subject: [PATCH 33/79] Edje_Edit: get "set's name" if it was set as image
+ normal or tween
+
+Sets and Images, they might have same id but different names
+---
+ src/lib/edje/edje_edit.c | 21 +++++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 806ca8e..fff3070 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -301,6 +301,17 @@ _edje_image_name_find(Edje_Edit *eed, int image_id)
+    return eed->base->file->image_dir->entries[image_id].entry;
+ }
+ 
++static const char *
++_edje_set_name_find(Edje_Edit *eed, int set_id)
++{
++   if (!eed->base->file) return NULL;
++   if (!eed->base->file->image_dir) return NULL;
++
++   if ((unsigned int)set_id >= eed->base->file->image_dir->sets_count)
++     return NULL;
++   return eed->base->file->image_dir->sets[set_id].name;
++}
++
+ static void
+ _edje_real_part_free(Edje *ed, Edje_Real_Part *rp)
+ {
+@@ -8974,7 +8985,10 @@ edje_edit_state_image_get(Evas_Object *obj, const char *part, const char *state,
+ 
+    img = (Edje_Part_Description_Image *)pd;
+ 
+-   image = _edje_image_name_find(eed, img->image.id);
++   if (!img->image.set)
++     image = _edje_image_name_find(eed, img->image.id);
++   else
++     image = _edje_set_name_find(eed, img->image.id);
+    if (!image) return NULL;
+ 
+    //printf("GET IMAGE for %s [%s]\n", state, image);
+@@ -9024,7 +9038,10 @@ edje_edit_state_tweens_list_get(Evas_Object *obj, const char *part, const char *
+ 
+    for (i = 0; i < img->image.tweens_count; ++i)
+      {
+-        name = _edje_image_name_find(eed, img->image.tweens[i]->id);
++        if (!img->image.tweens[i]->set)
++          name = _edje_image_name_find(eed, img->image.tweens[i]->id);
++        else
++          name = _edje_set_name_find(eed, img->image.tweens[i]->id);
+         //printf("   t: %s\n", name);
+         tweens = eina_list_append(tweens, eina_stringshare_add(name));
+      }
+-- 
+2.7.4
+

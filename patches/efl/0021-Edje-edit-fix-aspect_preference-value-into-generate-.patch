@@ -1,0 +1,29 @@
+From b63b00c1b8c8b07401b47660f6966429dbbae73b Mon Sep 17 00:00:00 2001
+From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
+Date: Tue, 19 Apr 2016 14:19:53 +0300
+Subject: [PATCH 30/79] Edje edit: fix aspect_preference value into generate
+ code function.
+
+Add value "SOURCE" as one of possible values for aspect_preference
+attributes.
+@fix
+---
+ src/lib/edje/edje_edit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index aeba548..7c4c5e1 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -11079,7 +11079,7 @@ edje_edit_script_error_list_get(Evas_Object *obj)
+ static const char *types[] = {"NONE", "RECT", "TEXT", "IMAGE", "SWALLOW", "TEXTBLOCK", "GRADIENT", "GROUP", "BOX", "TABLE", "EXTERNAL", "PROXY", "SPACER"};
+ static const char *effects[] = {"NONE", "PLAIN", "OUTLINE", "SOFT_OUTLINE", "SHADOW", "SOFT_SHADOW", "OUTLINE_SHADOW", "OUTLINE_SOFT_SHADOW", "FAR_SHADOW", "FAR_SOFT_SHADOW", "GLOW"};
+ static const char *shadow_direction[] = {"BOTTOM_RIGHT", "BOTTOM", "BOTTOM_LEFT", "LEFT", "TOP_LEFT", "TOP", "TOP_RIGHT", "RIGHT"};
+-static const char *prefers[] = {"NONE", "VERTICAL", "HORIZONTAL", "BOTH"};
++static const char *prefers[] = {"NONE", "VERTICAL", "HORIZONTAL", "BOTH", "SOURCE"};
+ static const char *entry_mode[] = {"NONE", "PLAIN", "EDITABLE", "PASSWORD"};
+ static const char *aspect_mode[] = {"NONE", "NEITHER", "HORIZONTAL", "VERTICAL", "BOTH"};
+ 
+-- 
+2.7.4
+
