@@ -371,6 +371,7 @@ _elm_combobox_eo_base_constructor(Eo *obj, Elm_Combobox_Data *sd)
    elm_hover_target_set(sd->hover, obj);
    snprintf(buf, sizeof(buf), "combobox_vertical/%s",
               elm_widget_style_get(obj));
+   elm_object_style_set(obj, buf);
    elm_object_style_set(sd->hover, buf);
 
    eo_do(sd->hover, eo_event_callback_add
@@ -421,6 +422,9 @@ _elm_combobox_eo_base_constructor(Eo *obj, Elm_Combobox_Data *sd)
    elm_object_part_content_set(obj, "elm.swallow.content", entry);
    elm_object_style_set(entry, buf);
 
+   /* combobox's style has no extra bit for orientation but could have... */
+   eina_stringshare_replace(&(sd->style), buf);
+
    eo_do(obj, eo_composite_attach(gl),
               eo_composite_attach(entry));
 
@@ -452,7 +456,7 @@ _elm_combobox_hover_end(Eo *obj, Elm_Combobox_Data *sd)
      {
         sd->expanded = EINA_FALSE;
         evas_object_hide(sd->hover);
-        eo_do(obj, eo_event_callback_call(ELM_HOVERSEL_EVENT_DISMISSED, NULL));
+        eo_do(obj, eo_event_callback_call(ELM_COMBOBOX_EVENT_DISMISSED, NULL));
      } // for backward compatibility
 }
 

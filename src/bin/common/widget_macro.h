@@ -91,6 +91,7 @@ TODO("see large comment below")
    COMBOBOX = elm_combobox_add(ap.win); \
    evas_object_size_hint_weight_set(COMBOBOX, EVAS_HINT_EXPAND, 0); \
    evas_object_size_hint_align_set(COMBOBOX, EVAS_HINT_FILL, 0); \
+   elm_object_style_set(COMBOBOX, "default"); \
    evas_object_show(COMBOBOX);
 
 #define SEGMENT_CONTROL_ADD(PARENT, SC) \
