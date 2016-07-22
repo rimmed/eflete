@@ -117,7 +117,7 @@ _group_copy(Project *pro, Eina_List *widgets)
                             snprintf(group_name, strlen(prefix) + strlen(style->name) + 1, "%s%s", prefix, style->name);
                             snprintf(cp_group_name, strlen(prefix) + strlen(cp_style_name) + 1, "%s%s", prefix, cp_style_name);
                             CRIT_ON_FAIL(editor_group_copy(ap.project->global_object, group_name, cp_group_name));
-                            gm_group_add(ap.project, cp_group_name);
+                            gm_group_add(ap.project, cp_group_name, true);
                          }
                     }
                }
@@ -126,20 +126,20 @@ _group_copy(Project *pro, Eina_List *widgets)
 }
 
 void
-_tabs_progress_end(void *data, PM_Project_Result result, Eina_List *widgets)
+_tabs_progress_end(void *data, PM_Project_Result result)
 {
    Meta_Data_Controls *meta = (Meta_Data_Controls *)data;
 
    if (PM_PROJECT_LOCKED == result)
      {
-        progress_end(data, result, NULL);
+        progress_end(data, result);
         popup_want_action(_("File is locked"), _("File locked by another application"),
                           NULL, BTN_OK, NULL, NULL);
         return;
      }
    if (PM_PROJECT_ERROR == result)
      {
-        progress_end(data, result, NULL);
+        progress_end(data, result);
         popup_want_action(_("File opening error"), _("Unknown problem with file appeared.<br>"
                                                      "(wrong file, filesystem error, no memory, etc)"),
                           NULL, BTN_OK, NULL, NULL);
@@ -157,13 +157,13 @@ _tabs_progress_end(void *data, PM_Project_Result result, Eina_List *widgets)
    project_navigator_project_set();
    //tabs_menu_tab_open(TAB_HOME_PROJECT_INFO);
 
-   _group_copy(ap.project, widgets);
+   //_group_copy(ap.project, widgets);
 
    config_recent_add(ap.project->name, ap.project->pro_path);
    _tab_open_project_recents_update();
    evas_object_smart_callback_call(ap.win, SIGNAL_PROJECT_OPENED, NULL);
 
-   progress_end(data, result, NULL);
+   progress_end(data, result);
 }
 
 void

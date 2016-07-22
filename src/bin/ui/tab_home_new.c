@@ -284,7 +284,7 @@ _file_to_swap_copy(Eina_Stringshare *path, const char *widget_name)
    Eina_Stringshare *path_to =
       eina_stringshare_printf("%s/%s.edc", path, widget_name);
    Eina_Stringshare *path_from =
-      eina_stringshare_printf(EFLETE_TEMPLATE_EDC_PATH"/%s.edc", widget_name);
+      eina_stringshare_printf("%s/template/edc/%s.edc", ap.path.edj_path, widget_name);
    int ch;
 
    FILE *fp_from = fopen(path_from, "r");
@@ -430,7 +430,7 @@ _edc_code_generate(Eina_Stringshare *path)
 /* SPLASH */
 
 static void
-_progress_end(void *data, PM_Project_Result result, Eina_List *widgets)
+_progress_end(void *data, PM_Project_Result result)
 {
    if (PM_PROJECT_SUCCESS == result)
      {
@@ -442,7 +442,7 @@ _progress_end(void *data, PM_Project_Result result, Eina_List *widgets)
         elm_entry_entry_set(tab_new.meta.comment, N_("Created with Eflete!"));
         _checks_set(false);
      }
-   _tabs_progress_end(data, result, widgets);
+   _tabs_progress_end(data, result);
 }
 
 static Eina_Bool
@@ -475,9 +475,8 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    fclose(fp);
 
    flags = eina_strbuf_new();
-   eina_strbuf_append_printf(flags, "-id \"%s\" -sd \"%s\" -v",
-                             EFLETE_TEMPLATE_IMAGES_PATH,
-                             EFLETE_TEMPLATE_SOUNDS_PATH);
+   eina_strbuf_append_printf(flags, "-id \"%s/template/images\" -sd \"%s/template/sounds\" -v",
+                             ap.path.edj_path, ap.path.edj_path);
 
    pm_project_import_edc(elm_entry_entry_get(tab_new.name),
                          elm_entry_entry_get(tab_new.path),

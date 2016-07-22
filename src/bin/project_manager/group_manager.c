@@ -122,22 +122,13 @@ do { \
 while (0);
 
 Eina_List *
-gm_group_used_groups_edj_get(const char *edj, const char *group)
+gm_group_used_groups_edj_get(Evas_Object *obj)
 {
    Eina_List *groups = NULL;
    Eina_List *parts, *l1;
    Eina_Stringshare *part, *source;
-   Evas *e;
-   Evas_Object *obj, *win;
    Edje_Part_Type type;
    int items_count, i;
-
-   ecore_thread_main_loop_begin();
-   win = elm_win_add(NULL, "eflete_group_groups_list_get", ELM_WIN_BASIC);
-   elm_win_norender_push(win);
-   e = evas_object_evas_get(win);
-   obj = edje_edit_object_add(e);
-   edje_object_file_set(obj, edj, group);
 
    parts = edje_edit_parts_list_get(obj);
    EINA_LIST_FOREACH(parts, l1, part)
@@ -167,29 +158,18 @@ gm_group_used_groups_edj_get(const char *edj, const char *group)
           }
      }
    edje_edit_string_list_free(parts);
-   evas_object_del(win);
-   ecore_thread_main_loop_end();
 
    return _strings_list_duplicates_del(groups);
 }
 #undef SOURCE_GET
 
 Eina_List *
-gm_group_used_images_edj_get(const char *edj, const char *group)
+gm_group_used_images_edj_get(Evas_Object *obj)
 {
    Eina_List *images = NULL;
    Eina_List *parts, *l1, *states, *l2, *tweens;
    Eina_Stringshare *part, *state, *img, *pstate;
    double pvalue;
-   Evas *e;
-   Evas_Object *obj, *win;
-
-   ecore_thread_main_loop_begin();
-   win = elm_win_add(NULL, "eflete_group_images_list_get", ELM_WIN_BASIC);
-   elm_win_norender_push(win);
-   e = evas_object_evas_get(win);
-   obj = edje_edit_object_add(e);
-   edje_object_file_set(obj, edj, group);
 
    parts = edje_edit_parts_list_get(obj);
    EINA_LIST_FOREACH(parts, l1, part)
@@ -209,27 +189,16 @@ gm_group_used_images_edj_get(const char *edj, const char *group)
           }
      }
    edje_edit_string_list_free(parts);
-   evas_object_del(win);
-   ecore_thread_main_loop_end();
 
    return _strings_list_duplicates_del(images);
 }
 
 Eina_List *
-gm_group_used_sample_edj_get(const char *edj, const char *group)
+gm_group_used_sample_edj_get(Evas_Object *obj)
 {
    Eina_List *samples = NULL;
    Eina_List *programs, *l1;
-   Evas *e;
-   Evas_Object *obj, *win;
    Eina_Stringshare *program, *sample;
-
-   ecore_thread_main_loop_begin();
-   win = elm_win_add(NULL, "eflete_group_samples_list_get", ELM_WIN_BASIC);
-   elm_win_norender_push(win);
-   e = evas_object_evas_get(win);
-   obj = edje_edit_object_add(e);
-   edje_object_file_set(obj, edj, group);
 
    programs = edje_edit_programs_list_get(obj);
    EINA_LIST_FOREACH(programs, l1, program)
@@ -245,28 +214,17 @@ gm_group_used_sample_edj_get(const char *edj, const char *group)
           }
      }
    edje_edit_string_list_free(programs);
-   evas_object_del(win);
-   ecore_thread_main_loop_end();
 
    return _strings_list_duplicates_del(samples);
 }
 
 Eina_List *
-gm_group_used_color_classes_edj_get(const char *edj, const char *group)
+gm_group_used_color_classes_edj_get(Evas_Object *obj)
 {
    Eina_List *color_classes = NULL;
    Eina_List *parts, *l1, *states, *l2;
    Eina_Stringshare *part, *state, *color_c, *pstate;
    double pvalue;
-   Evas *e;
-   Evas_Object *obj, *win;
-
-   ecore_thread_main_loop_begin();
-   win = elm_win_add(NULL, "eflete_group_color_classes_list_get", ELM_WIN_BASIC);
-   elm_win_norender_push(win);
-   e = evas_object_evas_get(win);
-   obj = edje_edit_object_add(e);
-   edje_object_file_set(obj, edj, group);
 
    parts = edje_edit_parts_list_get(obj);
    EINA_LIST_FOREACH(parts, l1, part)
@@ -285,28 +243,17 @@ gm_group_used_color_classes_edj_get(const char *edj, const char *group)
           }
      }
    edje_edit_string_list_free(parts);
-   evas_object_del(win);
-   ecore_thread_main_loop_end();
 
    return _strings_list_duplicates_del(color_classes);
 }
 
 Eina_List *
-gm_group_used_styles_edj_get(const char *edj, const char *group)
+gm_group_used_styles_edj_get(Evas_Object *obj)
 {
    Eina_List *styles = NULL;
    Eina_List *parts, *l1, *states, *l2;
    Eina_Stringshare *part, *state, *style, *pstate;
    double pvalue;
-   Evas *e;
-   Evas_Object *obj, *win;
-
-   ecore_thread_main_loop_begin();
-   win = elm_win_add(NULL, "eflete_group_styles_list_get", ELM_WIN_BASIC);
-   elm_win_norender_push(win);
-   e = evas_object_evas_get(win);
-   obj = edje_edit_object_add(e);
-   edje_object_file_set(obj, edj, group);
 
    parts = edje_edit_parts_list_get(obj);
    EINA_LIST_FOREACH(parts, l1, part)
@@ -326,8 +273,6 @@ gm_group_used_styles_edj_get(const char *edj, const char *group)
           }
      }
    edje_edit_string_list_free(parts);
-   evas_object_del(win);
-   ecore_thread_main_loop_end();
 
    return _strings_list_duplicates_del(styles);
 }
@@ -359,22 +304,13 @@ _style_font_get(Evas_Object *obj, const char *style)
 }
 
 Eina_List *
-gm_group_used_fonts_edj_get(const char *edj, const char *group)
+gm_group_used_fonts_edj_get(Evas_Object *obj)
 {
    Eina_List *fonts = NULL;
    Eina_List *parts, *l1, *states, *l2, *style_fonts;
    Eina_Stringshare *part, *state, *font, *style, *real_font, *pstate;
    double pvalue;
-   Evas *e;
-   Evas_Object *obj, *win;
    Edje_Part_Type type;
-
-   ecore_thread_main_loop_begin();
-   win = elm_win_add(NULL, "eflete_group_fonts_list_get", ELM_WIN_BASIC);
-   elm_win_norender_push(win);
-   e = evas_object_evas_get(win);
-   obj = edje_edit_object_add(e);
-   edje_object_file_set(obj, edj, group);
 
    parts = edje_edit_parts_list_get(obj);
    EINA_LIST_FOREACH(parts, l1, part)
@@ -417,8 +353,6 @@ gm_group_used_fonts_edj_get(const char *edj, const char *group)
           }
      }
    edje_edit_string_list_free(parts);
-   evas_object_del(win);
-   ecore_thread_main_loop_end();
 
    return _strings_list_duplicates_del(fonts);
 }
@@ -743,7 +677,7 @@ _group_load(Project *pro, Group *group)
 }
 
 Group *
-gm_group_add(Project *pro, const char *group_name)
+gm_group_add(Project *pro, const char *group_name, Eina_Bool emit)
 {
    Group *group;
 
@@ -754,7 +688,7 @@ gm_group_add(Project *pro, const char *group_name)
    resource_insert(&pro->groups, (Resource *)group);
 
    _group_load(pro, group);
-   evas_object_smart_callback_call(ap.win, SIGNAL_GROUP_ADDED, (void *)group);
+   if (emit) evas_object_smart_callback_call(ap.win, SIGNAL_GROUP_ADDED, (void *)group);
    return group;
 }
 
@@ -797,38 +731,12 @@ gm_group_del(Project *pro, Group *group)
    resource_free((Resource *)group);
 }
 
-Eina_Bool
-_is_checked(Eina_List *widgets)
-{
-   Eina_List *l, *ll, *lll;
-   Tree_Item_Data *widget, *style;
-   End_Item_Data *item_style;
-
-   EINA_LIST_FOREACH(widgets, l, widget)
-     {
-        if (widget->check) return EINA_TRUE;
-        EINA_LIST_FOREACH(widget->list, ll, style)
-          {
-             if (style->check) return EINA_TRUE;
-             if (style->copy) return EINA_TRUE;
-             EINA_LIST_FOREACH(style->list, lll, item_style)
-               if (item_style->check) return EINA_TRUE;
-          }
-     }
-
-   return EINA_FALSE;
-}
-
 void
 gm_groups_load(Project *pro)
 {
-   Eina_List *collections, *l, *wl, *wll, *wlll;
+   Eina_List *collections, *l;
    Eina_Stringshare *group_name;
-   const char *widget_name;
-   Tree_Item_Data *widget, *style;
-   End_Item_Data *item_style;
    Group *group;
-   Eina_Bool check, is_checked;
 
    assert(pro != NULL);
    assert(pro->dev != NULL);
@@ -838,47 +746,11 @@ gm_groups_load(Project *pro)
 
    assert(collections != NULL);
 
-   is_checked = _is_checked(pro->widgets);
-
    collections = eina_list_sort(collections, eina_list_count(collections), (Eina_Compare_Cb) strcmp);
    EINA_LIST_FOREACH(collections, l, group_name)
      {
-        check = false;
         if (!strcmp(group_name, EFLETE_INTERNAL_GROUP_NAME)) continue;
 
-        if (pro->widgets && is_checked)
-          {
-             widget_name = widget_name_get(group_name);
-             if (!widget_name) continue;
-             EINA_LIST_FOREACH(pro->widgets, wl, widget)
-               {
-                  EINA_LIST_FOREACH(widget->list, wll, style)
-                    {
-                       if (style->check)
-                         {
-                            if (!strcmp(widget->name, widget_name) &&
-                                style_name_check(group_name, style->name))
-                              {
-                                 check = true;
-                                 break;
-                              }
-                         }
-                       EINA_LIST_FOREACH(style->list, wlll, item_style)
-                         {
-                            if (item_style->check)
-                              {
-                                 if (!strcmp(widget->name, widget_name) &&
-                                     item_style_name_check(group_name, item_style->name, widget->list))
-                                   {
-                                      check = true;
-                                      break;
-                                   }
-                              }
-                         }
-                    }
-               }
-             if (!check) continue;
-          }
         group = (Group *)resource_add(group_name, RESOURCE_TYPE_GROUP);
         pro->groups = eina_list_append(pro->groups, group);
      }
