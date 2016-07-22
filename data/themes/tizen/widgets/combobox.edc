@@ -13,8 +13,8 @@ group { name: "elm/button/base/combobox_vertical/default";
          }
          description { state: "focus" 0.0;
          }
-       }
-       part { name: "base";
+      }
+      part { name: "base";
          type: SPACER;
          description { state: "default" 0.0;
             min: 0 24;
@@ -150,22 +150,6 @@ group { name: "elm/button/base/combobox_vertical/default";
          signal: "mouse,out";
          filter: "dummy" "default";
          action: STATE_SET "default" 0.0;
-         target: "border";
-         target: "bg";
-      }
-      program { name: "unfocus";
-         source: "elm";
-         signal: "elm,action,unfocus";
-         filter: "dummy" "default";
-         action: STATE_SET "default" 0.0;
-         target: "border";
-         target: "bg";
-      }
-      program { name: "focus";
-         source: "elm";
-         signal: "elm,action,focus";
-         filter: "dummy" "default";
-         action: STATE_SET "focus" 0.0;
          target: "border";
          target: "bg";
       }
@@ -449,7 +433,63 @@ group { name: "elm/button/base/combobox_vertical/color_class";
    max: 9999 24;
    images.image: "Property/color_class_img.png" COMP;
    parts {
-     part { name: "elm.swallow.content";
+      part { name: "base";
+         type: SPACER;
+         description { state: "default" 0.0;
+            max: -1 24;
+         }
+      }
+      part { name: "border";
+         type: RECT;
+         description { state: "default" 0.0;
+            color: 174 174 174 255;
+         }
+         description { state: "focus" 0.0;
+            inherit: "default" 0.00;
+            color: 5 140 238 255;
+         }
+      }
+      part { name: "bg";
+         type: RECT;
+         description { state: "default" 0.0;
+            rel1.offset: 1 1;
+            rel2.offset: -2 -2;
+         }
+      }
+      rect { "icon_clip";
+         desc { "default";
+         }
+         desc { "disabled";
+            inherit: "default";
+            color: 255 255 255 180;
+         }
+      }
+      rect { "event";
+         desc { "default";
+            color: 0 0 0 0;
+         }
+         desc { "disabled";
+            inherit: "default";
+            visible: 0;
+         }
+      }
+      part { name: "left.offset";
+         type: SPACER;
+         description { state: "default" 0.0;
+            align: 0.0 0.0;
+            min: 10 0;
+            max: 10 -1;
+         }
+      }
+      part { name: "right.offset";
+         type: SPACER;
+         description { state: "default" 0.0;
+            align: 1.0 1.0;
+            min: 20 19;
+            max: 20 -1;
+         }
+      }
+      part { name: "elm.swallow.content";
          type: SWALLOW;
          clip_to: "icon_clip";
          description { state: "default" 0.0;
@@ -917,38 +957,6 @@ group { name: "elm/genlist/base/combobox_vertical/default";
       part { name: "bg";
          description { state: "default" 0.0;
             color_class: "combobox_list_bg";
-         }
-      }
-   }
-
-}
-
-group { name: "elm/hover/base/combobox_vertical/library";
-   inherit: "elm/hover/base/combobox_vertical/default";
-   parts {
-      part { name: "elm.swallow.slot.bottom"; type: SWALLOW;
-         clip_to: "bottomclip";
-         description { state: "default" 0.0;
-            min: 110 0;
-            align: 0.0 1.0;
-            fixed: 0 1;
-            rel1.to: "elm.swallow.slot.middle";
-            rel1.relative: 0.0 1.0;
-            rel1.offset: 1 0;
-            rel2.to: "elm.swallow.slot.middle";
-            rel2.relative: 1.0 1.0;
-         }
-         description { state: "visible" 0.0;
-            inherit: "default" 0.0;
-            align: 0.0 0.0;
-         }
-         description { state: "right" 0.0;
-            inherit: "default" 0.0;
-            align: 1.0 1.0;
-         }
-         description { state: "right_visible" 0.0;
-            inherit: "default" 0.0;
-            align: 1.0 0.0;
          }
       }
    }
