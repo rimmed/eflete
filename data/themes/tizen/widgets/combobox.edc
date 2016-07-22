@@ -960,10 +960,6 @@ group { name: "elm/genlist/base/combobox_vertical/default";
          }
       }
    }
-<<<<<<< 9faa7f533c99a57ff5f0bf23d9a8847dc5a761bc
-=======
-
->>>>>>> Tizen theme: update theme for combobox.
 }
 
 group { name: "elm/genlist/item_compress/default/combobox_vertical/color_class";
