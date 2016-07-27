@@ -1,0 +1,26 @@
+From ca79210aac49692af4fc3c56e4127cb97314d2b9 Mon Sep 17 00:00:00 2001
+From: Jean Guyomarc'h <jean@guyomarch.bzh>
+Date: Sat, 4 Jun 2016 16:51:38 +0200
+Subject: [PATCH 47/64] edje: don't return a boolean when a pointer is expected
+
+Fix a warning thrown by Apple-llvm.
+---
+ src/lib/edje/edje_edit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index b0d91b4..03bd8fd 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -5266,7 +5266,7 @@ edje_edit_part_item_index_name_get(Evas_Object *obj, const char *part, unsigned
+        (rp->part->type != EDJE_PART_TYPE_TABLE))
+      return NULL;
+    if (rp->part->items_count < index)
+-     return EINA_FALSE;
++     return NULL;
+ 
+    ep = rp->part;
+ 
+-- 
+2.7.4
+

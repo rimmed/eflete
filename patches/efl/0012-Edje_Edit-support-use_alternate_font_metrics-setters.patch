@@ -1,0 +1,102 @@
+From 643bf1f04a378e72d20504f29768ece3f724d74d Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Wed, 24 Feb 2016 11:45:49 +0000
+Subject: [PATCH 12/64] Edje_Edit: support use_alternate_font_metrics setters
+ and getters
+
+---
+ src/lib/edje/Edje_Edit.h | 23 +++++++++++++++++++++++
+ src/lib/edje/edje_edit.c | 36 ++++++++++++++++++++++++++++++------
+ 2 files changed, 53 insertions(+), 6 deletions(-)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 96d6c48..9b2a3f9 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -1517,6 +1517,29 @@ EAPI Eina_Bool edje_edit_part_repeat_events_get(Evas_Object *obj, const char *pa
+  */
+ EAPI Eina_Bool edje_edit_part_repeat_events_set(Evas_Object *obj, const char *part, Eina_Bool repeat_events);
+ 
++/** Get use_alternate_font_metrics variable for part.
++ *
++ * @param obj Object being edited.
++ * @param part Part to get use_alternate_font_metrics for text or textblock part is enabled.
++ *
++ * @return @c EINA_TRUE if use_alternate_font_metrics, @c EINA_FALSE otherwise
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_use_alternate_font_metrics_get(Evas_Object *obj, const char *part);
++
++/** Set use_alternate_font_metrics variable for part.
++ *
++ * @param obj Object being edited.
++ * @param part Part to set use_alternate_font_metrics for text or textblock part is enabled.
++ * @param use EINA_TRUE if use_alternate_font_metrics, @c EINA_FALSE otherwise
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_use_alternate_font_metrics_set(Evas_Object *obj, const char *part, Eina_Bool use);
++
+ /** Get multiline for part.
+  *
+  * @param obj Object being edited.
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index a91a75d..525fef5 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -3783,6 +3783,32 @@ edje_edit_part_repeat_events_set(Evas_Object *obj, const char *part, Eina_Bool r
+ }
+ 
+ EAPI Eina_Bool
++edje_edit_part_use_alternate_font_metrics_get(Evas_Object *obj, const char *part)
++{
++   GET_RP_OR_RETURN(0);
++
++   if ((rp->part->type != EDJE_PART_TYPE_TEXT) &&
++       (rp->part->type != EDJE_PART_TYPE_TEXTBLOCK))
++     return EINA_FALSE;
++
++   return rp->part->use_alternate_font_metrics;
++}
++
++EAPI Eina_Bool
++edje_edit_part_use_alternate_font_metrics_set(Evas_Object *obj, const char *part, Eina_Bool use)
++{
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   if ((!rp->object) ||
++       ((rp->part->type != EDJE_PART_TYPE_TEXT) &&
++        (rp->part->type != EDJE_PART_TYPE_TEXTBLOCK)))
++     return EINA_FALSE;
++
++   rp->part->use_alternate_font_metrics = use;
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
+ edje_edit_part_multiline_get(Evas_Object *obj, const char *part)
+ {
+    GET_RP_OR_RETURN(0);
+@@ -11997,12 +12023,10 @@ _edje_generate_source_of_part(Evas_Object *obj, Edje_Part *ep, Eina_Strbuf *buf)
+    if (rp->part->access)
+      BUF_APPEND(I4 "access: 1;\n");
+ 
+-   //TODO Support use_alternate_font_metrics
+-   if ((str = _edje_part_clip_to_get(ed, rp)))
+-     {
+-        BUF_APPENDF(I4 "clip_to: \"%s\";\n", str);
+-        edje_edit_string_free(str);
+-     }
++   if ((rp->part->type == EDJE_PART_TYPE_TEXTBLOCK) ||
++       (rp->part->type == EDJE_PART_TYPE_TEXT))
++     if (rp->part->use_alternate_font_metrics)
++       BUF_APPENDF(I4 "use_alternate_font_metrics: 1;\n");
+ 
+    if ((rp->part->type == EDJE_PART_TYPE_TEXTBLOCK) ||
+        (rp->part->type == EDJE_PART_TYPE_GROUP))
+-- 
+2.7.4
+

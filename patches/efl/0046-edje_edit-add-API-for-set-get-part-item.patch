@@ -1,0 +1,113 @@
+From 3b1492dd25a3d995f62c69b80738e6b532d38e31 Mon Sep 17 00:00:00 2001
+From: Vyacheslav Reutskiy <v.reutskiy@samsung.com>
+Date: Fri, 3 Jun 2016 12:26:57 +0300
+Subject: [PATCH 46/64] edje_edit: add API for set/get part item
+
+---
+ src/lib/edje/Edje_Edit.h | 25 +++++++++++++++++++++++
+ src/lib/edje/edje_edit.c | 53 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 78 insertions(+)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 5f5cb86..0422e83 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -2507,6 +2507,31 @@ EAPI Eina_Bool edje_edit_part_item_del(Evas_Object *obj, const char *part, const
+ EAPI Eina_Bool
+ edje_edit_part_item_index_del(Evas_Object *obj, const char *part, unsigned int index);
+ 
++/** Set name for item from table or box items.
++ *
++ * @param obj Object being edited.
++ * @param part Part to change item's source. This part should have BOX or TABLE type.
++ * @param index Index of item
++ * @param name New item name.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_index_name_set(Evas_Object *obj, const char *part, unsigned int index, const char *name);
++
++/** Get name for item from table or box items.
++ *
++ * @param obj Object being edited.
++ * @param part Part to return item's source. This part should have BOX or TABLE type.
++ * @param index Index of item.
++ *
++ * @return name of the given item.
++ * @since 1.18
++ */
++EAPI const char *
++edje_edit_part_item_index_name_get(Evas_Object *obj, const char *part, unsigned int index);
++
+ /** Set source for item from table or box items.
+  *
+  * @param obj Object being edited.
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index b0a3ebf..b0d91b4 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -5222,6 +5222,59 @@ edje_edit_part_item_index_del(Evas_Object *obj, const char *part, unsigned int i
+    return EINA_TRUE;
+ }
+ 
++EAPI Eina_Bool
++edje_edit_part_item_index_name_set(Evas_Object *obj, const char *part, unsigned int index, const char *name)
++{
++   Edje_Part *ep;
++   unsigned int i;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++   if (rp->part->items_count < index)
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a part with given name is exists. */
++   for (i = 0; i < ep->items_count; ++i)
++     {
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, name)))
++          return EINA_FALSE;
++     }
++
++   eina_stringshare_del(ep->items[index]->name);
++   ep->items[index]->name = eina_stringshare_add(name);
++
++   return EINA_TRUE;
++}
++
++EAPI const char *
++edje_edit_part_item_index_name_get(Evas_Object *obj, const char *part, unsigned int index)
++{
++   Edje_Part *ep;
++
++   GET_RP_OR_RETURN(NULL);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return NULL;
++   if (rp->part->items_count < index)
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return NULL;
++
++   return eina_stringshare_add(ep->items[index]->name);
++}
++
+ /* deprecated */
+ EAPI Eina_Bool
+ edje_edit_part_item_source_set(Evas_Object *obj, const char *part, const char *item_name, const char *source_group)
+-- 
+2.7.4
+

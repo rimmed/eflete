@@ -1,7 +1,7 @@
-From 4f242fb48a5cf18b6e5ea6598681486abf791771 Mon Sep 17 00:00:00 2001
+From de9b71dd6a82117b51b2c35255cc529228e18a42 Mon Sep 17 00:00:00 2001
 From: Vincent Torri <vincent dot torri at gmail dot com>
 Date: Thu, 3 Dec 2015 10:52:56 +0100
-Subject: [PATCH 03/79] efl: add binary mode to fdopen() calls
+Subject: [PATCH 03/64] efl: add binary mode to fdopen() calls
 
 This allows better compatibility with Windows
 
@@ -11,10 +11,10 @@ Signed-off-by: Cedric BAIL <cedric@osg.samsung.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
-index f714fc3..f4f282a 100644
+index 84fd07b..a9ec942 100644
 --- a/src/lib/edje/edje_edit.c
 +++ b/src/lib/edje/edje_edit.c
-@@ -10156,7 +10156,7 @@ _edje_edit_embryo_rebuild(Edje_Edit *eed)
+@@ -10152,7 +10152,7 @@ _edje_edit_embryo_rebuild(Edje_Edit *eed)
     if (fd < 0)
       return EINA_FALSE;  /* FIXME: report something */
  

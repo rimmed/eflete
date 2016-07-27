@@ -1,0 +1,45 @@
+From e6f31e688049b7d81e30b1bff44ac3c120adfc03 Mon Sep 17 00:00:00 2001
+From: Andrii Kroitor <an.kroitor@samsung.com>
+Date: Mon, 18 Apr 2016 16:32:26 -0700
+Subject: [PATCH 17/64] edje_edit: add missing mempools on group copy
+
+Reviewers: reutskiy.v.v, cedric
+
+Subscribers: cedric, FurryMyad, NikaWhite, jpeg
+
+Differential Revision: https://phab.enlightenment.org/D3899
+
+Signed-off-by: Cedric BAIL <cedric@osg.samsung.com>
+---
+ src/lib/edje/edje_edit.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 8b82361..0022f5a 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -1641,6 +1641,10 @@ edje_edit_group_copy(Evas_Object *obj, const char *group_name, const char *copy_
+    EDIT_EMN(TABLE, Edje_Part_Description_Table, de);
+    EDIT_EMN(EXTERNAL, Edje_Part_Description_External, de);
+    EDIT_EMN(SPACER, Edje_Part_Description_Common, de);
++   EDIT_EMN(SNAPSHOT, Edje_Part_Description_Snapshot, de);
++   EDIT_EMN(MESH_NODE, Edje_Part_Description_Mesh_Node, de);
++   EDIT_EMN(LIGHT, Edje_Part_Description_Light, de);
++   EDIT_EMN(CAMERA, Edje_Part_Description_Camera, de);
+    EDIT_EMN(part, Edje_Part, de);
+ 
+    EDIT_EMNP(RECTANGLE, Edje_Part_Description_Common, de);
+@@ -1654,6 +1658,10 @@ edje_edit_group_copy(Evas_Object *obj, const char *group_name, const char *copy_
+    EDIT_EMNP(TABLE, Edje_Part_Description_Table, de);
+    EDIT_EMNP(EXTERNAL, Edje_Part_Description_External, de);
+    EDIT_EMNP(SPACER, Edje_Part_Description_Common, de);
++   EDIT_EMNP(SNAPSHOT, Edje_Part_Description_Snapshot, de);
++   EDIT_EMNP(MESH_NODE, Edje_Part_Description_Mesh_Node, de);
++   EDIT_EMNP(LIGHT, Edje_Part_Description_Light, de);
++   EDIT_EMNP(CAMERA, Edje_Part_Description_Camera, de);
+ 
+    epc->id = id;
+    epc->part = eina_stringshare_add(copy_name);
+-- 
+2.7.4
+

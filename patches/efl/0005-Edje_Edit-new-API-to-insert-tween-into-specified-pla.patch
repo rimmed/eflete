@@ -1,0 +1,100 @@
+From 46abf9847d88c3b9245c1d524a5852730c3d170d Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Thu, 18 Feb 2016 15:40:50 +0000
+Subject: [PATCH 05/64] Edje_Edit: new API to insert tween into specified place
+
+> edje_edit_state_tween_insert_at
+---
+ src/lib/edje/Edje_Edit.h | 16 ++++++++++++++++
+ src/lib/edje/edje_edit.c | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 64 insertions(+)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 29ddd1b..dc40eee 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -5462,6 +5462,22 @@ EAPI Eina_List * edje_edit_state_tweens_list_get(Evas_Object *obj, const char *p
+  */
+ EAPI Eina_Bool edje_edit_state_tween_add(Evas_Object *obj, const char *part, const char *state, double value, const char *tween);
+ 
++/** Insert a new tween frame to the given part state into a specific place.
++ *
++ * The tween param must be the name of an existing image.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain state.
++ * @param state The name of the state to add a new tween frame (not including the state value).
++ * @param value The state value.
++ * @param tween The name of the image to add.
++ * @param place Place to be added. It can't be less than 0 or more than current size of tweens.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ */
++EAPI Eina_Bool
++edje_edit_state_tween_insert_at(Evas_Object *obj, const char *part, const char *state, double value, const char *tween, int place);
++
+ /** Remove the first tween with the given name.
+  *
+  * The image is not removed from the edje.
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index f0fd5a7..baf0a20 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -8734,6 +8734,54 @@ edje_edit_state_tween_add(Evas_Object *obj, const char *part, const char *state,
+ }
+ 
+ EAPI Eina_Bool
++edje_edit_state_tween_insert_at(Evas_Object *obj, const char *part, const char *state, double value, const char *tween, int place)
++{
++   Edje_Part_Description_Image *img;
++   Edje_Part_Image_Id **tmp;
++   Edje_Part_Image_Id *i;
++   int id;
++   unsigned int j;
++
++   if (place < 0)
++     return EINA_FALSE;
++
++   GET_PD_OR_RETURN(EINA_FALSE);
++
++   if (rp->part->type != EDJE_PART_TYPE_IMAGE)
++     return EINA_FALSE;
++
++   id = _edje_image_id_find(eed, tween);
++   if (id < EINA_FALSE) return 0;
++
++   /* alloc Edje_Part_Image_Id */
++   i = _alloc(sizeof(Edje_Part_Image_Id));
++   if (!i) return EINA_FALSE;
++   i->id = id;
++
++   img = (Edje_Part_Description_Image *)pd;
++
++   if ((unsigned)place > img->image.tweens_count)
++     return EINA_FALSE;
++
++   /* add to tween list */
++   tmp = realloc(img->image.tweens,
++                 sizeof(Edje_Part_Image_Id *) * (img->image.tweens_count + 1));
++   if (!tmp)
++     {
++        free(i);
++        return EINA_FALSE;
++     }
++
++   img->image.tweens_count++;
++   for (j = img->image.tweens_count - 1; j > (unsigned)place; j--)
++     tmp[j] = tmp[j - 1];
++   tmp[place] = i;
++   img->image.tweens = tmp;
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
+ edje_edit_state_tween_del(Evas_Object *obj, const char *part, const char *state, double value, const char *tween)
+ {
+    Edje_Part_Description_Image *img;
+-- 
+2.7.4
+
