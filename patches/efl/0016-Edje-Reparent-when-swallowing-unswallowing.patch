@@ -1,7 +1,7 @@
-From e600eb2407ce87a53fc30b760c9786648f44ca7f Mon Sep 17 00:00:00 2001
+From 7c73f88779c33469e9202998064369713bd1d8a9 Mon Sep 17 00:00:00 2001
 From: Tom Hacohen <tom@stosb.com>
 Date: Thu, 7 Apr 2016 14:56:57 +0100
-Subject: [PATCH 16/64] Edje: Reparent when swallowing/unswallowing.
+Subject: [PATCH 16/71] Edje: Reparent when swallowing/unswallowing.
 
 On swallow make the edje object the parent, on unswallow the canvas.
 ---

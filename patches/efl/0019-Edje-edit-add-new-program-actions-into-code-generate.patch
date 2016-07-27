@@ -1,7 +1,7 @@
-From f81166fe04e69d015e59de833648d381581fc0bc Mon Sep 17 00:00:00 2001
+From 1553d7b02547b3040b3ffe8e6b21964caf43554c Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Tue, 19 Apr 2016 14:06:40 +0300
-Subject: [PATCH 19/64] Edje edit: add new program actions into code generate
+Subject: [PATCH 19/71] Edje edit: add new program actions into code generate
  function.
 
 Generate edc source code for next action types:

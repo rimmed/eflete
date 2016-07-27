@@ -1,7 +1,7 @@
-From bd6d55a54f437c4b91a30bcad3c75067fa97a55f Mon Sep 17 00:00:00 2001
+From ad36d1c557443f2935011c10198ec5623746b49c Mon Sep 17 00:00:00 2001
 From: Andrii Kroitor <an.kroitor@samsung.com>
 Date: Fri, 22 Apr 2016 16:12:26 -0700
-Subject: [PATCH 21/64] edje_edit: fix mempools in group/alias add
+Subject: [PATCH 21/71] edje_edit: fix mempools in group/alias add
 
 Summary: moved mempools adding to separate method to avoid this problem in future
 

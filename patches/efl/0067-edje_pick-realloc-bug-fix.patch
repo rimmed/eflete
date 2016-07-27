@@ -1,0 +1,26 @@
+From 6543eeee2cec3ead3d98f314fb1befe5c51a515b Mon Sep 17 00:00:00 2001
+From: Jaehwan Kim <jae.hwan.kim@samsung.com>
+Date: Thu, 7 Jul 2016 14:30:17 +0900
+Subject: [PATCH 67/71] edje_pick: realloc bug fix
+
+@fix
+---
+ src/bin/edje/edje_pick.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/bin/edje/edje_pick.c b/src/bin/edje/edje_pick.c
+index 05528e1..7b5d73d 100644
+--- a/src/bin/edje/edje_pick.c
++++ b/src/bin/edje/edje_pick.c
+@@ -745,7 +745,7 @@ _edje_pick_images_copy(Edje_File *edf, Edje_File *o)
+                        o->image_dir->entries_count += 1;
+ 
+                        /* alloc mem first time  or  re-allocate again (bigger array) */
+-                       entries = realloc(entries,
++                       entries = realloc(o->image_dir->entries,
+                                          o->image_dir->entries_count *
+                                          sizeof(Edje_Image_Directory_Entry));
+                        if (!entries)
+-- 
+2.7.4
+

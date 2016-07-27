@@ -1,7 +1,7 @@
-From 3da1f563286ae76355b6e28c95b3a0eb5567331a Mon Sep 17 00:00:00 2001
+From 903f75196950a0cab14927619cc174a69e80275b Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Mon, 16 May 2016 14:25:00 +0300
-Subject: [PATCH 38/64] Edje_edit: generate state code with inheritance rel
+Subject: [PATCH 38/71] Edje_edit: generate state code with inheritance rel
  block.
 
 Add ability to generate inherited code for relative block.

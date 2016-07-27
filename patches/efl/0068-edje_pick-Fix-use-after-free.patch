@@ -1,0 +1,31 @@
+From 09df3d6159436fda2c247401f02e41ebc5fc541c Mon Sep 17 00:00:00 2001
+From: Jean-Philippe Andre <jp.andre@samsung.com>
+Date: Wed, 13 Jul 2016 11:16:33 +0900
+Subject: [PATCH 68/71] edje_pick: Fix use after free
+
+Fixes CID 1267458 (trying again)
+---
+ src/bin/edje/edje_pick.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/bin/edje/edje_pick.c b/src/bin/edje/edje_pick.c
+index 7b5d73d..ce34ed5 100644
+--- a/src/bin/edje/edje_pick.c
++++ b/src/bin/edje/edje_pick.c
+@@ -1474,12 +1474,12 @@ main(int argc, char **argv)
+              }
+ 
+              free(edc);
+-             _edje_cache_file_unref(edf);
+              edje_cache_emp_free(ce);
+              eet_close(ef);
+           }
+ 
+         _edje_pick_images_copy(edf, out_file);  /* Add Images to imagelist */
++        _edje_cache_file_unref(edf);
+ 
+         /* We SKIP writing source, just can't compose it */
+         /* FIXME: use Edje_Edit code to generate source */
+-- 
+2.7.4
+

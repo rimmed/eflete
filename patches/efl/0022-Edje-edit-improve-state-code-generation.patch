@@ -1,7 +1,7 @@
-From 32938ec2e975f8ca91268bba2e875126ce3b4277 Mon Sep 17 00:00:00 2001
+From 465c25866ee9c3ce6e018346cab95f7e83afbf64 Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Tue, 26 Apr 2016 18:08:23 +0300
-Subject: [PATCH 22/64] Edje edit: improve state code generation.
+Subject: [PATCH 22/71] Edje edit: improve state code generation.
 
 Split function _edje_generate_source_of_state into
 separated smallest functions, that represent generation

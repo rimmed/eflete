@@ -1,7 +1,7 @@
-From 54a27e1b4233810a61b094a2548164de08a019f5 Mon Sep 17 00:00:00 2001
+From 657cb9c1a7ddb840e68cbc05d98dedc073716610 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Tue, 23 Feb 2016 17:27:25 +0000
-Subject: [PATCH 11/64] Edje_Edit: Edje_Edit: update source generation to print
+Subject: [PATCH 11/71] Edje_Edit: Edje_Edit: update source generation to print
  size classes
 
 ---

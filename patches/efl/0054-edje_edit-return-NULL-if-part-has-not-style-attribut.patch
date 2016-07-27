@@ -1,7 +1,7 @@
-From b5a644b70331f576aa650d8daa71f888d92d342a Mon Sep 17 00:00:00 2001
+From 05b9b86ea41771f7d187dccead01059a1c15c8a2 Mon Sep 17 00:00:00 2001
 From: Vyacheslav Reutskiy <v.reutskiy@samsung.com>
 Date: Thu, 16 Jun 2016 10:56:31 +0300
-Subject: [PATCH 54/64] edje_edit: return NULL if part has not style attribute
+Subject: [PATCH 54/71] edje_edit: return NULL if part has not style attribute
 
 ---
  src/lib/edje/edje_edit.c | 5 ++++-

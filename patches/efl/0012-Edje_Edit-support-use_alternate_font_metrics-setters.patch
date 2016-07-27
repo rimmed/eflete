@@ -1,7 +1,7 @@
-From 643bf1f04a378e72d20504f29768ece3f724d74d Mon Sep 17 00:00:00 2001
+From 9b4a6a4f9b2e9404b1dc2544b4e4037bb5fa9cc8 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Wed, 24 Feb 2016 11:45:49 +0000
-Subject: [PATCH 12/64] Edje_Edit: support use_alternate_font_metrics setters
+Subject: [PATCH 12/71] Edje_Edit: support use_alternate_font_metrics setters
  and getters
 
 ---

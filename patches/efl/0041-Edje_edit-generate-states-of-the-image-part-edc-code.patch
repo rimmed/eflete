@@ -1,7 +1,7 @@
-From b3accd6fa6605c921cee196da9b292e3ba29dd34 Mon Sep 17 00:00:00 2001
+From 85f690d4bea8df5e6c7dfc71d9f27e2f3a444917 Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Mon, 16 May 2016 15:12:31 +0300
-Subject: [PATCH 41/64] Edje_edit: generate states of the image part edc code
+Subject: [PATCH 41/71] Edje_edit: generate states of the image part edc code
  with inheritance.
 
 Generate inheritance image attributes from similar state.

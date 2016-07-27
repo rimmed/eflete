@@ -1,7 +1,7 @@
-From bf6e5657aab7e58daed84c7e4a7e3957ea9d2e31 Mon Sep 17 00:00:00 2001
+From fdcbad7bcc499300f9cf532c860b21eb083a31b7 Mon Sep 17 00:00:00 2001
 From: Yeshwanth Reddivari <r.yeshwanth@samsung.com>
 Date: Mon, 23 Nov 2015 18:51:08 +0900
-Subject: [PATCH 01/64] Edje: Remove duplicate NULL reassignment
+Subject: [PATCH 01/71] Edje: Remove duplicate NULL reassignment
 
 Summary:
 Remove duplicate code of variable 's' assignment to NULL in edje_edit_style_del.

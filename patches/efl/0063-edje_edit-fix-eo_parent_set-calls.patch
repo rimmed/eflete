@@ -1,7 +1,7 @@
-From 99652107ca38d14fea6f912c060057ac3e870b2f Mon Sep 17 00:00:00 2001
+From bcc3ddfe94d3d99b2498b629b32f4a648b055307 Mon Sep 17 00:00:00 2001
 From: Andrii Kroitor <an.kroitor@samsung.com>
 Date: Wed, 20 Jul 2016 17:31:57 +0300
-Subject: [PATCH 63/64] edje_edit: fix eo_parent_set calls
+Subject: [PATCH 63/71] edje_edit: fix eo_parent_set calls
 
 ---
  src/lib/edje/edje_edit.c | 4 ++--

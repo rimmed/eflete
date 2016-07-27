@@ -1,7 +1,7 @@
-From a428418502aa90240f13ee9290971faba073e576 Mon Sep 17 00:00:00 2001
+From e26941b1ea078c56a517a34925a87a33a4b002cc Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Wed, 24 Feb 2016 13:55:14 +0000
-Subject: [PATCH 14/64] Edje_Edit: return accidently removed clip_to in code
+Subject: [PATCH 14/71] Edje_Edit: return accidently removed clip_to in code
  generation
 
 Oops...

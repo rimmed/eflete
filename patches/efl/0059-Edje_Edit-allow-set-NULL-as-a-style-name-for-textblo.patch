@@ -1,7 +1,7 @@
-From 24356abe21a784f607b6ce014030644150f2ac94 Mon Sep 17 00:00:00 2001
+From df8209659b904a7fc1dde4ba1dccb49da2991b36 Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Tue, 5 Jul 2016 20:18:32 +0300
-Subject: [PATCH 59/64] Edje_Edit: allow set NULL as a style name for textblock
+Subject: [PATCH 59/71] Edje_Edit: allow set NULL as a style name for textblock
  part.
 
 NULL as 'style' value remove style name from textblock part state.

@@ -1,7 +1,7 @@
-From 3133bb381977112d00e931bd527c7d7310d429fa Mon Sep 17 00:00:00 2001
+From 593214a63a9201772ba847de8ec65a09561f38c5 Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Mon, 18 Apr 2016 16:46:39 +0300
-Subject: [PATCH 18/64] Edje edit: fix get list of program tagrets.
+Subject: [PATCH 18/71] Edje edit: fix get list of program tagrets.
 
 Correct support all types of program actions for constructing
 list of targets.

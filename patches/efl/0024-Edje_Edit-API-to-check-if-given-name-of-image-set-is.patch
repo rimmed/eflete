@@ -1,7 +1,7 @@
-From 3429b83fda465b6a06da4ff0ab2e70df40d7e42e Mon Sep 17 00:00:00 2001
+From e9facbc5b34c8fac2df2190cfefce6ac0436c6e2 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Tue, 26 Apr 2016 15:04:46 +0300
-Subject: [PATCH 24/64] Edje_Edit: API to check if given name of "image set" is
+Subject: [PATCH 24/71] Edje_Edit: API to check if given name of "image set" is
  exist
 
 edje_edit_image_set_exists

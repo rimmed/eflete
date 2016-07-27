@@ -1,7 +1,7 @@
-From 3aa7f06dab7b2f565b14c09afe383ee57a9ae67a Mon Sep 17 00:00:00 2001
+From ff60cf2877a826559f1e8ec63ff85f03ba2255b4 Mon Sep 17 00:00:00 2001
 From: "Carsten Haitzler (Rasterman)" <raster@rasterman.com>
 Date: Mon, 4 Jul 2016 14:59:59 +0900
-Subject: [PATCH 58/64] edje - reduce memory footprint by rearranging structs
+Subject: [PATCH 58/71] edje - reduce memory footprint by rearranging structs
  and types
 
 this should cut some memory used by edje by using smaller types like

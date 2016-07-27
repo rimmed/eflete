@@ -1,7 +1,7 @@
-From ca79210aac49692af4fc3c56e4127cb97314d2b9 Mon Sep 17 00:00:00 2001
+From 68c91bd2c4e394aaf5c3ead3a70afb293aa87c0a Mon Sep 17 00:00:00 2001
 From: Jean Guyomarc'h <jean@guyomarch.bzh>
 Date: Sat, 4 Jun 2016 16:51:38 +0200
-Subject: [PATCH 47/64] edje: don't return a boolean when a pointer is expected
+Subject: [PATCH 47/71] edje: don't return a boolean when a pointer is expected
 
 Fix a warning thrown by Apple-llvm.
 ---

@@ -1,0 +1,37 @@
+From 227ed532ac2c6a7f62fe1c210337757089fc931d Mon Sep 17 00:00:00 2001
+From: Vyacheslav Reutskiy <v.reutskiy@samsung.com>
+Date: Thu, 21 Jul 2016 14:02:46 +0300
+Subject: [PATCH 70/71] edje_pick: reset alias flag for copied group
+
+edje_pick make copy of whole group, even if group is alias. So if
+group was alias need to reset this flag.
+
+@fix
+---
+ src/bin/edje/edje_pick.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/bin/edje/edje_pick.c b/src/bin/edje/edje_pick.c
+index 0c9595f..e8163ca 100644
+--- a/src/bin/edje/edje_pick.c
++++ b/src/bin/edje/edje_pick.c
+@@ -592,6 +592,7 @@ _edje_pick_header_dependencies_check(Edje_File *out_file, Edje_File *edf, Edje_P
+              ce_out = malloc(sizeof(*ce_out)); \
+              memcpy(ce_out, ce_cor, sizeof(*ce_out)); \
+              ce_out->id = *current_id; \
++             ce_out->group_alias = EINA_FALSE; \
+              EINA_LOG_INFO("Changing ID of group <%d> to <%d>\n", ce->id, ce_out->id); \
+              eina_hash_direct_add(out_file->collection, ce_out->entry, ce_out); \
+              (*current_id)++; \
+@@ -704,6 +705,8 @@ _edje_pick_header_make(Edje_File *out_file , Edje_File *edf, Eina_List *ifs)
+                   ce_out = malloc(sizeof(*ce_out));
+ 
+                   memcpy(ce_out, ce, sizeof(*ce_out));
++                  /* reset flag alias */
++                  ce_out->group_alias = EINA_FALSE;
+ 
+                   ce_out->id = current_group_id;
+                   EINA_LOG_INFO("Changing ID of group <%d> to <%d>\n",
+-- 
+2.7.4
+

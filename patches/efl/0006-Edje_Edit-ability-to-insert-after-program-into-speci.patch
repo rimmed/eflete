@@ -1,7 +1,7 @@
-From 9c2ca79c7a984277bc8b34f02d84155d0b1cce2b Mon Sep 17 00:00:00 2001
+From f60116a2fa790cb8601d27c24aee7f8f77df0948 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Thu, 18 Feb 2016 17:10:24 +0000
-Subject: [PATCH 06/64] Edje_Edit: ability to insert "after" program into
+Subject: [PATCH 06/71] Edje_Edit: ability to insert "after" program into
  specific position
 
 API looks like this:
