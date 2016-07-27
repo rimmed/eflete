@@ -1,7 +1,7 @@
-From 0505f46f399549e19a68453b1614d31a0a1ad90c Mon Sep 17 00:00:00 2001
+From fb546eed3b582b92f23c227190662637b849a0be Mon Sep 17 00:00:00 2001
 From: Vyacheslav Reutskiy <v.reutskiy@samsung.com>
 Date: Thu, 2 Jun 2016 17:40:00 +0300
-Subject: [PATCH 45/64] edje_edit: add API for get part item attributes by item
+Subject: [PATCH 45/71] edje_edit: add API for get part item attributes by item
  index
 
 Cedric revert patch 6f7608befd006f8076d237bee5d17c9e9e1e09ac same days

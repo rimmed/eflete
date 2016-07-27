@@ -1,7 +1,7 @@
-From f1cfeae876d3b09cd2349717779f0cdd37ecee24 Mon Sep 17 00:00:00 2001
+From c65fe7241e4d98c5ccc0ed77bca6ff3db29bdfca Mon Sep 17 00:00:00 2001
 From: "Carsten Haitzler (Rasterman)" <raster@rasterman.com>
 Date: Sat, 9 Jul 2016 12:17:46 +0900
-Subject: [PATCH 62/64] edje edit - api was broken with incorrect l r t b
+Subject: [PATCH 62/71] edje edit - api was broken with incorrect l r t b
  ordering for border
 
 this fixes ordering to match everywhere else ANd usage of the get

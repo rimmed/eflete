@@ -1,7 +1,7 @@
-From 55ca6c9881f040b133116cfc90a66f25886b7801 Mon Sep 17 00:00:00 2001
+From 131f549fa47696ac544b245167a28473e8ad73f2 Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Tue, 17 May 2016 12:00:44 +0300
-Subject: [PATCH 44/64] Edje_edit: generate code of the image sets.
+Subject: [PATCH 44/71] Edje_edit: generate code of the image sets.
 
 Added support generate the edc code of the image sets in the image top level block.
 And correct support inside the image.normal attribute.

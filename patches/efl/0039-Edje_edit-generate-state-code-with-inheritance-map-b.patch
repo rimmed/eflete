@@ -1,7 +1,7 @@
-From 27ac08bf55795e18762fc9ab0f0be70c6e4740ad Mon Sep 17 00:00:00 2001
+From 240478e3c2421f659b32c8f30a47b203b0d19bff Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Mon, 16 May 2016 14:34:02 +0300
-Subject: [PATCH 39/64] Edje_edit: generate state code with inheritance map
+Subject: [PATCH 39/71] Edje_edit: generate state code with inheritance map
  block.
 
 Add ability to generate inherited code for map block.

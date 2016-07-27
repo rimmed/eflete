@@ -1,7 +1,7 @@
-From cebba3604dabda2cfcbbb34ded0433c21df62ddd Mon Sep 17 00:00:00 2001
+From 3c93f3d76b2d9c36c46da46f690e03de2cc9fee2 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Tue, 23 Feb 2016 11:50:12 +0000
-Subject: [PATCH 10/64] Edje_Edit: update source generation to print text
+Subject: [PATCH 10/71] Edje_Edit: update source generation to print text
  classes
 
 ---

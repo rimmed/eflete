@@ -1,7 +1,7 @@
-From 3381b868c45cc95b07c931af93dc1c05f47a2d99 Mon Sep 17 00:00:00 2001
+From 1b47648309f84a8a52a5df199709160844e4b1af Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Fri, 29 Apr 2016 11:25:41 +0300
-Subject: [PATCH 33/64] Edje edit: remove color generate from SPACER source.
+Subject: [PATCH 33/71] Edje edit: remove color generate from SPACER source.
 
 It is possible situation when SPACER structure has colors values.
 For example:

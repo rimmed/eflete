@@ -1,0 +1,61 @@
+From f0fcbfc1cac3958f6b1e388805bf4651ae4be258 Mon Sep 17 00:00:00 2001
+From: Vyacheslav Reutskiy <v.reutskiy@samsung.com>
+Date: Tue, 26 Jul 2016 15:25:01 +0300
+Subject: [PATCH 71/71] edje_pick: copy block 'data'
+
+Copy global data from files. Main resoan for it - elementary.
+Elementary needs data "version" for load widget styles.
+
+@fix
+---
+ src/bin/edje/edje_pick.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/src/bin/edje/edje_pick.c b/src/bin/edje/edje_pick.c
+index e8163ca..c89950b 100644
+--- a/src/bin/edje/edje_pick.c
++++ b/src/bin/edje/edje_pick.c
+@@ -530,6 +530,7 @@ _edje_pick_output_prepare(Edje_File *o, Edje_File *edf, char *name)
+         o->minor = edf->minor;
+         o->feature_ver = edf->feature_ver;
+         o->collection = eina_hash_string_small_new(NULL);
++        o->data = eina_hash_string_small_new(NULL);
+ 
+         /* Open output file */
+         o->ef = eet_open(name, EET_FILE_MODE_WRITE);
+@@ -622,6 +623,24 @@ _edje_pick_header_dependencies_check(Edje_File *out_file, Edje_File *edf, Edje_P
+ }
+ 
+ static int
++_edje_pick_data_update(Edje_File *out_file , Edje_File *edf)
++{
++   Eina_Bool status = EDJE_PICK_NO_ERROR;
++   Eina_Iterator *i;
++   Eina_Stringshare *key, *value;
++
++   i = eina_hash_iterator_key_new(edf->data);
++   EINA_ITERATOR_FOREACH(i, key)
++     {
++        if (eina_hash_find(out_file->data, key)) continue;
++        value = eina_hash_find(edf->data, key);
++        eina_hash_direct_add(out_file->data, key, value);
++     }
++
++   return status;
++}
++
++static int
+ _edje_pick_header_make(Edje_File *out_file , Edje_File *edf, Eina_List *ifs)
+ {
+    static int current_group_id = 0;
+@@ -1493,6 +1512,7 @@ main(int argc, char **argv)
+         _Edje_Pick_Fonts_add(edf);   /* Add fonts from file to fonts list */
+ 
+         /* Copy styles, color class */
++        _edje_pick_data_update(out_file, edf);
+         _edje_pick_styles_update(out_file, edf);
+         _edje_pick_color_class_update(out_file, edf);
+ 
+-- 
+2.7.4
+

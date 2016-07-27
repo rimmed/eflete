@@ -1,7 +1,7 @@
-From de9b71dd6a82117b51b2c35255cc529228e18a42 Mon Sep 17 00:00:00 2001
+From ed09ff423e4a9363089b47ba300360f8178f1ba5 Mon Sep 17 00:00:00 2001
 From: Vincent Torri <vincent dot torri at gmail dot com>
 Date: Thu, 3 Dec 2015 10:52:56 +0100
-Subject: [PATCH 03/64] efl: add binary mode to fdopen() calls
+Subject: [PATCH 03/71] efl: add binary mode to fdopen() calls
 
 This allows better compatibility with Windows
 

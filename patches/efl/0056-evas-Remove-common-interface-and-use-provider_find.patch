@@ -1,7 +1,7 @@
-From 877b798128c1e984726959d4062dd4260569e588 Mon Sep 17 00:00:00 2001
+From 7b4bd577d91dc9014f24c97494d58506ba272e42 Mon Sep 17 00:00:00 2001
 From: Jean-Philippe Andre <jp.andre@samsung.com>
 Date: Tue, 21 Jun 2016 15:45:31 +0900
-Subject: [PATCH 56/64] evas: Remove common interface and use provider_find
+Subject: [PATCH 56/71] evas: Remove common interface and use provider_find
 
 Evas.Common_Interface not only had a bad name, it also
 wasn't in line with how we can get a loop object, for

@@ -1,7 +1,7 @@
-From 77d800e99517c4b3e2dc2d3de161413841861188 Mon Sep 17 00:00:00 2001
+From c9a0b581e2e5744b875702aede05aa35952ad6f1 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Thu, 7 Jul 2016 20:31:01 +0300
-Subject: [PATCH 60/64] edje_edit: on save_all firstly save all cached group,
+Subject: [PATCH 60/71] edje_edit: on save_all firstly save all cached group,
  then all other
 
 this will fix case when aliased group was changed and alias-group was loaded,

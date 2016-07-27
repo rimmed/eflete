@@ -1,7 +1,7 @@
-From dbf55ed8b48fb2e66f9d0dd54881d19922c99018 Mon Sep 17 00:00:00 2001
+From 52d60c990ebf767e27bd1cd4b87af6ca693a31a2 Mon Sep 17 00:00:00 2001
 From: Jean-Philippe Andre <jp.andre@samsung.com>
 Date: Mon, 23 Nov 2015 19:40:59 +0900
-Subject: [PATCH 02/64] Edje edit: Free textblock styles with the proper
+Subject: [PATCH 02/71] Edje edit: Free textblock styles with the proper
  function
 
 ---

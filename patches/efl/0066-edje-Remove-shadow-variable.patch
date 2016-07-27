@@ -1,0 +1,24 @@
+From dc4008712c6a3d9fd22e94bcd2451513a83a5d53 Mon Sep 17 00:00:00 2001
+From: Jean-Philippe Andre <jp.andre@samsung.com>
+Date: Mon, 4 Jul 2016 20:25:17 +0900
+Subject: [PATCH 66/71] edje: Remove shadow variable
+
+---
+ src/bin/edje/edje_pick.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/bin/edje/edje_pick.c b/src/bin/edje/edje_pick.c
+index dc1a761..05528e1 100644
+--- a/src/bin/edje/edje_pick.c
++++ b/src/bin/edje/edje_pick.c
+@@ -774,7 +774,6 @@ _edje_pick_images_copy(Edje_File *edf, Edje_File *o)
+                {
+                   if (set->id.used)
+                     {
+-                       Eina_List *l;
+                        Edje_Image_Directory_Set_Entry *e;
+ 
+                        o->image_dir->sets_count += 1;
+-- 
+2.7.4
+

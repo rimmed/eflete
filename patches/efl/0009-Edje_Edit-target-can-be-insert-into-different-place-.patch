@@ -1,7 +1,7 @@
-From 6a86b9bf5c7b14b67f5c1ed4f5d14e7723cb42c3 Mon Sep 17 00:00:00 2001
+From 1b36601fbffeadb8c9e0bdf6813ddb4cb6225e31 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Fri, 19 Feb 2016 14:06:31 +0000
-Subject: [PATCH 09/64] Edje_Edit: target can be insert into different place in
+Subject: [PATCH 09/71] Edje_Edit: target can be insert into different place in
  program's target list
 
 Here is API for that:

@@ -1,7 +1,7 @@
-From e449407f106c6365ca70d14941f62f643bc594c4 Mon Sep 17 00:00:00 2001
+From 138e772e92b228e72e4947e450a36e3135c4ad52 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Fri, 18 Mar 2016 14:00:51 +0200
-Subject: [PATCH 15/64] edje_edit: program's source and signal CAN be NULL
+Subject: [PATCH 15/71] edje_edit: program's source and signal CAN be NULL
 
 Or else user can't remove them, only by writing source/signal like "" or some
 gibberish which is still getting interprettered as source and signal

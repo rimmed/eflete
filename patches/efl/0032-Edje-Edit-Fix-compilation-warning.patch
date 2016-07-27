@@ -1,7 +1,7 @@
-From f53f00a0037d81c84b4ad4abcfc98e3491f10d07 Mon Sep 17 00:00:00 2001
+From 27ad5581668b62fd49c1e7a62fe3db8cd72f8129 Mon Sep 17 00:00:00 2001
 From: Jean-Philippe Andre <jp.andre@samsung.com>
 Date: Thu, 28 Apr 2016 16:05:00 +0900
-Subject: [PATCH 32/64] Edje Edit: Fix compilation warning
+Subject: [PATCH 32/71] Edje Edit: Fix compilation warning
 
 ---
  src/lib/edje/edje_edit.c | 2 +-

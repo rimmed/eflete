@@ -1,7 +1,7 @@
-From fe7c0afc15c77402a348bc4467c5bf28b1a8677b Mon Sep 17 00:00:00 2001
+From 23e58805604e624da72e1a7f582fc642a634c864 Mon Sep 17 00:00:00 2001
 From: "Carsten Haitzler (Rasterman)" <raster@rasterman.com>
 Date: Fri, 8 Jul 2016 15:33:19 +0900
-Subject: [PATCH 61/64] edje edit - fix leaks spotted by coverity
+Subject: [PATCH 61/71] edje edit - fix leaks spotted by coverity
 
 fixes CID 1356630
 ---

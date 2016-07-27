@@ -1,7 +1,7 @@
-From f5eba27f6fc85cce0d930c4150f06806a9db4366 Mon Sep 17 00:00:00 2001
+From 036d92fbd1f17512f7f82ada31b078103d0948b1 Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Mon, 16 May 2016 13:57:52 +0300
-Subject: [PATCH 37/64] Edje_edit: generate state code with inheritance general
+Subject: [PATCH 37/71] Edje_edit: generate state code with inheritance general
  attributes.
 
 Support inheritance for part states on the edc code generate time.

@@ -1,7 +1,7 @@
-From e6f31e688049b7d81e30b1bff44ac3c120adfc03 Mon Sep 17 00:00:00 2001
+From 99b0f02d22448503ffafb827b0a04eb15edf44a2 Mon Sep 17 00:00:00 2001
 From: Andrii Kroitor <an.kroitor@samsung.com>
 Date: Mon, 18 Apr 2016 16:32:26 -0700
-Subject: [PATCH 17/64] edje_edit: add missing mempools on group copy
+Subject: [PATCH 17/71] edje_edit: add missing mempools on group copy
 
 Reviewers: reutskiy.v.v, cedric
 

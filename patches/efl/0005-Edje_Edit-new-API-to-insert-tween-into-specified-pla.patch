@@ -1,7 +1,7 @@
-From 46abf9847d88c3b9245c1d524a5852730c3d170d Mon Sep 17 00:00:00 2001
+From d08b9fba3cd5e3714663cce03d1330e1b307c4c2 Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Thu, 18 Feb 2016 15:40:50 +0000
-Subject: [PATCH 05/64] Edje_Edit: new API to insert tween into specified place
+Subject: [PATCH 05/71] Edje_Edit: new API to insert tween into specified place
 
 > edje_edit_state_tween_insert_at
 ---

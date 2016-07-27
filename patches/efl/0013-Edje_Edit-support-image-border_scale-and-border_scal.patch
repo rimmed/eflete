@@ -1,7 +1,7 @@
-From 758e02c232ba3d45211bb09403cc312949c720a5 Mon Sep 17 00:00:00 2001
+From 8a840ba310bb94b298bb0ea6bf7b80a3587ba80a Mon Sep 17 00:00:00 2001
 From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
 Date: Wed, 24 Feb 2016 13:50:36 +0000
-Subject: [PATCH 13/64] Edje_Edit: support image border_scale and
+Subject: [PATCH 13/71] Edje_Edit: support image border_scale and
  border_scale_by setters and getters
 
 ---

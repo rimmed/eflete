@@ -1,7 +1,7 @@
-From f4cde46d44a0f90fb11c2e8a5c0c33499dea3fe3 Mon Sep 17 00:00:00 2001
+From 7367eb8e2d1121b1f71055f9b985d5ab821c03aa Mon Sep 17 00:00:00 2001
 From: Mykyta Biliavskyi <m.biliavskyi@samsung.com>
 Date: Mon, 16 May 2016 13:33:42 +0300
-Subject: [PATCH 36/64] Edje_edit: move text state edc code generate to
+Subject: [PATCH 36/71] Edje_edit: move text state edc code generate to
  standalone func.
 
 Created internal function _edje_generate_source_state_text.
