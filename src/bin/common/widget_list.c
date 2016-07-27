@@ -133,117 +133,7 @@ style_name_get(const Eina_Stringshare *group_name)
    return strdup(style);
 }
 
-Eina_Bool
-style_name_check(const Eina_Stringshare *group_name, const char *style_name)
-{
-   const char *style = style_name_get(group_name);
-
-   if (!style) return EINA_FALSE;
-
-   return !strcmp(style_name, style);
-}
-
-char* _strrstr(char* str, const char* ptn)
-{
-   unsigned int ptnlen = 0;
-   unsigned int i = 0, j = 0;
-
-   ptnlen = strlen(ptn) - 1;
-
-   for (i = strlen(str) - 1; i != 0; i--)
-     {
-        if (str[i] == ptn[ptnlen])
-          {
-             if (ptnlen == 0)
-               {
-                  return &str[i];
-               }
-             for (j = 1; (j < strlen(ptn)) & (i > j); j++)
-               {
-                  if (str[i - j] != ptn[ptnlen - j])
-                    {
-                       break;
-                    }
-                  if (j + 1 == strlen(ptn))
-                    {
-                       return &str[i - j];
-                    }
-               }
-          }
-     }
-
-   return NULL;
-}
-
-const char *
-item_style_name_get(const Eina_Stringshare *group_name, Eina_List *style_list)
-{
-   int len = strlen(group_name);
-   int first, i;
-   Eina_List *l;
-   Tree_Item_Data *style_item;
-   char widget[32], class[32], style[256];
-
-   if (group_name[0] != 'e') return NULL;
-   if (group_name[1] != 'l') return NULL;
-   if (group_name[2] != 'm') return NULL;
-   if (group_name[3] != '/') return NULL;
-
-   for (i = 4; i < len; i++)
-     {
-        if (group_name[i] == '/') break;
-     }
-
-   first = 4;
-   for (i = first; i < len; i++)
-     {
-        if (group_name[i] == '/') break;
-        widget[i - first] = group_name[i];
-     }
-   widget[i - first] = '\0';
-
-   first = i + 1;
-   for (i = first; i < len; i++)
-     {
-        if (group_name[i] == '/') break;
-        class[i - first] = group_name[i];
-     }
-   class[i - first] = '\0';
-
-   if (!strcmp(widget, "genlist") && !strcmp(class, "base")) return NULL;
-
-   first = i + 1;
-   for (i = first; i < len; i++)
-     {
-        style[i - first] = group_name[i];
-     }
-   style[i - first] = '\0';
-
-   EINA_LIST_FOREACH(style_list, l, style_item)
-     {
-        char *str;
-
-        str = _strrstr(style, style_item->name);
-        if (str)
-          {
-             style[strlen(style) - strlen(str) - 1] = '\0';
-          }
-     }
-
-   return strdup(style);
-}
-
-Eina_Bool
-item_style_name_check(const Eina_Stringshare *group_name, const char *style_name, Eina_List *style_list)
-{
-   const char *style = item_style_name_get(group_name, style_list);
-
-   if (!style) return EINA_FALSE;
-
-   return !strcmp(style_name, style);
-}
-
-const char *
+Eina_Stringshare *
 option_widget_name_get(const char *str, Eina_List **style_list)
 {
    int len = strlen(str);
@@ -276,7 +166,7 @@ option_widget_name_get(const char *str, Eina_List **style_list)
              if (!copying && str[i] == ',')
                {
                   style[i - first] = '\0';
-                  list = eina_list_append(list, strdup(style));
+                  list = eina_list_append(list, eina_stringshare_add(style));
                   first = i + 1;
                   continue;
                }
@@ -289,15 +179,15 @@ option_widget_name_get(const char *str, Eina_List **style_list)
    else
      {
         style[i - first] = '\0';
-        list = eina_list_append(list, strdup(style));
+        list = eina_list_append(list, eina_stringshare_add(style));
      }
 
    *style_list = list;
 
-   return strdup(widget);
+   return eina_stringshare_add(widget);
 }
 
-const char *
+Eina_Stringshare *
 option_style_name_get(const char *str, Eina_List **cp_style_list)
 {
    int len = strlen(str);
@@ -327,7 +217,7 @@ option_style_name_get(const char *str, Eina_List **cp_style_list)
              if (str[i] == ',')
                {
                   cp_style[i - first] = '\0';
-                  list = eina_list_append(list, strdup(cp_style));
+                  list = eina_list_append(list, eina_stringshare_add(cp_style));
                   first = i + 1;
                   continue;
                }
@@ -340,12 +230,12 @@ option_style_name_get(const char *str, Eina_List **cp_style_list)
    else
      {
         cp_style[i - first] = '\0';
-        list = eina_list_append(list, strdup(cp_style));
+        list = eina_list_append(list, eina_stringshare_add(cp_style));
      }
 
    *cp_style_list = list;
 
-   return strdup(style);
+   return eina_stringshare_add(style);
 }
 
 Eina_List *
@@ -468,5 +358,3 @@ widget_tree_items_get(Eina_List *groups,
         eina_stringshare_del(group_prefix);
      }
 }
-
-

@@ -609,7 +609,7 @@ _genlist_style_selected_set(Node *item, Eina_List *styles, Eina_Bool selected)
    Eina_List *l, *l1, *cp_style_list;
    Node *node;
    Eina_Stringshare *name, *name1, *style_name, *tmp;
-   const char *pos, *style;
+   const char *pos;
    char cp_style[256];
 
    assert (item != NULL);
@@ -623,24 +623,41 @@ _genlist_style_selected_set(Node *item, Eina_List *styles, Eina_Bool selected)
      }
    else
      {
-        pos = strrchr(item->name, '/');
-        if (pos) style = pos + 1;
-        else style = item->name;
-        EINA_LIST_FOREACH(styles, l, name)
+        if (styles)
           {
-             style_name = option_style_name_get(name, &cp_style_list);
-             if (!strcmp(style, style_name))
+             EINA_LIST_FOREACH(styles, l, name)
                {
-                  item->check = selected;
-                  widget_list = eina_list_append(widget_list, item->name);
-                  EINA_LIST_FOREACH(cp_style_list, l1, name1)
+                  style_name = option_style_name_get(name, &cp_style_list);
+                  if (!strcmp(style_name, "default"))
                     {
-                       strncpy(cp_style, item->name, pos - item->name);
-                       cp_style[pos - item->name] = '\0';
-                       tmp = eina_stringshare_printf("cp***%s***%s/%s", item->name, cp_style, name1);
-                       widget_list = eina_list_append(widget_list, tmp);
+                       pos = string_rstr(item->name, "base/default");
+                       if (pos) widget_list = eina_list_append(widget_list, item->name);
                     }
+                  else
+                    {
+                       pos = string_rstr(item->name, style_name);
+                       if (pos)
+                         {
+                            item->check = selected;
+                            widget_list = eina_list_append(widget_list, item->name);
+                            EINA_LIST_FOREACH(cp_style_list, l1, name1)
+                              {
+                                 strncpy(cp_style, item->name, pos - item->name - 1);
+                                 cp_style[pos - item->name] = '\0';
+                                 tmp = eina_stringshare_printf("cp***%s***%s/%s", item->name, cp_style, name1);
+                                 widget_list = eina_list_append(widget_list, tmp);
+                              }
+                         }
+                    }
+                  eina_stringshare_del(style_name);
+                  EINA_LIST_STRINGSHARE_FREE(cp_style_list);
                }
+          }
+        else
+          {
+             /* if list of style empty need to select all available widget styles */
+             item->check = selected;
+             widget_list = eina_list_append(widget_list, item->name);
           }
      }
 }
@@ -649,7 +666,8 @@ void
 _tab_import_edj_data_set(const char *name, const char *path, const char *edj, const Eina_List *widgets)
 {
    Eina_List *style_list = NULL;
-   const char *str, *widget_name;
+   const char *str;
+   Eina_Stringshare *widget_name;
    Eina_Strbuf *buf = eina_strbuf_new();
    Eina_Bool first_not_found = true;
 
@@ -697,61 +715,8 @@ _tab_import_edj_data_set(const char *name, const char *path, const char *edj, co
              eina_strbuf_append_printf(buf, first_not_found ? "%s" : ", %s", widget_name);
              first_not_found = false;
           }
-        /*
-        EINA_LIST_FOREACH(widget_list, wl, widget)
-          {
-             if (!strcasecmp(widget_name, widget->name))
-               {
-                  if (!style_list)
-                    {
-                       EINA_LIST_FOREACH(widget->list, wll, style)
-                         {
-                            EINA_LIST_FOREACH(style->list, wlll, item_style)
-                              {
-                                 item_style->check = true;
-                              }
-                            style->check = true;
-                         }
-                       widget->check = true;
-                    }
-                  else
-                    {
-                       EINA_LIST_FOREACH(style_list, wlll, style_name)
-                         {
-                            style_name = option_style_name_get(style_name, &cp_style_list);
-
-                            EINA_LIST_FOREACH(widget->list, wll, style)
-                              {
-                                 if (!strcasecmp(style_name, style->name))
-                                   {
-                                      style->copy = cp_style_list;
-                                      if (!(style->copy))
-                                        {
-                                           EINA_LIST_FOREACH(style->list, wllll, item_style)
-                                             {
-                                                item_style->check = true;
-                                             }
-                                           style->check = true;
-                                        }
-                                      break;
-                                   }
-                              }
-                            if (!style)
-                              {
-                                 eina_strbuf_append_printf(buf, first_not_found ? "%s(%s)" : ", %s(%s)", widget_name, style_name);
-                                 first_not_found = false;
-                              }
-                         }
-                    }
-                  break;
-               }
-          }
-        if (!widget)
-          {
-             eina_strbuf_append_printf(buf, first_not_found ? "%s" : ", %s", widget_name);
-             first_not_found = false;
-          }
-          */
+        eina_stringshare_del(widget_name);
+        EINA_LIST_STRINGSHARE_FREE(style_list);
      }
    elm_genlist_realized_items_update(tab_edj.genlist);
    if (eina_strbuf_length_get(buf))

@@ -109,6 +109,10 @@ _menu_cb(void *data __UNUSED__,
          break;
       case MENU_FILE_SAVE:
          project_save();
+#if HAVE_TIZEN
+         if (ap.path.export_edj)
+           project_export_develop();
+#endif
          break;
       case MENU_FILE_EXPORT_EDC_GROUP:
          project_export_edc_group();
@@ -201,6 +205,9 @@ _menu_cb(void *data __UNUSED__,
       case MENU_HELP_ABOUT:
          about_window_add();
          break;
+      case MENU_HELP_SHORTCUTS:
+         shortcuts_window_add();
+         break;
       default:
          ERR("unknown menu id: %d", menu_event->mid);
          break;
@@ -277,16 +284,16 @@ ui_menu_add(void)
       ITEM_MENU_ADD(MENU_FILE, MENU_FILE_IMPORT_EDJ, NULL, _("Import edj-file"), NULL)
       ITEM_MENU_ADD(MENU_FILE, MENU_FILE_IMPORT_EDC, NULL, _("Import edc-file"), NULL)
       ___(MENU_FILE);
+#endif /* if !HAVE_TIZEN */
       ITEM_MENU_ADD(MENU_FILE, MENU_FILE_SAVE, buf, _("Save"), "Ctrl-S")
+#if !HAVE_TIZEN
       ITEM_MENU_ADD(MENU_FILE, MENU_FILE_EXPORT_EDC, NULL, _("Export as edc"), NULL)
          ITEM_MENU_ADD(MENU_FILE_EXPORT_EDC, MENU_FILE_EXPORT_EDC_GROUP, NULL, _("Group"), NULL)
          ITEM_MENU_ADD(MENU_FILE_EXPORT_EDC, MENU_FILE_EXPORT_EDC_PROJECT, NULL, _("Project"), NULL)
-#endif /* if !HAVE_TIZEN */
       ITEM_MENU_ADD(MENU_FILE, MENU_FILE_EXPORT, NULL, _("Export as edj"), NULL)
          ITEM_MENU_ADD(MENU_FILE_EXPORT, MENU_FILE_EXPORT_DEVELOP, NULL, _("Develop"), NULL)
          ITEM_MENU_ADD(MENU_FILE_EXPORT, MENU_FILE_EXPORT_RELEASE, NULL, _("Release"), NULL)
       ___(MENU_FILE);
-#if !HAVE_TIZEN
       ITEM_MENU_ADD(MENU_FILE, MENU_FILE_CLOSE_PROJECT, NULL, _("Close project"), NULL)
       ___(MENU_FILE);
 #endif /* if !HAVE_TIZEN */
@@ -327,6 +334,7 @@ ui_menu_add(void)
       ITEM_MENU_ADD(MENU_WINDOW, MENU_WINDOW_MANAGER_COLORCLASS, "color", _("Color class manager"), "F10")
 
    ITEM_MENU_ADD(MENU_NULL, MENU_HELP, NULL, _("Help"), NULL)
+      ITEM_MENU_ADD(MENU_HELP, MENU_HELP_SHORTCUTS, NULL, _("Shortcuts"), "F1")
       ITEM_MENU_ADD(MENU_HELP, MENU_HELP_ABOUT, NULL, _("About"), NULL)
 
    elm_menu_item_separator_add(window_menu, menu->items[MENU_FILE_IMPORT_EDC]);

@@ -66,6 +66,7 @@ typedef struct _Ruler Ruler;
 struct _Scroll_Area {
    Evas_Object *layout;  /* layout for rulers and scroller */
    Evas_Object *scroller;
+   Evas_Object *helper;
    Evas_Object *bg;
    Bg_Preview bg_preview;
    Evas_Object *container;
@@ -358,6 +359,34 @@ _combobox_item_del(void *data,
 
 #if HAVE_TIZEN
 static void
+_btn_minus_zoom_cb(void *data,
+                   Evas_Object *obj __UNUSED__,
+                   void *event_info __UNUSED__)
+{
+   Workspace_Data *wd = (Workspace_Data *)data;
+
+   wd->zoom_factor -= 0.5 ;
+   elm_slider_value_set(wd->toolbar.zoom.slider, (int) (wd->zoom_factor * 100));
+   elm_spinner_value_set(wd->toolbar.zoom.cmb_zoom, (int)(wd->zoom_factor * 100));
+
+   _members_zoom_set(wd);
+}
+
+static void
+_btn_plus_zoom_cb(void *data,
+                   Evas_Object *obj __UNUSED__,
+                   void *event_info __UNUSED__)
+{
+   Workspace_Data *wd = (Workspace_Data *)data;
+
+   wd->zoom_factor += 0.5 ;
+   elm_slider_value_set(wd->toolbar.zoom.slider, (int) (wd->zoom_factor * 100));
+   elm_spinner_value_set(wd->toolbar.zoom.cmb_zoom, (int)(wd->zoom_factor * 100));
+
+   _members_zoom_set(wd);
+}
+
+static void
 _spinner_zoom_cb(void *data,
                  Evas_Object *obj,
                  void *event_info __UNUSED__)
@@ -394,13 +423,13 @@ static void
 _zoom_controls_add(Workspace_Data *wd)
 {
    Elm_Object_Item *tb_it;
-   Evas_Object *img;
 
    wd->toolbar.zoom.fit = elm_button_add(wd->toolbar.obj);
    evas_object_smart_callback_add(wd->toolbar.zoom.fit, "clicked", _fit_cb, wd);
 #if HAVE_TIZEN
    elm_object_style_set(wd->toolbar.zoom.fit, "fit");
 #else
+   Evas_Object *img;
    IMAGE_ADD_NEW(wd->toolbar.zoom.fit, img, "icon", "fit")
    elm_object_part_content_set(wd->toolbar.zoom.fit, NULL, img);
 #endif
@@ -415,10 +444,23 @@ _zoom_controls_add(Workspace_Data *wd)
    evas_object_smart_callback_add(wd->toolbar.zoom.slider, "slider,drag,start", _slider_zoom_start_cb, wd);
    evas_object_smart_callback_add(wd->toolbar.zoom.slider, "changed", _slider_zoom_cb, wd);
    evas_object_smart_callback_add(wd->toolbar.zoom.slider, "slider,drag,stop", _slider_zoom_stop_cb, wd);
+#if HAVE_TIZEN
+   Evas_Object *btn = elm_button_add(wd->toolbar.obj);
+   elm_object_style_set(btn, "minus_zoom");
+   evas_object_show(btn);
+   evas_object_smart_callback_add(btn, "clicked", _btn_minus_zoom_cb, wd);
+   elm_object_part_content_set(wd->toolbar.zoom.slider, "elm.swallow.icon", btn);
+   btn = elm_button_add(wd->toolbar.obj);
+   elm_object_style_set(btn, "plus_zoom");
+   evas_object_show(btn);
+   evas_object_smart_callback_add(btn, "clicked", _btn_plus_zoom_cb, wd);
+   elm_object_part_content_set(wd->toolbar.zoom.slider, "elm.swallow.end", btn);
+#else
    IMAGE_ADD_NEW(wd->toolbar.zoom.slider, img, "icon", "scale_smaller")
    elm_object_part_content_set(wd->toolbar.zoom.slider, "elm.swallow.icon", img);
    IMAGE_ADD_NEW(wd->toolbar.zoom.slider, img, "icon", "scale_larger")
    elm_object_part_content_set(wd->toolbar.zoom.slider, "elm.swallow.end", img);
+#endif
 #if HAVE_TIZEN
    evas_object_size_hint_min_set(wd->toolbar.zoom.slider, 134, 0);
    Evas_Object *zoom_layout = elm_layout_add(wd->toolbar.obj);
@@ -857,17 +899,23 @@ _scroll_area_add(Workspace_Data *wd, Scroll_Area *area, Eina_Bool scale_rel)
 
    /* create scroller for normal mode and set bg */
    area->scroller = elm_scroller_add(area->layout);
-   elm_scroller_policy_set(area->scroller, ELM_SCROLLER_POLICY_ON, ELM_SCROLLER_POLICY_ON);
+   //elm_scroller_policy_set(area->scroller, ELM_SCROLLER_POLICY_ON, ELM_SCROLLER_POLICY_ON);
    evas_object_event_callback_add(area->scroller, EVAS_CALLBACK_MOUSE_MOVE, _rulers_pointer_move, area);
    elm_layout_content_set(area->layout, "elm.swallow.scroller", area->scroller);
    area->bg = elm_layout_add(area->layout);
    elm_layout_theme_set(area->bg, "layout", "workspace", "bg");
    elm_object_part_content_set(area->scroller, "elm.swallow.background", area->bg);
 
+   area->helper = elm_layout_add(area->layout);
+   elm_layout_theme_set(area->helper, "layout", "workspace", "helper");
+   evas_object_size_hint_weight_set(area->helper, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   elm_object_content_set(area->scroller, area->helper);
+
    area->container = container_add(area->scroller);
+   evas_object_size_hint_weight_set(area->container, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    container_handler_size_set(area->container, 8, 8);
    evas_object_smart_callback_add(area->container, "container,changed", _container_changed, wd);
-   elm_object_content_set(area->scroller, area->container);
+   elm_object_content_set(area->helper, area->container);
    container_container_size_set(area->container, 350, 350);
 
    if (wd->mode == MODE_NORMAL)
@@ -1899,8 +1947,9 @@ void
 workspace_container_fit(Evas_Object *obj)
 {
    int w, h;
-   double zoom;
+   double zoom, c_zoom;
    int r, t, l, b;
+   int base_con, base_works;
    Scroll_Area *area;
    const Container_Geom *geom;
 
@@ -1913,11 +1962,15 @@ workspace_container_fit(Evas_Object *obj)
    evas_object_geometry_get(area->bg, NULL, NULL, &w, &h);
    geom = container_geom_get(area->container);
    container_padding_size_get(area->container, &r, &t, &l, &b);
+   c_zoom = workspace_zoom_factor_get(obj);
 
-   if (geom->w >= geom->h)
-     zoom = (w - l - r) / (double)geom->w;
+   if (geom->w == geom->h)
+     base_con = geom->w;
    else
-     zoom = (h - t - b) / (double)geom->h;
+     base_con = (geom->w > geom->h) ? geom->w : geom->h;
+   base_works = (w >= h) ? h : w;
+
+   zoom = (base_works - l * 3) / ((double)base_con / c_zoom);
 
    workspace_zoom_factor_set(obj, zoom);
 }

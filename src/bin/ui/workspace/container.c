@@ -22,7 +22,7 @@
 
 #define MY_CLASS_NAME "Container"
 
-#define BASE_PADDING 100
+#define BASE_PADDING 10
 
 typedef struct _Container_Smart_Data Container_Smart_Data;
 
@@ -346,6 +346,7 @@ _container_smart_calculate(Evas_Object *o)
    cw = (hrb_x + sd->handler_BR.w + (geom ? geom->w : 0) + BASE_PADDING) - x;
    ch = (hrb_y + sd->handler_BR.h + (geom ? geom->h : 0) + BASE_PADDING) - y;
    evas_object_size_hint_min_set(o, cw, ch);
+   evas_object_size_hint_max_set(o, cw, ch);
 
    if (fabs(sd->zoom - 1.0) < DBL_EPSILON)
      {

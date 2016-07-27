@@ -1,12 +1,9 @@
 group { name: "elm/gengrid/item/default/default";
-   images {
-      image: "image_border.png" COMP;
-      image: "image_border_selected.png" COMP;
-   }
    data {
       item: "texts" "elm.text";
       item: "contents" "elm.swallow.icon elm.swallow.end";
    }
+   images.image: "Custom/border_1.png" COMP;
    parts {
       part { name: "highlight";
          type: RECT;
@@ -36,8 +33,9 @@ group { name: "elm/gengrid/item/default/default";
       part { name: "icon_border";
          type: IMAGE;
          description { state: "default" 0.0;
+            color_class: "gengrid_item_border";
             image {
-               normal: "image_border.png";
+               normal: "Custom/border_1.png";
                border: 1 1 1 1;
                middle: NONE;
             }
@@ -50,11 +48,7 @@ group { name: "elm/gengrid/item/default/default";
          }
          description { state: "selected" 0.0;
             inherit: "default" 0.0;
-            image {
-               normal: "image_border_selected.png";
-               border: 1 1 1 1;
-               middle: NONE;
-            }
+            color_class: "border_focused";
          }
       }
       part { name: "elm.swallow.icon";
@@ -168,19 +162,16 @@ group { name: "elm/gengrid/item/default/default";
 }
 
 group { name: "elm/gengrid/item/sound_editor/default";
-   images {
-      image: "image_border.png" COMP;
-      image: "image_border_selected.png" COMP;
-   }
    data {
       item: "texts" "elm.text elm.text.type";
       item: "contents" "elm.swallow.icon";
    }
+   images.image: "Custom/border_1.png" COMP;
    parts {
       part { name: "bg";
          type: RECT;
          description { state: "default" 0.0;
-            color_class: "select_dark";
+            color_class: "gengrid_item_bg";
             rel1 {
                to: "icon_border";
             }
@@ -240,8 +231,9 @@ group { name: "elm/gengrid/item/sound_editor/default";
       part { name: "icon_border";
          type: IMAGE;
          description { state: "default" 0.0;
+            color_class: "gengrid_item_border";
             image {
-               normal: "image_border.png";
+               normal: "Custom/border_1.png";
                border: 1 1 1 1;
                middle: NONE;
             }
@@ -254,11 +246,7 @@ group { name: "elm/gengrid/item/sound_editor/default";
          }
          description { state: "selected" 0.0;
             inherit: "default" 0.0;
-            image {
-               normal: "image_border_selected.png";
-               border: 1 1 1 1;
-               middle: NONE;
-            }
+            color_class: "border_focused";
          }
       }
       part { name: "elm.swallow.icon";

@@ -230,6 +230,7 @@ src/lib/ewe/Makefile
 src/lib/elementary_combobox/Makefile
 data/Makefile
 data/eflete.desktop
+data/component_designer.desktop
 tests/Makefile
 tests/edj_build/Makefile
 tests/edj_build/radio.edc

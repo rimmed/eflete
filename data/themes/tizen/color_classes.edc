@@ -1,4 +1,14 @@
 color_classes {
+   color_class { name: "separator";
+      color: 177 177 177 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "toolbar_separator";
+      color: 180 180 180 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
    color_class { name: "scrollbar_bg";
       color: 231 231 231 255;
       color2: 0 0 0 0;
@@ -70,7 +80,57 @@ color_classes {
       color3: 0 0 0 0;
    }
    color_class { name: "entry_bg_disabled";
-      color: 244 244 244 255;
+      color: 245 245 245 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_text_disabled";
+      color: 153 153 153 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_text";
+      color: 51 51 51 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_text_focused";
+      color: 0 150 221 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_border";
+      color: 173 173 173 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_border_over";
+      color: 0 150 221 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_border_dim";
+      color: 191 192 191 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+    color_class { name: "button";
+      color: 225 225 225 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_focused";
+      color: 238 238 238 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_pressed";
+      color: 0 150 221 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "button_dim";
+      color: 204 204 204 255;
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
@@ -84,7 +144,22 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
-   color_class { name: "over";
+   color_class { name: "entry_cursor";
+      color: 0 150 221 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "gengrid_item_border";
+      color: 204 204 204 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "gengrid_item_bg";
+      color: 245 245 245 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+    color_class { name: "over";
       color: 205 233 255 255;
       color2: 0 0 0 0;
       color3: 0 0 0 0;
@@ -99,4 +174,49 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
+   color_class { name: "combobox_border";
+      color: 170 170 170 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "combobox_border_over";
+      color: 0 150 221 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "combobox";
+      color: 245 245 245 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "combobox_over";
+      color: 255 255 255 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "combobox_list_bg";
+      color: 255 255 255 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+
+   color_class { name: "colorselector_border_bg";
+      color: 255 255 255 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+
+   color_class { name: "colorselector_bg";
+      color: 248 248 248 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "popup_helper_border";
+      color: 0 138 238 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+ 
+
+
 }
