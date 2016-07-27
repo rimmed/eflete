@@ -1026,6 +1026,9 @@ _mode_cb(void *data,
          break;
      }
 
+   /* on efl 1.16 there are render artifacts after switching modes without this line */
+   edje_object_calc_force(elm_layout_edje_get(wd->panes_h));
+
    evas_object_smart_callback_call(ap.win, SIGNAL_WORKSPACE_MODE_CHANGED, &wd->mode);
    assert (area != NULL);
 
