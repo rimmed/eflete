@@ -199,7 +199,6 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
-<<<<<<< 9faa7f533c99a57ff5f0bf23d9a8847dc5a761bc
    color_class { name: "colorselector_border_bg";
       color: 255 255 255 255;
       color2: 0 0 0 0;
@@ -226,11 +225,4 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
- }
-=======
-
-
-
-
 }
->>>>>>> Tizen theme: update theme for combobox.
