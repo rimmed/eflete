@@ -1,0 +1,36 @@
+From 07f452affda039647a7ea6e08e9956bb54f1d3cf Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Thu, 18 Feb 2016 17:17:56 +0000
+Subject: [PATCH 07/64] Edje_Edit: fix warning on unsigned and signed int
+ comparation
+
+Oops!
+Sorry, missed this one:
+
+lib/edje/edje_edit.c: In function 'edje_edit_program_after_insert_at':
+lib/edje/edje_edit.c:9980:14: warning: comparison between signed and unsigned
+integer expressions [-Wsign-compare]
+    if (place >= eina_list_count(epr->after))
+              ^
+
+Now fixed
+---
+ src/lib/edje/edje_edit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 2c6e46a..96d8cf5 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -9977,7 +9977,7 @@ edje_edit_program_after_insert_at(Evas_Object *obj, const char *prog, const char
+ 
+    a->id = af->id;
+ 
+-   if (place >= eina_list_count(epr->after))
++   if ((unsigned)place >= eina_list_count(epr->after))
+      epr->after = eina_list_append(epr->after, a);
+    else
+      {
+-- 
+2.7.4
+

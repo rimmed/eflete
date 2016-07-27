@@ -1,0 +1,177 @@
+From a1fe87ed31afe25a899ad6051fa0dde0a5130b16 Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Wed, 27 Apr 2016 13:58:44 +0300
+Subject: [PATCH 26/64] Edje_Edit: some API to manipulate set's images
+
+get list of images of set (edje_edit_image_set_images_list_get)
+add image to set (edje_edit_image_set_image_add)
+delete image from set by it's place (edje_edit_image_set_image_del)
+---
+ src/lib/edje/Edje_Edit.h | 48 +++++++++++++++++++++++++
+ src/lib/edje/edje_edit.c | 91 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 139 insertions(+)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 3a2c09a..c96470f 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -5292,6 +5292,54 @@ edje_edit_image_set_list_get(Evas_Object *obj);
+ EAPI Eina_Bool
+ edje_edit_image_set_add(Evas_Object *obj, const char *name);
+ 
++/** Get the list of all images inside of given set in the given edje.
++ * Use edje_edit_string_list_free() when you don't need the list anymore.
++ *
++ * @param obj Object being edited.
++ * @param name name of image set.
++ *
++ * @return A List containing all images found inside of given set in the edje file.
++ *
++ * @since 1.18
++ */
++EAPI Eina_List *
++edje_edit_image_set_images_list_get(Evas_Object *obj, const char *name);
++
++/** Add image to set.
++ *
++ * Add image to given set. If image is not exist inside of edje
++ * collection then function @see edje_edit_image_add should be
++ * used to get image added to edje collection.
++ * This function uses only already added functions
++ *
++ * @param obj Object being edited.
++ * @param set_name name of image set.
++ * @param name image set's name.
++ *
++ * @return @c EINA_TRUE on success, @c EINA_FALSE otherwise (and when image is not exist).
++ *
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_image_set_image_add(Evas_Object *obj, const char *set_name, const char *name);
++
++/** Delete image on current position from set.
++ *
++ * Remove image from given set. To be sure what kind of image will be
++ * deleted, firstly check it's position via
++ * @see edje_edit_image_set_images_list_get function.
++ *
++ * @param obj Object being edited.
++ * @param set_name name of image set.
++ * @param place position of image to be deleted.
++ *
++ * @return @c EINA_TRUE on success, @c EINA_FALSE otherwise.
++ *
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_image_set_image_del(Evas_Object *obj, const char *set_name, unsigned int place);
++
+ //@}
+ /******************************************************************************/
+ /**************************   IMAGES API   ************************************/
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 488ffa8..110521b 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -8238,6 +8238,97 @@ edje_edit_image_set_add(Evas_Object *obj, const char *name)
+    return EINA_TRUE;
+ }
+ 
++EAPI Eina_List *
++edje_edit_image_set_images_list_get(Evas_Object *obj, const char *name)
++{
++   Eina_List *images = NULL, *l;
++   Edje_Image_Directory_Set *de = NULL;
++   Edje_Image_Directory_Set_Entry *dim = NULL;
++   unsigned int i;
++
++   GET_ED_OR_RETURN(NULL);
++
++   if (!ed->file) return NULL;
++   if (!ed->file->image_dir) return NULL;
++   if (!name) return NULL;
++
++   for (i = 0; i < ed->file->image_dir->sets_count; ++i)
++     {
++        de = ed->file->image_dir->sets + i;
++        if ((de->name) && (!strcmp(name, de->name)))
++          break;
++     }
++   if (i == ed->file->image_dir->sets_count) return NULL;
++
++   EINA_LIST_FOREACH(de->entries, l, dim)
++     {
++        images = eina_list_append(images, eina_stringshare_add(dim->name));
++     }
++
++   return images;
++}
++
++EAPI Eina_Bool
++edje_edit_image_set_image_add(Evas_Object *obj, const char *set_name, const char *name)
++{
++   Edje_Image_Directory_Set *de = NULL;
++   Edje_Image_Directory_Set_Entry *dim = NULL;
++   unsigned int i;
++   int id;
++
++   GET_ED_OR_RETURN(EINA_FALSE);
++
++   if (!ed->file) return EINA_FALSE;
++   if (!ed->file->image_dir) return EINA_FALSE;
++   if (!name) return EINA_FALSE;
++   id = edje_edit_image_id_get(obj, name);
++   if (id < 0) return EINA_FALSE;
++
++   for (i = 0; i < ed->file->image_dir->sets_count; ++i)
++     {
++        de = ed->file->image_dir->sets + i;
++        if ((de->name) && (!strcmp(set_name, de->name)))
++          break;
++     }
++   if (i == ed->file->image_dir->sets_count) return EINA_FALSE;
++
++   dim = (Edje_Image_Directory_Set_Entry *)calloc(1, sizeof(Edje_Image_Directory_Set_Entry));
++   dim->name = name;
++   dim->id = id;
++   de->entries = eina_list_append(de->entries, dim);
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_image_set_image_del(Evas_Object *obj, const char *set_name, unsigned int place)
++{
++   Edje_Image_Directory_Set *de = NULL;
++   Edje_Image_Directory_Set_Entry *dim = NULL;
++   unsigned int i;
++
++   GET_ED_OR_RETURN(EINA_FALSE);
++
++   if (!ed->file) return EINA_FALSE;
++   if (!ed->file->image_dir) return EINA_FALSE;
++
++   for (i = 0; i < ed->file->image_dir->sets_count; ++i)
++     {
++        de = ed->file->image_dir->sets + i;
++        if ((de->name) && (!strcmp(set_name, de->name)))
++          break;
++     }
++   if (i == ed->file->image_dir->sets_count) return EINA_FALSE;
++
++   dim = eina_list_nth(de->entries, place);
++   if (!dim) return EINA_FALSE;
++
++   de->entries = eina_list_remove_list(de->entries, eina_list_nth_list(de->entries, place));
++   free(dim);
++
++   return EINA_TRUE;
++}
++
+ /****************/
+ /*  IMAGES API  */
+ /****************/
+-- 
+2.7.4
+

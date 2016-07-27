@@ -1,0 +1,369 @@
+From ec534b76259232d6b70a202a6baee1e9592fc503 Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Thu, 18 Feb 2016 10:57:52 +0000
+Subject: [PATCH 04/64] edje_edit.c: it should be able to change item position
+
+Few new API for inserting/mving items inside of BOX/TABLE
+> edje_edit_part_item_insert_before
+> edje_edit_part_item_insert_after
+> edje_edit_part_item_insert_at
+> edje_edit_part_item_move_below
+> edje_edit_part_item_move_above
+---
+ src/lib/edje/Edje_Edit.h |  67 +++++++++++++
+ src/lib/edje/edje_edit.c | 248 ++++++++++++++++++++++++++++++++++++++++++-----
+ 2 files changed, 289 insertions(+), 26 deletions(-)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 8f7ad5f..29ddd1b 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -2316,6 +2316,73 @@ edje_edit_state_container_align_y_get(Evas_Object *obj, const char *part, const
+  */
+ EAPI Eina_Bool edje_edit_part_item_append(Evas_Object *obj, const char *part, const char *item_name, const char *source_group);
+ 
++/** Insert new item to box or table part before specified existing item.
++ *
++ * @param obj Object being edited.
++ * @param part Part to add a new item. This part should have BOX or TABLE type.
++ * @param item_name Name of new item that is not exist in BOX or TABLE yet.
++ * @param item_before Name of repated item that is exist in BOX or TABLE.
++ * @param source_group Source (means group name) of the new item.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_insert_before(Evas_Object *obj, const char *part, const char *item_name, const char *item_before, const char *source_group);
++
++/** Insert new item to box or table part after specified existing item.
++ *
++ * @param obj Object being edited.
++ * @param part Part to add a new item. This part should have BOX or TABLE type.
++ * @param item_name Name of new item that is not exist in BOX or TABLE yet.
++ * @param item_after Name of repated item that is exist in BOX or TABLE.
++ * @param source_group Source (means group name) of the new item.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_insert_after(Evas_Object *obj, const char *part, const char *item_name, const char *item_after, const char *source_group);
++
++/** Insert new item to box or table part directly into specified position.
++ *
++ * @param obj Object being edited.
++ * @param part Part to add a new item. This part should have BOX or TABLE type.
++ * @param item_name Name of new item that is not exist in BOX or TABLE yet.
++ * @param source_group Source (means group name) of the new item.
++ * @param place Specified place to insert item into. Place cannot be less than 0 or
++ *              greater than current number of items in BOX or TABLE.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_insert_at(Evas_Object *obj, const char *part, const char *item_name, const char *source_group, unsigned int place);
++
++/** Restack existing item above.
++ *
++ * @param obj Object being edited.
++ * @param part Part which contain items. This part should have BOX or TABLE type.
++ * @param item_name Name of item that will be moved above.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_move_above(Evas_Object *obj, const char *part, const char *item_name);
++
++/** Restack existing item below.
++ *
++ * @param obj Object being edited.
++ * @param part Part which contain items. This part should have BOX or TABLE type.
++ * @param item_name Name of item that will be moved below.
++ *
++ * @return @c EINA_TRUE in case of success, @c EINA_FALSE otherwise.
++ * @since 1.18
++ */
++EAPI Eina_Bool
++edje_edit_part_item_move_below(Evas_Object *obj, const char *part, const char *item_name);
++
+ /** Get the list of all part items in the given edje.
+  *
+  * @param obj Object being edited.
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index a9ec942..f0fd5a7 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -4663,38 +4663,19 @@ edje_edit_state_container_min_set(Evas_Object *obj, const char *part, const char
+ /*  BOX & TABLE ITEMS API  */
+ /***************************/
+ 
+-EAPI Eina_Bool
+-edje_edit_part_item_append(Evas_Object *obj, const char *part, const char *item_name, const char *source_group)
++static void
++_edje_edit_part_item_insert(Edje_Part *ep, unsigned int item_position, const char *item_name, const char *source_group)
+ {
+-   Edje_Part *ep;
+-   unsigned int i;
+    Edje_Pack_Element *item;
+-
+-   GET_RP_OR_RETURN(EINA_FALSE);
+-
+-   /* There is only Box and Table is allowed. */
+-   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
+-       (rp->part->type != EDJE_PART_TYPE_TABLE))
+-     return EINA_FALSE;
+-
+-   ep = rp->part;
+-
+-   if (!ed->file) return EINA_FALSE;
+-
+-   /* check if a source group is exists. */
+-   if (!eina_hash_find(ed->file->collection, source_group))
+-     return EINA_FALSE;
+-
+-   for (i = 0; i < ep->items_count; ++i)
+-     {
+-        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_name)))
+-          return EINA_FALSE;
+-     }
++   unsigned int i;
+ 
+    ep->items_count++;
+    ep->items = realloc(ep->items, sizeof (Edje_Pack_Element *) * ep->items_count);
+    item = _alloc(sizeof (Edje_Pack_Element));
+-   ep->items[ep->items_count - 1] = item;
++   /* shift all items to the end */
++   for (i = ep->items_count - 1; i > item_position; i--)
++     ep->items[i] = ep->items[i - 1];
++   ep->items[item_position] = item;
+ 
+    item->type = EDJE_PART_TYPE_GROUP;
+    item->name = eina_stringshare_add(item_name);
+@@ -4723,6 +4704,221 @@ edje_edit_part_item_append(Evas_Object *obj, const char *part, const char *item_
+    item->rowspan = 1;
+    item->spread.w = 1;
+    item->spread.h = 1;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_append(Evas_Object *obj, const char *part, const char *item_name, const char *source_group)
++{
++   Edje_Part *ep;
++   unsigned int i;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a source group is exists. */
++   if (!eina_hash_find(ed->file->collection, source_group))
++     return EINA_FALSE;
++
++   for (i = 0; i < ep->items_count; ++i)
++     {
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_name)))
++          return EINA_FALSE;
++     }
++
++   _edje_edit_part_item_insert(ep, ep->items_count, item_name, source_group);
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_insert_before(Evas_Object *obj, const char *part, const char *item_name, const char *item_before, const char *source_group)
++{
++   Edje_Part *ep;
++   unsigned int i;
++   int item_before_position = -1;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a source group is exists. */
++   if (!eina_hash_find(ed->file->collection, source_group))
++     return EINA_FALSE;
++
++   for (i = 0; i < ep->items_count; ++i)
++     {
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_name)))
++          return EINA_FALSE;
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_before)))
++          item_before_position = i;
++     }
++
++   if (item_before_position == -1) return EINA_FALSE;
++
++   _edje_edit_part_item_insert(ep, (unsigned)item_before_position, item_name, source_group);
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_insert_after(Evas_Object *obj, const char *part, const char *item_name, const char *item_after, const char *source_group)
++{
++   Edje_Part *ep;
++   unsigned int i;
++   int item_after_position = -1;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a source group is exists. */
++   if (!eina_hash_find(ed->file->collection, source_group))
++     return EINA_FALSE;
++
++   for (i = 0; i < ep->items_count; ++i)
++     {
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_name)))
++          return EINA_FALSE;
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_after)))
++          item_after_position = i;
++     }
++
++   if (item_after_position == -1) return EINA_FALSE;
++
++   item_after_position++;
++   _edje_edit_part_item_insert(ep, (unsigned)item_after_position, item_name, source_group);
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_insert_at(Evas_Object *obj, const char *part, const char *item_name, const char *source_group, unsigned int place)
++{
++   Edje_Part *ep;
++   unsigned int i;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++   if (place > ep->items_count - 1)
++     return EINA_FALSE;
++
++   if (!ed->file) return EINA_FALSE;
++
++   /* check if a source group is exists. */
++   if (!eina_hash_find(ed->file->collection, source_group))
++     return EINA_FALSE;
++
++   for (i = 0; i < ep->items_count; ++i)
++     {
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_name)))
++          return EINA_FALSE;
++     }
++
++   _edje_edit_part_item_insert(ep, place, item_name, source_group);
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_move_below(Evas_Object *obj, const char *part, const char *item_name)
++{
++   Edje_Part *ep;
++   unsigned int i;
++   Edje_Pack_Element *item;
++   unsigned int item_place = 0;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   for (i = 0; i < ep->items_count; ++i)
++     {
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_name)))
++          {
++             item_place = i;
++             break;
++          }
++     }
++
++   if (!item_place)
++     return EINA_FALSE;
++
++   item = ep->items[item_place - 1];
++   ep->items[item_place - 1] = ep->items[item_place];
++   ep->items[item_place] = item;
++
++   return EINA_TRUE;
++}
++
++EAPI Eina_Bool
++edje_edit_part_item_move_above(Evas_Object *obj, const char *part, const char *item_name)
++{
++   Edje_Part *ep;
++   unsigned int i;
++   Edje_Pack_Element *item;
++   unsigned int item_place = 0;
++
++   GET_RP_OR_RETURN(EINA_FALSE);
++
++   /* There is only Box and Table is allowed. */
++   if ((rp->part->type != EDJE_PART_TYPE_BOX) &&
++       (rp->part->type != EDJE_PART_TYPE_TABLE))
++     return EINA_FALSE;
++
++   ep = rp->part;
++
++   if (!ed->file) return EINA_FALSE;
++
++   for (i = 0; i < ep->items_count; ++i)
++     {
++        if (ep->items[i]->name && (!strcmp(ep->items[i]->name, item_name)))
++          {
++             item_place = i;
++             break;
++          }
++     }
++
++   if (item_place == ep->items_count - 1)
++     return EINA_FALSE;
++
++   item = ep->items[item_place + 1];
++   ep->items[item_place + 1] = ep->items[item_place];
++   ep->items[item_place] = item;
+ 
+    return EINA_TRUE;
+ }
+-- 
+2.7.4
+

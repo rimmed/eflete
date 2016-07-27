@@ -1,0 +1,80 @@
+From 14cdc94c141ebca3b934865e104e9aa09624065a Mon Sep 17 00:00:00 2001
+From: Vitalii Vorobiov <vi.vorobiov@samsung.com>
+Date: Tue, 7 Jun 2016 16:57:02 +0300
+Subject: [PATCH 50/64] edje_edit: fix copy&paste type for map functions which
+ should return int
+
+zplane and focal actually returns int, not Eina_Bool
+
+@fix
+---
+ src/lib/edje/Edje_Edit.h |  4 ++--
+ src/lib/edje/edje_edit.c | 16 ++--------------
+ 2 files changed, 4 insertions(+), 16 deletions(-)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 1e66569..cedf43c 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -5289,7 +5289,7 @@ EAPI Eina_Bool edje_edit_state_map_rotation_set(Evas_Object *obj, const char *pa
+  * @return map.perspective.focal value of given part state.
+  * @since 1.11
+  **/
+-EAPI Eina_Bool edje_edit_state_map_perspective_focal_get(Evas_Object *obj, const char *part, const char *state, double value);
++EAPI int edje_edit_state_map_perspective_focal_get(Evas_Object *obj, const char *part, const char *state, double value);
+ 
+ /** Set map.perspective.focal value of given part state.
+  *
+@@ -5314,7 +5314,7 @@ EAPI Eina_Bool edje_edit_state_map_perspective_focal_set(Evas_Object *obj, const
+  * @return map.perspective.zplane value of given part state.
+  * @since 1.11
+  **/
+-EAPI Eina_Bool edje_edit_state_map_perspective_zplane_get(Evas_Object *obj, const char *part, const char *state, double value);
++EAPI int edje_edit_state_map_perspective_zplane_get(Evas_Object *obj, const char *part, const char *state, double value);
+ 
+ /** Set map.perspective.zplane value of given part state.
+  *
+diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
+index 1df23de..654535f 100644
+--- a/src/lib/edje/edje_edit.c
++++ b/src/lib/edje/edje_edit.c
+@@ -7736,7 +7736,7 @@ edje_edit_state_map_perspective_zplane_set(Evas_Object *obj, const char *part, c
+    return EINA_TRUE;
+ }
+ 
+-EAPI Eina_Bool
++EAPI int
+ edje_edit_state_map_perspective_zplane_get(Evas_Object *obj, const char *part, const char *state, double value)
+ {
+    GET_PD_OR_RETURN(EINA_FALSE);
+@@ -7755,7 +7755,7 @@ edje_edit_state_map_perspective_focal_set(Evas_Object *obj, const char *part, co
+    return EINA_TRUE;
+ }
+ 
+-EAPI Eina_Bool
++EAPI int
+ edje_edit_state_map_perspective_focal_get(Evas_Object *obj, const char *part, const char *state, double value)
+ {
+    GET_PD_OR_RETURN(EINA_FALSE);
+@@ -14542,18 +14542,6 @@ _edje_generate_source_of_state(Evas_Object *obj, const char *part, const char *s
+                       pd->color2.r, pd->color2.g, pd->color2.b, pd->color2.a);
+      }
+ 
+-   if ((pd->persp.zplane != 0) || (pd->persp.focal != 1000))
+-     {
+-        BUF_APPEND(I5 "perspective {\n");
+-
+-        if (pd->persp.zplane != 0)
+-          BUF_APPENDF(I6 "zplane: %d;\n", pd->persp.zplane);
+-        if (pd->persp.focal != 1000)
+-          BUF_APPENDF(I6 "focal: %d;\n", pd->persp.focal);
+-
+-        BUF_APPEND(I5 "}\n");
+-     }
+-
+    //Box
+    if (rp->part->type == EDJE_PART_TYPE_BOX)
+      _edje_generate_source_state_box(pd, inherit_pd, buf);
+-- 
+2.7.4
+

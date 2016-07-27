@@ -1,0 +1,54 @@
+From db991c7e68eae9cb1f45c0d0ac7db6424fc5c0c7 Mon Sep 17 00:00:00 2001
+From: Vyacheslav Reutskiy <v.reutskiy@samsung.com>
+Date: Mon, 6 Jun 2016 10:42:14 +0300
+Subject: [PATCH 48/64] edje_edit: return lost API *_span_row/col_set
+ declaration
+
+I'm lost this declaration while add API for manager part items by
+index and mark as deprecated old funcs
+---
+ src/lib/edje/Edje_Edit.h | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/src/lib/edje/Edje_Edit.h b/src/lib/edje/Edje_Edit.h
+index 0422e83..1e66569 100644
+--- a/src/lib/edje/Edje_Edit.h
++++ b/src/lib/edje/Edje_Edit.h
+@@ -3660,6 +3660,34 @@ EAPI Eina_Bool edje_edit_part_item_span_set(Evas_Object *obj, const char *part,
+  *
+  * @param obj Object being edited.
+  * @param part Part that contain item.
++ * @param item The name of the item.
++ * @param col new count of the columns spans.
++ *
++ * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
++ * @since 1.16
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool
++edje_edit_part_item_span_col_set(Evas_Object *obj, const char *part, const char *item, unsigned short col);
++
++/** Set the count of rows which this item will spans for use.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
++ * @param item The name of the item.
++ * @param row new count of the rows spans.
++ *
++ * @return @c EINA_TRUE if successful, @c EINA_FALSE otherwise.
++ * @since 1.16
++ */
++EINA_DEPRECATED
++EAPI Eina_Bool
++edje_edit_part_item_span_row_set(Evas_Object *obj, const char *part, const char *item, unsigned short row);
++
++/** Set the count of columns which this item will spans for use.
++ *
++ * @param obj Object being edited.
++ * @param part Part that contain item.
+  * @param index Index of the item.
+  * @param col new count of the columns spans.
+  *
+-- 
+2.7.4
+

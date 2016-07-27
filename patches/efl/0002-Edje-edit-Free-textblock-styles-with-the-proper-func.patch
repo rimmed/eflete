@@ -1,7 +1,7 @@
-From 1ab1b24e4e1d3af8400c37ff2c2f8e48523b81ed Mon Sep 17 00:00:00 2001
+From dbf55ed8b48fb2e66f9d0dd54881d19922c99018 Mon Sep 17 00:00:00 2001
 From: Jean-Philippe Andre <jp.andre@samsung.com>
 Date: Mon, 23 Nov 2015 19:40:59 +0900
-Subject: [PATCH 02/79] Edje edit: Free textblock styles with the proper
+Subject: [PATCH 02/64] Edje edit: Free textblock styles with the proper
  function
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 02/79] Edje edit: Free textblock styles with the proper
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/src/lib/edje/edje_edit.c b/src/lib/edje/edje_edit.c
-index 7922d78..f714fc3 100644
+index 69e8051..84fd07b 100644
 --- a/src/lib/edje/edje_edit.c
 +++ b/src/lib/edje/edje_edit.c
 @@ -2689,7 +2689,7 @@ edje_edit_style_del(Evas_Object *obj, const char *style)
