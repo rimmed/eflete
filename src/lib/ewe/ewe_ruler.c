@@ -854,6 +854,9 @@ _ewe_ruler_evas_object_smart_resize(Eo *obj,
                                     Evas_Coord w,
                                     Evas_Coord h)
 {
+   Ewe_Ruler_Scale *scale;
+   Eina_List *l;
+
    if ((w == sd->geometry.width) && (h == sd->geometry.height)) return;
 
    sd->size_changed = EINA_TRUE;
@@ -863,6 +866,8 @@ _ewe_ruler_evas_object_smart_resize(Eo *obj,
    eo_do_super(obj, MY_CLASS, evas_obj_smart_resize(w, h));
    evas_object_resize(sd->clip, w, h);
    evas_object_resize(sd->bg, w, h);
+   EINA_LIST_FOREACH(sd->scales, l, scale)
+      evas_object_resize(scale->box, w, h);
 
    evas_object_smart_changed(obj);
 }
