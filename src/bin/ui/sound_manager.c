@@ -547,8 +547,12 @@ sound_manager_add(void)
    mw_title_set(mng.win, _("Sound manager"));
    evas_object_smart_callback_add(mng.win, "cancel", _mw_cancel_cb, NULL);
    evas_object_smart_callback_add(mng.win, "done", _mw_done_cb, NULL);
+#if !HAVE_TIZEN
    ic = elm_icon_add(mng.win);
-   elm_icon_standard_set(ic, "sound2");
+   elm_icon_standard_set(ic, "image2");
+#else
+   IMAGE_ADD_NEW(mng.win, ic, "icon", "logo");
+#endif
    mw_icon_set(mng.win, ic);
 
    if (mng.layout) goto done;
@@ -624,8 +628,12 @@ sound_manager_add(void)
 
    ENTRY_ADD(mng.layout, search_entry, true);
    elm_object_part_text_set(search_entry, "guide", _("Search"));
+#if !HAVE_TIZEN
    ICON_STANDARD_ADD(search_entry, ic, true, "search");
    elm_object_part_content_set(search_entry, "elm.swallow.end", ic);
+ #else
+   elm_object_style_set(search_entry, "search");
+#endif
    elm_layout_content_set(mng.layout, "elm.swallow.search", search_entry);
    evas_object_smart_callback_add(search_entry, "changed", _search_changed_cb, NULL);
    evas_object_smart_callback_add(search_entry, "activated", _find_next_cb, NULL);

@@ -244,14 +244,19 @@ ITEM_SEARCH_FUNC(genlist,ELM_GENLIST_ITEM_SCROLLTO_MIDDLE, "elm.text")
 static inline Evas_Object *
 _manager_search_field_create(Evas_Object *parent)
 {
-   Evas_Object *entry, *icon;
+   Evas_Object *entry;
 
    assert(parent != NULL);
 
    ENTRY_ADD(parent, entry, true);
    elm_object_part_text_set(entry, "guide", _("Search"));
+#if !HAVE_TIZEN
+   Evas_Object *icon;
    ICON_STANDARD_ADD(entry, icon, true, "search");
    elm_object_part_content_set(entry, "elm.swallow.end", icon);
+#else
+   elm_object_style_set(entry, "search");
+#endif
    return entry;
 }
 static void
@@ -434,8 +439,12 @@ colorclass_manager_add(void)
    mw_title_set(mng.win, _("Color class manager"));
    evas_object_smart_callback_add(mng.win, "cancel", _mw_cancel_cb, NULL);
    evas_object_smart_callback_add(mng.win, "done", _mw_done_cb, NULL);
+#if !HAVE_TIZEN
    ic = elm_icon_add(mng.win);
-   elm_icon_standard_set(ic, "color");
+   elm_icon_standard_set(ic, "image2");
+#else
+   IMAGE_ADD_NEW(mng.win, ic, "icon", "logo");
+#endif
    mw_icon_set(mng.win, ic);
    mng.layout = elm_layout_add(ap.win);
    elm_layout_theme_set(mng.layout, "layout", "manager", "internal");
