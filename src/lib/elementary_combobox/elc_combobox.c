@@ -59,11 +59,11 @@ _elm_combobox_elm_widget_translate(Eo *obj EINA_UNUSED, Elm_Combobox_Data *sd)
    return EINA_TRUE;
 }
 
-EOLIAN static Eina_Bool
+EOLIAN static Elm_Theme_Apply
 _elm_combobox_elm_widget_theme_apply(Eo *obj, Elm_Combobox_Data *sd)
 {
    const char *style;
-   Eina_Bool int_ret = EINA_FALSE;
+   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
    Eina_Bool mirrored;
    char buf[128];
 
@@ -77,7 +77,7 @@ _elm_combobox_elm_widget_theme_apply(Eo *obj, Elm_Combobox_Data *sd)
    eina_stringshare_replace(&(wd->style), buf);
 
    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
-   if (!int_ret) return EINA_FALSE;
+   if (!int_ret) return ELM_THEME_APPLY_FAILED;
 
    eina_stringshare_replace(&(wd->style), style);
 

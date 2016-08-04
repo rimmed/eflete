@@ -1,0 +1,2120 @@
+From 46463f9b142705a8d0ed67aaf269d275f632e1d3 Mon Sep 17 00:00:00 2001
+From: Jinyong Park <j4939.park@samsung.com>
+Date: Tue, 21 Jun 2016 14:07:33 +0900
+Subject: [PATCH] theme: return enum from elm_widget_style_set instead of bool
+
+if trying to apply incorrect theme, widget apply default theme and return TRUE.
+so there is no way to check it really apply correct theme.
+To resolve this problem, _elm_theme_set return three type enum
+
+[ it is already merged in opensource ]
+
+Change-Id: I2b81e8240c5d54d8d896b3c1f2b0b66af3e7a9ac
+Signed-off-by: Jinyong Park <j4939.park@samsung.com>
+---
+ elm_notify.c                      |  0
+ src/lib/elc_ctxpopup.c            |  8 ++++----
+ src/lib/elc_fileselector.c        | 10 +++++-----
+ src/lib/elc_fileselector_button.c | 10 +++++-----
+ src/lib/elc_fileselector_entry.c  | 10 +++++-----
+ src/lib/elc_hoversel.c            | 10 +++++-----
+ src/lib/elc_multibuttonentry.c    |  8 ++++----
+ src/lib/elc_naviframe.c           |  4 ++--
+ src/lib/elc_player.c              |  8 ++++----
+ src/lib/elc_popup.c               |  4 ++--
+ src/lib/elm_actionslider.c        | 10 +++++-----
+ src/lib/elm_box.c                 | 10 +++++-----
+ src/lib/elm_button.c              |  8 ++++----
+ src/lib/elm_calendar.c            |  8 ++++----
+ src/lib/elm_check.c               | 10 +++++-----
+ src/lib/elm_clock.c               |  8 ++++----
+ src/lib/elm_colorselector.c       | 12 ++++++------
+ src/lib/elm_conform.c             |  8 ++++----
+ src/lib/elm_datetime.c            | 12 ++++++------
+ src/lib/elm_dayselector.c         |  8 ++++----
+ src/lib/elm_diskselector.c        |  8 ++++----
+ src/lib/elm_entry.c               | 12 ++++++------
+ src/lib/elm_flip.c                |  8 ++++----
+ src/lib/elm_flipselector.c        | 10 +++++-----
+ src/lib/elm_gengrid.c             |  8 ++++----
+ src/lib/elm_genlist.c             |  8 ++++----
+ src/lib/elm_grid.c                |  8 ++++----
+ src/lib/elm_hover.c               |  8 ++++----
+ src/lib/elm_icon.c                |  8 ++++----
+ src/lib/elm_image.c               |  8 ++++----
+ src/lib/elm_index.c               | 10 +++++-----
+ src/lib/elm_label.c               | 10 +++++-----
+ src/lib/elm_layout.c              | 26 ++++++++++++++++----------
+ src/lib/elm_list.c                |  8 ++++----
+ src/lib/elm_main.c                |  4 +++-
+ src/lib/elm_map.c                 | 10 +++++-----
+ src/lib/elm_mapbuf.c              |  8 ++++----
+ src/lib/elm_menu.c                |  8 ++++----
+ src/lib/elm_notify.c              |  8 ++++----
+ src/lib/elm_panel.c               | 10 +++++-----
+ src/lib/elm_panes.c               |  8 ++++----
+ src/lib/elm_photo.c               | 10 +++++-----
+ src/lib/elm_photocam.c            |  8 ++++----
+ src/lib/elm_plug.c                |  8 ++++----
+ src/lib/elm_priv.h                |  4 ++--
+ src/lib/elm_progressbar.c         | 10 +++++-----
+ src/lib/elm_radio.c               | 10 +++++-----
+ src/lib/elm_route.c               |  8 ++++----
+ src/lib/elm_scroller.c            |  8 ++++----
+ src/lib/elm_segment_control.c     |  8 ++++----
+ src/lib/elm_separator.c           |  8 ++++----
+ src/lib/elm_slider.c              | 10 +++++-----
+ src/lib/elm_spinner.c             |  6 +++---
+ src/lib/elm_table.c               |  8 ++++----
+ src/lib/elm_theme.c               | 13 ++++++-------
+ src/lib/elm_toolbar.c             | 12 ++++++------
+ src/lib/elm_web2.c                |  4 ++--
+ src/lib/elm_widget.c              | 25 +++++++++++++------------
+ src/lib/elm_widget.eo             | 13 ++++++++++---
+ src/lib/elm_widget.h              | 16 ++++++++--------
+ src/lib/elm_win.c                 | 30 ++++++++++++++++++------------
+ src/mobile_lib/elc_ctxpopup.c     | 10 +++++-----
+ src/mobile_lib/elm_genlist.c      |  8 ++++----
+ 63 files changed, 310 insertions(+), 289 deletions(-)
+ create mode 100644 elm_notify.c
+
+diff --git a/elm_notify.c b/elm_notify.c
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/lib/elc_ctxpopup.c b/src/lib/elc_ctxpopup.c
+index 77295b5..0d009a6 100644
+--- a/src/lib/elc_ctxpopup.c
++++ b/src/lib/elc_ctxpopup.c
+@@ -784,13 +784,13 @@ _on_content_resized(void *data,
+ }
+ 
+ //FIXME: lost the content size when theme hook is called.
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_ctxpopup_elm_widget_theme_apply(Eo *obj, Elm_Ctxpopup_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    elm_widget_theme_object_set
+      (obj, sd->bg, "ctxpopup", "bg", elm_widget_style_get(obj));
+@@ -809,7 +809,7 @@ _elm_ctxpopup_elm_widget_theme_apply(Eo *obj, Elm_Ctxpopup_Data *sd)
+ 
+    if (sd->visible) elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ /* kind of a big and tricky override here: an internal box will hold
+diff --git a/src/lib/elc_fileselector.c b/src/lib/elc_fileselector.c
+index 342c235..6660e42 100644
+--- a/src/lib/elc_fileselector.c
++++ b/src/lib/elc_fileselector.c
+@@ -96,18 +96,18 @@ _mirrored_set(Evas_Object *obj, Eina_Bool rtl)
+    elm_widget_mirrored_set(sd->home_button, rtl);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_fileselector_elm_widget_theme_apply(Eo *obj, Elm_Fileselector_Data *sd)
+ {
+    const char *style;
+    const char *data;
+    char buf[1024];
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    style = elm_widget_style_get(obj);
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+@@ -150,7 +150,7 @@ _elm_fileselector_elm_widget_theme_apply(Eo *obj, Elm_Fileselector_Data *sd)
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static Eina_Bool
+diff --git a/src/lib/elc_fileselector_button.c b/src/lib/elc_fileselector_button.c
+index fb5d082..37b76f2 100644
+--- a/src/lib/elc_fileselector_button.c
++++ b/src/lib/elc_fileselector_button.c
+@@ -34,15 +34,15 @@ static const Evas_Smart_Cb_Description _smart_callbacks[] = {
+ };
+ #undef ELM_PRIV_FILESELECTOR_BUTTON_SIGNALS
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_fileselector_button_elm_widget_theme_apply(Eo *obj, Elm_Fileselector_Button_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    char buf[4096];
+    const char *style;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    style = eina_stringshare_add(elm_widget_style_get(obj));
+ 
+@@ -52,13 +52,13 @@ _elm_fileselector_button_elm_widget_theme_apply(Eo *obj, Elm_Fileselector_Button
+    eina_stringshare_replace(&(wd->style), buf);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    eina_stringshare_replace(&(wd->style), style);
+ 
+    eina_stringshare_del(style);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static Eina_Bool
+diff --git a/src/lib/elc_fileselector_entry.c b/src/lib/elc_fileselector_entry.c
+index ba06a6f..a571f01 100644
+--- a/src/lib/elc_fileselector_entry.c
++++ b/src/lib/elc_fileselector_entry.c
+@@ -162,17 +162,17 @@ _elm_fileselector_entry_elm_widget_focus_next(Eo *obj EINA_UNUSED, Elm_Fileselec
+    return EINA_FALSE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_fileselector_entry_elm_widget_theme_apply(Eo *obj, Elm_Fileselector_Entry_Data *sd)
+ {
+    const char *style;
+    char buf[1024];
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    style = elm_widget_style_get(obj);
+ 
+@@ -190,7 +190,7 @@ _elm_fileselector_entry_elm_widget_theme_apply(Eo *obj, Elm_Fileselector_Entry_D
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elc_hoversel.c b/src/lib/elc_hoversel.c
+index 31e4830..ad0aa9f 100644
+--- a/src/lib/elc_hoversel.c
++++ b/src/lib/elc_hoversel.c
+@@ -56,12 +56,12 @@ _elm_hoversel_elm_widget_translate(Eo *obj EINA_UNUSED, Elm_Hoversel_Data *sd)
+    return EINA_TRUE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_hoversel_elm_widget_theme_apply(Eo *obj, Elm_Hoversel_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    char buf[4096];
+    const char *style;
+@@ -77,7 +77,7 @@ _elm_hoversel_elm_widget_theme_apply(Eo *obj, Elm_Hoversel_Data *sd)
+    eina_stringshare_replace(&(wd->style), buf);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    eina_stringshare_replace(&(wd->style), style);
+ 
+@@ -88,7 +88,7 @@ _elm_hoversel_elm_widget_theme_apply(Eo *obj, Elm_Hoversel_Data *sd)
+ 
+    elm_hoversel_hover_end(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static Eina_Bool
+diff --git a/src/lib/elc_multibuttonentry.c b/src/lib/elc_multibuttonentry.c
+index 694de90..29fb6d7 100644
+--- a/src/lib/elc_multibuttonentry.c
++++ b/src/lib/elc_multibuttonentry.c
+@@ -91,7 +91,7 @@ _format_count(int count, void *data EINA_UNUSED)
+    return strdup(buf);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_multibuttonentry_elm_widget_theme_apply(Eo *obj, Elm_Multibuttonentry_Data *sd)
+ {
+    const char *str;
+@@ -100,9 +100,9 @@ _elm_multibuttonentry_elm_widget_theme_apply(Eo *obj, Elm_Multibuttonentry_Data
+    Elm_Object_Item *eo_item;
+    double pad_scale;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    str = elm_layout_data_get(obj, "horizontal_pad");
+    if (str) hpad = atoi(str);
+@@ -133,7 +133,7 @@ _elm_multibuttonentry_elm_widget_theme_apply(Eo *obj, Elm_Multibuttonentry_Data
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elc_naviframe.c b/src/lib/elc_naviframe.c
+index 8329529..ec011a2 100644
+--- a/src/lib/elc_naviframe.c
++++ b/src/lib/elc_naviframe.c
+@@ -434,7 +434,7 @@ _item_title_enabled_update(Elm_Naviframe_Item_Data *nit, Eina_Bool transition)
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_naviframe_elm_widget_theme_apply(Eo *obj, Elm_Naviframe_Data *sd)
+ {
+    Elm_Naviframe_Item_Data *it;
+@@ -452,7 +452,7 @@ _elm_naviframe_elm_widget_theme_apply(Eo *obj, Elm_Naviframe_Data *sd)
+      }
+ 
+    elm_layout_sizing_eval(obj);
+-   return EINA_TRUE;
++   return ELM_THEME_APPLY_SUCCESS;
+ }
+ 
+ static char *
+diff --git a/src/lib/elc_player.c b/src/lib/elc_player.c
+index ac4a23f..6e394c9 100644
+--- a/src/lib/elc_player.c
++++ b/src/lib/elc_player.c
+@@ -210,12 +210,12 @@ _update_theme_slider(Evas_Object *obj, Evas_Object *sl, const char *name, const
+    elm_object_disabled_set(sl, elm_widget_disabled_get(obj));
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_player_elm_widget_theme_apply(Eo *obj, Elm_Player_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _update_theme_button(obj, sd->forward, "forward");
+    _update_theme_button(obj, sd->info, "info");
+@@ -233,7 +233,7 @@ _elm_player_elm_widget_theme_apply(Eo *obj, Elm_Player_Data *sd)
+    _update_theme_slider(obj, sd->vslider,  "volume", "volumeslider");
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elc_popup.c b/src/lib/elc_popup.c
+index 73e7967..61dde24 100644
+--- a/src/lib/elc_popup.c
++++ b/src/lib/elc_popup.c
+@@ -446,6 +446,6 @@ _notify_orient_name_get(Evas_Object *obj)
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_popup_elm_widget_theme_apply(Eo *obj, Elm_Popup_Data *sd)
+ {
+    Elm_Popup_Item_Data *it;
+@@ -548,7 +548,7 @@ _elm_popup_elm_widget_theme_apply(Eo *obj, Elm_Popup_Data *sd)
+    /* access */
+    if (_elm_config->access_mode) _access_obj_process(obj, EINA_TRUE);
+ 
+-   return EINA_TRUE;
++   return ELM_THEME_APPLY_SUCCESS;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_actionslider.c b/src/lib/elm_actionslider.c
+index f7095a9..ff3b2db 100644
+--- a/src/lib/elm_actionslider.c
++++ b/src/lib/elm_actionslider.c
+@@ -105,25 +105,25 @@ _mirroredness_change_eval(Evas_Object *obj)
+      (wd->resize_obj, "elm.drag_button_base", 1.0 - pos, 0.5);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_actionslider_elm_widget_theme_apply(Eo *obj, Elm_Actionslider_Data *sd EINA_UNUSED)
+ {
+    Eina_Bool mirrored;
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    mirrored = elm_object_mirrored_get(obj);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if (elm_object_mirrored_get(obj) != mirrored)
+      _mirroredness_change_eval(obj);
+ 
+    edje_object_message_signal_process(wd->resize_obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_box.c b/src/lib/elm_box.c
+index f597e02..b7a780d 100644
+--- a/src/lib/elm_box.c
++++ b/src/lib/elm_box.c
+@@ -110,18 +110,18 @@ _elm_box_elm_widget_focus_direction(Eo *obj EINA_UNUSED, Elm_Box_Data *_pd EINA_
+             (obj, base, items, list_data_get, degree, direction, direction_item, weight);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_box_elm_widget_theme_apply(Eo *obj, Elm_Box_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+    evas_object_smart_calculate(wd->resize_obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_button.c b/src/lib/elm_button.c
+index b813fe1..6d9321c 100644
+--- a/src/lib/elm_button.c
++++ b/src/lib/elm_button.c
+@@ -116,16 +116,16 @@ _icon_signal_emit(Evas_Object *obj)
+ /* FIXME: replicated from elm_layout just because button's icon spot
+  * is elm.swallow.content, not elm.swallow.icon. Fix that whenever we
+  * can changed the theme API */
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_button_elm_widget_theme_apply(Eo *obj, Elm_Button_Data *_pd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+    _icon_signal_emit(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ /* FIXME: replicated from elm_layout just because button's icon spot
+diff --git a/src/lib/elm_calendar.c b/src/lib/elm_calendar.c
+index c7e5929..f9f5828 100644
+--- a/src/lib/elm_calendar.c
++++ b/src/lib/elm_calendar.c
+@@ -1042,15 +1042,15 @@ _spinner_buttons_add(Evas_Object *obj, Elm_Calendar_Data *sd)
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_calendar_elm_widget_theme_apply(Eo *obj, Elm_Calendar_Data *_pd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    evas_object_smart_changed(obj);
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ /* Set correct tm_wday and tm_yday after other fields changes*/
+diff --git a/src/lib/elm_check.c b/src/lib/elm_check.c
+index fc27911..eb06d71 100644
+--- a/src/lib/elm_check.c
++++ b/src/lib/elm_check.c
+@@ -198,15 +198,15 @@ _elm_check_elm_widget_event(Eo *obj, Elm_Check_Data *_pd EINA_UNUSED, Evas_Objec
+    return EINA_TRUE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_check_elm_widget_theme_apply(Eo *obj, Elm_Check_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if (!sd->state) elm_layout_signal_emit(obj, "elm,state,check,off", "elm");
+    else elm_layout_signal_emit(obj, "elm,state,check,on", "elm");
+@@ -224,7 +224,7 @@ _elm_check_elm_widget_theme_apply(Eo *obj, Elm_Check_Data *sd)
+
+    eo_do(obj, elm_obj_layout_sizing_eval());
+
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static char *
+diff --git a/src/lib/elm_clock.c b/src/lib/elm_clock.c
+index 31f84f9..47a3b58 100644
+--- a/src/lib/elm_clock.c
++++ b/src/lib/elm_clock.c
+@@ -560,17 +560,17 @@ _time_update(Evas_Object *obj, Eina_Bool theme_update)
+      sd->cur.ampm = -1;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_clock_elm_widget_theme_apply(Eo *obj, Elm_Clock_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _time_update(obj, EINA_TRUE);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static Eina_Bool
+diff --git a/src/lib/elm_colorselector.c b/src/lib/elm_colorselector.c
+index d7909f2..68f3fbf 100644
+--- a/src/lib/elm_colorselector.c
++++ b/src/lib/elm_colorselector.c
+@@ -1284,7 +1284,7 @@ _color_bars_add(Evas_Object *obj)
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_colorselector_elm_widget_theme_apply(Eo *obj, Elm_Colorselector_Data *sd)
+ {
+    int i;
+@@ -1295,11 +1295,11 @@ _elm_colorselector_elm_widget_theme_apply(Eo *obj, Elm_Colorselector_Data *sd)
+    unsigned int h_pad = DEFAULT_HOR_PAD;
+    unsigned int v_pad = DEFAULT_VER_PAD;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
+-   Eina_Bool int_ret = EINA_FALSE;
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if ((sd->mode == ELM_COLORSELECTOR_PALETTE) ||
+        (sd->mode == ELM_COLORSELECTOR_ALL) ||
+@@ -1334,7 +1334,7 @@ _elm_colorselector_elm_widget_theme_apply(Eo *obj, Elm_Colorselector_Data *sd)
+        (sd->mode == ELM_COLORSELECTOR_ALL) ||
+        (sd->mode == ELM_COLORSELECTOR_BOTH))
+      {
+-        if (!sd->col_bars_area) return EINA_FALSE;
++        if (!sd->col_bars_area) return ELM_THEME_APPLY_FAILED;
+ 
+         elm_widget_theme_object_set
+           (obj, sd->col_bars_area, "colorselector", "bg",
+@@ -1375,7 +1375,7 @@ _elm_colorselector_elm_widget_theme_apply(Eo *obj, Elm_Colorselector_Data *sd)
+      }
+ 
+    elm_layout_sizing_eval(obj);
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_conform.c b/src/lib/elm_conform.c
+index 8b826ec..4e8b6b9 100644
+--- a/src/lib/elm_conform.c
++++ b/src/lib/elm_conform.c
+@@ -711,19 +711,19 @@ _on_rotation_changed(void *data,
+    return EINA_TRUE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_conformant_elm_widget_theme_apply(Eo *obj, Elm_Conformant_Data *_pd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _conformant_parts_swallow(obj);
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ // unused now - but meant to be for making sure the focused widget is always
+diff --git a/src/lib/elm_datetime.c b/src/lib/elm_datetime.c
+index 5a61641..89e53b6 100644
+--- a/src/lib/elm_datetime.c
++++ b/src/lib/elm_datetime.c
+@@ -569,21 +569,21 @@ _elm_datetime_elm_layout_sizing_eval(Eo *obj, Elm_Datetime_Data *sd)
+    evas_object_size_hint_max_set(obj, -1, -1);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_datetime_elm_widget_theme_apply(Eo *obj, Elm_Datetime_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    Datetime_Field *field;
+    char buf[BUFFER_SIZE];
+    unsigned int idx;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+-   if ((!dt_mod) || (!dt_mod->field_value_display)) return EINA_TRUE;
++   if ((!dt_mod) || (!dt_mod->field_value_display)) return int_ret;
+ 
+    for (idx = 0; idx < ELM_DATETIME_TYPE_COUNT; idx++)
+      {
+@@ -611,7 +611,7 @@ _elm_datetime_elm_widget_theme_apply(Eo *obj, Elm_Datetime_Data *sd)
+    edje_object_message_signal_process(wd->resize_obj);
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static int
+diff --git a/src/lib/elm_dayselector.c b/src/lib/elm_dayselector.c
+index 0f76ab9..fce1b22 100644
+--- a/src/lib/elm_dayselector.c
++++ b/src/lib/elm_dayselector.c
+@@ -120,17 +120,17 @@ _item_location_get(Elm_Dayselector_Data *sd,
+           ELM_DAYSELECTOR_MAX;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_dayselector_elm_widget_theme_apply(Eo *obj, Elm_Dayselector_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    Eina_List *l;
+    char buf[1024];
+    Elm_Dayselector_Item_Data *it;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    EINA_LIST_FOREACH(sd->items, l, it)
+      {
+@@ -146,7 +146,7 @@ _elm_dayselector_elm_widget_theme_apply(Eo *obj, Elm_Dayselector_Data *sd)
+    _update_items(obj);
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_diskselector.c b/src/lib/elm_diskselector.c
+index 7f38288..1bb8342 100644
+--- a/src/lib/elm_diskselector.c
++++ b/src/lib/elm_diskselector.c
+@@ -810,18 +810,18 @@ _theme_data_get(Evas_Object *obj)
+    else sd->minh = -1;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_diskselector_elm_widget_theme_apply(Eo *obj, Elm_Diskselector_Data *sd)
+ {
+    Eina_List *l;
+    Elm_Diskselector_Item_Data *it;
+    Evas_Object *blank;
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    Evas *evas;
+    const char *style = elm_widget_style_get(obj);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    evas = evas_object_evas_get(obj);
+    evas_event_freeze(evas);
+@@ -867,7 +867,7 @@ _elm_diskselector_elm_widget_theme_apply(Eo *obj, Elm_Diskselector_Data *sd)
+    evas_event_thaw(evas);
+    evas_event_thaw_eval(evas);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elm_entry.c b/src/lib/elm_entry.c
+index 07bfa9f..f362320 100644
+--- a/src/lib/elm_entry.c
++++ b/src/lib/elm_entry.c
+@@ -1583,18 +1583,18 @@ _elm_entry_elm_widget_disable(Eo *obj, Elm_Entry_Data *sd)
+ 
+ /* we can't issue the layout's theming code here, cause it assumes an
+  * unique edje object, always */
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_entry_elm_widget_theme_apply(Eo *obj, Elm_Entry_Data *sd)
+ {
+    const char *str;
+    const char *t;
+    const char *style = elm_widget_style_get(obj);
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    evas_event_freeze(evas_object_evas_get(obj));
+ 
+@@ -1680,7 +1680,7 @@ _elm_entry_elm_widget_theme_apply(Eo *obj, Elm_Entry_Data *sd)
+ 
+    if (sd->scroll)
+      {
+-        Eina_Bool ok = EINA_FALSE;
++        Elm_Theme_Apply ok = ELM_THEME_APPLY_FAILED;
+ 
+         eo_do(obj, elm_interface_scrollable_mirrored_set(elm_widget_mirrored_get(obj)));
+ 
+@@ -1727,7 +1727,7 @@ _elm_entry_elm_widget_theme_apply(Eo *obj, Elm_Entry_Data *sd)
+ 
+    evas_object_unref(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_flip.c b/src/lib/elm_flip.c
+index 30695f2..d6e8d70 100644
+--- a/src/lib/elm_flip.c
++++ b/src/lib/elm_flip.c
+@@ -93,16 +93,16 @@ _sizing_eval(Evas_Object *obj)
+    evas_object_size_hint_max_set(obj, maxw, maxh);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_flip_elm_widget_theme_apply(Eo *obj, Elm_Flip_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elm_flipselector.c b/src/lib/elm_flipselector.c
+index 067e31b..af3557c 100644
+--- a/src/lib/elm_flipselector.c
++++ b/src/lib/elm_flipselector.c
+@@ -354,16 +354,16 @@ _item_new(Evas_Object *obj,
+    return eo_item;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_flipselector_elm_widget_theme_apply(Eo *obj, Elm_Flipselector_Data *sd)
+ {
+    const char *max_len;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    max_len = edje_object_data_get(wd->resize_obj, "max_len");
+    if (!max_len) sd->max_len = MAX_LEN_DEFAULT;
+@@ -377,7 +377,7 @@ _elm_flipselector_elm_widget_theme_apply(Eo *obj, Elm_Flipselector_Data *sd)
+    _update_view(obj);
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_gengrid.c b/src/lib/elm_gengrid.c
+index 6de05fa..1732076 100644
+--- a/src/lib/elm_gengrid.c
++++ b/src/lib/elm_gengrid.c
+@@ -3856,16 +3856,16 @@ _mirrored_set(Evas_Object *obj,
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_gengrid_elm_widget_theme_apply(Eo *obj, Elm_Gengrid_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_genlist.c b/src/lib/elm_genlist.c
+index 61bfb1a..d1b92cd 100644
+--- a/src/lib/elm_genlist.c
++++ b/src/lib/elm_genlist.c
+@@ -3380,16 +3380,16 @@ _mirrored_set(Evas_Object *obj,
+    eo_do(obj, elm_interface_scrollable_mirrored_set(rtl));
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_genlist_elm_widget_theme_apply(Eo *obj, Elm_Genlist_Data *sd)
+ {
+    Item_Block *itb;
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    Eina_List *l;
+    Elm_Gen_Item *it;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    evas_event_freeze(evas_object_evas_get(obj));
+    _item_cache_zero(sd);
+@@ -3412,7 +3412,7 @@ _elm_genlist_elm_widget_theme_apply(Eo *obj, Elm_Genlist_Data *sd)
+    evas_event_thaw(evas_object_evas_get(obj));
+    evas_event_thaw_eval(evas_object_evas_get(obj));
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ /* FIXME: take off later. maybe this show region coords belong in the
+diff --git a/src/lib/elm_grid.c b/src/lib/elm_grid.c
+index f347335..06623cd 100644
+--- a/src/lib/elm_grid.c
++++ b/src/lib/elm_grid.c
+@@ -102,17 +102,17 @@ _mirrored_set(Evas_Object *obj, Eina_Bool rtl)
+    evas_object_grid_mirrored_set(wd->resize_obj, rtl);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_grid_elm_widget_theme_apply(Eo *obj, void *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_hover.c b/src/lib/elm_hover.c
+index 73fcf3f..50c07bd 100644
+--- a/src/lib/elm_hover.c
++++ b/src/lib/elm_hover.c
+@@ -289,12 +289,12 @@ _hov_show_do(Evas_Object *obj)
+    }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_hover_elm_widget_theme_apply(Eo *obj, Elm_Hover_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if (sd->smt_sub) _elm_hover_smt_sub_re_eval(obj);
+ 
+@@ -302,7 +302,7 @@ _elm_hover_elm_widget_theme_apply(Eo *obj, Elm_Hover_Data *sd)
+ 
+    if (evas_object_visible_get(obj)) _hov_show_do(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_icon.c b/src/lib/elm_icon.c
+index b634fd1..14d28ce 100644
+--- a/src/lib/elm_icon.c
++++ b/src/lib/elm_icon.c
+@@ -407,18 +407,18 @@ _elm_icon_elm_image_memfile_set(Eo *obj, Elm_Icon_Data *sd, const void *img, siz
+    return int_ret;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_icon_elm_widget_theme_apply(Eo *obj, Elm_Icon_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    if (sd->stdicon)
+      _elm_theme_object_icon_set(obj, sd->stdicon, elm_widget_style_get(obj));
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static Eina_Bool
+diff --git a/src/lib/elm_image.c b/src/lib/elm_image.c
+index f76eb9a..07709fb 100644
+--- a/src/lib/elm_image.c
++++ b/src/lib/elm_image.c
+@@ -767,16 +767,16 @@ _elm_image_evas_object_smart_clip_unset(Eo *obj, Elm_Image_Data *sd)
+    if (sd->prev_img) evas_object_clip_unset(sd->prev_img);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_image_elm_widget_theme_apply(Eo *obj, Elm_Image_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    eo_do(obj, elm_obj_image_sizing_eval());
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static Eina_Bool
+diff --git a/src/lib/elm_index.c b/src/lib/elm_index.c
+index 18d85dc..43c26fe 100644
+--- a/src/lib/elm_index.c
++++ b/src/lib/elm_index.c
+@@ -434,15 +434,15 @@ _index_priority_change(void *data, Elm_Index_Item_Data *it)
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_index_elm_widget_theme_apply(Eo *obj, Elm_Index_Data *sd)
+ {
+    Evas_Coord minw = 0, minh = 0;
+    Elm_Object_Item *eo_item;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+    ELM_LAYOUT_DATA_GET(obj, ld);
+ 
+    _index_box_clear(obj, 0);
+@@ -454,7 +454,7 @@ _elm_index_elm_widget_theme_apply(Eo *obj, Elm_Index_Data *sd)
+      eina_stringshare_replace(&ld->group, "base/vertical");
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    elm_coords_finger_size_adjust(1, &minw, 1, &minh);
+    evas_object_size_hint_min_set(sd->event_rect[0], minw, minh);
+@@ -516,7 +516,7 @@ _elm_index_elm_widget_theme_apply(Eo *obj, Elm_Index_Data *sd)
+    if (_elm_config->access_mode == ELM_ACCESS_MODE_ON)
+      _access_index_register(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_label.c b/src/lib/elm_label.c
+index c01e625..81225b6 100644
+--- a/src/lib/elm_label.c
++++ b/src/lib/elm_label.c
+@@ -172,17 +172,17 @@ _label_slide_change(Evas_Object *obj)
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_label_elm_widget_theme_apply(Eo *obj, Elm_Label_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    evas_event_freeze(evas_object_evas_get(obj));
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _label_format_set(wd->resize_obj, sd->format);
+    _label_slide_change(obj);
+@@ -205,7 +205,7 @@ _elm_label_elm_layout_sizing_eval(Eo *obj, Elm_Label_Data *_pd EINA_UNUSED)
+    ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd);
+ 
+    if (sd->linewrap)
+-     {
++    {
+         evas_object_geometry_get(wd->resize_obj, NULL, NULL, &resw, &resh);
+         if (resw == sd->lastw) return;
+         sd->lastw = resw;
+diff --git a/src/lib/elm_layout.c b/src/lib/elm_layout.c
+index ab84a4a..d290cf3 100644
+--- a/src/lib/elm_layout.c
++++ b/src/lib/elm_layout.c
+@@ -351,12 +351,12 @@ _elm_layout_elm_widget_disable(Eo *obj, Elm_Layout_Smart_Data *_pd EINA_UNUSED)
+    return EINA_TRUE;
+ }
+ 
+-static Eina_Bool
++static Elm_Theme_Apply
+ _elm_layout_theme_internal(Eo *obj, Elm_Layout_Smart_Data *sd)
+ {
+-   Eina_Bool ret = EINA_FALSE;
++   Elm_Theme_Apply ret = ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    /* function already prints error messages, if any */
+    if (!sd->file_set)
+@@ -369,25 +369,28 @@ _elm_layout_theme_internal(Eo *obj, Elm_Layout_Smart_Data *sd)
+    if (ret)
+      eo_do(obj, eo_event_callback_call(ELM_LAYOUT_EVENT_THEME_CHANGED, NULL));
+ 
+-   ret = _visuals_refresh(obj, sd) && ret;
++   if (!_visuals_refresh(obj, sd))
++     ret = ELM_THEME_APPLY_FAILED;
+ 
+    return ret;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_layout_elm_widget_theme_apply(Eo *obj, Elm_Layout_Smart_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+    /* The following lines are here to support entry design; the _theme function
+     * of entry needs to call directly the widget _theme function */
+    Eina_Bool enable = EINA_TRUE;
+    eo_do(obj, enable = elm_obj_layout_theme_enable());
+-   if (!enable) return EINA_TRUE;
++   if (!enable) return int_ret;
+ 
+-   return _elm_layout_theme_internal(obj, sd);
++   int_ret = _elm_layout_theme_internal(obj, sd) & int_ret;
++
++   return int_ret;
+ }
+ 
+ static void *
+@@ -888,7 +891,10 @@ _elm_layout_theme_set(Eo *obj, Elm_Layout_Smart_Data *sd, const char *klass, con
+    eina_stringshare_replace(&(sd->group), group);
+    eina_stringshare_replace(&(wd->style), style);
+ 
+-   return _elm_layout_theme_internal(obj, sd);
++   if (_elm_layout_theme_internal(obj, sd))
++     return EINA_TRUE;
++   else
++     return EINA_FALSE;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_list.c b/src/lib/elm_list.c
+index 620ccf8..2599114 100644
+--- a/src/lib/elm_list.c
++++ b/src/lib/elm_list.c
+@@ -1106,15 +1106,15 @@ _mirrored_set(Evas_Object *obj,
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_list_elm_widget_theme_apply(Eo *obj, Elm_List_Data *sd)
+ {
+    Elm_Object_Item *eo_it;
+    Eina_List *n;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+ 
+@@ -1130,7 +1130,7 @@ _elm_list_elm_widget_theme_apply(Eo *obj, Elm_List_Data *sd)
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_main.c b/src/lib/elm_main.c
+index e7b567c..c78f0ac 100644
+--- a/src/lib/elm_main.c
++++ b/src/lib/elm_main.c
+@@ -1303,7 +1303,9 @@ elm_object_style_set(Evas_Object *obj,
+                      const char  *style)
+ {
+    EINA_SAFETY_ON_NULL_RETURN_VAL(obj, EINA_FALSE);
+-   return elm_widget_style_set(obj, style);
++   if (elm_widget_style_set(obj, style))
++     return EINA_TRUE;
++   return EINA_FALSE;
+ }
+ 
+ EAPI Eina_Bool
+diff --git a/src/lib/elm_map.c b/src/lib/elm_map.c
+index b2092bd..63860ab 100644
+--- a/src/lib/elm_map.c
++++ b/src/lib/elm_map.c
+@@ -3907,13 +3907,13 @@ _elm_map_pan_class_constructor(Eo_Class *klass)
+ 
+ #include "elm_map_pan.eo.c"
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_map_elm_widget_theme_apply(Eo *obj, Elm_Map_Data *sd EINA_UNUSED)
+ {
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
+-   Eina_Bool int_ret = EINA_FALSE;
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+ 
+    elm_widget_theme_object_set
+@@ -3921,7 +3921,7 @@ _elm_map_elm_widget_theme_apply(Eo *obj, Elm_Map_Data *sd EINA_UNUSED)
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static Eina_Bool
+diff --git a/src/lib/elm_mapbuf.c b/src/lib/elm_mapbuf.c
+index 6c8ac1e..f6860a4 100644
+--- a/src/lib/elm_mapbuf.c
++++ b/src/lib/elm_mapbuf.c
+@@ -31,16 +31,16 @@ _sizing_eval(Evas_Object *obj)
+    evas_object_size_hint_max_set(obj, maxw, maxh);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_mapbuf_elm_widget_theme_apply(Eo *obj, Elm_Mapbuf_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_menu.c b/src/lib/elm_menu.c
+index ce49793..c1ffbd9 100644
+--- a/src/lib/elm_menu.c
++++ b/src/lib/elm_menu.c
+@@ -217,10 +217,10 @@ _sizing_eval(Evas_Object *obj)
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_menu_elm_widget_theme_apply(Eo *obj, Elm_Menu_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+    Eina_List *l, *_l, *_ll, *ll = NULL;
+    Elm_Object_Item *eo_item;
+@@ -228,7 +228,7 @@ _elm_menu_elm_widget_theme_apply(Eo *obj, Elm_Menu_Data *sd)
+    char style[1024];
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if (sd->menu_bar)
+       snprintf(style, sizeof(style), "main_menu/%s", elm_widget_style_get(obj));
+@@ -291,7 +291,7 @@ _elm_menu_elm_widget_theme_apply(Eo *obj, Elm_Menu_Data *sd)
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_notify.c b/src/lib/elm_notify.c
+index b5474ff..b4a01f7 100644
+--- a/src/lib/elm_notify.c
++++ b/src/lib/elm_notify.c
+@@ -136,12 +136,12 @@ _sizing_eval(Evas_Object *obj)
+    evas_object_resize(obj, w, h);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_notify_elm_widget_theme_apply(Eo *obj, Elm_Notify_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+ 
+@@ -153,7 +153,7 @@ _elm_notify_elm_widget_theme_apply(Eo *obj, Elm_Notify_Data *sd)
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_panel.c b/src/lib/elm_panel.c
+index a117b94..d603237 100644
+--- a/src/lib/elm_panel.c
++++ b/src/lib/elm_panel.c
+@@ -201,19 +201,19 @@ _scrollable_layout_theme_set(Eo *obj, Elm_Panel_Data *sd)
+      _access_obj_process(obj, EINA_TRUE);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_panel_elm_widget_theme_apply(Eo *obj, Elm_Panel_Data *sd)
+ {
+    const char *str;
+    int w, h;
+    Evas_Coord minw = 0, minh = 0;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+ 
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+ 
+@@ -252,7 +252,7 @@ _elm_panel_elm_widget_theme_apply(Eo *obj, Elm_Panel_Data *sd)
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elm_panes.c b/src/lib/elm_panes.c
+index 87dd4a7..83e1d8d 100644
+--- a/src/lib/elm_panes.c
++++ b/src/lib/elm_panes.c
+@@ -42,13 +42,13 @@ static const Elm_Layout_Part_Alias_Description _content_aliases[] =
+    {NULL, NULL}
+ };
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_panes_elm_widget_theme_apply(Eo *obj, Elm_Panes_Data *sd)
+ {
+    double size;
+    Evas_Coord minw = 0, minh = 0;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    ELM_LAYOUT_DATA_GET(obj, ld);
+ 
+    if (sd->horizontal)
+@@ -61,7 +61,7 @@ _elm_panes_elm_widget_theme_apply(Eo *obj, Elm_Panes_Data *sd)
+    evas_object_size_hint_min_set(sd->event, minw, minh);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    size = elm_panes_content_left_size_get(obj);
+ 
+@@ -78,7 +78,7 @@ _elm_panes_elm_widget_theme_apply(Eo *obj, Elm_Panes_Data *sd)
+ 
+    elm_panes_content_left_size_set(obj, size);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elm_photo.c b/src/lib/elm_photo.c
+index e91149b..26455a4 100644
+--- a/src/lib/elm_photo.c
++++ b/src/lib/elm_photo.c
+@@ -47,14 +47,14 @@ _sizing_eval(Evas_Object *obj)
+    evas_object_size_hint_max_set(obj, maxw, maxh);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_photo_elm_widget_theme_apply(Eo *obj, Elm_Photo_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    edje_object_mirrored_set
+      (wd->resize_obj, elm_widget_mirrored_get(obj));
+@@ -69,7 +69,7 @@ _elm_photo_elm_widget_theme_apply(Eo *obj, Elm_Photo_Data *sd)
+                          elm_widget_scale_get(obj) * elm_config_scale_get());
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_photocam.c b/src/lib/elm_photocam.c
+index 713ed1f..f376d14 100644
+--- a/src/lib/elm_photocam.c
++++ b/src/lib/elm_photocam.c
+@@ -1155,16 +1155,16 @@ _elm_photocam_elm_widget_on_focus(Eo *obj, Elm_Photocam_Data *_pd EINA_UNUSED, E
+    return EINA_TRUE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_photocam_elm_widget_theme_apply(Eo *obj, Elm_Photocam_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_plug.c b/src/lib/elm_plug.c
+index a028aa4..d743b1c 100644
+--- a/src/lib/elm_plug.c
++++ b/src/lib/elm_plug.c
+@@ -80,16 +80,16 @@ _elm_plug_elm_widget_on_focus(Eo *obj, void *sd EINA_UNUSED, Elm_Object_Item *it
+    return EINA_TRUE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_plug_elm_widget_theme_apply(Eo *obj, void *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_priv.h b/src/lib/elm_priv.h
+index c679a3f..77dfe88 100644
+--- a/src/lib/elm_priv.h
++++ b/src/lib/elm_priv.h
+@@ -380,7 +380,7 @@ void                 _elm_win_focus_reconfigure(void);
+ 
+ Ecore_X_Window       _elm_ee_xwin_get(const Ecore_Evas *ee);
+ 
+-Eina_Bool            _elm_theme_object_set(Evas_Object *parent,
++Elm_Theme_Apply          _elm_theme_object_set(Evas_Object *parent,
+                                            Evas_Object *o,
+                                            const char *clas,
+                                            const char *group,
+@@ -388,7 +388,7 @@ Eina_Bool            _elm_theme_object_set(Evas_Object *parent,
+ Eina_Bool            _elm_theme_object_icon_set(Evas_Object *o,
+                                                 const char *group,
+                                                 const char *style);
+-Eina_Bool            _elm_theme_set(Elm_Theme *th,
++Elm_Theme_Apply          _elm_theme_set(Elm_Theme *th,
+                                     Evas_Object *o,
+                                     const char *clas,
+                                     const char *group,
+diff --git a/src/lib/elm_progressbar.c b/src/lib/elm_progressbar.c
+index 347b803..e5e46b5 100644
+--- a/src/lib/elm_progressbar.c
++++ b/src/lib/elm_progressbar.c
+@@ -165,19 +165,19 @@ _elm_progressbar_elm_container_content_set(Eo *obj, Elm_Progressbar_Data *_pd EI
+    return EINA_TRUE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_progressbar_elm_widget_theme_apply(Eo *obj, Elm_Progressbar_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    ELM_LAYOUT_DATA_GET(obj, ld);
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    if (sd->horizontal)
+      eina_stringshare_replace(&ld->group, "horizontal");
+    else eina_stringshare_replace(&ld->group, "vertical");
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if (sd->pulse)
+      elm_layout_signal_emit(obj, "elm,state,pulse", "elm");
+@@ -218,7 +218,7 @@ _elm_progressbar_elm_widget_theme_apply(Eo *obj, Elm_Progressbar_Data *sd)
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static char *
+diff --git a/src/lib/elm_radio.c b/src/lib/elm_radio.c
+index 04a81a3..e851641 100644
+--- a/src/lib/elm_radio.c
++++ b/src/lib/elm_radio.c
+@@ -215,13 +215,13 @@ _elm_radio_elm_widget_event(Eo *obj, Elm_Radio_Data *_pd EINA_UNUSED, Evas_Objec
+    return EINA_TRUE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_radio_elm_widget_theme_apply(Eo *obj, Elm_Radio_Data *sd)
+ {
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
+-   Eina_Bool int_ret = EINA_FALSE;
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if (sd->state) elm_layout_signal_emit(obj, "elm,state,radio,on", "elm");
+    else elm_layout_signal_emit(obj, "elm,state,radio,off", "elm");
+@@ -241,7 +241,7 @@ _elm_radio_elm_widget_theme_apply(Eo *obj, Elm_Radio_Data *sd)
+
+    eo_do(obj, elm_obj_layout_sizing_eval());
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_route.c b/src/lib/elm_route.c
+index 716c572..517cfed 100644
+--- a/src/lib/elm_route.c
++++ b/src/lib/elm_route.c
+@@ -86,18 +86,18 @@ _move_resize_cb(void *data EINA_UNUSED,
+    _sizing_eval(obj);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_route_elm_widget_theme_apply(Eo *obj, Elm_Route_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    //TODO
+ 
+    _sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ #ifdef ELM_EMAP
+diff --git a/src/lib/elm_scroller.c b/src/lib/elm_scroller.c
+index 0300126..d6d950d 100644
+--- a/src/lib/elm_scroller.c
++++ b/src/lib/elm_scroller.c
+@@ -379,18 +379,18 @@ _mirrored_set(Evas_Object *obj,
+    eo_do(obj, elm_interface_scrollable_mirrored_set(mirrored));
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_scroller_elm_widget_theme_apply(Eo *obj, Elm_Scroller_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+ 
+    elm_layout_sizing_eval(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elm_segment_control.c b/src/lib/elm_segment_control.c
+index 169f32b..50f4c18 100644
+--- a/src/lib/elm_segment_control.c
++++ b/src/lib/elm_segment_control.c
+@@ -212,16 +212,16 @@ _update_list(Elm_Segment_Control_Data *sd)
+      }
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_segment_control_elm_widget_theme_apply(Eo *obj, Elm_Segment_Control_Data *sd)
+ {
+    Eina_List *l;
+    Eina_Bool rtl;
+    Elm_Object_Item *eo_item;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    rtl = elm_widget_mirrored_get(obj);
+ 
+@@ -238,7 +238,7 @@ _elm_segment_control_elm_widget_theme_apply(Eo *obj, Elm_Segment_Control_Data *s
+ 
+    _update_list(sd);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elm_separator.c b/src/lib/elm_separator.c
+index a1d98cb..0b887bd 100644
+--- a/src/lib/elm_separator.c
++++ b/src/lib/elm_separator.c
+@@ -15,10 +15,10 @@
+ #define MY_CLASS_NAME "Elm_Separator"
+ #define MY_CLASS_NAME_LEGACY "elm_separator"
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_separator_elm_widget_theme_apply(Eo *obj, Elm_Separator_Data *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    ELM_LAYOUT_DATA_GET(obj, ld);
+ 
+    if (sd->horizontal)
+@@ -27,9 +27,9 @@ _elm_separator_elm_widget_theme_apply(Eo *obj, Elm_Separator_Data *sd EINA_UNUSE
+      eina_stringshare_replace(&ld->group, "vertical");
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_slider.c b/src/lib/elm_slider.c
+index 76b4fb6..4f0d8f5 100644
+--- a/src/lib/elm_slider.c
++++ b/src/lib/elm_slider.c
+@@ -535,12 +535,12 @@ _popup_add(Elm_Slider_Data *sd, Eo *obj)
+    elm_layout_content_set(obj, "elm.track.slider", sd->track);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_slider_elm_widget_theme_apply(Eo *obj, Elm_Slider_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    ELM_LAYOUT_DATA_GET(obj, ld);
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    if (sd->horizontal)
+      {
+@@ -560,7 +560,7 @@ _elm_slider_elm_widget_theme_apply(Eo *obj, Elm_Slider_Data *sd)
+      }
+ 
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    if (sd->popup)
+      edje_object_scale_set(sd->popup, elm_widget_scale_get(obj) *
+@@ -604,7 +604,7 @@ _elm_slider_elm_widget_theme_apply(Eo *obj, Elm_Slider_Data *sd)
+ 
+    evas_object_smart_changed(obj);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_spinner.c b/src/lib/elm_spinner.c
+index 4729a4a..db5d4bd 100644
+--- a/src/lib/elm_spinner.c
++++ b/src/lib/elm_spinner.c
+@@ -1371,10 +1371,10 @@ _elm_spinner_evas_object_smart_del(Eo *obj, Elm_Spinner_Data *sd)
+    eo_do_super(obj, MY_CLASS, evas_obj_smart_del());
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_spinner_elm_widget_theme_apply(Eo *obj, Elm_Spinner_Data *sd)
+ {
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+    if (!elm_layout_theme_set(obj, "spinner", "base", elm_widget_style_get(obj)))
+      CRI("Failed to set layout!");
+@@ -1420,7 +1420,7 @@ _elm_spinner_elm_widget_theme_apply(Eo *obj, Elm_Spinner_Data *sd)
+      _access_spinner_register(obj, EINA_TRUE);
+ 
+    elm_layout_sizing_eval(obj);
+-   return EINA_TRUE;
++   return ELM_THEME_APPLY_SUCCESS;
+ }
+ 
+ static Eina_Bool _elm_spinner_smart_focus_next_enable = EINA_FALSE;
+diff --git a/src/lib/elm_table.c b/src/lib/elm_table.c
+index 1738773..9ce2f68 100644
+--- a/src/lib/elm_table.c
++++ b/src/lib/elm_table.c
+@@ -106,16 +106,16 @@ _mirrored_set(Evas_Object *obj, Eina_Bool rtl)
+    evas_object_table_mirrored_set(wd->resize_obj, rtl);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_table_elm_widget_theme_apply(Eo *obj, void *sd EINA_UNUSED)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    _mirrored_set(obj, elm_widget_mirrored_get(obj));
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_theme.c b/src/lib/elm_theme.c
+index 4006bc6..d7bf555 100644
+--- a/src/lib/elm_theme.c
++++ b/src/lib/elm_theme.c
+@@ -264,14 +264,13 @@ _elm_theme_data_find(Elm_Theme *th, const char *key)
+    return NULL;
+ }
+ 
+-Eina_Bool
++Elm_Theme_Apply
+ _elm_theme_object_set(Evas_Object *parent, Evas_Object *o, const char *clas, const char *group, const char *style)
+ {
+    Elm_Theme *th = NULL;
+ 
+    if (parent) th = elm_widget_theme_get(parent);
+-   if (!_elm_theme_set(th, o, clas, group, style)) return EINA_FALSE;
+-   return EINA_TRUE;
++   return _elm_theme_set(th, o, clas, group, style);
+ }
+ 
+ /* only issued by elm_icon.c */
+@@ -285,7 +284,7 @@ _elm_theme_object_icon_set(Evas_Object *o,
+    return _elm_theme_icon_set(th, o, group, style);
+ }
+ 
+-Eina_Bool
++Elm_Theme_Apply
+ _elm_theme_set(Elm_Theme *th, Evas_Object *o, const char *clas, const char *group, const char *style)
+ {
+    Eina_File *file;
+@@ -299,7 +298,7 @@ _elm_theme_set(Elm_Theme *th, Evas_Object *o, const char *clas, const char *grou
+         file = _elm_theme_group_file_find(th, buf2);
+         if (file)
+           {
+-             if (edje_object_mmap_set(o, file, buf2)) return EINA_TRUE;
++             if (edje_object_mmap_set(o, file, buf2)) return ELM_THEME_APPLY_SUCCESS;
+              else
+                {
+                   DBG("could not set theme group '%s' from file '%s': %s",
+@@ -336,7 +335,7 @@ _elm_theme_set(Elm_Theme *th, Evas_Object *o, const char *clas, const char *grou
+         //style not found, add to the not found list
+         eina_hash_add(th->cache_style_load_failed, buf2, (void *)1);
+      }
+-   return EINA_FALSE;
++   return ELM_THEME_APPLY_FAILED;
+ }
+ 
+ Eina_Bool
+diff --git a/src/lib/elm_toolbar.c b/src/lib/elm_toolbar.c
+index 8992c63..6353d4e 100644
+--- a/src/lib/elm_toolbar.c
++++ b/src/lib/elm_toolbar.c
+@@ -1605,18 +1605,18 @@ _elm_toolbar_highlight_in_theme(Evas_Object *obj)
+      elm_widget_highlight_in_theme_set(obj, EINA_FALSE);
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_toolbar_elm_widget_theme_apply(Eo *obj, Elm_Toolbar_Data *sd)
+ {
+    Elm_Toolbar_Item_Data *it;
+    double scale = 0;
+-   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, EINA_FALSE);
++   ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, ELM_THEME_APPLY_FAILED);
+ 
+-   if (sd->delete_me) return EINA_TRUE;
++   if (sd->delete_me) return ELM_THEME_APPLY_SUCCESS;
+ 
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    elm_widget_theme_object_set
+      (obj, wd->resize_obj, "toolbar", "base",
+@@ -1650,7 +1650,7 @@ _elm_toolbar_elm_widget_theme_apply(Eo *obj, Elm_Toolbar_Data *sd)
+    _elm_toolbar_highlight_in_theme(obj);
+    evas_object_smart_need_recalculate_set(obj, EINA_TRUE);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ static void
+diff --git a/src/lib/elm_web2.c b/src/lib/elm_web2.c
+index e3e9bfb..b7a6d4d 100644
+--- a/src/lib/elm_web2.c
++++ b/src/lib/elm_web2.c
+@@ -625,11 +625,11 @@ elm_need_web(void)
+ #endif
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_web_elm_widget_theme_apply(Eo *obj, Elm_Web_Data *sd EINA_UNUSED)
+ {
+    (void)obj;
+-   return EINA_TRUE;
++   return ELM_THEME_APPLY_SUCCESS;
+ }
+ 
+ EOLIAN static Eina_Bool
+diff --git a/src/lib/elm_widget.c b/src/lib/elm_widget.c
+index f976287..d7c91a5 100644
+--- a/src/lib/elm_widget.c
++++ b/src/lib/elm_widget.c
+@@ -913,16 +913,16 @@ _elm_widget_access(Eo *obj EINA_UNUSED, Elm_Widget_Smart_Data *_pd EINA_UNUSED,
+ {
+ }
+ 
+-EAPI Eina_Bool
++EAPI Elm_Theme_Apply
+ elm_widget_theme(Evas_Object *obj)
+ {
+    const Eina_List *l;
+    Evas_Object *child;
+    Elm_Tooltip *tt;
+    Elm_Cursor *cur;
+-   Eina_Bool ret = EINA_TRUE;
++   Elm_Theme_Apply ret = ELM_THEME_APPLY_SUCCESS;
+ 
+-   API_ENTRY return EINA_FALSE;
++   API_ENTRY return ELM_THEME_APPLY_FAILED;
+ 
+    EINA_LIST_FOREACH(sd->subobjs, l, child)
+      if (_elm_widget_is(child))
+@@ -935,7 +935,7 @@ elm_widget_theme(Evas_Object *obj)
+    EINA_LIST_FOREACH(sd->cursors, l, cur)
+      elm_cursor_theme(cur);
+ 
+-   Eina_Bool ret2 = EINA_FALSE;
++   Elm_Theme_Apply ret2 = ELM_THEME_APPLY_FAILED;
+    eo_do(obj, ret2 = elm_obj_widget_theme_apply());
+    ret &= ret2;
+ 
+@@ -987,14 +987,14 @@ elm_widget_theme_specific(Evas_Object *obj,
+    eo_do(obj, elm_obj_widget_theme_apply());
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_widget_theme_apply(Eo *obj, Elm_Widget_Smart_Data *_pd EINA_UNUSED)
+ {
+    _elm_widget_mirrored_reload(obj);
+ 
+    elm_widget_disabled_set(obj, elm_widget_disabled_get(obj));
+ 
+-   return EINA_TRUE;
++   return ELM_THEME_APPLY_SUCCESS;
+ }
+ 
+ /**
+@@ -3814,13 +3814,13 @@ _elm_widget_theme_get(Eo *obj EINA_UNUSED, Elm_Widget_Smart_Data *sd)
+    return sd->theme;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_widget_style_set(Eo *obj, Elm_Widget_Smart_Data *sd, const char *style)
+ {
+    if (eina_stringshare_replace(&sd->style, style))
+       return elm_widget_theme(obj);
+ 
+-   return EINA_TRUE;
++   return ELM_THEME_APPLY_SUCCESS;
+ }
+ 
+ EOLIAN static const char*
+@@ -3911,12 +3911,13 @@ _elm_widget_item_loop_enabled_get(Eo *obj EINA_UNUSED, Elm_Widget_Smart_Data *sd
+ 	return EINA_FALSE;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_widget_theme_object_set(Eo *obj, Elm_Widget_Smart_Data *sd, Evas_Object *edj, const char *wname, const char *welement, const char *wstyle)
+ {
+-   if (!_elm_theme_object_set(obj, edj, wname, welement, wstyle))
++   Elm_Theme_Apply ret = _elm_theme_object_set(obj, edj, wname, welement, wstyle);
++   if (!ret)
+      {
+-        return EINA_FALSE;
++        return ELM_THEME_APPLY_FAILED;
+      }
+ 
+    if (sd->orient_mode != -1)
+@@ -3926,7 +3927,7 @@ _elm_widget_theme_object_set(Eo *obj, Elm_Widget_Smart_Data *sd, Evas_Object *ed
+         eo_do(obj, elm_obj_widget_signal_emit(buf, "elm"));
+      }
+ 
+-   return EINA_TRUE;
++   return ret;
+ }
+ 
+ EOLIAN static void
+diff --git a/src/lib/elm_widget.eo b/src/lib/elm_widget.eo
+index 27f09b3..b3fc2ea 100644
+--- a/src/lib/elm_widget.eo
++++ b/src/lib/elm_widget.eo
+@@ -1,5 +1,12 @@
+ import elm_general;
+ 
++enum Elm.Theme.Apply
++{
++   failed = 0,
++   default = 1,
++   success = 3
++}
++
+ abstract Elm.Widget (Evas.Object_Smart, Elm_Interface_Atspi_Accessible, Elm_Interface_Atspi_Component)
+ {
+    eo_prefix: elm_obj_widget;
+@@ -101,7 +108,7 @@ abstract Elm.Widget (Evas.Object_Smart, Elm_Interface_Atspi_Accessible, Elm_Inte
+       }
+       @property style {
+          set {
+-            return: bool;
++            return: Elm.Theme.Apply;
+          }
+          get {
+          }
+@@ -203,7 +210,7 @@ abstract Elm.Widget (Evas.Object_Smart, Elm_Interface_Atspi_Accessible, Elm_Inte
+       }
+       @property theme_object {
+          set {
+-            return: bool;
++            return: Elm.Theme.Apply;
+          }
+          values {
+             edj: Evas.Object *;
+@@ -682,7 +689,7 @@ abstract Elm.Widget (Evas.Object_Smart, Elm_Interface_Atspi_Accessible, Elm_Inte
+       }
+       theme_apply {
+          [['Virtual' function on the widget being re-themed.]]
+-         return: bool;
++         return: Elm.Theme.Apply;
+       }
+       focus_direction_get @const {
+          return: bool;
+diff --git a/src/lib/elm_widget.h b/src/lib/elm_widget.h
+index b19b8b3..8f78b03 100644
+--- a/src/lib/elm_widget.h
++++ b/src/lib/elm_widget.h
+@@ -671,12 +671,17 @@ struct _Elm_Widget_Item_Data
+ };
+ 
++typedef void (*region_hook_func_type)(void *data, Evas_Object *obj);
++typedef void * (*list_data_get_func_type)(const Eina_List * l);
++
++#include "elm_widget.eo.h"
++
+ #define ELM_NEW(t) calloc(1, sizeof(t))
+ 
+ EAPI Evas_Object     *elm_widget_add(Evas_Smart *, Evas_Object *);
+ EAPI void             elm_widget_parent_set(Evas_Object *, Evas_Object *);
+ EAPI Eina_Bool        elm_widget_api_check(int ver);
+ EAPI Eina_Bool        elm_widget_access(Evas_Object *obj, Eina_Bool is_access);
+-EAPI Eina_Bool        elm_widget_theme(Evas_Object *obj);
++EAPI Elm_Theme_Apply  elm_widget_theme(Evas_Object *obj);
+ EAPI void             elm_widget_theme_specific(Evas_Object *obj, Elm_Theme *th, Eina_Bool force);
+ EAPI void             elm_widget_translate(Evas_Object *obj);
+ EAPI void             elm_widget_on_show_region_hook_set(Evas_Object *obj, void (*func)(void *data, Evas_Object *obj), void *data);
+@@ -784,7 +789,7 @@ EAPI Eina_Bool        elm_widget_mirrored_automatic_get(const Evas_Object *obj);
+ EAPI void             elm_widget_mirrored_automatic_set(Evas_Object *obj, Eina_Bool automatic);
+ EAPI void             elm_widget_theme_set(Evas_Object *obj, Elm_Theme *th);
+ EAPI Elm_Theme       *elm_widget_theme_get(const Evas_Object *obj);
+-EAPI Eina_Bool        elm_widget_style_set(Evas_Object *obj, const char *style);
++EAPI Elm_Theme_Apply  elm_widget_style_set(Evas_Object *obj, const char *style);
+ EAPI const char      *elm_widget_style_get(const Evas_Object *obj);
+ EAPI void             elm_widget_type_set(Evas_Object *obj, const char *type);
+ EAPI const char      *elm_widget_type_get(const Evas_Object *obj);
+@@ -800,7 +805,7 @@ EAPI int              elm_widget_drag_child_locked_x_get(const Evas_Object *obj)
+ EAPI int              elm_widget_drag_child_locked_y_get(const Evas_Object *obj);
+ EAPI void             elm_widget_item_loop_enabled_set(Evas_Object *obj, Eina_Bool enable);
+ EAPI Eina_Bool        elm_widget_item_loop_enabled_get(const Evas_Object *obj);
+-EAPI Eina_Bool        elm_widget_theme_object_set(Evas_Object *obj, Evas_Object *edj, const char *wname, const char *welement, const char *wstyle);
++EAPI Elm_Theme_Apply  elm_widget_theme_object_set(Evas_Object *obj, Evas_Object *edj, const char *wname, const char *welement, const char *wstyle);
+ EAPI Eina_Bool        elm_widget_type_check(const Evas_Object *obj, const char *type, const char *func);
+ EAPI Evas_Object     *elm_widget_name_find(const Evas_Object *obj, const char *name, int recurse);
+ EAPI Eina_List       *elm_widget_stringlist_get(const char *str);
+@@ -916,11 +921,6 @@ _elm_widget_sub_object_redirect_to_top(Evas_Object *obj, Evas_Object *sobj)
+ 
+ EAPI Eina_Bool elm_selection_selection_has_owner(Evas_Object *obj);
+ 
+-typedef void (*region_hook_func_type)(void *data, Evas_Object *obj);
+-typedef void * (*list_data_get_func_type)(const Eina_List * l);
+-
+-#include "elm_widget.eo.h"
+-
+ #define ELM_WIDGET_ITEM_PROTECTED
+ #include "elm_widget_item.eo.h"
+ 
+diff --git a/src/lib/elm_win.c b/src/lib/elm_win.c
+index 3060317..233fd44 100644
+--- a/src/lib/elm_win.c
++++ b/src/lib/elm_win.c
+@@ -334,7 +334,7 @@ _elm_win_on_resize_obj_changed_size_hints(void *data,
+                                           void *event_info);
+ static void
+ _elm_win_img_callbacks_del(Evas_Object *obj, Evas_Object *imgobj);
+-static Eina_Bool _elm_win_theme_internal(Eo *obj, Elm_Win_Data *sd);
++static Elm_Theme_Apply _elm_win_theme_internal(Eo *obj, Elm_Win_Data *sd);
+
+ #ifdef HAVE_ELEMENTARY_X
+ static void _elm_win_xwin_update(Elm_Win_Data *sd);
+@@ -5921,15 +5921,17 @@ _elm_win_focus_highlight_enabled_get(Eo *obj EINA_UNUSED, Elm_Win_Data *sd)
+    return sd->focus_highlight.enabled;
+ }
+ 
+-static Eina_Bool
++static Elm_Theme_Apply
+ _elm_win_theme_internal(Eo *obj, Elm_Win_Data *sd)
+ {
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    Eina_Bool ret = EINA_FALSE;
+    const char *s;
+ 
+-   if (!_elm_theme_object_set(obj, sd->edje, "win", "base",
+-                               elm_widget_style_get(obj)))
+-     return EINA_FALSE;
++   int_ret = _elm_theme_object_set(obj, sd->edje, "win", "base",
++                                   elm_widget_style_get(obj));
++
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    edje_object_mirrored_set(sd->edje, elm_widget_mirrored_get(obj));
+    edje_object_scale_set(sd->edje,
+@@ -5938,6 +5940,8 @@ _elm_win_theme_internal(Eo *obj, Elm_Win_Data *sd)
+    eo_do(obj, eo_event_callback_call(ELM_WIN_EVENT_THEME_CHANGED, NULL));
+    eo_do(obj, ret = elm_obj_widget_disable());
+ 
++   if (!ret) int_ret = ELM_THEME_APPLY_FAILED;
++
+    if (!sd->theme_alpha && !sd->application_alpha)
+      {
+         s = edje_object_data_get(sd->edje, "alpha");
+@@ -5952,22 +5956,24 @@ _elm_win_theme_internal(Eo *obj, Elm_Win_Data *sd)
+           }
+      }
+ 
+-   return ret;
++   return int_ret;
+ }
+ 
+-EOLIAN static Eina_Bool
++EOLIAN static Elm_Theme_Apply
+ _elm_win_elm_widget_theme_apply(Eo *obj, Elm_Win_Data *sd)
+ {
+-   Eina_Bool int_ret = EINA_FALSE;
++   Elm_Theme_Apply int_ret = ELM_THEME_APPLY_FAILED;
+    eo_do_super(obj, MY_CLASS, int_ret = elm_obj_widget_theme_apply());
+-   if (!int_ret) return EINA_FALSE;
++   if (!int_ret) return ELM_THEME_APPLY_FAILED;
+ 
+    sd->focus_highlight.theme_changed = EINA_TRUE;
+-   if (!_elm_win_theme_internal(obj, sd))
+-     return EINA_FALSE;
++
++   int_ret = _elm_win_theme_internal(obj, sd) & int_ret;
++   if (!int_ret)
++     return ELM_THEME_APPLY_FAILED;
+    _elm_win_focus_highlight_reconfigure_job_start(sd);
+ 
+-   return EINA_TRUE;
++   return int_ret;
+ }
+ 
+ EOLIAN static void
