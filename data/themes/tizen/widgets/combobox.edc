@@ -960,6 +960,7 @@ group { name: "elm/genlist/base/combobox_vertical/default";
          }
       }
    }
+}
 
 group { name: "elm/genlist/item_compress/default/combobox_vertical/color_class";
    images.image: "Property/color_class_img.png" COMP;
