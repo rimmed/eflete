@@ -103,9 +103,15 @@ _validate()
        !eina_str_has_extension(elm_entry_entry_get(tab_edj.edj), ".edj") ||
        !ecore_file_exists(elm_entry_entry_get(tab_edj.edj)) ||
        (widget_list && !_checked_get()))
-     elm_object_disabled_set(tab_edj.btn_create, true);
+     {
+        elm_object_disabled_set(tab_edj.btn_create, true);
+        elm_object_disabled_set(tab_edj.ch_all, true);
+     }
    else
-     elm_object_disabled_set(tab_edj.btn_create, false);
+     {
+        elm_object_disabled_set(tab_edj.btn_create, false);
+        elm_object_disabled_set(tab_edj.ch_all, false);
+     }
 }
 
 static void
@@ -501,7 +507,7 @@ _elipsis(void *data __UNUSED__,
          void *event_info __UNUSED__)
 {
    popup_fileselector_folder_helper(NULL,
-                                    tab_edj.path,
+                                    NULL,
                                     elm_entry_entry_get(tab_edj.path),
                                     entry_path_set,
                                     tab_edj.path,
@@ -515,7 +521,7 @@ _elipsis_edj(void *data __UNUSED__,
              void *event_info __UNUSED__)
 {
    popup_fileselector_edj_helper(NULL,
-                                 tab_edj.edj,
+                                 NULL,
                                  NULL,
                                  entry_path_set,
                                  tab_edj.edj,
@@ -572,6 +578,7 @@ _tab_import_edj_add(void)
    /* check all */
    CHECK_ADD(tab_edj.layout, tab_edj.ch_all);
    evas_object_smart_callback_add(tab_edj.ch_all, "changed", _on_check_all, NULL);
+   elm_object_disabled_set(tab_edj.ch_all, true);
    elm_object_part_content_set(tab_edj.layout, "swallow.all_widgets_check", tab_edj.ch_all);
    elm_object_part_text_set(tab_edj.layout, "label.widgets", _("Widgets:"));
 
@@ -706,8 +713,11 @@ _tab_import_edj_data_set(const char *name, const char *path, const char *edj, co
           {
              EINA_LIST_FOREACH(node->list, l1, sub)
              {
-                if (strstr(sub->name, widget_name))
+                Eina_Stringshare *wname = widget_name_get(sub->name);
+
+                if (!strcmp(wname, widget_name))
                   _genlist_style_selected_set(sub, style_list, true);
+                eina_stringshare_del(wname);
              }
           }
         else

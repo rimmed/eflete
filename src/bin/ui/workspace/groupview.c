@@ -185,6 +185,8 @@ _groupview_smart_move(Evas_Object *o,
    evas_object_move(sd->group->edit_object,x ,y);
    evas_object_move(sd->box, x, y);
 
+   sd->geom.x = x;
+   sd->geom.y = y;
    sd->zoom1.x = x;
    sd->zoom1.y = y;
 }
@@ -398,6 +400,7 @@ groupview_part_object_area_visible_set(Evas_Object *obj, Eina_Bool visible)
 
    if (sd->obj_area_visible && sd->selected)
      {
+        _part_object_area_calc(sd, sd->selected);
         evas_object_geometry_set(sd->object_area,
                                  sd->selected->object_area_geom.x,
                                  sd->selected->object_area_geom.y,
