@@ -240,6 +240,7 @@ group { name: "elm/layout/popup/hint";
                   to_y: "separator";
                }
                rel2.to: "bg";
+
             }
          }
       }
