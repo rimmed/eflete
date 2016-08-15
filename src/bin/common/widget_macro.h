@@ -118,6 +118,7 @@ TODO("see large comment below")
    evas_object_size_hint_weight_set(COMBOBOX, EVAS_HINT_EXPAND, 0); \
    evas_object_size_hint_align_set(COMBOBOX, EVAS_HINT_FILL, 0); \
    evas_object_show(COMBOBOX); \
+   elm_object_style_set(COMBOBOX, "default"); \
    evas_object_smart_callback_add(COMBOBOX, "expanded",  _combobox_widget_expanded_cb, NULL); \
    evas_object_smart_callback_add(COMBOBOX, "dismissed", _combobox_widget_dismissed_cb, NULL);
 #endif
