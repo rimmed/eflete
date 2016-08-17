@@ -44,6 +44,8 @@
 static int zoom_values[] = { 20, 50, 100, 200, 500, 0 };
 #endif
 
+#define RULER_STEP_DEFAULT 50
+
 typedef struct
 {
    int index;
@@ -278,6 +280,8 @@ static void
 _members_zoom_set(Workspace_Data *wd)
 {
    Scroll_Area *area;
+   double zoom_calc;
+   int step, step_val;
 
    DBG("Set the zoom factor %f in tab '%s'", wd->zoom_factor * 100, wd->group->name);
    area = _scroll_area_get(wd);
@@ -285,8 +289,24 @@ _members_zoom_set(Workspace_Data *wd)
    container_zoom_factor_set(area->container, wd->zoom_factor);
    groupview_zoom_factor_set(area->content, wd->zoom_factor);
 
-   ewe_ruler_step_set(area->ruler_h.obj, NULL, (int)(50 * wd->zoom_factor));
-   ewe_ruler_step_set(area->ruler_v.obj, NULL, (int)(50 * wd->zoom_factor));
+   zoom_calc = RULER_STEP_DEFAULT * wd->zoom_factor;
+   if (fabs(wd->zoom_factor - 1.0) > DBL_EPSILON)
+     {
+        if (((int)zoom_calc) < (RULER_STEP_DEFAULT * 0.6))
+          {
+             step = (RULER_STEP_DEFAULT / (int)zoom_calc) * (int)zoom_calc;
+             step_val = (RULER_STEP_DEFAULT / (int)zoom_calc) * RULER_STEP_DEFAULT;
+             ewe_ruler_value_step_set(area->ruler_h.obj, NULL, step_val);
+             ewe_ruler_value_step_set(area->ruler_v.obj, NULL, step_val);
+             ewe_ruler_step_set(area->ruler_h.obj, NULL, step);
+             ewe_ruler_step_set(area->ruler_v.obj, NULL, step);
+             return;
+          }
+     }
+   ewe_ruler_value_step_set(area->ruler_h.obj, NULL, RULER_STEP_DEFAULT);
+   ewe_ruler_value_step_set(area->ruler_v.obj, NULL, RULER_STEP_DEFAULT);
+   ewe_ruler_step_set(area->ruler_h.obj, NULL, (int)zoom_calc);
+   ewe_ruler_step_set(area->ruler_v.obj, NULL, (int)zoom_calc);
 }
 
 static void
@@ -654,14 +674,16 @@ _radio_switcher_add(Workspace_Data *wd,
 static void
 _ruler_add(Evas_Object *parent, Ruler *ruler, Eina_Bool scale_rel)
 {
+
    ruler->obj = ewe_ruler_add(parent);
    ruler->pointer = ewe_ruler_marker_add(ruler->obj, "pointer");
+   ewe_ruler_value_step_set(ruler->obj, NULL, RULER_STEP_DEFAULT);
 
    if (scale_rel)
      {
       ruler->scale_rel = ewe_ruler_scale_add(ruler->obj, "relative");
       ewe_ruler_format_set(ruler->obj, ruler->scale_rel, "%.1f");
-      //ewe_ruler_scale_visible_set(ruler->obj, ruler->scale_rel, false);
+      ewe_ruler_scale_visible_set(ruler->obj, ruler->scale_rel, false);
       ewe_ruler_value_step_set(ruler->obj, ruler->scale_rel, 0.5);
      }
 }
@@ -704,8 +726,8 @@ _container_changed(void *data,
 
 
    /* shift the abs scale zero mark */
-   ewe_ruler_zero_offset_set(area->ruler_h.obj, NULL, geom->x - x);
-   ewe_ruler_zero_offset_set(area->ruler_v.obj, NULL, geom->y - y);
+   ewe_ruler_zero_offset_set(area->ruler_h.obj, NULL, scale_x);
+   ewe_ruler_zero_offset_set(area->ruler_v.obj, NULL, scale_y);
 
    /* shift the rel scale zero mark */
    if (area->ruler_h.scale_rel)

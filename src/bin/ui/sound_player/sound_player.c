@@ -224,8 +224,8 @@ _sample_play()
      {
         sample = (External_Resource *)snd->resource;
         _create_io_stream();
-        eo_do(in, ecore_audio_obj_name_set(sample->source));
-        eo_do(in, ret = ecore_audio_obj_source_set(sample->source));
+        eo_do(in, ecore_audio_obj_name_set(sample->path));
+        eo_do(in, ret = ecore_audio_obj_source_set(sample->path));
         if (!ret)
           {
              ERR("Can not set source obj for added sample");
@@ -234,7 +234,7 @@ _sample_play()
         eo_do(in, len = ecore_audio_obj_in_length_get());
         elm_slider_min_max_set(rewin, 0, len);
         elm_slider_value_set(rewin, 0.0);
-        length = ecore_file_size(sample->source);
+        length = ecore_file_size(sample->path);
      }
 
    eo_do(out, ret = ecore_audio_obj_out_input_attach(in));

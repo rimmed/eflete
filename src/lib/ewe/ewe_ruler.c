@@ -104,14 +104,13 @@ _add_dashes(Ewe_Ruler_Smart_Data *sd)
                {
                   object = edje_object_add(canvas);
                   edje_object_file_set(object, EWE_THEME, scale->full_style);
-                  evas_object_smart_member_add(object, sd->obj);
-                  evas_object_clip_set(object, sd->clip);
                   scale->dashes = eina_list_append(scale->dashes, object);
                   if (sd->horizontal)
                     evas_object_size_hint_min_set(object, scale->mark_step, sd->geometry.height);
                   else
                     evas_object_size_hint_min_set(object, sd->geometry.width, scale->mark_step);
                   elm_box_pack_end(scale->box, object);
+                  evas_object_show(object);
                }
           }
         else
@@ -168,7 +167,7 @@ _place_markers(Ewe_Ruler_Smart_Data *sd)
         if (sd->horizontal)
           {
              /*size of marker(pointer) is set to 1 to make posible centring from style*/
-             evas_object_resize(marker->obj, 1, sd->geometry.height);
+             evas_object_resize(marker->obj, marker->size, sd->geometry.height);
              evas_object_move(marker->obj,
                               sd->geometry.x + marker->abs_position,
                               sd->geometry.y);
@@ -176,7 +175,7 @@ _place_markers(Ewe_Ruler_Smart_Data *sd)
         else
           {
              /*size of marker(pointer) is set to 1 to make posible centring from style*/
-             evas_object_resize(marker->obj, sd->geometry.width, 1);
+             evas_object_resize(marker->obj, sd->geometry.width, marker->size);
              evas_object_move(marker->obj,
                               sd->geometry.x,
                               marker->abs_position + sd->geometry.y);
@@ -209,6 +208,8 @@ _ewe_ruler_horizontal_set(Eo *obj,
                           Ewe_Ruler_Smart_Data *sd,
                           Eina_Bool horizontal)
 {
+   Eina_Strbuf *buf;
+
    if (sd->horizontal == horizontal)
      return EINA_FALSE;
    sd->horizontal = horizontal;
@@ -241,13 +242,15 @@ _ewe_ruler_horizontal_set(Eo *obj,
         count = eina_list_count(scale->dashes);
         _delete_extra_dashes(scale, count);
      }
+   buf = eina_strbuf_new();
    EINA_LIST_FOREACH(sd->markers, lm, marker)
      {
-        eina_stringshare_del(marker->full_style);
-        marker->full_style = eina_stringshare_printf("%s/%s", markers, marker->style);
-        edje_object_file_set(marker->obj, EWE_THEME, marker->full_style);
+        eina_strbuf_reset(buf);
+        eina_strbuf_append_printf(buf, "%s/%s", markers, marker->style);
+        edje_object_file_set(marker->obj, EWE_THEME, eina_strbuf_string_get(buf));
      }
 
+   eina_strbuf_free(buf);
    evas_object_smart_changed(obj);
    return EINA_TRUE;
 }
@@ -410,7 +413,6 @@ _ewe_ruler_scale_add(Eo *obj,
    sd->scales = eina_list_append(sd->scales, ret);
 
    ret->box = elm_box_add(obj);
-   elm_box_align_set(ret->box, 0.0, 0.0);
    elm_box_horizontal_set(ret->box, sd->horizontal);
    evas_object_smart_member_add(ret->box, obj);
    evas_object_clip_set(ret->box, sd->clip);
@@ -529,6 +531,7 @@ _ewe_ruler_marker_add(Eo *obj,
                       Ewe_Ruler_Smart_Data *sd,
                       const char *style)
 {
+   Eina_Strbuf *buf;
    Ewe_Ruler_Marker *ret = malloc(sizeof(Ewe_Ruler_Marker));
    if (!ret) return NULL;
    if (!style) style = DEFAULT_STYLE;
@@ -536,14 +539,21 @@ _ewe_ruler_marker_add(Eo *obj,
    sd->markers = eina_list_append(sd->markers, ret);
 
    ret->style = eina_stringshare_add(style);
+   buf = eina_strbuf_new();
    if (sd->horizontal)
-     ret->full_style = eina_stringshare_printf("%s/%s", MARKER, style);
+     {
+        eina_strbuf_append_printf(buf, MARKER"/%s", style);
+        edje_object_size_min_calc(ret->obj, &ret->size, NULL);
+     }
    else
-     ret->full_style = eina_stringshare_printf("%s/%s", MARKER_VER, style);
+     {
+        eina_strbuf_append_printf(buf, MARKER_VER"/%s", style);
+        edje_object_size_min_calc(ret->obj, NULL, &ret->size);
+     }
 
    ret->obj = edje_object_add(obj);
    evas_object_clip_set(ret->obj, sd->clip);
-   edje_object_file_set(ret->obj, EWE_THEME, ret->full_style);
+   edje_object_file_set(ret->obj, EWE_THEME, eina_strbuf_string_get(buf));
    evas_object_smart_member_add(ret->obj, obj);
 
    ret->scale = NULL;
@@ -552,6 +562,7 @@ _ewe_ruler_marker_add(Eo *obj,
    ret->visible = EINA_TRUE;
    ret->relative = EINA_FALSE;
 
+   eina_strbuf_free(buf);
    return ret;
 }
 
@@ -562,7 +573,6 @@ _ewe_ruler_marker_del(Eo *obj EINA_UNUSED,
 {
    if (!marker) return EINA_FALSE;
    eina_stringshare_del(marker->style);
-   eina_stringshare_del(marker->full_style);
 
    if (marker->relative)
      marker->scale->markers = eina_list_remove(marker->scale->markers, marker);
@@ -573,6 +583,24 @@ _ewe_ruler_marker_del(Eo *obj EINA_UNUSED,
    evas_object_del(marker->obj);
    free(marker);
    return EINA_TRUE;
+}
+
+EOLIAN static void
+_ewe_ruler_marker_size_set(Eo *obj,
+                           Ewe_Ruler_Smart_Data *sd EINA_UNUSED,
+                           Ewe_Ruler_Marker *marker,
+                           int size)
+{
+   marker->size = size;
+   evas_object_smart_changed(obj);
+}
+
+EOLIAN static int
+_ewe_ruler_marker_size_get(Eo *obj EINA_UNUSED,
+                           Ewe_Ruler_Smart_Data *sd EINA_UNUSED,
+                           Ewe_Ruler_Marker *marker)
+{
+   return marker->size;
 }
 
 EOLIAN static Eina_Bool
@@ -698,17 +726,20 @@ _ewe_ruler_marker_style_set(Eo *obj,
                             Ewe_Ruler_Marker *marker,
                             const char *style)
 {
+   Eina_Strbuf *buf;
+
    if (!marker) return EINA_FALSE;
    eina_stringshare_del(marker->style);
-   eina_stringshare_del(marker->full_style);
    marker->style = eina_stringshare_add(style);
-   if (sd->horizontal)
-     marker->full_style = eina_stringshare_printf("%s/%s", MARKER, style);
-   else
-     marker->full_style = eina_stringshare_printf("%s/%s", MARKER_VER, style);
-   edje_object_file_set(marker->obj, EWE_THEME, marker->full_style);
 
-   sd->text_changed = EINA_TRUE;
+   buf = eina_strbuf_new();
+   if (sd->horizontal)
+     eina_strbuf_append_printf(buf, MARKER"/%s", style);
+   else
+     eina_strbuf_append_printf(buf, MARKER_VER"/%s", style);
+   edje_object_file_set(marker->obj, EWE_THEME, eina_strbuf_string_get(buf));
+
+   eina_strbuf_free(buf);
    evas_object_smart_changed(obj);
    return EINA_TRUE;
 }
@@ -854,9 +885,6 @@ _ewe_ruler_evas_object_smart_resize(Eo *obj,
                                     Evas_Coord w,
                                     Evas_Coord h)
 {
-   Ewe_Ruler_Scale *scale;
-   Eina_List *l;
-
    if ((w == sd->geometry.width) && (h == sd->geometry.height)) return;
 
    sd->size_changed = EINA_TRUE;
@@ -866,8 +894,6 @@ _ewe_ruler_evas_object_smart_resize(Eo *obj,
    eo_do_super(obj, MY_CLASS, evas_obj_smart_resize(w, h));
    evas_object_resize(sd->clip, w, h);
    evas_object_resize(sd->bg, w, h);
-   EINA_LIST_FOREACH(sd->scales, l, scale)
-      evas_object_resize(scale->box, w, h);
 
    evas_object_smart_changed(obj);
 }
@@ -887,6 +913,21 @@ _ewe_ruler_evas_object_smart_calculate(Eo *obj EINA_UNUSED,
           {
              _dashes_size_set(sd, scale);
           }
+        EINA_LIST_FOREACH(sd->scales, ls, scale)
+          {
+             int dashes_count = eina_list_count(scale->dashes);
+             if (sd->horizontal)
+               {
+               evas_object_size_hint_min_set(scale->box, dashes_count * scale->mark_step, sd->geometry.height);
+               evas_object_resize(scale->box, dashes_count * scale->mark_step, sd->geometry.height);
+               }
+             else
+               {
+               evas_object_size_hint_min_set(scale->box, sd->geometry.width, dashes_count * scale->mark_step);
+               evas_object_resize(scale->box, sd->geometry.width, dashes_count * scale->mark_step);
+               }
+
+          }
      }
    if (sd->position_changed)
      {
@@ -899,6 +940,7 @@ _ewe_ruler_evas_object_smart_calculate(Eo *obj EINA_UNUSED,
                     evas_object_move(scale->box, sd->geometry.x + offset, sd->geometry.y);
                   else
                     evas_object_move(scale->box, sd->geometry.x, sd->geometry.y + offset);
+
                }
           }
         sd->position_changed = EINA_FALSE;

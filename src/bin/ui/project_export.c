@@ -51,7 +51,7 @@ _export_dev(void *data __UNUSED__,
 
    assert(selected != NULL);
 
-   if (ecore_file_is_dir(path) || (strcmp(strrchr(path, '.'), ".edj")))
+   if (ecore_file_is_dir(path) || (!eina_str_has_extension(path, ".edj")))
      {
         buf = eina_strbuf_new();
         eina_strbuf_append_printf(buf, _("Please type in actual .edj file"));
@@ -124,7 +124,7 @@ _export_release(void *data __UNUSED__,
 
    assert(selected != NULL);
 
-   if (ecore_file_is_dir(path) || (strcmp(strrchr(path, '.'), ".edj")))
+   if (ecore_file_is_dir(path) || (!eina_str_has_extension(path, ".edj")))
      {
         buf = eina_strbuf_new();
         eina_strbuf_append_printf(buf, _("Please type in actual .edj file"));
@@ -156,7 +156,22 @@ _export_release(void *data __UNUSED__,
 void
 project_export_release(void)
 {
-   popup_fileselector_edj_helper("Export to release edj-file", NULL, NULL, _export_release, NULL, false, true);
+   Eina_Strbuf *buf;
+
+   if (!ap.path.export_edj)
+     popup_fileselector_edj_helper("Export to release edj-file", NULL, NULL, _export_release, NULL, false, true);
+   else
+     {
+        Eina_List *l = NULL;
+        l = eina_list_append(l, ap.path.export_edj);
+        _export_dev(NULL, NULL, l);
+        eina_list_free(l);
+     }
+
+   buf = eina_strbuf_new();
+   eina_strbuf_append_printf(buf, "%s-release.edj", ap.project->name);
+   popup_fileselector_file_set(eina_strbuf_string_get(buf));
+   eina_strbuf_free(buf);
 }
 
 static Eina_Bool

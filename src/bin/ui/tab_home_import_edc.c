@@ -356,7 +356,7 @@ _progress_print(void *data, Eina_Stringshare *progress_string)
 }
 
 static void
-_progress_end(void *data, PM_Project_Result result)
+_progress_end(void *data, PM_Project_Result result, Project *project)
 {
    if (PM_PROJECT_ERROR == result)
      popup_log_message_helper(eina_strbuf_string_get(tab_edc.log));
@@ -375,7 +375,7 @@ _progress_end(void *data, PM_Project_Result result)
         elm_entry_entry_set(tab_edc.meta.licenses, NULL);
         elm_entry_entry_set(tab_edc.meta.comment, N_("Created with Eflete!"));
      }
-   _tabs_progress_end(data, result);
+   _tabs_progress_end(data, result, project);
 }
 
 static Eina_Bool
@@ -399,7 +399,6 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 static Eina_Bool
 _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
-   pm_project_thread_free();
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }

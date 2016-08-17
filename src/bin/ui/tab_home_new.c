@@ -430,7 +430,7 @@ _edc_code_generate(Eina_Stringshare *path)
 /* SPLASH */
 
 static void
-_progress_end(void *data, PM_Project_Result result)
+_progress_end(void *data, PM_Project_Result result, Project *project)
 {
    if (PM_PROJECT_SUCCESS == result)
      {
@@ -442,7 +442,7 @@ _progress_end(void *data, PM_Project_Result result)
         elm_entry_entry_set(tab_new.meta.comment, N_("Created with Eflete!"));
         _checks_set(false);
      }
-   _tabs_progress_end(data, result);
+   _tabs_progress_end(data, result, project);
 }
 
 static Eina_Bool
@@ -492,7 +492,6 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 static Eina_Bool
 _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
-   pm_project_thread_free();
    ecore_file_recursive_rm(tab_new.tmp_dir_path);
    eina_stringshare_del(tab_new.tmp_dir_path);
    tab_new.tmp_dir_path = NULL;

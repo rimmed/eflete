@@ -28,6 +28,7 @@
 #include "change.h"
 #include "project_manager.h"
 #include "validator.h"
+#include "shortcuts.h"
 
 #define PART_MASK(TYPE) (1u << TYPE)
 #define PART_RECTANGLE PART_MASK(EDJE_PART_TYPE_RECTANGLE)
@@ -1093,6 +1094,13 @@ _styles_combobox_fill(Evas_Object *combo, const char *selected)
    elm_genlist_item_append(combo, itc,
                            combobox_item, NULL,
                            ELM_GENLIST_ITEM_NONE, NULL, NULL);
+   combobox_item = mem_malloc(sizeof(Combobox_Item));
+   combobox_item->index = i++;
+   combobox_item->data = eina_stringshare_add(_("< Style manager >"));
+   elm_genlist_item_append(combo, itc,
+                           combobox_item, NULL,
+                           ELM_GENLIST_ITEM_NONE, NULL, NULL);
+
 
    EINA_LIST_FOREACH(ap.project->styles, l, style)
      {
@@ -1174,6 +1182,14 @@ _sample_combobox_fill(Evas_Object *combo, const char *selected, Eina_Bool with_n
                                 combobox_item, NULL,
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
      }
+
+   combobox_item = mem_malloc(sizeof(Combobox_Item));
+   combobox_item->index = i++;
+   combobox_item->data = eina_stringshare_add(_("< Sound manager >"));
+   elm_genlist_item_append(combo, itc,
+                           combobox_item, NULL,
+                           ELM_GENLIST_ITEM_NONE, NULL, NULL);
+
 
    EINA_LIST_FOREACH(ap.project->sounds, l, sample)
      {
@@ -1410,6 +1426,13 @@ _color_classes_combobox_fill(Evas_Object *combo, const char *selected)
    elm_genlist_item_append(combo, itc,
                            combobox_item, NULL,
                            ELM_GENLIST_ITEM_NONE, NULL, NULL);
+   combobox_item = mem_calloc(1, sizeof(Combobox_Cc_Item));
+   combobox_item->index = i++;
+   combobox_item->data = eina_stringshare_add(_("< Color class manager >"));
+   elm_genlist_item_append(combo, itc,
+                           combobox_item, NULL,
+                           ELM_GENLIST_ITEM_NONE, NULL, NULL);
+
 
    EINA_LIST_FOREACH(cclist, l, color_class)
      {
@@ -1734,11 +1757,11 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return !int_val1;
       case ATTRIBUTE_PART_NAME:
          property_entry_set(action->control, PART_ARGS);
-         edje_object_signal_emit(action->control, "validation,default,pass", "elm");
+         elm_object_signal_emit(action->control, "validation,default,pass", "elm");
          return true;
       case ATTRIBUTE_GROUP_DATA_NAME:
          property_entry_set(action->control, GROUP_DATA_ARGS);
-         edje_object_signal_emit(action->control, "validation,default,pass", "elm");
+         elm_object_signal_emit(action->control, "validation,default,pass", "elm");
          return true;
       case ATTRIBUTE_GROUP_DATA_VALUE:
          str_val1 = edje_edit_group_data_value_get(EDIT_OBJ, GROUP_DATA_ARGS);
@@ -3419,12 +3442,12 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
       case ATTRIBUTE_PART_NAME:
          if (resource_name_validator_status_get(group_pd.part_name_validator) != ELM_REG_NOERROR)
            {
-              edje_object_signal_emit(action->control, "validation,default,fail", "elm");
+              elm_object_signal_emit(action->control, "validation,default,fail", "elm");
               break;
            }
          else
            {
-              edje_object_signal_emit(action->control, "validation,default,pass", "elm");
+              elm_object_signal_emit(action->control, "validation,default,pass", "elm");
            }
          CRIT_ON_FAIL(editor_part_name_set(EDIT_OBJ, CHANGE_NO_MERGE, PART_ARGS, str_val1));
          eina_stringshare_del(group_pd.history.new.str_val1);
@@ -3433,12 +3456,12 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
       case ATTRIBUTE_GROUP_DATA_NAME:
          if (resource_name_validator_status_get(group_pd.group_data_name_validator) != ELM_REG_NOERROR)
            {
-              edje_object_signal_emit(action->control, "validation,default,fail", "elm");
+              elm_object_signal_emit(action->control, "validation,default,fail", "elm");
               break;
            }
          else
            {
-              edje_object_signal_emit(action->control, "validation,default,pass", "elm");
+              elm_object_signal_emit(action->control, "validation,default,pass", "elm");
            }
          CRIT_ON_FAIL(editor_group_data_name_set(EDIT_OBJ, CHANGE_NO_MERGE, GROUP_DATA_ARGS, str_val1));
          eina_stringshare_del(group_pd.history.new.str_val1);
@@ -3650,10 +3673,23 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
          break;
       case ATTRIBUTE_STATE_TEXT_STYLE:
          assert(cb_item_combo != NULL);
-         str_val1 = (cb_item_combo->index != 0) ? eina_stringshare_add(cb_item_combo->data) : NULL;
-         CRIT_ON_FAIL(editor_state_text_style_set(EDIT_OBJ, CHANGE_NO_MERGE, STATE_ARGS, str_val1));
-         eina_stringshare_del(group_pd.history.new.str_val1);
-         group_pd.history.new.str_val1 = str_val1;
+         if (cb_item_combo->index == 1)
+           {
+              /* a small hack, while combogbox is not dismissed its in the
+               * shorcuts stack, but for call style manager we need push
+               * manager to stack before comobox, because on dismiss combobox,
+               * will pop top object, and it must be combobox */
+              shortcuts_object_check_pop(action->control);
+              style_manager_add();
+              shortcuts_object_push(action->control);
+           }
+         else
+           {
+              str_val1 = (cb_item_combo->index != 0) ? eina_stringshare_add(cb_item_combo->data) : NULL;
+              CRIT_ON_FAIL(editor_state_text_style_set(EDIT_OBJ, CHANGE_NO_MERGE, STATE_ARGS, str_val1));
+              eina_stringshare_del(group_pd.history.new.str_val1);
+              group_pd.history.new.str_val1 = str_val1;
+           }
          break;
       case ATTRIBUTE_PART_MULTILINE:
          CRIT_ON_FAIL(editor_part_multiline_set(EDIT_OBJ, CHANGE_NO_MERGE, PART_ARGS, bool_val1));
@@ -3840,11 +3876,21 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
          break;
       case ATTRIBUTE_STATE_COLOR_CLASS:
          assert(cb_item_combo != NULL);
-         str_val1 = (cb_item_combo->index != 0) ? eina_stringshare_add(cb_item_combo->data) : NULL;
-         _color_class_select(action->control, str_val1);
-         CRIT_ON_FAIL(editor_state_color_class_set(EDIT_OBJ, CHANGE_NO_MERGE, STATE_ARGS, str_val1));
-         eina_stringshare_del(group_pd.history.new.str_val1);
-         group_pd.history.new.str_val1 = str_val1;
+         if (cb_item_combo->index == 1)
+           {
+              /* see comment for ATTRIBUTE_STATE_TEXT_STYLE */
+              shortcuts_object_check_pop(action->control);
+              colorclass_manager_add();
+              shortcuts_object_push(action->control);
+           }
+         else
+           {
+              str_val1 = (cb_item_combo->index != 0) ? eina_stringshare_add(cb_item_combo->data) : NULL;
+              _color_class_select(action->control, str_val1);
+              CRIT_ON_FAIL(editor_state_color_class_set(EDIT_OBJ, CHANGE_NO_MERGE, STATE_ARGS, str_val1));
+              eina_stringshare_del(group_pd.history.new.str_val1);
+              group_pd.history.new.str_val1 = str_val1;
+           }
          break;
       case ATTRIBUTE_STATE_COLOR:
          CRIT_ON_FAIL(editor_state_color_set(EDIT_OBJ, CHANGE_MERGE, STATE_ARGS, r, g, b, a));
@@ -4009,10 +4055,20 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
          break;
       case ATTRIBUTE_PROGRAM_SAMPLE_NAME:
          assert(cb_item_combo != NULL);
-         str_val1 = (cb_item_combo->index != 0) ? eina_stringshare_add(cb_item_combo->data) : "";
-         CRIT_ON_FAIL(editor_program_sample_name_set(EDIT_OBJ, CHANGE_NO_MERGE, PROGRAM_ARGS, str_val1));
-         eina_stringshare_del(group_pd.history.new.str_val1);
-         group_pd.history.new.str_val1 = str_val1;
+         if (cb_item_combo->index == 1)
+           {
+              /* see comment for ATTRIBUTE_STATE_TEXT_STYLE */
+              shortcuts_object_check_pop(action->control);
+              sound_manager_add();
+              shortcuts_object_push(action->control);
+           }
+         else
+           {
+              str_val1 = (cb_item_combo->index != 0) ? eina_stringshare_add(cb_item_combo->data) : "";
+              CRIT_ON_FAIL(editor_program_sample_name_set(EDIT_OBJ, CHANGE_NO_MERGE, PROGRAM_ARGS, str_val1));
+              eina_stringshare_del(group_pd.history.new.str_val1);
+              group_pd.history.new.str_val1 = str_val1;
+           }
          break;
       case ATTRIBUTE_PROGRAM_TONE_NAME:
          assert(cb_item_combo != NULL);

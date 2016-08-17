@@ -315,7 +315,7 @@ _combobox_dismissed_cb(void *data __UNUSED__,
    /* after dissmissing combobox its entry remains focused.
       this makes problems for shortcuts */
    Evas_Object *focused = elm_object_focused_object_get(ap.win);
-   if (!strcmp("elm_entry", evas_object_type_get(focused)))
+   if (focused && !strcmp("elm_entry", evas_object_type_get(focused)))
      {
         elm_object_focus_allow_set(focused, false);
         elm_object_focus_set(focused, false);
@@ -362,9 +362,10 @@ _control_create(Property_Attribute *pa, Property_Action *action, Evas_Object *pa
          itc->func.content_get = _combobox_cc_content_get;
          itc->func.del = _combobox_cc_item_del;
          evas_object_data_set(content, "COMMON_ITC", itc);
-         evas_object_smart_callback_add(content, "item,pressed",
-                                        _combobox_item_pressed_cb, pa);
          elm_object_style_set(content, "color_class");
+         evas_object_smart_callback_add(content, "item,pressed", _combobox_item_pressed_cb, pa);
+         evas_object_smart_callback_add(content, "expanded", _combobox_expanded_cb, pa);
+         evas_object_smart_callback_add(content, "dismissed", _combobox_dismissed_cb, pa);
          break;
       case PROPERTY_CONTROL_SPINNER:
          SPINNER_ADD(parent, content, 0.0, 9999.0, 1.0, true);
