@@ -45,10 +45,10 @@ _project_dev_file_create(Project *pro)
 }
 
 
-Eina_Bool
-_lock_try(const char *path, Eina_Bool check)
-{
 #ifndef _WIN32
+Eina_Bool
+_lock_try(const char *path, Eina_Bool check, int *pro_fd)
+{
    struct flock lock, savelock;
 
    int fd = open(path, O_RDWR);
@@ -64,27 +64,64 @@ _lock_try(const char *path, Eina_Bool check)
         ERR("Process %d has a write lock already!", lock.l_pid);
         return false;
      }
-   /* if flag check is false not need to lock the file */
-   if (check)
+
+   /* if flag check is false not need to lock the file, just close handler */
+   if (!check)
+     {
+        close(fd);
+        return true;
+     }
+
+   if (pro_fd)
      {
         savelock.l_pid = getpid();
         fcntl(fd, F_SETLK, &savelock);
+        *pro_fd = fd;
+        return true;
      }
+   close(fd);
+   return false;
+}
 #else
-   LPOFSTRUCT lpReOpenBuff;
-   HFILE fd = OpenFile(path, lpReOpenBuff, OF_READWRITE);
-   if (fd == HFILE_ERROR)
+Eina_Bool
+_lock_try(const char *path, Eina_Bool check, HANDLE *pro_fd)
+{
+   LPCTSTR  lpFileName = path;
+   DWORD dwDesiredAccess = GENERIC_READ|GENERIC_WRITE;
+   DWORD  dwShareMode = FILE_SHARE_READ|FILE_SHARE_WRITE;
+   LPSECURITY_ATTRIBUTES  lpSecurityAttributes = NULL;
+   DWORD  dwCreationDisposition = OPEN_EXISTING;
+   DWORD  dwFlagsAndAttributes = 0;
+   HANDLE  hTemplateFile = NULL;
+   HANDLE fd = CreateFile(lpFileName, 
+                          dwDesiredAccess, 
+                          dwShareMode, 
+                          lpSecurityAttributes, 
+                          dwCreationDisposition,
+                          dwFlagsAndAttributes,
+                          hTemplateFile);
+	
+   if (fd == INVALID_HANDLE_VALUE) 
      {
-       ERR("The file '%s' cannot be opened in mode read-write!", path);
-       return false;
+        ERR("The file '%s' cannot be opened in mode read-write!", path);
+        return !check;
      }
+
    if (!check)
      {
-       CloseHandle(fd);
+        CloseHandle(fd);
+        return true;
      }
-#endif
-   return true;
+    if (pro_fd)
+     {
+        *pro_fd = fd;
+        return true;
+     }
+
+    CloseHandle(fd);
+    return false;
 }
+#endif
 
 void
 _project_descriptor_init(Project_Thread *ptd)
@@ -370,7 +407,7 @@ _project_dummy_sample_add(Project *project)
 
    edje_object_file_set(edje_edit_obj, project->saved_edj, EFLETE_INTERNAL_GROUP_NAME);
    snprintf(buf, sizeof(buf), "%s"EFLETE_DUMMY_SAMPLE_NAME, ap.path.sound_path);
-   assert(edje_edit_sound_sample_add(edje_edit_obj, EFLETE_DUMMY_SAMPLE_NAME, buf) != false);
+   edje_edit_sound_sample_add(edje_edit_obj, EFLETE_DUMMY_SAMPLE_NAME, buf);
 
    you_shall_not_pass_editor_signals(NULL);
    CRIT_ON_FAIL(editor_save(edje_edit_obj));
@@ -628,6 +665,13 @@ pm_project_close(Project *project)
 #endif /* HAVE_ENVENTOR */
 
    eet_close(project->ef);
+#ifdef _WIN32
+   if (project->pro_fd != INVALID_HANDLE_VALUE)
+     CloseHandle(project->pro_fd);
+#else
+   if (project->pro_fd != -1)
+     close(project->pro_fd);
+#endif
    free(project);
    evas_object_smart_callback_call(ap.win, SIGNAL_PROJECT_CLOSED, NULL);
 
@@ -1005,7 +1049,7 @@ pm_project_enventor_save(Project *project,
 Eina_Bool
 pm_lock_check(const char *path)
 {
-   return _lock_try(path, false);
+   return _lock_try(path, false, NULL);
 }
 
 Eina_Bool

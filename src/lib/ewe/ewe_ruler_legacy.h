@@ -245,6 +245,30 @@ EAPI Eina_Bool
 ewe_ruler_marker_del(Eo *obj, Ewe_Ruler_Marker *marker);
 
 /**
+ * Set the marker size.
+ *
+ * @param obj Ruler object.
+ * @param marker Marker
+ * @param size The new marker size
+ *
+ * @ingroup Ruler
+ */
+EAPI void
+ewe_ruler_marker_size_set(Eo *obj, Ewe_Ruler_Marker *marker, int size);
+
+/**
+ * Set a tooltip for given marker.
+ *
+ * @param obj Ruler object.
+ * @param marker Marker
+ * @param text The tooltip text
+ *
+ * @ingroup Ruler
+ */
+EAPI void
+ewe_ruler_marker_tooltip_set(Eo *obj, Ewe_Ruler_Marker *marker, const char *text);
+
+/**
  * Get visiblility state of given scale
  *
  * @param obj Ruler object.

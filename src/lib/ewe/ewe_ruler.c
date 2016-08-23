@@ -223,13 +223,13 @@ _ewe_ruler_horizontal_set(Eo *obj,
 
    if (sd->horizontal)
      {
-        edje_object_file_set(sd->bg, EWE_THEME, "ewe/ruler/horizontal_background/default");
+        elm_layout_file_set(sd->bg, EWE_THEME, "ewe/ruler/horizontal_background/default");
         dashes = DASHES;
         markers = MARKER;
      }
    else
      {
-        edje_object_file_set(sd->bg, EWE_THEME, "ewe/ruler/vertical_background/default");
+        elm_layout_file_set(sd->bg, EWE_THEME, "ewe/ruler/vertical_background/default");
         dashes = DASHES_VER;
         markers = MARKER_VER;
      }
@@ -247,7 +247,7 @@ _ewe_ruler_horizontal_set(Eo *obj,
      {
         eina_strbuf_reset(buf);
         eina_strbuf_append_printf(buf, "%s/%s", markers, marker->style);
-        edje_object_file_set(marker->obj, EWE_THEME, eina_strbuf_string_get(buf));
+        elm_layout_file_set(marker->obj, EWE_THEME, eina_strbuf_string_get(buf));
      }
 
    eina_strbuf_free(buf);
@@ -518,7 +518,7 @@ _ewe_ruler_scale_middle_mark_set(Eo *obj EINA_UNUSED,
         Eina_List *l;
         Evas_Object *mark;
         EINA_LIST_FOREACH(scale->dashes, l, mark)
-          edje_object_part_text_set(mark, "ewe.middle.text", "");
+          elm_layout_text_set(mark, "ewe.middle.text", "");
      }
 
    sd->text_changed = EINA_TRUE;
@@ -543,17 +543,17 @@ _ewe_ruler_marker_add(Eo *obj,
    if (sd->horizontal)
      {
         eina_strbuf_append_printf(buf, MARKER"/%s", style);
-        edje_object_size_min_calc(ret->obj, &ret->size, NULL);
+        edje_object_size_min_calc(elm_layout_edje_get(ret->obj), &ret->size, NULL);
      }
    else
      {
         eina_strbuf_append_printf(buf, MARKER_VER"/%s", style);
-        edje_object_size_min_calc(ret->obj, NULL, &ret->size);
+        edje_object_size_min_calc(elm_layout_edje_get(ret->obj), NULL, &ret->size);
      }
 
-   ret->obj = edje_object_add(obj);
+   ret->obj = elm_layout_add(obj);
    evas_object_clip_set(ret->obj, sd->clip);
-   edje_object_file_set(ret->obj, EWE_THEME, eina_strbuf_string_get(buf));
+   elm_layout_file_set(ret->obj, EWE_THEME, eina_strbuf_string_get(buf));
    evas_object_smart_member_add(ret->obj, obj);
 
    ret->scale = NULL;
@@ -603,6 +603,32 @@ _ewe_ruler_marker_size_get(Eo *obj EINA_UNUSED,
    return marker->size;
 }
 
+EOLIAN static void
+_ewe_ruler_marker_text_set(Eo *obj EINA_UNUSED,
+                           Ewe_Ruler_Smart_Data *sd EINA_UNUSED,
+                           Ewe_Ruler_Marker *marker,
+                           const char *text)
+{
+   elm_layout_text_set(marker->obj, "ewe.text", text);
+}
+
+EOLIAN static const char *
+_ewe_ruler_marker_text_get(Eo *obj EINA_UNUSED,
+                           Ewe_Ruler_Smart_Data *sd EINA_UNUSED,
+                           Ewe_Ruler_Marker *marker)
+{
+   return elm_layout_text_get(marker->obj, "ewe.text");
+}
+
+EOLIAN static void
+_ewe_ruler_marker_tooltip_set(Eo *obj EINA_UNUSED,
+                              Ewe_Ruler_Smart_Data *sd EINA_UNUSED,
+                              Ewe_Ruler_Marker *marker,
+                              const char *text)
+{
+   elm_object_tooltip_text_set(marker->obj, text);
+}
+
 EOLIAN static Eina_Bool
 _ewe_ruler_marker_relative_set(Eo *obj,
                                Ewe_Ruler_Smart_Data *sd,
@@ -635,7 +661,6 @@ _ewe_ruler_marker_relative_set(Eo *obj,
      }
    marker->rel_position = pos;
 
-   sd->text_changed = EINA_TRUE;
    evas_object_smart_changed(obj);
    return EINA_TRUE;
 }
@@ -676,7 +701,6 @@ _ewe_ruler_marker_absolute_set(Eo *obj,
      }
    marker->abs_position = pos;
 
-   sd->text_changed = EINA_TRUE;
    evas_object_smart_changed(obj);
    return EINA_TRUE;
 }
@@ -715,7 +739,6 @@ _ewe_ruler_marker_visible_set(Eo *obj EINA_UNUSED,
      evas_object_hide(marker->obj);
    else if (sd->ruler_visible)
      evas_object_show(marker->obj);
-   sd->text_changed = EINA_TRUE;
    evas_object_smart_changed(obj);
    return EINA_TRUE;
 }
@@ -737,7 +760,7 @@ _ewe_ruler_marker_style_set(Eo *obj,
      eina_strbuf_append_printf(buf, MARKER"/%s", style);
    else
      eina_strbuf_append_printf(buf, MARKER_VER"/%s", style);
-   edje_object_file_set(marker->obj, EWE_THEME, eina_strbuf_string_get(buf));
+   elm_layout_file_set(marker->obj, EWE_THEME, eina_strbuf_string_get(buf));
 
    eina_strbuf_free(buf);
    evas_object_smart_changed(obj);
@@ -764,8 +787,8 @@ _ewe_ruler_evas_object_smart_add(Eo *obj, Ewe_Ruler_Smart_Data *sd)
    sd->obj = obj;
    sd->clip = evas_object_rectangle_add(evas_object_evas_get(obj));
    evas_object_smart_member_add(sd->clip, obj);
-   sd->bg = edje_object_add(evas_object_evas_get(obj));
-   edje_object_file_set(sd->bg, EWE_THEME, "ewe/ruler/horizontal_background/default");
+   sd->bg = elm_layout_add(obj);
+   elm_layout_file_set(sd->bg, EWE_THEME, "ewe/ruler/horizontal_background/default");
    evas_object_smart_member_add(sd->bg, obj);
 
    sd->horizontal = EINA_TRUE;
@@ -946,10 +969,8 @@ _ewe_ruler_evas_object_smart_calculate(Eo *obj EINA_UNUSED,
         sd->position_changed = EINA_FALSE;
      }
    if (sd->text_changed)
-     {
-        _set_labels(sd);
-        _place_markers(sd);
-     }
+     _set_labels(sd);
+   _place_markers(sd);
 }
 
 EOLIAN static Elm_Theme_Apply
@@ -965,7 +986,7 @@ _ewe_ruler_elm_widget_theme_apply(Eo *obj, Ewe_Ruler_Smart_Data *sd)
 
    if (sd->horizontal)
      {
-        edje_object_file_set(sd->bg, EWE_THEME, "ewe/ruler/horizontal_background/default");
+        elm_layout_file_set(sd->bg, EWE_THEME, "ewe/ruler/horizontal_background/default");
         EINA_LIST_FOREACH(sd->scales, ls, scale)
           {
              eina_stringshare_del(scale->full_style);
@@ -976,7 +997,7 @@ _ewe_ruler_elm_widget_theme_apply(Eo *obj, Ewe_Ruler_Smart_Data *sd)
      }
    else
      {
-        edje_object_file_set(sd->bg, EWE_THEME, "ewe/ruler/vertical_background/default");
+        elm_layout_file_set(sd->bg, EWE_THEME, "ewe/ruler/vertical_background/default");
         EINA_LIST_FOREACH(sd->scales, ls, scale)
           {
              eina_stringshare_del(scale->full_style);
