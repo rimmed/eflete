@@ -18,8 +18,6 @@
 #include "ewe_private.h"
 #include "ewe_widget_ruler.h"
 
-EAPI Eo_Op EWE_OBJ_RULER_BASE_ID = EO_NOOP;
-
 #define MY_CLASS EWE_RULER_CLASS
 
 #define MY_CLASS_NAME "Ewe_Ruler"

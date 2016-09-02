@@ -45,7 +45,7 @@ static void
 _common_param_update(Groupview_Part *gp, Evas_Object *edit_obj);
 
 static void
-_image_param_update(Groupview_Part *gp, Evas_Object *edit_obj);
+_image_param_update(Groupview_Part *gp, Groupview_Smart_Data *sd);
 
 static void
 _proxy_param_update(Groupview_Part *gp, Evas_Object *edit_obj);
@@ -569,7 +569,7 @@ _part_update(Groupview_Smart_Data *sd, Groupview_Part *gp)
          _common_param_update(gp, sd->group->edit_object);
          break;
       case EDJE_PART_TYPE_IMAGE:
-         _image_param_update(gp, sd->group->edit_object);
+         _image_param_update(gp, sd);
          break;
       case EDJE_PART_TYPE_PROXY:
          _proxy_param_update(gp, sd->group->edit_object);
@@ -647,6 +647,7 @@ _part_draw_add(Groupview_Smart_Data *sd, Part *part)
          break;
       case EDJE_PART_TYPE_IMAGE:
          PART_VIEW_PROXY_SET()
+         gp->proxy_dead_part = evas_object_image_filled_add(evas_object_evas_get(sd->obj));
          elm_object_signal_emit(gp->layout, "border,text", "eflete");
          break;
       case EDJE_PART_TYPE_PROXY: // it part like image
@@ -809,9 +810,10 @@ _image_proxy_common_param_update(Evas_Object *image, Groupview_Part *gp, Evas_Ob
 }
 
 static void
-_image_param_update(Groupview_Part *gp, Evas_Object *edit_obj)
+_image_param_update(Groupview_Part *gp, Groupview_Smart_Data *sd)
 {
    Evas_Load_Error err;
+   Evas_Object *edit_obj = sd->group->edit_object;
    const char *image_normal;
    const char *buf = NULL;
    int id;
@@ -834,6 +836,11 @@ _image_param_update(Groupview_Part *gp, Evas_Object *edit_obj)
    assert(edit_obj != NULL);
 
    PART_STATE_GET(edit_obj, gp->part->name)
+
+   evas_object_image_source_set(gp->proxy_dead_part, NULL);
+   evas_object_image_source_set(gp->proxy_dead_part,
+                                (Evas_Object *)edje_object_part_object_get(edit_obj, gp->part->name));
+   evas_object_image_source_visible_set(gp->proxy_dead_part, false);
 
    image_normal = edje_edit_state_image_get(edit_obj, gp->part->name, state, value);
    if (!image_normal) return;
@@ -877,22 +884,18 @@ _image_param_update(Groupview_Part *gp, Evas_Object *edit_obj)
    map_on = edje_edit_state_map_on_get(edit_obj, gp->part->name, state, value);
    if (map_on)
      {
-
-        rot_part = edje_edit_state_map_rotation_center_get(edit_obj, gp->part->name, state, value);
-        edje_object_part_geometry_get(edit_obj, rot_part, &rx, &ry, &rw, &rh);
         edje_object_part_geometry_get(edit_obj, gp->part->name, NULL, NULL, &w, &h);
-        evas_object_geometry_get(edit_obj, &xe, &ye, NULL, NULL);
+        rot_part = edje_edit_state_map_rotation_center_get(edit_obj, gp->part->name, state, value);
 
         if (rot_part)
-          {
-             center_x = xe + rx + (rw / 2);
-             center_y = ye + ry + (rh / 2);
-          }
+          edje_object_part_geometry_get(edit_obj, rot_part, &rx, &ry, &rw, &rh);
         else
-          {
-             center_x = xe + w / 2;
-             center_y = ye + h / 2;
-          }
+          edje_object_part_geometry_get(edit_obj, gp->part->name, &rx, &ry, &rw, &rh);
+
+        evas_object_geometry_get(edit_obj, &xe, &ye, NULL, NULL);
+
+        center_x = xe + rx * sd->zoom + (rw * sd->zoom / 2);
+        center_y = ye + ry * sd->zoom + (rh * sd->zoom / 2);
         center_z = 0;
 
         m = evas_map_new(4);
@@ -934,8 +937,8 @@ _image_param_update(Groupview_Part *gp, Evas_Object *edit_obj)
                   zplane = edje_edit_state_map_perspective_zplane_get(edit_obj, perpective, state, value);
                   focal = edje_edit_state_map_perspective_focal_get(edit_obj, perpective, state, value);
 
-                  persp_x = xe + rx + (rw / 2);
-                  persp_y = ye + ry + (rh / 2);
+                  persp_x = xe + rx * sd->zoom + (rw * sd->zoom / 2);
+                  persp_y = ye + ry * sd->zoom + (rh * sd->zoom / 2);
                }
              else
                {
@@ -953,8 +956,8 @@ _image_param_update(Groupview_Part *gp, Evas_Object *edit_obj)
              edje_edit_state_color_get(edit_obj, light, state, value, &lr, &lg, &lb, NULL);
              /* outline because color2 being used in edje_calc */
              edje_edit_state_outline_color_get(edit_obj, light, state, value, &lar, &lag, &lab, NULL);
-             lx = xe + rx + (rw / 2);
-             ly = ye + ry + (rh / 2);
+             lx = xe + rx * sd->zoom + (rw * sd->zoom / 2);
+             ly = ye + ry * sd->zoom + (rh * sd->zoom / 2);
              lz = edje_edit_state_map_perspective_zplane_get(edit_obj, perpective, state, value);
              evas_map_util_3d_lighting(m, lx, ly, lz, lr, lg, lb, lar, lag, lab);
           }
@@ -995,6 +998,7 @@ _proxy_param_update(Groupview_Part *gp, Evas_Object *edit_obj)
         source = _parts_list_find(sd->parts, proxy_source);
         evas_object_image_source_set(gp->proxy_part, source->proxy_part);
         evas_object_image_source_clip_set(gp->proxy_part, false);
+        evas_object_image_source_visible_set (gp->proxy_part, false);
         _image_proxy_common_param_update(gp->proxy_part, gp, edit_obj);
      }
    else
@@ -1013,7 +1017,7 @@ _common_param_update(Groupview_Part *gp, Evas_Object *edit_obj)
    evas_object_image_source_set(gp->proxy_part, NULL);
    evas_object_image_source_set(gp->proxy_part,
                                 (Evas_Object *)edje_object_part_object_get(edit_obj, gp->part->name));
-   evas_object_image_source_clip_set(gp->proxy_part, false);
+   evas_object_image_source_visible_set(gp->proxy_part, false);
 }
 
 static void

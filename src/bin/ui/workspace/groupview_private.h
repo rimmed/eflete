@@ -57,7 +57,6 @@ struct _Groupview_Smart_Data
    Groupview_Part *selected;
    Evas_Object *highlight;
    Evas_Object *object_area;
-   Evas_Object *clipper;
    Eina_Bool obj_area_visible : 1;
    Eina_Bool separated : 1;
    Eina_Bool manual_calc : 1;
@@ -90,7 +89,7 @@ struct _Groupview_Part
    Evas_Object *draw;         /**< The evas primitive to be draw in groupview.
                                    The valid evas object types: image, rectangle,
                                    text and textblock.*/
-   Evas_Object *proxy_part;
+   Evas_Object *proxy_part, *proxy_dead_part;
    Evas_Object *layout;
    Evas_Object *container;    /**< Used for box/table parts */
    Eina_List *items;          /**< The items, for TABLE, BOX part types */
