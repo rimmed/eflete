@@ -322,11 +322,15 @@ _sample_add_cb(void *data,
 }
 
 static void
-_validation(void *data __UNUSED__,
+_validation(void *data,
             Evas_Object *obj __UNUSED__,
             void *event_info __UNUSED__)
 {
+   Evas_Object *popup = data;
    Eina_Bool validate = EINA_FALSE;
+
+   assert(popup != NULL);
+
    if (resource_name_validator_status_get(mng.tone_validator) != ELM_REG_NOERROR)
      {
         validate = EINA_FALSE;
@@ -351,13 +355,13 @@ _validation(void *data __UNUSED__,
 
 
    if (!validate)
-       popup_buttons_disabled_set(BTN_OK, true);
+       popup_button_disabled_set(popup, BTN_OK, true);
    else
-       popup_buttons_disabled_set(BTN_OK, false);
+       popup_button_disabled_set(popup, BTN_OK, false);
 }
 
 Evas_Object *
-_add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
+_add_tone_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Object **to_focus)
 {
    Evas_Object *item, *box;
 
@@ -366,7 +370,7 @@ _add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    LAYOUT_PROP_ADD(box, _("Tone name:"), "popup", "1swallow")
    ENTRY_ADD(item, mng.tone_entry, true);
    eo_event_callback_add(mng.tone_entry, ELM_ENTRY_EVENT_VALIDATE, resource_name_validator_helper, mng.tone_validator);
-   evas_object_smart_callback_add(mng.tone_entry, "changed", _validation, NULL);
+   evas_object_smart_callback_add(mng.tone_entry, "changed", _validation, popup);
    elm_object_part_text_set(mng.tone_entry, "guide", _("Type a new tone name"));
    elm_object_part_content_set(item, "elm.swallow.content", mng.tone_entry);
    /* need to manualy set not valid string for triggered validator */
@@ -376,7 +380,7 @@ _add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    LAYOUT_PROP_ADD(box, _("Frequency:"), "popup", "1swallow")
    ENTRY_ADD(item, mng.frq_entry, true);
    eo_event_callback_add(mng.frq_entry, ELM_ENTRY_EVENT_VALIDATE, elm_validator_regexp_helper, mng.frq_validator);
-   evas_object_smart_callback_add(mng.frq_entry, "changed", _validation, NULL);
+   evas_object_smart_callback_add(mng.frq_entry, "changed", _validation, popup);
    elm_object_part_text_set(mng.frq_entry, "guide", _("Type a frequency (20 - 20000)"));
    elm_object_part_content_set(item, "elm.swallow.content", mng.frq_entry);
    /* need to manualy set not valid string for triggered validator */
@@ -385,7 +389,6 @@ _add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    mng.box = box;
 
    if (to_focus) *to_focus = mng.tone_entry;
-   popup_buttons_disabled_set(BTN_OK, true);
 
    return box;
 }
@@ -415,8 +418,8 @@ _tone_add_cb(void *data __UNUSED__,
    resource_name_validator_list_set(mng.tone_validator, &ap.project->tones, true);
    mng.frq_validator = elm_validator_regexp_new(FREQUENCY_REGEX, NULL);
 
-   popup_buttons_disabled_set(BTN_OK, true);
    popup = popup_add(_("Create a new layout"), NULL, BTN_OK|BTN_CANCEL, _add_tone_content_get, mng.tone_entry);
+   popup_button_disabled_set(popup, BTN_OK, true);
    evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _tone_add_popup_close_cb, NULL);
 }
 
