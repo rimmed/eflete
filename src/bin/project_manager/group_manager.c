@@ -28,10 +28,12 @@ _group_name_parse(Group *group)
 
    assert(group != NULL);
 
+   if (!eina_str_has_prefix(group->name, "elm")) return;
+
    c = eina_str_split_full(group->name, "/", 4, &count);
 
    TODO("move here complicated class/style parsing from live_view");
-   if ((count == 4) && (!strcmp(c[0], "elm")))
+   if (count == 4)
      {
         group->widget = eina_stringshare_add(c[1]);
         group->class = eina_stringshare_add(c[2]);
@@ -411,7 +413,10 @@ gm_state_add(Project *pro, Part *part, const char *state_name, double state_valu
              /* Colorclass can be specified but not defined in edc.
                 If colorclass don't exist yet adding it */ \
              TODO("move this code to colorclass resource manager"); \
-             edje_edit_color_class_add(pro->global_object, name); \
+             you_shall_not_pass_editor_signals(NULL); \
+             if (editor_color_class_add(pro->global_object, name, false)) \
+               ERR("Something wrong happened"); \
+             you_shall_pass_editor_signals(NULL); \
              Colorclass_Resource *res = (Colorclass_Resource *)resource_add(name, RESOURCE_TYPE_COLORCLASS); \
              res->color1.r = res->color1.g = res->color1.b = res->color1.a = 255; \
              res->color2.r = res->color2.g = res->color2.b = res->color2.a = 255; \

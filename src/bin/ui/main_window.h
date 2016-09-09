@@ -121,8 +121,9 @@ typedef Eina_Bool(* Popup_Validator_Func)(void *data);
  *
  * @ingroup Window
  */
-typedef Evas_Object *(* Popup_Content_Get_Func)(void *data, Evas_Object **to_focus);
+typedef Evas_Object *(* Popup_Content_Get_Func)(void *data, Evas_Object *popup, Evas_Object **to_focus);
 
+#define POPUP_CLOSE_CB "POPUP_CLOSE_CB"
 /**
  * The fileselector helper callback.
  *
@@ -341,13 +342,12 @@ project_close(void);
  *
  * @ingroup Window
  */
-Popup_Button
-popup_want_action(const char *title,
-                  const char *msg,
-                  Popup_Content_Get_Func content_get,
-                  Popup_Button p_btns,
-                  Popup_Validator_Func func,
-                  void *data);
+Evas_Object *
+popup_add(const char *title,
+          const char *msg,
+          Popup_Button popup_btns,
+          Popup_Content_Get_Func content_get,
+          void *data);
 
 void
 popup_active_helper_close(void *data,
@@ -364,7 +364,10 @@ popup_active_helper_close(void *data,
  * @ingroup Window
  */
 void
-popup_buttons_disabled_set(Popup_Button p_btns, Eina_Bool disabled);
+popup_button_disabled_set(Evas_Object *popup, Popup_Button btn, Eina_Bool disabled);
+
+void
+popup_fileselector_helper_dismiss();
 
 void
 popup_fileselector_folder_helper(const char *title, Evas_Object *follow_up, const char *path,

@@ -59,6 +59,14 @@
 #define SIGNAL_GROUP_ADDED "SIGNAL_GROUP_ADDED"
 
 /**
+ * emited when new group is added.
+ * eventinfo - pointer to Group object
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_GROUP_ADDED "SIGNAL_EDITOR_GROUP_ADDED"
+
+/**
  * emited when group is opened.
  * eventinfo - pointer to Group object
  *
@@ -73,6 +81,14 @@
  * @ingroup Window
  */
 #define SIGNAL_GROUP_DELETED "SIGNAL_GROUP_DELETED"
+
+/**
+ * emited when group is deleted.
+ * eventinfo - pointer to group name (stringshare)
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_GROUP_DELETED "SIGNAL_EDITOR_GROUP_DELETED"
 
 typedef struct {
    const char *old_name;
@@ -142,6 +158,14 @@ typedef struct {
  */
 #define SIGNAL_EDITOR_ATTRIBUTE_CHANGED "SIGNAL_EDITOR_ATTRIBUTE_CHANGED"
 
+/**
+ * emited when any attribute of top level resource (image, colorclass etc) is changed in editor.
+ * eventinfo - Pointer to Attribute
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_RESOURCE_ATTRIBUTE_CHANGED "SIGNAL_EDITOR_RESOURCE_ATTRIBUTE_CHANGED"
+
 typedef struct {
    const char *part_name;
    const char *state_name;
@@ -166,6 +190,7 @@ typedef struct {
 typedef struct {
    const char *part_name;
    const char *item_name;
+   const char *source;
 } Editor_Item;
 /**
  * emited when item is added in editor.
@@ -263,6 +288,86 @@ typedef struct {
  * @ingroup Window
  */
 #define SIGNAL_EDITOR_PART_ITEM_RESTACKED "SIGNAL_EDITOR_PART_ITEM_RESTACKED"
+
+/**
+ * emited when colorclass is added.
+ * eventinfo - colorclass'es name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_COLORCLASS_ADDED "SIGNAL_EDITOR_COLORCLASS_ADDED"
+
+/**
+ * emited when colorclass is deleted.
+ * eventinfo - colorclass'es name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_COLORCLASS_DELETED "SIGNAL_EDITOR_COLORCLASS_DELETED"
+
+/**
+ * emited when sound is added.
+ * eventinfo - sound's name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_SOUND_ADDED "SIGNAL_EDITOR_SOUND_ADDED"
+
+/**
+ * emited when sound is deleted.
+ * eventinfo - sound's name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_SOUND_DELETED "SIGNAL_EDITOR_SOUND_DELETED"
+
+/**
+ * emited when tone is added.
+ * eventinfo - tone's name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_TONE_ADDED "SIGNAL_EDITOR_TONE_ADDED"
+
+/**
+ * emited when sound is deleted.
+ * eventinfo - tone's name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_TONE_DELETED "SIGNAL_EDITOR_TONE_DELETED"
+
+/**
+ * emited when tone is added.
+ * eventinfo - image's name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_IMAGE_ADDED "SIGNAL_EDITOR_IMAGE_ADDED"
+
+/**
+ * emited when sound is deleted.
+ * eventinfo - image's name
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_IMAGE_DELETED "SIGNAL_EDITOR_IMAGE_DELETED"
+
+/**
+ * emited when tone is added.
+ * eventinfo - NULL
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_STYLE_ADDED "SIGNAL_EDITOR_STYLE_ADDED"
+
+/**
+ * emited when sound is deleted.
+ * eventinfo - NULL
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_STYLE_DELETED "SIGNAL_EDITOR_STYLE_DELETED"
 
 /**
  * emited when part state is selected.

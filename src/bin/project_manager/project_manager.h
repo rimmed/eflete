@@ -82,13 +82,28 @@ struct _Project
    /** compile options for release edj file. see edje_cc reference */
    Eina_Stringshare *release_options;
 
+   struct {
+      Eina_List *groups;
+      Eina_List *tones;
+      Eina_List *sounds;
+      Eina_List *images;
+      Eina_List *image_sets;
+      Eina_List *fonts;
+      Eina_List *colorclasses;
+      Eina_List *styles;
+      Eina_List *global_data;
+   } RM; /* rename to resource_manager,
+            this is just to make coding simplier. easier and faster */
+
    Eina_List *groups;
    Eina_List *images;
+   Eina_List *image_sets;
    Eina_List *sounds;
    Eina_List *tones;
    Eina_List *fonts;
    Eina_List *colorclasses;
    Eina_List *styles;
+   Eina_List *global_data;
 
    Eina_File *mmap_file; /**< mmaped dev file*/
 

@@ -218,8 +218,70 @@ typedef enum {
    ATTRIBUTE_LAST
 } Attribute;
 
+
+typedef enum {
+   ATTRIBUTE_RESOURCES_NONE,
+
+   ATTRIBUTE_RESOURCES_COLORCLASS_DESCRIPTION,
+   ATTRIBUTE_RESOURCES_COLORCLASS_COLORS,
+   ATTRIBUTE_RESOURCES_STYLE_TAG_ADDED,
+   ATTRIBUTE_RESOURCES_STYLE_TAG_DELETED,
+
+   ATTRIBUTE_RESOURCES_LAST
+} Attribute_Resource;
+
+
 void
 _editor_project_changed();
+
+/* Top Level Blocks */
+Eina_Bool
+editor_image_add(Evas_Object *obj, const char *selected, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_del(Evas_Object *obj, const char *selected, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_color_class_add(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_color_class_del(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_color_class_description_set(Evas_Object *obj, const char *name, const char *description) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_color_class_colors_set(Evas_Object *obj, const char *name,
+                              int r, int g, int b, int a,
+                              int r2, int g2, int b2, int a2,
+                              int r3, int g3, int b3, int a3) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_sound_sample_add(Evas_Object *obj, const char *name, const char *source, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_sound_sample_del(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_sound_tone_add(Evas_Object *obj, const char *name, int frq, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_sound_tone_del(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_style_add(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_style_del(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_style_tag_add(Evas_Object *obj, const char *name, const char *tag) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_style_tag_del(Evas_Object *obj, const char *name, const char *tag) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_style_tag_value_set(Evas_Object *obj, const char *name, const char *tag, const char *value) EINA_WARN_UNUSED_RESULT;
 
 /* General */
 Eina_Bool
@@ -232,16 +294,16 @@ Eina_Bool
 editor_internal_group_add(Evas_Object *edit_object) EINA_WARN_UNUSED_RESULT;
 
 Eina_Bool
-editor_group_add(Evas_Object *obj, const char *name) EINA_WARN_UNUSED_RESULT;
+editor_group_add(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
 
 Eina_Bool
-editor_group_copy(Evas_Object *obj, const char *group_src, const char *group_dest) EINA_WARN_UNUSED_RESULT;
+editor_group_copy(Evas_Object *obj, const char *group_src, const char *group_dest, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
 
 Eina_Bool
-editor_group_alias_add(Evas_Object *obj, const char *group_src, const char *group_alias) EINA_WARN_UNUSED_RESULT;
+editor_group_alias_add(Evas_Object *obj, const char *group_src, const char *group_alias, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
 
 Eina_Bool
-editor_group_del(Evas_Object *obj, const char *name) EINA_WARN_UNUSED_RESULT;
+editor_group_del(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
 
 Eina_Bool
 you_shall_not_pass_editor_signals(Change *change);

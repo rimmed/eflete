@@ -368,24 +368,26 @@ _group_sel(void *data __UNUSED__,
 }
 
 static void
-_group_validate(void *data __UNUSED__,
+_group_validate(void *data,
                 Evas_Object *obj __UNUSED__,
                 void *event_info __UNUSED__)
 {
+   Evas_Object *popup = data;
+   assert(popup != NULL);
    if (resource_name_validator_status_get(validator) != ELM_REG_NOERROR)
      {
-       popup_buttons_disabled_set(BTN_OK, true);
+       popup_button_disabled_set(popup, BTN_OK, true);
        elm_object_signal_emit(obj, "validation,default,fail", "elm");
      }
    else
      {
-       popup_buttons_disabled_set(BTN_OK, false);
+       popup_button_disabled_set(popup, BTN_OK, false);
        elm_object_signal_emit(obj, "validation,default,pass", "elm");
      }
 }
 
-Evas_Object *
-_add_group_content_get(void *data __UNUSED__, Evas_Object **to_focus)
+static Evas_Object *
+_add_group_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Object **to_focus)
 {
    Evas_Object *item;
    Group *group;
@@ -399,7 +401,7 @@ _add_group_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    /* name: entry */
    LAYOUT_PROP_ADD(layout_p.box, _("Name"), "popup", "1swallow")
    ENTRY_ADD(layout_p.box, layout_p.entry, true)
-   evas_object_smart_callback_add(layout_p.entry, "changed", _group_validate, NULL);
+   evas_object_smart_callback_add(layout_p.entry, "changed", _group_validate, popup);
    eo_do(layout_p.entry, eo_event_callback_add(ELM_ENTRY_EVENT_VALIDATE, resource_name_validator_helper, validator));
    elm_layout_content_set(item, NULL, layout_p.entry);
    elm_box_pack_end(layout_p.box, item);
@@ -440,17 +442,45 @@ _add_group_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    elm_object_text_set(layout_p.combobox, _("None"));
 
    if (to_focus) *to_focus = layout_p.entry;
-   popup_buttons_disabled_set(BTN_OK, true);
 
    return layout_p.box;
 }
+
+static void
+_add_group_popup_close_cb(void *data __UNUSED__,
+                          Evas_Object *obj __UNUSED__,
+                          void *event_info)
+{
+   Popup_Button btn_res = (Popup_Button) event_info;
+
+   if (BTN_OK == btn_res)
+     {
+        if ((!layout_p.selected) || (layout_p.selected->index == 0))
+          CRIT_ON_FAIL(editor_group_add(ap.project->global_object, elm_entry_entry_get(layout_p.entry), true));
+        else
+          {
+             if (!elm_check_state_get(layout_p.check))
+               CRIT_ON_FAIL(editor_group_copy(ap.project->global_object, layout_p.selected->data, elm_entry_entry_get(layout_p.entry), true));
+             else
+               CRIT_ON_FAIL(editor_group_alias_add(ap.project->global_object, layout_p.selected->data, elm_entry_entry_get(layout_p.entry), true));
+          }
+        TODO("Delete gm_group_add after RM integration");
+        gm_group_add(ap.project, elm_entry_entry_get(layout_p.entry), true);
+     }
+
+   evas_object_del(layout_p.box);
+   resource_name_validator_free(validator);
+   validator = NULL;
+   layout_p.selected = NULL;
+}
+
 
 static void
 _btn_add_group_cb(void *data __UNUSED__,
                   Evas_Object *obj __UNUSED__,
                   void *event_info __UNUSED__)
 {
-   Popup_Button btn_res;
+   Evas_Object *popup;
 
    if (!ap.project) return; /* when pressing ctrl + n without open project */
 
@@ -458,27 +488,9 @@ _btn_add_group_cb(void *data __UNUSED__,
 
    validator = resource_name_validator_new(LAYOUT_NAME_REGEX, NULL);
    resource_name_validator_list_set(validator, &ap.project->groups, false);
-   btn_res = popup_want_action(_("Create a new layout"), NULL, _add_group_content_get,
-                               BTN_OK|BTN_CANCEL,
-                               NULL, layout_p.entry);
-   if (BTN_CANCEL == btn_res) goto close;
-
-   if ((!layout_p.selected) || (layout_p.selected->index == 0))
-     CRIT_ON_FAIL(editor_group_add(ap.project->global_object, elm_entry_entry_get(layout_p.entry)));
-   else
-     {
-        if (!elm_check_state_get(layout_p.check))
-          CRIT_ON_FAIL(editor_group_copy(ap.project->global_object, layout_p.selected->data, elm_entry_entry_get(layout_p.entry)));
-        else
-          CRIT_ON_FAIL(editor_group_alias_add(ap.project->global_object, layout_p.selected->data, elm_entry_entry_get(layout_p.entry)));
-     }
-   gm_group_add(ap.project, elm_entry_entry_get(layout_p.entry), true);
-
-close:
-   evas_object_del(layout_p.box);
-   resource_name_validator_free(validator);
-   validator = NULL;
-   layout_p.selected = NULL;
+   popup = popup_add(_("Create a new layout"), NULL, BTN_OK|BTN_CANCEL, _add_group_content_get, layout_p.entry);
+   popup_button_disabled_set(popup, BTN_OK, true);
+   evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _add_group_popup_close_cb, NULL);
 }
 
 static void
@@ -500,25 +512,27 @@ _folder_del(const char *prefix)
         EINA_LIST_FREE(group->aliases, alias)
           {
              tmp = eina_stringshare_add(alias->name);
-             if (editor_group_del(ap.project->global_object, tmp))
+             if (editor_group_del(ap.project->global_object, tmp, true))
                gm_group_del(ap.project, alias);
              else
                {
                   msg = eina_stringshare_printf(_("Can't delete alias layout \"%s\""), alias->name);
-                  popup_want_action(_("Error"), msg, NULL, BTN_OK, NULL, NULL);
+                  TODO("Check if it's correct to ignore error");
+                  popup_add(_("Error"), msg, BTN_OK, NULL, NULL);
                   eina_stringshare_del(msg);
                }
              eina_stringshare_del(tmp);
           }
 
         tmp = eina_stringshare_add(group->name);
-        if (editor_group_del(ap.project->global_object, tmp))
+        if (editor_group_del(ap.project->global_object, tmp, true))
           gm_group_del(ap.project, group);
         else
           {
              msg = eina_stringshare_printf(_("Can't delete layout \"%s\". "
                                             "Please close a tab with given group."), group->name);
-             popup_want_action(_("Error"), msg, NULL, BTN_OK, NULL, NULL);
+             TODO("Check if it's correct to ignore error");
+             popup_add(_("Error"), msg, BTN_OK, NULL, NULL);
              eina_stringshare_del(msg);
           }
         eina_stringshare_del(tmp);
@@ -581,24 +595,60 @@ _group_del(void *data __UNUSED__,
 }
 
 static void
+_folder_del_popup_close_cb(void *data,
+                           Evas_Object *obj __UNUSED__,
+                           void *event_info)
+{
+   Elm_Object_Item *glit = data;
+   Popup_Button btn_res = (Popup_Button) event_info;
+
+   if (BTN_CANCEL == btn_res) return;
+
+   _folder_del(elm_object_item_data_get(glit));
+   elm_object_disabled_set(project_navigator.btn_del, true);
+}
+
+static void
+_group_del_popup_close_cb(void *data,
+                          Evas_Object *obj __UNUSED__,
+                          void *event_info)
+{
+   Eina_Stringshare *tmp, *msg;
+   Group *group = data;
+   Popup_Button btn_res = (Popup_Button) event_info;
+
+   if (BTN_CANCEL == btn_res) return;
+
+   tmp = eina_stringshare_add(group->name);
+   if (editor_group_del(ap.project->global_object, tmp, true))
+     gm_group_del(ap.project, group);
+   else
+     {
+        msg = eina_stringshare_printf(_("Can't delete layout \"%s\""), group->name);
+        eina_stringshare_del(msg);
+     }
+   eina_stringshare_del(tmp);
+
+   elm_object_disabled_set(project_navigator.btn_del, true);
+}
+
+static void
 _btn_del_group_cb(void *data __UNUSED__,
                   Evas_Object *obj __UNUSED__,
                   void *event_info __UNUSED__)
 {
-   Popup_Button btn_res;
    Group *group;
+   Evas_Object *popup;
    Elm_Object_Item *glit;
-   Eina_Stringshare *tmp, *msg;
 
    glit = elm_genlist_selected_item_get(project_navigator.genlist);
    if (elm_genlist_item_type_get(glit) == ELM_GENLIST_ITEM_TREE)
      {
-        btn_res = popup_want_action(_("Confirm delete layouts"),
-                                    _("Are you sure you want to delete the selected layouts?<br>"
-                                      "All aliases will be delete too."),
-                                    NULL, BTN_OK|BTN_CANCEL, NULL, NULL);
-        if (BTN_CANCEL == btn_res) return;
-        _folder_del(elm_object_item_data_get(glit));
+        popup = popup_add(_("Confirm delete layouts"),
+                          _("Are you sure you want to delete the selected layouts?<br>"
+                            "All aliases will be delete too."),
+                          BTN_OK|BTN_CANCEL, NULL, NULL);
+        evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _folder_del_popup_close_cb, glit);
      }
    else
      {
@@ -607,29 +657,18 @@ _btn_del_group_cb(void *data __UNUSED__,
          * and delete it */
         if (group->edit_object)
           {
-             popup_want_action(_("Warning: Delete layout"),
-                               _("Cann't delete the opened layout. Please, "
-                                 "close the layout tab before delete it."),
-                               NULL, BTN_CANCEL, NULL, NULL);
+             popup_add(_("Warning: Delete layout"),
+                       _("Cann't delete the opened layout. Please, "
+                         "close the layout tab before delete it."),
+                       BTN_CANCEL, NULL, NULL);
              return;
           }
-        btn_res = popup_want_action(_("Confirm delete layout"),
+        popup = popup_add(_("Confirm delete layout"),
                                     _("Are you sure you want to delete the selected layout?<br>"
                                       "All aliases will be delete too."),
-                                    NULL, BTN_OK|BTN_CANCEL, NULL, NULL);
-        if (BTN_CANCEL == btn_res) return;
-        tmp = eina_stringshare_add(group->name);
-        if (editor_group_del(ap.project->global_object, tmp))
-          gm_group_del(ap.project, group);
-        else
-          {
-             msg = eina_stringshare_printf(_("Can't delete layout \"%s\""), group->name);
-             popup_want_action(_("Error"), msg, NULL, BTN_OK, NULL, NULL);
-             eina_stringshare_del(msg);
-          }
-        eina_stringshare_del(tmp);
+                                    BTN_OK|BTN_CANCEL, NULL, NULL);
+        evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _group_del_popup_close_cb, group);
      }
-   elm_object_disabled_set(project_navigator.btn_del, true);
 }
 
 static void

@@ -144,6 +144,10 @@ struct _App_Data
    } path;
    Project *project;
    Shortcut_Module *shortcuts; /**< Structure with data from shortcuts module */
+   Eina_Bool exit_in_progress : 1; /**< is set to true when ui_main_window_del() is called.
+                                       This is needed to continue closing application after
+                                       clicking in save/don't save buttons in project close
+                                       popup */
 #ifdef HAVE_ENVENTOR
    Evas_Object *enventor;
    Eina_Bool enventor_mode : 1;
@@ -184,26 +188,6 @@ app_init(void);
  */
 Eina_Bool
 app_shutdown(void);
-
-/**
- * Start nested not blocked ecore main loop.
- *
- * @note Master Raster add to ecore_main_loop_begin the hard check to nested
- * main loops. Now have no time to remake our popup behavior, and add this
- * crutch. In further need to delete it.
- *
- * @ingroup Eflete
- */
-void
-eflete_main_loop_begin(void);
-
-/**
- * End nested main loop.
- *
- * @ingroup Eflete
- */
-void
-eflete_main_loop_quit(void);
 
 #define GET_IMAGE(IMG, PARENT, NAME) \
 { \

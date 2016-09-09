@@ -93,15 +93,15 @@ _lock_try(const char *path, Eina_Bool check, HANDLE *pro_fd)
    DWORD  dwCreationDisposition = OPEN_EXISTING;
    DWORD  dwFlagsAndAttributes = 0;
    HANDLE  hTemplateFile = NULL;
-   HANDLE fd = CreateFile(lpFileName, 
-                          dwDesiredAccess, 
-                          dwShareMode, 
-                          lpSecurityAttributes, 
+   HANDLE fd = CreateFile(lpFileName,
+                          dwDesiredAccess,
+                          dwShareMode,
+                          lpSecurityAttributes,
                           dwCreationDisposition,
                           dwFlagsAndAttributes,
                           hTemplateFile);
-	
-   if (fd == INVALID_HANDLE_VALUE) 
+
+   if (fd == INVALID_HANDLE_VALUE)
      {
         ERR("The file '%s' cannot be opened in mode read-write!", path);
         return !check;
@@ -293,7 +293,9 @@ _project_edj_file_copy(Project_Thread *ptd)
 
    src = eina_stringshare_ref(ptd->edj);
    dst = eina_stringshare_ref(ptd->project->saved_edj);
-   result = ecore_file_cp(src, dst);
+   result = eina_file_copy(src, dst,
+                           EINA_FILE_COPY_PERMISSION | EINA_FILE_COPY_XATTR,
+                           NULL, NULL);
 
    DBG("Copy the .edj file to project folder.");
    eina_stringshare_del(src);
@@ -370,6 +372,7 @@ _project_special_group_add(Project *project)
    Evas *e;
    Evas_Object *edje_edit_obj;
    Eina_List *list;
+   Eina_Bool ret;
 
    assert(project != NULL);
 
@@ -380,8 +383,11 @@ _project_special_group_add(Project *project)
    list = edje_file_collection_list(project->saved_edj);
    edje_edit_obj = edje_edit_object_add(e);
 
-   edje_object_file_set(edje_edit_obj, project->saved_edj, eina_list_data_get(list));
+   ret = edje_object_file_set(edje_edit_obj, project->saved_edj, eina_list_data_get(list));
+   assert(true == ret);
+   you_shall_not_pass_editor_signals(NULL);
    CRIT_ON_FAIL(editor_internal_group_add(edje_edit_obj));
+   you_shall_pass_editor_signals(NULL);
 
    edje_edit_string_list_free(list);
    evas_object_del(edje_edit_obj);
@@ -407,11 +413,13 @@ _project_dummy_sample_add(Project *project)
 
    edje_object_file_set(edje_edit_obj, project->saved_edj, EFLETE_INTERNAL_GROUP_NAME);
    snprintf(buf, sizeof(buf), "%s"EFLETE_DUMMY_SAMPLE_NAME, ap.path.sound_path);
-   edje_edit_sound_sample_add(edje_edit_obj, EFLETE_DUMMY_SAMPLE_NAME, buf);
-
    you_shall_not_pass_editor_signals(NULL);
-   CRIT_ON_FAIL(editor_save(edje_edit_obj));
+   if (editor_sound_sample_add(edje_edit_obj, EFLETE_DUMMY_SAMPLE_NAME, buf, false))
+     {
+        CRIT_ON_FAIL(editor_save(edje_edit_obj));
+     }
    you_shall_pass_editor_signals(NULL);
+
    evas_object_del(edje_edit_obj);
    ecore_evas_free(project->ecore_evas);
 
@@ -435,7 +443,9 @@ _project_dummy_image_add(Project *project)
 
    edje_object_file_set(edje_edit_obj, project->saved_edj, EFLETE_INTERNAL_GROUP_NAME);
    snprintf(buf, sizeof(buf), "%s"EFLETE_DUMMY_IMAGE_NAME, ap.path.image_path);
-   edje_edit_image_add(edje_edit_obj, buf);
+   you_shall_not_pass_editor_signals(NULL);
+   CRIT_ON_FAIL(editor_image_add(edje_edit_obj, buf, false));
+   you_shall_pass_editor_signals(NULL);
 
    evas_object_del(edje_edit_obj);
    ecore_evas_free(project->ecore_evas);
@@ -456,6 +466,9 @@ pm_project_import_edj(const char *name,
    assert(path != NULL);
    assert(edj != NULL);
 
+   char *spath = eina_file_path_sanitize(path);
+   char *sedj = eina_file_path_sanitize(edj);
+
    Project_Thread *ptd;
    ptd = mem_calloc(1, sizeof(Project_Thread));
    ptd->func_progress = func_progress;
@@ -463,11 +476,13 @@ pm_project_import_edj(const char *name,
    ptd->data = (void *)data;
    ptd->result = PM_PROJECT_LAST;
    ptd->name = eina_stringshare_add(name);
-   ptd->path = eina_stringshare_add(path);
-   ptd->edj = eina_stringshare_add(edj);
+   ptd->path = eina_stringshare_add(spath);
+   ptd->edj = eina_stringshare_add(sedj);
    ptd->widgets = list;
 
    _project_import_edj(ptd);
+   free(spath);
+   free(sedj);
 }
 
 
@@ -484,6 +499,9 @@ pm_project_import_edc(const char *name,
    assert(path != NULL);
    assert(edc != NULL);
 
+   char *spath = eina_file_path_sanitize(path);
+   char *sedc = eina_file_path_sanitize(edc);
+
    Project_Thread *ptd;
    ptd = mem_calloc(1, sizeof(Project_Thread));
    ptd->func_progress = func_progress;
@@ -491,11 +509,13 @@ pm_project_import_edc(const char *name,
    ptd->data = (void *)data;
    ptd->result = PM_PROJECT_LAST;
    ptd->name = eina_stringshare_add(name);
-   ptd->path = eina_stringshare_add(path);
-   ptd->edc = eina_stringshare_add(edc);
+   ptd->path = eina_stringshare_add(spath);
+   ptd->edc = eina_stringshare_add(sedc);
    ptd->build_options = eina_stringshare_add(import_options);
 
    _project_import_edc(ptd);
+   free(spath);
+   free(sedc);
 }
 
 Eina_Bool
@@ -514,9 +534,11 @@ pm_project_open(const char *path,
 {
    assert(path != NULL);
 
+   char *spath = eina_file_path_sanitize(path);
+
    Project_Thread *ptd;
    ptd = mem_calloc(1, sizeof(Project_Thread));
-   ptd->path = eina_stringshare_add(path);
+   ptd->path = eina_stringshare_add(spath);
    ptd->func_progress = func_progress;
    ptd->func_end = func_end;
    ptd->data = (void *)data;
@@ -526,6 +548,8 @@ pm_project_open(const char *path,
    ecore_thread_feedback_run(_project_open_feedback_job, _project_open_feedback_cb,
                              _project_open_end_cb, _project_open_cancel_cb, ptd,
                              true);
+
+   free(spath);
 }
 
 void
@@ -1133,7 +1157,7 @@ pm_project_group_import(Project *project, const char *edj, const char *group)
         evas_object_del(img);
         THREAD_CONTEXT_SWITCH_END;
 
-        CRIT_ON_FAIL(edje_edit_image_add(project->global_object, res_file));
+        CRIT_ON_FAIL(editor_image_add(ap.project->global_object, res_file, false));
         res = (External_Resource *)resource_add(data, RESOURCE_TYPE_IMAGE);
         res->source = eina_stringshare_add(data);
         resource_insert(&project->images, (Resource *)res);
@@ -1182,7 +1206,7 @@ pm_project_group_import(Project *project, const char *edj, const char *group)
         eina_binbuf_free(sound_bin);
 
         THREAD_CONTEXT_SWITCH_BEGIN;
-        CRIT_ON_FAIL(edje_edit_sound_sample_add(project->global_object, data, res_file));
+        CRIT_ON_FAIL(editor_sound_sample_add(project->global_object, data, res_file, false));
         THREAD_CONTEXT_SWITCH_END;
         res = (External_Resource *)resource_add(data, RESOURCE_TYPE_SOUND);
         res->source = eina_stringshare_add(res_file);
@@ -1267,11 +1291,11 @@ pm_project_group_import(Project *project, const char *edj, const char *group)
                                          &c1_r, &c1_g, &c1_b, &c1_a,
                                          &c2_r, &c2_g, &c2_b, &c2_a,
                                          &c3_r, &c3_g, &c3_b, &c3_a);
-        CRIT_ON_FAIL(edje_edit_color_class_add(project->global_object, data));
-        CRIT_ON_FAIL(edje_edit_color_class_colors_set(project->global_object, data,
-                                                      c1_r, c1_g, c1_b, c1_a,
-                                                      c2_r, c2_g, c2_b, c2_a,
-                                                      c3_r, c3_g, c3_b, c3_a));
+        CRIT_ON_FAIL(editor_color_class_add(project->global_object, data, false));
+        CRIT_ON_FAIL(editor_color_class_colors_set(project->global_object, data,
+                                                   c1_r, c1_g, c1_b, c1_a,
+                                                   c2_r, c2_g, c2_b, c2_a,
+                                                   c3_r, c3_g, c3_b, c3_a));
         THREAD_CONTEXT_SWITCH_END;
         res = (External_Resource *)resource_add(data, RESOURCE_TYPE_COLORCLASS);
         resource_insert(&project->colorclasses, (Resource *)res);
@@ -1291,7 +1315,7 @@ pm_project_group_import(Project *project, const char *edj, const char *group)
              TODO("implement resource replacing")
                 continue;
           }
-        edje_edit_style_add(project->global_object, data);
+        CRIT_ON_FAIL(editor_style_add(project->global_object, data, false));
         THREAD_CONTEXT_SWITCH_BEGIN;
         resources1 = edje_edit_style_tags_list_get(obj, data);
         THREAD_CONTEXT_SWITCH_END;
@@ -1299,8 +1323,8 @@ pm_project_group_import(Project *project, const char *edj, const char *group)
           {
              THREAD_CONTEXT_SWITCH_END;
              source = edje_edit_style_tag_value_get(obj, data, data1);
-             CRIT_ON_FAIL(edje_edit_style_tag_add(project->global_object, data, data1));
-             CRIT_ON_FAIL(edje_edit_style_tag_value_set(project->global_object, data, data1, source));
+             CRIT_ON_FAIL(editor_style_tag_add(project->global_object, data, data1));
+             CRIT_ON_FAIL(editor_style_tag_value_set(project->global_object, data, data1, source));
              eina_stringshare_del(source);
              THREAD_CONTEXT_SWITCH_END;
           }
@@ -1329,7 +1353,7 @@ pm_project_group_import(Project *project, const char *edj, const char *group)
 
    /* apply group to project */
    THREAD_CONTEXT_SWITCH_BEGIN;
-   CRIT_ON_FAIL(editor_group_add(project->global_object, group));
+   CRIT_ON_FAIL(editor_group_add(project->global_object, group, false));
    CRIT_ON_FAIL(editor_save_all(project->global_object));
    obj = edje_edit_object_add(e);
    edje_object_file_set(obj, project->dev, group);

@@ -59,18 +59,25 @@
 #pragma GCC poison edje_edit_group_data_name_set
 
 /* Color Classes API */
-//#pragma GCC poison edje_edit_color_class_add
-//#pragma GCC poison edje_edit_color_class_del
-//#pragma GCC poison edje_edit_color_class_colors_set
+#pragma GCC poison edje_edit_color_class_add
+#pragma GCC poison edje_edit_color_class_del
+#pragma GCC poison edje_edit_color_class_colors_set
 //#pragma GCC poison edje_edit_color_class_name_set
+#pragma GCC poison edje_edit_color_class_description_set
+
+/* Sound and Tone API */
+#pragma GCC poison edje_edit_sound_sample_add
+#pragma GCC poison edje_edit_sound_sample_del
+#pragma GCC poison edje_edit_sound_tone_add
+#pragma GCC poison edje_edit_sound_tone_del
 
 /* Text styles API */
-//#pragma GCC poison edje_edit_style_add
-//#pragma GCC poison edje_edit_style_del
-//#pragma GCC poison edje_edit_style_tag_value_set
+#pragma GCC poison edje_edit_style_add
+#pragma GCC poison edje_edit_style_del
+#pragma GCC poison edje_edit_style_tag_value_set
 //#pragma GCC poison edje_edit_style_tag_name_set
-//#pragma GCC poison edje_edit_style_tag_add
-//#pragma GCC poison edje_edit_style_tag_del
+#pragma GCC poison edje_edit_style_tag_add
+#pragma GCC poison edje_edit_style_tag_del
 
 /* Externals API */
 //#pragma GCC poison edje_edit_external_add
@@ -220,8 +227,8 @@
 //#pragma GCC poison edje_edit_font_del
 
 /* Images API */
-//#pragma GCC poison edje_edit_image_add
-//#pragma GCC poison edje_edit_image_del
+#pragma GCC poison edje_edit_image_add
+#pragma GCC poison edje_edit_image_del
 //#pragma GCC poison edje_edit_image_replace
 //#pragma GCC poison edje_edit_image_data_add
 #pragma GCC poison edje_edit_state_image_set

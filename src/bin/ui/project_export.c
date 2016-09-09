@@ -40,6 +40,15 @@ _export_develop_setup(void *data, Splash_Status status __UNUSED__)
    return true;
 }
 
+static void
+_after_export_dev_check(void *data)
+{
+   ap.splash = splash_add(ap.win, _export_develop_setup, _export_teardown, NULL, data);
+   evas_object_focus_set(ap.splash, true);
+   evas_object_show(ap.splash);
+   popup_fileselector_helper_dismiss();
+}
+
 static Eina_Bool
 _export_dev(void *data __UNUSED__,
             Evas_Object *obj, /* this is fileselector from popup */
@@ -55,8 +64,7 @@ _export_dev(void *data __UNUSED__,
      {
         buf = eina_strbuf_new();
         eina_strbuf_append_printf(buf, _("Please type in actual .edj file"));
-        popup_want_action(_("Export to develop edj-file"), eina_strbuf_string_get(buf),
-                          NULL, BTN_OK, NULL, NULL);
+        popup_add(_("Export to develop edj-file"), eina_strbuf_string_get(buf), BTN_OK, NULL, NULL);
         eina_strbuf_free(buf);
         return false;
      }
@@ -65,19 +73,14 @@ _export_dev(void *data __UNUSED__,
    eina_strbuf_append_printf(buf,
                              _("<font_size=16>A project file '%s' already exist."
                                "Do you want to replace it?</font_size>"), path);
-   if (obj && !exist_permission_check(elm_fileselector_path_get(obj),
-                               elm_fileselector_current_name_get(obj),
-                               _("Export to develop edj-file"),
-                               eina_strbuf_string_get(buf), EINA_TRUE))
-     return false;
+   exist_permission_check(elm_fileselector_path_get(obj),
+                          elm_fileselector_current_name_get(obj),
+                          _("Export to develop edj-file"),
+                          eina_strbuf_string_get(buf), EINA_TRUE,
+                          _after_export_dev_check, (void *)eina_stringshare_add(path));
    eina_strbuf_free(buf);
 
-   ap.splash = splash_add(ap.win, _export_develop_setup, _export_teardown,
-                           NULL, (void *)eina_stringshare_add(path));
-   evas_object_focus_set(ap.splash, true);
-   evas_object_show(ap.splash);
-
-   return true;
+   return false;
 }
 
 void
@@ -112,6 +115,16 @@ _export_release_setup(void *data, Splash_Status status __UNUSED__)
    return true;
 }
 
+static void
+_after_export_release_check(void *data)
+{
+   ap.splash = splash_add(ap.win, _export_release_setup, _export_teardown,
+                           NULL, data);
+   evas_object_focus_set(ap.splash, true);
+   evas_object_show(ap.splash);
+   popup_fileselector_helper_dismiss();
+}
+
 static Eina_Bool
 _export_release(void *data __UNUSED__,
                 Evas_Object *obj, /* this is fileselector from popup */
@@ -128,8 +141,7 @@ _export_release(void *data __UNUSED__,
      {
         buf = eina_strbuf_new();
         eina_strbuf_append_printf(buf, _("Please type in actual .edj file"));
-        popup_want_action(_("Export to develop edj-file"), eina_strbuf_string_get(buf),
-                          NULL, BTN_OK, NULL, NULL);
+        popup_add(_("Export to develop edj-file"), eina_strbuf_string_get(buf), BTN_OK, NULL, NULL);
         eina_strbuf_free(buf);
         return false;
      }
@@ -138,19 +150,14 @@ _export_release(void *data __UNUSED__,
    eina_strbuf_append_printf(buf,
                              _("<font_size=16>A project file '%s' already exist."
                                "Do you want to replace it?</font_size>"), path);
-   if (!exist_permission_check(elm_fileselector_path_get(obj),
-                               elm_fileselector_current_name_get(obj),
-                               _("Export to release edj-file"),
-                               eina_strbuf_string_get(buf), EINA_FALSE))
-     return false;
+   exist_permission_check(elm_fileselector_path_get(obj),
+                          elm_fileselector_current_name_get(obj),
+                          _("Export to release edj-file"),
+                          eina_strbuf_string_get(buf), EINA_FALSE,
+                          _after_export_release_check, (void *)eina_stringshare_add(path));
    eina_strbuf_free(buf);
 
-   ap.splash = splash_add(ap.win, _export_release_setup, _export_teardown,
-                           NULL, (void *)eina_stringshare_add(path));
-   evas_object_focus_set(ap.splash, true);
-   evas_object_show(ap.splash);
-
-   return true;
+   return false;
 }
 
 void
@@ -189,6 +196,15 @@ _export_source_code_setup(void *data, Splash_Status status __UNUSED__)
    return true;
 }
 
+static void
+_after_export_source_code_check(void *data)
+{
+   ap.splash = splash_add(ap.win, _export_source_code_setup, _export_teardown, NULL, data);
+   evas_object_focus_set(ap.splash, true);
+   evas_object_show(ap.splash);
+   popup_fileselector_helper_dismiss();
+}
+
 static Eina_Bool
 _export_source_code(void *data __UNUSED__,
                     Evas_Object *obj __UNUSED__, /* this is fileselector from popup */
@@ -212,18 +228,14 @@ _export_source_code(void *data __UNUSED__,
                                "Do you want to replace it?</font_size>"),
                              path,
                              folder);
-   if (!exist_permission_check(path,
-                               folder,
-                               _("Export to develop edj-file"),
-                               eina_strbuf_string_get(buf), EINA_FALSE))
-     return false;
+   exist_permission_check(path,
+                          folder,
+                          _("Export to develop edj-file"),
+                          eina_strbuf_string_get(buf), EINA_FALSE,
+                          _after_export_source_code_check, (void *)path);
    eina_strbuf_free(buf);
 
-   ap.splash = splash_add(ap.win, _export_source_code_setup, _export_teardown, NULL, (void *)path);
-   evas_object_focus_set(ap.splash, true);
-   evas_object_show(ap.splash);
-
-   return true;
+   return false;
 }
 
 void
@@ -256,6 +268,15 @@ _export_group_source_code_setup(void *data, Splash_Status status __UNUSED__)
    return true;
 }
 
+static void
+_after_group_source_check(void *data)
+{
+   ap.splash = splash_add(ap.win, _export_group_source_code_setup, _export_teardown, NULL, data);
+   evas_object_focus_set(ap.splash, true);
+   evas_object_show(ap.splash);
+   popup_fileselector_helper_dismiss();
+}
+
 static Eina_Bool
 _export_group_source_code(void *data __UNUSED__,
                           Evas_Object *obj __UNUSED__, /* this is fileselector from popup */
@@ -279,18 +300,14 @@ _export_group_source_code(void *data __UNUSED__,
                              _("<font_size=16>A project file '%s/%s' already exist."
                                "Do you want to replace it?</font_size>"),
                              path, name);
-   if (!exist_permission_check(path, name,
-                               _("Export group source code"),
-                               eina_strbuf_string_get(buf), EINA_FALSE))
-     return false;
+   exist_permission_check(path, name,
+                          _("Export group source code"),
+                          eina_strbuf_string_get(buf), EINA_FALSE, _after_group_source_check, path);
+
    eina_strbuf_free(buf);
    free(name);
 
-   ap.splash = splash_add(ap.win, _export_group_source_code_setup, _export_teardown, NULL, (void *)path);
-   evas_object_focus_set(ap.splash, true);
-   evas_object_show(ap.splash);
-
-   return true;
+   return false;
 }
 
 void

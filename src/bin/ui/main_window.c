@@ -57,6 +57,7 @@ _help(void *data __UNUSED__,
 Eina_Bool
 ui_main_window_del(void)
 {
+   ap.exit_in_progress = true;
    if (ap.project)
      if (!project_close())
        return false;
@@ -176,7 +177,7 @@ ui_main_window_add(void)
 
 #if !HAVE_TIZEN
 Evas_Object *
-_about_window_content_get(void *data, Evas_Object **to_focus __UNUSED__)
+_about_window_content_get(void *data, Evas_Object *popup __UNUSED__, Evas_Object **to_focus __UNUSED__)
 {
    Evas_Object *label = (Evas_Object *) data;
    elm_object_text_set(label,
@@ -213,14 +214,13 @@ Evas_Object *
 about_window_add(void)
 {
    Evas_Object *content = elm_label_add(ap.win);
-   popup_want_action(_("About"), NULL, _about_window_content_get, BTN_CANCEL, NULL, content);
-   evas_object_del(content);
+   popup_add(_("About"), NULL, BTN_CANCEL, _about_window_content_get, content);
    return NULL;
 }
 
 #else
 Evas_Object *
-_about_window_content_get(void *data, Evas_Object **to_focus __UNUSED__)
+_about_window_content_get(void *data, Evas_Object *popup __UNUSED__, Evas_Object **to_focus __UNUSED__)
 {
   Evas_Object *layout = (Evas_Object *)data;
   elm_layout_theme_set(layout, "layout", "about", "default");
@@ -234,14 +234,13 @@ Evas_Object *
 about_window_add(void)
 {
    Evas_Object *content = elm_layout_add(ap.win);
-   popup_want_action(_("About Component Designer"), NULL, _about_window_content_get, BTN_OK, NULL, content);
-   evas_object_del(content);
+   popup_add(_("About Component Designer"), NULL, BTN_OK, _about_window_content_get, content);
    return NULL;
 }
 
 #endif
 static Evas_Object *
-_shortcuts_window_content_get(void *data, Evas_Object **to_focus __UNUSED__)
+_shortcuts_window_content_get(void *data, Evas_Object *popup __UNUSED__, Evas_Object **to_focus __UNUSED__)
 {
    Evas_Object *box = data;
    Evas_Object *scroller = elm_scroller_add(ap.win);
@@ -306,7 +305,6 @@ shortcuts_window_add(void)
 
    evas_object_size_hint_min_set(content, 0, 300);
 
-   popup_want_action(_("Help: shortcuts"), NULL, _shortcuts_window_content_get, BTN_OK, NULL, content);
-   evas_object_del(content);
+   popup_add(_("Help: shortcuts"), NULL, BTN_OK, _shortcuts_window_content_get, content);
    return NULL;
 }

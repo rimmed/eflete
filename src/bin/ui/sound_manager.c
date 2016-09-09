@@ -210,6 +210,7 @@ _add_sample_done(void *data __UNUSED__,
                  void *event_info)
 {
    Sound_Data *snd;
+   Attribute attribute = ATTRIBUTE_PROGRAM_SAMPLE_NAME;
    Eina_Stringshare *sound_name;
    Eina_List *samples_list, *l;
    Eina_Bool exist = false;
@@ -265,7 +266,7 @@ _add_sample_done(void *data __UNUSED__,
         return true;
      }
 
-   edje_edit_sound_sample_add(ap.project->global_object, res->name, res->path);
+   CRIT_ON_FAIL(editor_sound_sample_add(ap.project->global_object, res->name, res->source, true));
 
    snd = (Sound_Data *)mem_malloc(sizeof(Sound_Data));
    snd->name = eina_stringshare_ref(res->name);
@@ -273,10 +274,7 @@ _add_sample_done(void *data __UNUSED__,
    snd->type = SOUND_TYPE_SAMPLE;
    snd->resource = (Resource *)res;
    elm_gengrid_item_insert_before(mng.gengrid, gic, snd, mng.tone_header, _grid_sel_cb, NULL);
-
-   CRIT_ON_FAIL(editor_save(ap.project->global_object));
-   TODO("Remove this line once edje_edit_sound_sample_add would be added into Editor Module and saving would work properly")
-   ap.project->changed = true;
+   evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
 
    return true;
 }
@@ -285,13 +283,14 @@ static void
 _tone_add(void)
 {
    Sound_Data *snd;
+   Attribute attribute = ATTRIBUTE_PROGRAM_TONE_NAME;
    Eina_Stringshare *tone_name;
    int frq;
    Tone_Resource *tone;
 
    tone_name = eina_stringshare_add(elm_entry_entry_get(mng.tone_entry));
    frq = atoi(elm_entry_entry_get(mng.frq_entry));
-   edje_edit_sound_tone_add(ap.project->global_object, tone_name, frq);
+   CRIT_ON_FAIL(editor_sound_tone_add(ap.project->global_object, tone_name, frq, true));
 
    tone = (Tone_Resource *)resource_add(tone_name, RESOURCE_TYPE_TONE);
    tone->freq = frq;
@@ -304,9 +303,7 @@ _tone_add(void)
    snd->resource = (Resource *)tone;
    elm_gengrid_item_append(mng.gengrid, gic, snd, _grid_sel_cb, NULL);
 
-   CRIT_ON_FAIL(editor_save(ap.project->global_object));
-   TODO("Remove this line once edje_edit_image_add would be added into Editor Module and saving would work properly")
-   ap.project->changed = true;
+   evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
 }
 
 static void
@@ -318,11 +315,15 @@ _sample_add_cb(void *data,
 }
 
 static void
-_validation(void *data __UNUSED__,
+_validation(void *data,
             Evas_Object *obj __UNUSED__,
             void *event_info __UNUSED__)
 {
+   Evas_Object *popup = data;
    Eina_Bool validate = EINA_FALSE;
+
+   assert(popup != NULL);
+
    if (resource_name_validator_status_get(mng.tone_validator) != ELM_REG_NOERROR)
      {
         validate = EINA_FALSE;
@@ -347,13 +348,13 @@ _validation(void *data __UNUSED__,
 
 
    if (!validate)
-       popup_buttons_disabled_set(BTN_OK, true);
+       popup_button_disabled_set(popup, BTN_OK, true);
    else
-       popup_buttons_disabled_set(BTN_OK, false);
+       popup_button_disabled_set(popup, BTN_OK, false);
 }
 
 Evas_Object *
-_add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
+_add_tone_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Object **to_focus)
 {
    Evas_Object *item, *box;
 
@@ -362,7 +363,7 @@ _add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    LAYOUT_PROP_ADD(box, _("Tone name:"), "popup", "1swallow")
    ENTRY_ADD(item, mng.tone_entry, true);
    eo_do(mng.tone_entry, eo_event_callback_add(ELM_ENTRY_EVENT_VALIDATE, resource_name_validator_helper, mng.tone_validator));
-   evas_object_smart_callback_add(mng.tone_entry, "changed", _validation, NULL);
+   evas_object_smart_callback_add(mng.tone_entry, "changed", _validation, popup);
    elm_object_part_text_set(mng.tone_entry, "guide", _("Type a new tone name"));
    elm_object_part_content_set(item, "elm.swallow.content", mng.tone_entry);
    /* need to manualy set not valid string for triggered validator */
@@ -372,7 +373,9 @@ _add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    LAYOUT_PROP_ADD(box, _("Frequency:"), "popup", "1swallow")
    ENTRY_ADD(item, mng.frq_entry, true);
    eo_do(mng.frq_entry, eo_event_callback_add(ELM_ENTRY_EVENT_VALIDATE, elm_validator_regexp_helper, mng.frq_validator));
-   evas_object_smart_callback_add(mng.frq_entry, "changed", _validation, NULL);
+   evas_object_smart_callback_add(mng.frq_entry, "changed", _validation, popup);
+   /* force validator trigger */
+   elm_entry_entry_set(mng.frq_entry, " ");
    elm_object_part_text_set(mng.frq_entry, "guide", _("Type a frequency (20 - 20000)"));
    elm_object_part_content_set(item, "elm.swallow.content", mng.frq_entry);
    /* need to manualy set not valid string for triggered validator */
@@ -381,9 +384,23 @@ _add_tone_content_get(void *data __UNUSED__, Evas_Object **to_focus)
    mng.box = box;
 
    if (to_focus) *to_focus = mng.tone_entry;
-   popup_buttons_disabled_set(BTN_OK, true);
 
    return box;
+}
+
+static void
+_tone_add_popup_close_cb(void *data __UNUSED__,
+                         Evas_Object *obj __UNUSED__,
+                         void *event_info)
+{
+   Popup_Button btn_res = (Popup_Button) event_info;
+
+   if (BTN_CANCEL != btn_res)
+     _tone_add();
+
+   resource_name_validator_free(mng.tone_validator);
+   elm_validator_regexp_free(mng.frq_validator);
+   evas_object_del(mng.box);
 }
 
 static void
@@ -391,23 +408,14 @@ _tone_add_cb(void *data __UNUSED__,
              Evas_Object *obj __UNUSED__,
              void *event_info __UNUSED__)
 {
-   Popup_Button btn_res;
-
+   Evas_Object *popup;
    mng.tone_validator = resource_name_validator_new(NAME_REGEX, NULL);
    resource_name_validator_list_set(mng.tone_validator, &ap.project->tones, true);
    mng.frq_validator = elm_validator_regexp_new(FREQUENCY_REGEX, NULL);
 
-   popup_buttons_disabled_set(BTN_OK, true);
-   btn_res = popup_want_action(_("Create a new layout"), NULL, _add_tone_content_get,
-                               BTN_OK|BTN_CANCEL,
-                               NULL, mng.tone_entry);
-   if (BTN_CANCEL == btn_res) goto close;
-   _tone_add();
-
-close:
-   resource_name_validator_free(mng.tone_validator);
-   elm_validator_regexp_free(mng.frq_validator);
-   evas_object_del(mng.box);
+   popup = popup_add(_("Create a new layout"), NULL, BTN_OK|BTN_CANCEL, _add_tone_content_get, mng.tone_entry);
+   popup_button_disabled_set(popup, BTN_OK, true);
+   evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _tone_add_popup_close_cb, NULL);
 }
 
 #undef INFO_ADD
@@ -435,6 +443,7 @@ _sound_del_cb(void *data __UNUSED__,
    Eina_List *list, *l, *l_next;
    External_Resource *res;
    Resource request;
+   Attribute attribute;
 
    list = (Eina_List *)elm_gengrid_selected_items_get(mng.gengrid);
    EINA_LIST_FOREACH_SAFE(list, l, l_next, grid_it)
@@ -444,33 +453,32 @@ _sound_del_cb(void *data __UNUSED__,
         switch (snd->type)
           {
            case SOUND_TYPE_SAMPLE:
+              attribute = ATTRIBUTE_PROGRAM_SAMPLE_NAME;
               request.name = snd->name;
               request.resource_type = RESOURCE_TYPE_SOUND;
               res = (External_Resource *)resource_get(ap.project->sounds, &request);
               if (res->used_in) ERR("Unable to delete sample '%s'", res->name);
-              edje_edit_sound_sample_del(ap.project->global_object, snd->name);
+              CRIT_ON_FAIL(editor_sound_sample_del(ap.project->global_object, snd->name, true));
               ecore_file_unlink(res->path);
               resource_remove(&ap.project->sounds, (Resource *)res);
               elm_object_item_del(grid_it);
               break;
            case SOUND_TYPE_TONE:
+              attribute = ATTRIBUTE_PROGRAM_TONE_NAME;
               request.name = snd->name;
               request.resource_type = RESOURCE_TYPE_TONE;
               res = (External_Resource *)resource_get(ap.project->tones, &request);
               if (res->used_in) ERR("Unable to delete tone '%s'", res->name);
-              edje_edit_sound_tone_del(ap.project->global_object, snd->name);
+              CRIT_ON_FAIL(editor_sound_tone_del(ap.project->global_object, snd->name, true));
               resource_remove(&ap.project->tones, (Resource *)res);
               elm_object_item_del(grid_it);
               break;
           }
      }
 
-   CRIT_ON_FAIL(editor_save(ap.project->global_object));
-   TODO("Remove this line once edje_edit_sound_..._del would be added into Editor Modulei and saving would work properly")
-   ap.project->changed = true;
-
    elm_object_disabled_set(mng.btn_del, true);
    evas_object_smart_callback_call(ap.win, SIGNAL_SOUND_UNSELECTED, NULL);
+   evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
 }
 
 ITEM_SEARCH_FUNC(gengrid, ELM_GENGRID_ITEM_SCROLLTO_MIDDLE, "elm.text")
