@@ -125,4 +125,85 @@ _resource_callbacks_register(Project *project);
 void
 _resource_callbacks_unregister(Project *project);
 
+/* RESOURCES DELETION AND FREE */
+
+void
+_resource_state_free(Part2 *part, State2 *state);
+
+void
+_resource_state_del(Part2 *part, State2 *state, Change *change);
+
+void
+_resource_part_item_free(Part2 *part, Part_Item2 *item);
+
+void
+_resource_part_item_del(Part2 *part, Part_Item2 *item);
+
+void
+_resource_part_free(Group2 *group, Part2 *part);
+
+void
+_resource_part_del(Group2 *group, Part2 *part, Change *change);
+
+void
+_resource_program_free(Group2 *group, Program2 *program);
+
+void
+_resource_program_del(Group2 *group, Program2 *program);
+
+void
+_resource_group_data_free(Group2 *group, Group_Data2 *data);
+
+void
+_resource_group_data_del(Group2 *group, Group_Data2 *data);
+
+void
+_resource_group_free(Project *pro, Group2 *group);
+
+void
+_resource_group_del(Project *pro, Group2 *group);
+
+/* TOP LEVEL RESOURCES DELETION AND FREE */
+
+void
+_resource_image_free(Project *pro, Image2 *res);
+
+void
+_resource_image_del(Project *pro, Image2 *res_image);
+
+void
+_resource_tone_free(Project *pro, Tone2 *res);
+
+void
+_resource_tone_del(Project *pro, Tone2 *res_tone);
+
+void
+_resource_sound_free(Project *pro, Sound2 *res);
+
+void
+_resource_sound_del(Project *pro, Sound2 *res_sound);
+
+void
+_resource_colorclass_free(Project *pro, Colorclass2 *res);
+
+void
+_resource_colorclass_del(Project *pro, Colorclass2 *res_colorclass);
+
+void
+_resource_style_free(Project *pro, Style2 *res);
+
+void
+_resource_style_del(Project *pro, Style2 *res_style);
+
+/***** NOT IMPLEMENTED YET BUT NEED FREEING ***********/
+
+void
+_resource_image_set_free(Project *pro, Image_Set2 *res);
+
+void
+_resource_font_free(Project *pro, Font2 *res);
+
+void
+_resource_data_free(Project *pro, Global_Data2 *res);
+
 #endif /* RESOURCE_MANAGER_PRIVATE_H */

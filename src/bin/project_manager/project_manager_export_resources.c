@@ -37,7 +37,7 @@ _resources_export_feedback_cb(void *data __UNUSED__,
 }
 
 void
-_resources_export_cancel_cb(void *data __UNUSED__, Ecore_Thread *th __UNUSED__)
+_resources_export_cancel_cb(void *data, Ecore_Thread *th __UNUSED__)
 {
    Feedback_Thread_Data *ftd = (Feedback_Thread_Data *)data;
    Project_Thread *ptd = ecore_thread_global_data_find("ptd");
@@ -50,7 +50,7 @@ _resources_export_cancel_cb(void *data __UNUSED__, Ecore_Thread *th __UNUSED__)
 }
 
 void
-_resources_export_end_cb(void *data __UNUSED__, Ecore_Thread *th __UNUSED__)
+_resources_export_end_cb(void *data, Ecore_Thread *th __UNUSED__)
 {
    Feedback_Thread_Data *ftd = (Feedback_Thread_Data *)data;
 
@@ -164,7 +164,6 @@ _image_resources_feedback_job(void *data, Ecore_Thread *th)
    ids->dev = project->dev;
    ids->edit_object = project->global_object;
    eina_lock_new(&ids->mutex);
-   eina_lock_take(&ids->mutex);
 
    Image_Data_Get *idg = mem_calloc(1, sizeof(Image_Data_Get));
    idg->edit_object = project->global_object;
@@ -209,6 +208,7 @@ _image_resources_feedback_job(void *data, Ecore_Thread *th)
                   WARN("Image %s coudn't be exported", image_name);
                   continue;
                }
+             eina_lock_take(&ids->mutex);
              ids->id = id;
              ids->im = NULL;
              ids->source = res->path;
@@ -216,7 +216,6 @@ _image_resources_feedback_job(void *data, Ecore_Thread *th)
              ecore_main_loop_thread_safe_call_sync(_image_save_routine, ids);
           }
      }
-   eina_lock_release(&ids->mutex);
    eina_lock_free(&ids->mutex);
    free(ids);
 

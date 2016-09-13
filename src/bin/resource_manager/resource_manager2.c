@@ -94,103 +94,76 @@ resource_manager_init(Project *project)
    return false;
 }
 
-void
-_resource_free(Resource2 *res)
-{
-   eina_stringshare_del(res->common.name);
-   eina_list_free(res->common.used_in);
-   eina_list_free(res->common.uses___);
-   free(res);
-}
-
-void
-_resource_part_free(Part2 *res)
-{
-   Part_Item2 *part_res;
-   State2 *state;
-   EINA_LIST_FREE(res->states, state)
-     {
-        eina_stringshare_del(state->normal);
-        eina_list_free(state->tweens);
-        _resource_free((Resource2 *)state);
-     }
-   EINA_LIST_FREE(res->items, part_res)
-     {
-        if (part_res->source)
-          eina_stringshare_del(part_res->source);
-        _resource_free((Resource2 *)part_res);
-     }
-   _resource_free((Resource2 *)res);
-}
-
-void
-_resource_group_free(Group2 *res)
-{
-   Part2 *part;
-   Program2 *program;
-   Group_Data2 *group_data;
-
-   EINA_LIST_FREE(res->parts, part)
-      _resource_part_free(part);
-
-   EINA_LIST_FREE(res->programs, program)
-     {
-        eina_list_free(program->targets);
-        eina_list_free(program->afters);
-        _resource_free((Resource2 *)program);
-     }
-   EINA_LIST_FREE(res->data_items, group_data)
-     {
-        eina_stringshare_del(group_data->source);
-        _resource_free((Resource2 *)group_data);
-     }
-   _resource_free((Resource2 *)res);
-}
-
 Eina_Bool
 resource_manager_shutdown(Project *pro)
 {
-   Resource2 *res;
+   Image_Set2 *res_image_set;
    Image2 *res_image;
    Sound2 *res_sound;
    Font2 *res_font;
+   Tone2 *res_tone;
    Global_Data2 *res_data;
+   Style2 *res_style;
+   Colorclass2 *res_colorclass;
+
+   State2 *state;
+   Part_Item2 *item;
+   Part2 *part;
+   Program2 *program;
+   Group_Data2 *data;
 
    Group2 *group;
 
    /* image_set */
-   EINA_LIST_FREE(pro->RM.image_sets, res)
-     _resource_free(res);
-   EINA_LIST_FREE(pro->RM.tones, res)
-     _resource_free(res);
-   EINA_LIST_FREE(pro->RM.colorclasses, res)
-     _resource_free(res);
-   EINA_LIST_FREE(pro->RM.styles, res)
-     _resource_free(res);
-
+   EINA_LIST_FREE(pro->RM.image_sets, res_image_set)
+     _resource_image_set_free(pro, res_image_set);
    EINA_LIST_FREE(pro->RM.images, res_image)
-     {
-        eina_stringshare_del(res_image->source);
-        _resource_free((Resource2 *)res_image);
-     }
+     _resource_image_free(pro, res_image);
+
+   EINA_LIST_FREE(pro->RM.tones, res_tone)
+     _resource_tone_free(pro, res_tone);
    EINA_LIST_FREE(pro->RM.sounds, res_sound)
-     {
-        eina_stringshare_del(res_sound->source);
-        _resource_free((Resource2 *)res_sound);
-     }
+     _resource_sound_free(pro, res_sound);
+
+   EINA_LIST_FREE(pro->RM.colorclasses, res_colorclass)
+     _resource_colorclass_free(pro, res_colorclass);
+   EINA_LIST_FREE(pro->RM.styles, res_style)
+     _resource_style_free(pro, res_style);
+
    EINA_LIST_FREE(pro->RM.fonts, res_font)
-     {
-        eina_stringshare_del(res_font->source);
-        _resource_free((Resource2 *)res_font);
-     }
+      _resource_font_free(pro, res_font);
    EINA_LIST_FREE(pro->RM.global_data, res_data)
-     {
-        eina_stringshare_del(res_data->source);
-        _resource_free((Resource2 *)res_data);
-     }
+      _resource_data_free(pro, res_data);
 
    EINA_LIST_FREE(pro->RM.groups, group)
-      _resource_group_free(group);
+     {
+        /* free parts */
+        EINA_LIST_FREE(group->parts, part)
+          {
+             /* free states */
+             EINA_LIST_FREE(part->states, state)
+               {
+                  _resource_state_free(part, state);
+               }
+             /* free part items */
+             EINA_LIST_FREE(part->items, item)
+               {
+                  _resource_part_item_free(part, item);
+               }
+             _resource_part_free(group, part);
+          }
+        /* free programs */
+        EINA_LIST_FREE(group->programs, program)
+          {
+             _resource_program_free(group, program);
+          }
+        /* free group data*/
+        EINA_LIST_FREE(group->data_items, data)
+          {
+             _resource_group_data_free(group, data);
+          }
+        _resource_group_free(pro, group);
+     }
 
    _resource_callbacks_unregister(pro);
 

@@ -4,7 +4,7 @@ LOCALE_DIR = @LOCALE_DIR@
 
 bin_PROGRAMS = eflete
 
-includesub_HEADERS = \
+EXTRA_DIST = \
 	eflete.h \
 	alloc/alloc.h \
 	common/common_macro.h \
@@ -57,7 +57,6 @@ includesub_HEADERS = \
 	ui/workspace/demo_group.h \
 	ui/workspace/group_navigator.h \
 	ui/workspace/workspace.h
-includesubdir = $(pkgincludedir)-@VMAJ@
 
 noinst_LIBRARIES = libete.a
 libete_a_SOURCES = \
@@ -78,6 +77,7 @@ libete_a_SOURCES = \
 ../../src/bin/resource_manager/resource_manager_load.c \
 ../../src/bin/resource_manager/resource_manager_build.c \
 ../../src/bin/resource_manager/resource_manager_react.c \
+../../src/bin/resource_manager/resource_manager_free.c \
 ../../src/bin/logger/logger.c \
 ../../src/bin/config/config.c \
 ../../src/bin/external/syntax_color.c \

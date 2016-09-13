@@ -29,13 +29,11 @@ Ewe.h
 includesdir = $(pkgincludedir)-@VMAJ@
 
 includesub_HEADERS = \
-../logger/logger.h \
 ewe_main.h \
 ewe_ruler.h \
 ewe_ruler_legacy.h \
 ewe_ruler_eo.h \
-ewe_ruler_common.h \
-ewe_widget_ruler.h
+ewe_ruler_common.h
 
 includesubdir = $(pkgincludedir)-@VMAJ@
 
@@ -51,4 +49,6 @@ BUILT_SOURCES = \
 ewe_ruler.eo.c \
 ewe_ruler.eo.h
 
-EXTRA_DIST = ewe_ruler.eo
+EXTRA_DIST = ewe_ruler.eo \
+../logger/logger.h \
+ewe_widget_ruler.h

@@ -208,7 +208,7 @@ _sound_resources_load(Project *project)
 }
 
 Eina_Bool
-_font_resources_load(Project *project __UNUSED__)
+_font_resources_load(Project *project)
 {
    Font2 *res;
    Eina_List *fonts;
@@ -232,14 +232,14 @@ _font_resources_load(Project *project __UNUSED__)
    ef = eet_open(project->dev, EET_FILE_MODE_READ);
    if (eina_list_count(fonts) == 0)
      {
-        res = false;
+        res = NULL;
         goto cleanup;
      }
 
    if (!ecore_file_mkpath(resource_folder))
      {
         ERR("Failed create path %s for export fonts", resource_folder);
-        res = false;
+        res = NULL;
         goto cleanup;
      }
 
@@ -552,7 +552,7 @@ _gm_group_data_add(Project *pro, Group2 *group, Eina_Stringshare *group_data_nam
    assert(group_data_name != NULL);
    assert(group != NULL);
 
-   group_data = mem_calloc(1, sizeof(Program2));
+   group_data = mem_calloc(1, sizeof(Group_Data2));
    group_data->common.type = RESOURCE2_TYPE_DATA_GROUP;
    group_data->common.name = eina_stringshare_add(group_data_name);
    group_data->source = edje_edit_group_data_value_get(group->edit_object,
@@ -575,6 +575,7 @@ _program_load(Group2 *group, Eina_Stringshare *program_name)
    program->common.name = eina_stringshare_add(program_name);
    program->type = edje_edit_program_action_get(group->edit_object,
                                                 program_name);
+   program->group = group;
 
    targets = edje_edit_program_targets_get(group->edit_object, program->common.name);
    EINA_LIST_FOREACH(targets, l2, name)

@@ -226,93 +226,163 @@ _property_attribute_changed(void *data __UNUSED__,
 }
 
 static void
-_colorclass_added(void *data __UNUSED__,
+_colorclass_added(void *data,
                   Evas_Object *obj __UNUSED__,
                   void *ei)
 {
+   Colorclass2 *res;
    const char *name = (const char *)ei;
-   printf("Colorclass added [%s] \n", name);
+   Project *project = (Project *)data;
+
+   res = mem_calloc(1, sizeof(Colorclass2));
+   res->common.type = RESOURCE2_TYPE_COLORCLASS;
+   res->common.name = eina_stringshare_add(name);
+   project->RM.colorclasses = eina_list_append(project->RM.colorclasses, res);
 }
 
 static void
-_colorclass_deleted(void *data __UNUSED__,
+_colorclass_deleted(void *data,
                     Evas_Object *obj __UNUSED__,
                     void *ei)
 {
    const char *name = (const char *)ei;
-   printf("Colorclass deleted [%s] \n", name);
+   Project *pro = (Project *)data;
+   Colorclass2 *res_colorclass;
+
+   res_colorclass = (Colorclass2 *)resource_manager_find(pro->RM.colorclasses,
+                                                         name);
+   _resource_colorclass_del(pro, res_colorclass);
 }
 
 static void
-_sound_added(void *data __UNUSED__,
+_sound_added(void *data,
              Evas_Object *obj __UNUSED__,
              void *ei)
 {
+   Sound2 *res;
+   Eina_Stringshare *resource_folder, *sound_file;
    const char *name = (const char *)ei;
-   printf("Sound added [%s] \n", name);
+   Project *project = (Project *)data;
+
+   sound_file = edje_edit_sound_samplesource_get(project->global_object, name);
+   resource_folder = eina_stringshare_printf("%s/sounds", project->develop_path);
+
+   res = mem_calloc(1, sizeof(Sound2));
+   res->common.type = RESOURCE2_TYPE_SAMPLE;
+   res->common.name = eina_stringshare_add(name);
+   res->source = eina_stringshare_printf("%s/%s", resource_folder, sound_file);
+
+   project->RM.sounds = eina_list_append(project->RM.sounds, res);
+   edje_edit_string_free(sound_file);
 }
 
 static void
-_sound_deleted(void *data __UNUSED__,
+_sound_deleted(void *data,
                Evas_Object *obj __UNUSED__,
                void *ei)
 {
    const char *name = (const char *)ei;
-   printf("Sound deleted [%s] \n", name);
+   Project *pro = (Project *)data;
+   Sound2 *res_sound;
+
+   res_sound = (Sound2 *)resource_manager_find(pro->RM.sounds, name);
+   _resource_sound_del(pro, res_sound);
 }
 
 static void
-_tone_added(void *data __UNUSED__,
+_tone_added(void *data,
             Evas_Object *obj __UNUSED__,
             void *ei)
 {
+   Tone2 *res;
    const char *name = (const char *)ei;
-   printf("Tone added [%s] \n", name);
+   Project *project = (Project *)data;
+
+   res = mem_calloc(1, sizeof(Tone2));
+   res->common.type = RESOURCE2_TYPE_TONE;
+   res->common.name = eina_stringshare_add(name);
+   res->freq = edje_edit_sound_tone_frequency_get(project->global_object, name);
+   project->RM.tones = eina_list_append(project->RM.tones, res);
 }
 
 static void
-_tone_deleted(void *data __UNUSED__,
+_tone_deleted(void *data,
                Evas_Object *obj __UNUSED__,
                void *ei)
 {
    const char *name = (const char *)ei;
-   printf("Tone deleted [%s] \n", name);
+   Project *pro = (Project *)data;
+   Tone2 *res_tone;
+
+   res_tone = (Tone2 *)resource_manager_find(pro->RM.tones, name);
+   _resource_tone_del(pro, res_tone);
 }
 
 static void
-_image_added(void *data __UNUSED__,
+_image_added(void *data,
              Evas_Object *obj __UNUSED__,
              void *ei)
 {
+   Image2 *res;
    const char *name = (const char *)ei;
-   printf("We got new image [%s] \n", name);
+   Project *project = (Project *)data;
+   Eina_Stringshare *resource_folder;
+
+   resource_folder = eina_stringshare_printf("%s/images", project->develop_path);
+
+   res = mem_calloc(1, sizeof(Image2));
+   res->common.type = RESOURCE2_TYPE_IMAGE;
+   res->common.name = eina_stringshare_add(name);
+   res->comp_type = edje_edit_image_compression_type_get(project->global_object,
+                                                         res->common.name);
+   if (res->comp_type == EDJE_EDIT_IMAGE_COMP_USER)
+     res->source = eina_stringshare_add(name);
+   else
+     res->source = eina_stringshare_printf("%s/%s", resource_folder, name);
+
+   project->RM.images = eina_list_append(project->RM.images, res);
+   eina_stringshare_del(resource_folder);
 }
 
 static void
-image_deleted(void *data __UNUSED__,
+image_deleted(void *data,
               Evas_Object *obj __UNUSED__,
               void *ei)
 {
    const char *name = (const char *)ei;
-   printf("And old image was deleted [%s] \n", name);
+   Project *pro = (Project *)data;
+   Image2 *res_image;
+
+   res_image = (Image2 *)resource_manager_find(pro->RM.images, name);
+   _resource_image_del(pro, res_image);
 }
 
 static void
-_style_added(void *data __UNUSED__,
+_style_added(void *data,
              Evas_Object *obj __UNUSED__,
-             void *ei __UNUSED__)
+             void *ei)
 {
+   Style2 *res;
    const char *name = (const char *)ei;
-   printf("style added [%s] \n", name);
+   Project *project = (Project *)data;
+
+   res = mem_calloc(1, sizeof(Style2));
+   res->common.type = RESOURCE2_TYPE_STYLE;
+   res->common.name = eina_stringshare_add(name);
+   project->RM.styles = eina_list_append(project->RM.styles, res);
 }
 
 static void
-_style_deleted(void *data __UNUSED__,
+_style_deleted(void *data,
                Evas_Object *obj __UNUSED__,
-               void *ei __UNUSED__)
+               void *ei)
 {
    const char *name = (const char *)ei;
-   printf("style deleted [%s] \n", name);
+   Project *pro = (Project *)data;
+   Style2 *res_style;
+
+   res_style = (Style2 *)resource_manager_find(pro->RM.styles, name);
+   _resource_style_del(pro, res_style);
 }
 
 static void
@@ -347,7 +417,7 @@ _group_data_renamed(void *data,
    group_data->common.name = eina_stringshare_add(ren->new_name);
 }
 static void
-_editor_part_added_cb(void *data __UNUSED__,
+_editor_part_added_cb(void *data,
                       Evas_Object *obj __UNUSED__,
                       void *event_info)
 {
@@ -364,46 +434,12 @@ _editor_part_deleted_cb(void *data,
                         Evas_Object *obj __UNUSED__,
                         void *event_info)
 {
-   State2 *state;
-   Part2 *part;
-   Part_Item2 *item;
-   Eina_Stringshare *part_name = event_info;
+   const Editor_Part *editor_part = event_info;
    Project *pro = (Project *)data;
-
    Group2 *group = _get_current_group2(pro);
-   part = (Part2 *)resource_manager_find(group->parts, part_name);
+   Part2 *part = (Part2 *)resource_manager_find(group->parts, editor_part->part_name);
 
-   TODO("Apply more complex work (with warning and error maybe?) with parts which are used by other resources later")
-   /* step by step */
-   /* 1. remove part from all "used_in" and "uses___" and cleanup */
-   _resource_usage_dependency_cleanup((Resource2 *)part);
-   eina_stringshare_del(part->common.name);
-   EINA_LIST_FREE(part->states, state)
-     {
-        /* 2.1. remove each state from all "used_in" and "uses___" and cleanup */
-        _resource_usage_dependency_cleanup((Resource2 *)state);
-        /* 2.2. cleanup list of tweens */
-        eina_list_free(state->tweens);
-        /* 2.3. free state */
-        eina_stringshare_del(state->common.name);
-        eina_stringshare_del(state->normal);
-        free(state);
-     }
-   EINA_LIST_FREE(part->items, item)
-     {
-        /* 3.1. remove each item from all "used_in" and "uses___" and cleanup */
-        _resource_usage_dependency_cleanup((Resource2 *)item);
-        /* 3.2. free item */
-        eina_stringshare_del(item->common.name);
-        free(item);
-     }
-   /* 4. cleanup items and state list */
-   eina_list_free(part->states);
-   eina_list_free(part->items);
-   /* 5. remove part from group->parts */
-   group->parts = eina_list_remove(group->parts, part);
-   /* 6. free part */
-   free(part);
+   _resource_part_del(group, part, editor_part->change);
 }
 
 static void
@@ -414,8 +450,8 @@ _editor_program_added_cb(void *data,
    Eina_Stringshare *program_name = event_info;
    Project *pro = (Project *)data;
    Group2 *group = _get_current_group2(pro);
-
    Program2 *program = _program_load(group, program_name);
+
    _program_dependency_load(pro, group, program);
 }
 
@@ -429,15 +465,7 @@ _editor_program_deleted_cb(void *data,
    Group2 *group = _get_current_group2(pro);
    Program2 *program = (Program2 *)resource_manager_find(group->programs, program_name);
 
-   /* 1.1. remove each program from all "used_in" and "uses___" and cleanup */
-   _resource_usage_dependency_cleanup((Resource2 *)program);
-   /* 1.2. cleanup list of tweens */
-   eina_list_free(program->afters);
-   eina_list_free(program->targets);
-   /* 1.3. free state */
-   free(program);
-
-   group->programs = eina_list_remove(group->programs, program);
+   _resource_program_del(group, program);
 }
 
 static void
@@ -462,11 +490,7 @@ _editor_group_data_deleted_cb(void *data,
    Group2 *group = _get_current_group2(pro);
    Group_Data2 *group_data = (Group_Data2 *)resource_manager_find(group->data_items, group_data_name);
 
-   eina_stringshare_del(group_data->common.name);
-   eina_stringshare_del(group_data->source);
-
-   group->data_items = eina_list_remove(group->data_items, group_data);
-   free(group_data);
+   _resource_group_data_del(group, group_data);
 }
 
 static void
@@ -498,14 +522,9 @@ _editor_part_item_deleted_cb(void *data,
    Project *pro = (Project *)data;
    Group2 *group = _get_current_group2(pro);
    Part2 *part = (Part2 *)resource_manager_find(group->parts, editor_item->part_name);
-   Resource2 *part_item = resource_manager_find(part->items, editor_item->item_name);
+   Part_Item2 *item = (Part_Item2 *)resource_manager_find(part->items, editor_item->item_name);
 
-   /* 3.1. remove each item from all "used_in" and "uses___" and cleanup */
-   _resource_usage_dependency_cleanup(part_item);
-   /* 3.2. free item */
-   free(part_item);
-
-   part->items = eina_list_remove(part->items, part_item);
+   _resource_part_item_del(part, item);
 }
 
 static void
@@ -531,21 +550,11 @@ _editor_state_deleted_cb(void *data,
 {
    const Editor_State *editor_state = event_info;
    Project *pro = (Project *)data;
-   Part2 *part;
-   State2 *state;
    Group2 *group = _get_current_group2(pro);
+   Part2 *part = (Part2 *)resource_manager_find(group->parts, editor_state->part_name);
+   State2 *state = (State2 *)resource_manager_v_find(part->states, editor_state->state_name, editor_state->state_value);
 
-   part = (Part2 *)resource_manager_find(group->parts, editor_state->part_name);
-   state = (State2 *)resource_manager_v_find(part->states, editor_state->state_name, editor_state->state_value);
-
-   /* 2.1. remove each state from all "used_in" and "uses___" and cleanup */
-   _resource_usage_dependency_cleanup((Resource2 *)state);
-   /* 2.2. cleanup list of tweens */
-   eina_list_free(state->tweens);
-   /* 2.3. free state */
-   free(state);
-
-   part->states = eina_list_remove(part->states, state);
+   _resource_state_del(part, state, editor_state->change);
 }
 
 static void
@@ -620,8 +629,11 @@ _editor_group_del_cb(void *data __UNUSED__,
                      Evas_Object *obj __UNUSED__,
                      void *event_info)
 {
-   Eina_Stringshare *group_name = (Eina_Stringshare *)event_info;
-   printf("ugh [%s] \n", group_name);
+   Eina_Stringshare *group_name = event_info;
+   Project *pro = (Project *)data;
+   Group2 *group = (Group2 *)resource_manager_find(pro->RM.groups, group_name);
+
+   _resource_group_del(pro, group);
 }
 
 /* INITIAL FUNCTIONS */

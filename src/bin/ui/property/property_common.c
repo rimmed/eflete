@@ -168,6 +168,10 @@ _start_change_stop_cb(void *data,
                       Evas_Object *obj,
                       void *event_info __UNUSED__)
 {
+#ifdef HAVE_TIZEN
+   Eina_Bool by_api = evas_object_data_get(obj, "by_api");
+   if (by_api) return;
+#endif
    PROPERTY_DATA_GET(obj);
    Property_Attribute *pa = data;
 
@@ -274,7 +278,7 @@ _combobox_cc_item_del(void *data,
 }
 
 static void
-_combobox_item_pressed_cb(void *data __UNUSED__, Evas_Object *obj,
+_combobox_item_pressed_cb(void *data, Evas_Object *obj,
                           void *event_info)
 {
    Combobox_Item *item_obj, *item = elm_object_item_data_get(event_info);
