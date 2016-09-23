@@ -19,7 +19,7 @@
 
 #include "resource_manager2.h"
 #include "resource_manager_private.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "string_common.h"
 
 Eina_Bool
@@ -40,7 +40,7 @@ _global_data_resources_load(Project *project)
         res->common.type = RESOURCE2_TYPE_DATA_GLOBAL;
         res->common.name = eina_stringshare_add(key);
         res->source = edje_edit_data_value_get(project->global_object, key);
-        project->global_data = eina_list_append(project->global_data, res);
+        project->RM.global_data = eina_list_append(project->RM.global_data, res);
      }
 
    edje_edit_string_list_free(data);
@@ -85,27 +85,13 @@ _image_resources_load(Project *project)
    Image2 *res;
    Eina_List *images;
    Eina_Stringshare *resource_folder;
-   Eina_Stringshare *image_name, *source_file;
+   Eina_Stringshare *image_name;
    Eina_List *l;
-   Evas *e;
-   Evas_Object *im;
-   char *file_dir;
 
    assert(project != NULL);
 
    resource_folder = eina_stringshare_printf("%s/images", project->develop_path);
-   ecore_file_recursive_rm(resource_folder);
-
-   if (!ecore_file_mkpath(resource_folder))
-     {
-        ERR("Failed create path %s for export images", resource_folder);
-        eina_stringshare_del(resource_folder);
-        return false;
-     }
-
    images = edje_edit_images_list_get(project->global_object);
-
-   e = ecore_evas_get(project->ecore_evas);
    EINA_LIST_FOREACH(images, l, image_name)
      {
         /* for supporting old themes, which were compilled
@@ -117,27 +103,15 @@ _image_resources_load(Project *project)
         res->common.name = eina_stringshare_add(image_name);
         res->comp_type = edje_edit_image_compression_type_get(project->global_object,
                                                               res->common.name);
+        res->common.id = edje_edit_image_id_get(project->global_object, image_name);
+        res->is_used = false;
+
         if (res->comp_type == EDJE_EDIT_IMAGE_COMP_USER)
           res->source = eina_stringshare_add(image_name);
         else
           res->source = eina_stringshare_printf("%s/%s", resource_folder, image_name);
 
         project->RM.images = eina_list_append(project->RM.images, res);
-
-        if (!ecore_file_exists(res->source))
-          {
-             file_dir = ecore_file_dir_get(res->source);
-             ecore_file_mkpath(file_dir);
-             free(file_dir);
-             im = evas_object_image_add(e);
-             res->common.id = edje_edit_image_id_get(project->global_object, image_name);
-             res->is_used = false;
-             source_file = eina_stringshare_printf("edje/images/%i", res->common.id);
-             evas_object_image_file_set(im, project->dev, source_file);
-             evas_object_image_save(im, res->source, NULL, NULL);
-             evas_object_del(im);
-             eina_stringshare_del(source_file);
-          }
      }
 
    edje_edit_string_list_free(images);
@@ -153,25 +127,17 @@ _sound_resources_load(Project *project)
    Eina_Stringshare *resource_folder;
    Eina_Stringshare *sound_name, *sound_file;
    Eina_List *l;
-   Eina_Binbuf *sound_bin;
-   FILE *f;
-   char *file_dir;
 
    assert(project != NULL);
 
    resource_folder = eina_stringshare_printf("%s/sounds", project->develop_path);
-   ecore_file_recursive_rm(resource_folder);
-
-   if (!ecore_file_mkpath(resource_folder))
-     {
-        ERR("Failed create path %s for export sounds", resource_folder);
-        eina_stringshare_del(resource_folder);
-        return false;
-     }
 
    sounds = edje_edit_sound_samples_list_get(project->global_object);
    EINA_LIST_FOREACH(sounds, l, sound_name)
      {
+        if (!strcmp(sound_name, EFLETE_DUMMY_SAMPLE_NAME))
+          continue;
+
         sound_file = edje_edit_sound_samplesource_get(project->global_object, sound_name);
 
         res = mem_calloc(1, sizeof(Sound2));
@@ -181,24 +147,6 @@ _sound_resources_load(Project *project)
 
         project->RM.sounds = eina_list_append(project->RM.sounds, res);
 
-        if (!ecore_file_exists(res->source))
-          {
-             file_dir = ecore_file_dir_get(res->source);
-             ecore_file_mkpath(file_dir);
-             free(file_dir);
-             sound_bin = edje_edit_sound_samplebuffer_get(project->global_object, sound_name);
-             if (!(f = fopen(res->source, "wb")))
-               {
-                  ERR("Could not open file: %s", res->source);
-                  sleep(2);
-                  continue;
-               }
-             if (fwrite(eina_binbuf_string_get(sound_bin),
-                        eina_binbuf_length_get(sound_bin), 1, f) != 1)
-               ERR("Could not write sound: %s", strerror(errno));
-             if (f) fclose(f);
-             eina_binbuf_free(sound_bin);
-          }
         edje_edit_string_free(sound_file);
      }
 
@@ -213,32 +161,19 @@ _font_resources_load(Project *project)
    Font2 *res;
    Eina_List *fonts;
    Eina_Stringshare *resource_folder;
-   Eet_File *ef;
    Eina_List *l;
    Eina_Stringshare *font_name, *font_file;
-   void *font;
-   FILE *f;
-   int size;
 
    Eina_Bool result = true;
 
    assert(project != NULL);
 
    resource_folder = eina_stringshare_printf("%s/fonts", project->develop_path);
-   ecore_file_recursive_rm(resource_folder);
 
    fonts = edje_edit_fonts_list_get(project->global_object);
 
-   ef = eet_open(project->dev, EET_FILE_MODE_READ);
    if (eina_list_count(fonts) == 0)
      {
-        res = NULL;
-        goto cleanup;
-     }
-
-   if (!ecore_file_mkpath(resource_folder))
-     {
-        ERR("Failed create path %s for export fonts", resource_folder);
         res = NULL;
         goto cleanup;
      }
@@ -253,28 +188,9 @@ _font_resources_load(Project *project)
         res->source = eina_stringshare_printf("%s/%s", resource_folder, font_file);
 
         project->RM.fonts = eina_list_append(project->RM.fonts, res);
-
-        if (!ecore_file_exists(res->source))
-          {
-             edje_edit_string_free(font_file);
-             font_file = eina_stringshare_printf("edje/fonts/%s", font_name);
-             font = eet_read(ef, font_file, &size);
-             if (!font) continue;
-             if (!(f = fopen(res->source, "wb")))
-               {
-                  ERR("Could not open file: %s", res->source);
-                  continue;
-               }
-             if (fwrite(font, size, 1, f) != 1)
-               ERR("Could not write font: %s", strerror(errno));
-             fclose(f);
-             free(font);
-             eina_stringshare_del(font_file);
-          }
      }
 
 cleanup:
-   eet_close(ef);
    edje_edit_string_list_free(fonts);
    eina_stringshare_del(resource_folder);
    return result;
@@ -315,7 +231,7 @@ _colorclasses_resources_load(Project *project)
 {
    Eina_List *colorclasses, *l;
    Colorclass2 *res;
-   Eina_Stringshare *name;
+   Eina_Stringshare *name, *description;
 
    assert(project != NULL);
 
@@ -341,7 +257,12 @@ _colorclasses_resources_load(Project *project)
              free(res);
           }
         else
-          project->RM.colorclasses = eina_list_append(project->RM.colorclasses, res);
+          {
+             description = edje_edit_color_class_description_get(project->global_object, name);
+             res->description = eina_stringshare_add(description);
+             edje_edit_string_free(description);
+             project->RM.colorclasses = eina_list_append(project->RM.colorclasses, res);
+          }
      }
 
    edje_edit_string_list_free(colorclasses);
@@ -349,11 +270,44 @@ _colorclasses_resources_load(Project *project)
 }
 
 Eina_Bool
+_styles_tag_resources_load(Project *pro, Eina_Stringshare *name, Style2 *style)
+{
+   char *pch, *tok, *data;
+   Eina_Stringshare *value;
+   Style_Tag2 *res;
+
+   value = edje_edit_style_tag_value_get(pro->global_object,
+                                         style->common.name,
+                                         name);
+   data = strdup(value);
+   edje_edit_string_free(data);
+   pch = strstr(data, "font");
+   if (!pch)
+     {
+        free(data);
+        return false;
+     }
+   pch += strlen("font");
+   tok = strtok(pch, " =");
+   if (pch)
+     {
+        res = mem_calloc(1, sizeof(Style_Tag2));
+        res->common.type = RESOURCE2_TYPE_STYLE_TAG;
+        res->common.name = eina_stringshare_add(name);
+        res->font = eina_stringshare_add(tok);
+        style->tags = eina_list_append(style->tags, res);
+        res->style = style;
+     }
+   free(data);
+   return true;
+}
+
+Eina_Bool
 _styles_resources_load(Project *project)
 {
-   Eina_List *styles, *l;
+   Eina_List *styles, *tags, *l2, *l1;
    Style2 *res;
-   Eina_Stringshare *name;
+   Eina_Stringshare *name, *tag_value;
 
    assert(project != NULL);
 
@@ -363,17 +317,18 @@ _styles_resources_load(Project *project)
         edje_edit_string_list_free(styles);
         return false;
      }
-   EINA_LIST_FOREACH(styles, l, name)
+   EINA_LIST_FOREACH(styles, l1, name)
      {
         res = mem_calloc(1, sizeof(Style2));
         res->common.type = RESOURCE2_TYPE_STYLE;
         res->common.name = eina_stringshare_add(name);
-        project->RM.styles = eina_list_append(project->RM.styles, res);
 
-        TODO("parse all values and find dependencies in here like that:");
-        /*
-            STYLES uses FONT, COLOR_CLASS?, VIBRO?
-         */
+        tags = edje_edit_style_tags_list_get(project->global_object, name);
+        EINA_LIST_FOREACH(tags, l2, tag_value)
+          {
+             _styles_tag_resources_load(project, tag_value, res);
+          }
+        project->RM.styles = eina_list_append(project->RM.styles, res);
      }
    edje_edit_string_list_free(styles);
    return true;
@@ -404,33 +359,8 @@ _group_name_parse(Group2 *group)
    free(c);
 }
 
-void
-_resource_group_edit_object_load(Project *pro, Group2 *group, Evas *e)
-{
-   assert(pro != NULL);
-   assert(group != NULL);
-   assert(group->edit_object == NULL);
-
-   group->edit_object = edje_edit_object_add(e);
-   if (!edje_object_mmap_set(group->edit_object, pro->mmap_file, group->common.name))
-     {
-        ERR("Can't set mmap object");
-        abort();
-     }
-}
-
-void
-_resource_group_edit_object_unload(Group2 *group)
-{
-   assert(group != NULL);
-   assert(group->edit_object != NULL);
-
-   evas_object_del(group->edit_object);
-   group->edit_object = NULL;
-}
-
 State2 *
-_gm_state_add(Project *pro, Group2 *group, Part2 *part, const char *state_name, double state_value)
+_state_add(Project *pro, Group2 *group, Part2 *part, const char *state_name, double state_value)
 {
    State2 *state;
    Eina_Stringshare *image_name;
@@ -481,7 +411,7 @@ _gm_state_add(Project *pro, Group2 *group, Part2 *part, const char *state_name, 
 }
 
 Part_Item2 *
-_gm_part_item_add(Part2 *part, Eina_Stringshare *item_name, unsigned int i)
+_part_item_add(Part2 *part, Eina_Stringshare *item_name, unsigned int i)
 {
    Part_Item2 *item;
 
@@ -500,7 +430,7 @@ _gm_part_item_add(Part2 *part, Eina_Stringshare *item_name, unsigned int i)
 }
 
 Part2 *
-_gm_part_add(Project *pro, Group2 *group, const char *part_name)
+_part_add(Project *pro, Group2 *group, const char *part_name)
 {
    Part2 *part;
    Eina_List *states, *l;
@@ -524,7 +454,7 @@ _gm_part_add(Project *pro, Group2 *group, const char *part_name)
    EINA_LIST_FOREACH(states, l, state_name)
      {
         state_name_split(state_name, &parsed_state_name, &val);
-        _gm_state_add(pro, group, part, parsed_state_name, val);
+        _state_add(pro, group, part, parsed_state_name, val);
         eina_stringshare_del(parsed_state_name);
      }
    edje_edit_string_list_free(states);
@@ -536,7 +466,7 @@ _gm_part_add(Project *pro, Group2 *group, const char *part_name)
         for (i = 0; i < items_count; i++)
           {
              item_name = edje_edit_part_item_index_name_get(group->edit_object, part_name, i);
-             _gm_part_item_add(part, item_name, i);
+             _part_item_add(part, item_name, i);
           }
      }
 
@@ -544,7 +474,7 @@ _gm_part_add(Project *pro, Group2 *group, const char *part_name)
 }
 
 Group_Data2 *
-_gm_group_data_add(Project *pro, Group2 *group, Eina_Stringshare *group_data_name)
+_group_data_add(Project *pro, Group2 *group, Eina_Stringshare *group_data_name)
 {
    Group_Data2 *group_data;
 
@@ -614,17 +544,17 @@ _group_load(Project *pro, Group2 *group)
 
    _group_name_parse(group);
 
-   _resource_group_edit_object_load(pro, group, evas_object_evas_get(pro->global_object));
+   resource_group_edit_object_load(pro, group, evas_object_evas_get(pro->global_object));
    if (!edje_edit_group_alias_is(group->edit_object, group->common.name))
      {
         parts = edje_edit_parts_list_get(group->edit_object);
         EINA_LIST_FOREACH(parts, l, part_name)
-           _gm_part_add(pro, group, part_name);
+           _part_add(pro, group, part_name);
         edje_edit_string_list_free(parts);
 
         datas = edje_edit_group_data_list_get(group->edit_object);
         EINA_LIST_FOREACH(datas, l, group_data_name)
-           _gm_group_data_add(pro, group, group_data_name);
+           _group_data_add(pro, group, group_data_name);
 
         programs = edje_edit_programs_list_get(group->edit_object);
         EINA_LIST_FOREACH(programs, l, program_name)
@@ -634,11 +564,11 @@ _group_load(Project *pro, Group2 *group)
         edje_edit_string_list_free(programs);
      }
 
-   _resource_group_edit_object_unload(group);
+   resource_group_edit_object_unload(group);
 }
 
 Group2 *
-_gm_group_add(Project *pro, Eina_Stringshare *group_name)
+_group_add(Project *pro, Eina_Stringshare *group_name)
 {
    Group2 *res;
 
@@ -651,7 +581,7 @@ _gm_group_add(Project *pro, Eina_Stringshare *group_name)
 }
 
 void
-_gm_groups_load(Project *pro)
+_groups_load(Project *pro)
 {
    Eina_List *collections, *l;
    Eina_Stringshare *group_name;
@@ -669,7 +599,7 @@ _gm_groups_load(Project *pro)
    EINA_LIST_FOREACH(collections, l, group_name)
      {
         if (!strcmp(group_name, EFLETE_INTERNAL_GROUP_NAME)) continue;
-        _gm_group_add(pro, group_name);
+        _group_add(pro, group_name);
      }
    edje_file_collection_list_free(collections);
 

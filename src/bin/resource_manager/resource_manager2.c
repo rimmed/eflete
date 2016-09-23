@@ -19,7 +19,7 @@
 
 #include "resource_manager2.h"
 #include "resource_manager_private.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 
 Resource2 *
 resource_manager_find(const Eina_List *list, Eina_Stringshare *name)
@@ -72,6 +72,54 @@ resource_manager_v_find(const Eina_List *list, Eina_Stringshare *name, double va
    return (Resource2 *)res;
 }
 
+void
+resource_group_edit_object_load(Project *pro, Group2 *group, Evas *e)
+{
+   assert(pro != NULL);
+   assert(group != NULL);
+   assert(group->edit_object == NULL);
+
+   group->edit_object = edje_edit_object_add(e);
+   if (!edje_object_mmap_set(group->edit_object, pro->mmap_file, group->common.name))
+     {
+        ERR("Can't set mmap object");
+        abort();
+     }
+}
+
+void
+resource_group_edit_object_unload(Group2 *group)
+{
+   assert(group != NULL);
+   assert(group->edit_object != NULL);
+
+   evas_object_del(group->edit_object);
+   group->edit_object = NULL;
+}
+
+void
+resource_group_edit_object_reload(Project *pro, Group2 *group)
+{
+   Part2 *part;
+   Eina_List *l;
+
+   assert(pro != NULL);
+   assert(group != NULL);
+   assert(group->edit_object != NULL);
+
+   if (!edje_object_mmap_set(group->edit_object, pro->mmap_file, group->common.name))
+     {
+        ERR("Can't set mmap object");
+        abort();
+     }
+
+   EINA_LIST_FOREACH(group->parts, l, part)
+      edje_edit_part_selected_state_set(group->edit_object,
+                                        part->common.name,
+                                        part->current_state->common.name,
+                                        part->current_state->val);
+}
+
 Eina_Bool
 resource_manager_init(Project *project)
 {
@@ -85,7 +133,7 @@ resource_manager_init(Project *project)
    _styles_resources_load(project);
    _global_data_resources_load(project);
 
-   _gm_groups_load(project);
+   _groups_load(project);
 
    _resource_dependency_load(project);
 

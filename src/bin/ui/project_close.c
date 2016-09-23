@@ -19,7 +19,7 @@
 
 #include "main_window.h"
 #include "tabs.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "project_navigator.h"
 
 static Eina_Bool
@@ -177,6 +177,7 @@ project_close(void)
 
    assert(ap.project != NULL);
 
+#ifndef HAVE_TIZEN
    if (ap.project->changed)
      {
         title = eina_stringshare_printf(_("Close project %s"), ap.project->name);
@@ -189,6 +190,7 @@ project_close(void)
         eina_stringshare_del(title);
         return false;
      }
+#endif
 
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_BASE, true);
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_STYLE_ONLY, true);

@@ -135,7 +135,7 @@ _tree_nodes_get(Eina_List *groups_list, Node *node)
    Eina_List *folders = NULL, *groups = NULL;
    Eina_Stringshare *prefix;
    Node *n;
-   Group *group;
+   Group2 *group;
 
    widget_tree_items_get(groups_list, node->name, &folders, &groups);
    EINA_LIST_FREE(folders, prefix)
@@ -148,7 +148,7 @@ _tree_nodes_get(Eina_List *groups_list, Node *node)
    EINA_LIST_FREE(groups, group)
      {
         n = mem_calloc(1, sizeof(Node));
-        n->name = eina_stringshare_add(group->name);
+        n->name = eina_stringshare_add(group->common.name);
         node->list = eina_list_append(node->list, n);
      }
 }
@@ -161,7 +161,7 @@ _edj_changed_cb(void *data __UNUSED__,
    Eina_List *collections, *l, *groups_list = NULL;
    Eina_List *folders = NULL, *groups = NULL;
    Eina_Stringshare *group_name, *prefix;
-   Group *group;
+   Group2 *group;
    Node *node;
 
    if (tab_edj.prev_edj_path && !strcmp(tab_edj.prev_edj_path, elm_entry_entry_get(tab_edj.edj)))
@@ -185,8 +185,8 @@ _edj_changed_cb(void *data __UNUSED__,
    collections = eina_list_sort(collections, eina_list_count(collections), (Eina_Compare_Cb) strcmp);
    EINA_LIST_FOREACH(collections, l, group_name)
      {
-        group = mem_calloc(1, sizeof(Group));
-        group->name = eina_stringshare_ref(group_name);
+        group = mem_calloc(1, sizeof(Group2));
+        group->common.name = eina_stringshare_ref(group_name);
         groups_list = eina_list_append(groups_list, group);
      }
    edje_file_collection_list_free(collections);
@@ -208,7 +208,7 @@ _edj_changed_cb(void *data __UNUSED__,
    EINA_LIST_FREE(groups, group)
      {
         node = mem_calloc(1, sizeof(Node));
-        node->name = eina_stringshare_ref(group->name);
+        node->name = eina_stringshare_ref(group->common.name);
         elm_genlist_item_append(tab_edj.genlist,
                                 itc,
                                 node,
@@ -220,7 +220,7 @@ _edj_changed_cb(void *data __UNUSED__,
    edje_file_cache_flush();
    EINA_LIST_FREE(groups_list, group)
      {
-        eina_stringshare_del(group->name);
+        eina_stringshare_del(group->common.name);
         free(group);
      }
 
@@ -339,7 +339,7 @@ _genlist_content_get(void *data,
    CHECK_ADD(obj, check);
    elm_object_focus_allow_set(check, false);
    elm_check_state_set(check, node->check);
-   evas_object_smart_callback_add(check, "changed", _check_widget, node);
+   evas_object_smart_callback_add(check, signals.elm.check.changed, _check_widget, node);
    return check;
 }
 
@@ -457,7 +457,7 @@ _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 __UNUSED__ static Eina_Bool
 _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
-   pm_project_thread_cancel();
+   //pm_project_thread_cancel();
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
@@ -556,7 +556,7 @@ _tab_import_edj_add(void)
 
    BUTTON_ADD(tab_edj.layout, tab_edj.btn_create, _("Create"))
    elm_object_part_content_set(tab_edj.layout, "elm.swallow.btn_create", tab_edj.btn_create);
-   evas_object_smart_callback_add(tab_edj.btn_create, "clicked", _import, NULL);
+   evas_object_smart_callback_add(tab_edj.btn_create, signals.elm.button.clicked, _import, NULL);
    elm_object_disabled_set(tab_edj.btn_create, true);
 
    /* label.name */
@@ -575,7 +575,7 @@ _tab_import_edj_add(void)
    /* label.path */
    elm_object_part_text_set(tab_edj.layout, "label.edj", _("Path to edj-file:"));
    ENTRY_ADD(tab_edj.layout, tab_edj.edj, true)
-   evas_object_smart_callback_add(tab_edj.edj, "changed", _edj_changed_cb, NULL);
+   evas_object_smart_callback_add(tab_edj.edj, signals.elm.entry.changed, _edj_changed_cb, NULL);
    elm_object_part_content_set(tab_edj.layout, "swallow.edj", tab_edj.edj);
    elipsis_btn_add(tab_edj.edj, _elipsis_edj, NULL);
 
@@ -585,7 +585,7 @@ _tab_import_edj_add(void)
 
    /* check all */
    CHECK_ADD(tab_edj.layout, tab_edj.ch_all);
-   evas_object_smart_callback_add(tab_edj.ch_all, "changed", _on_check_all, NULL);
+   evas_object_smart_callback_add(tab_edj.ch_all, signals.elm.check.changed, _on_check_all, NULL);
    elm_object_disabled_set(tab_edj.ch_all, true);
    elm_object_part_content_set(tab_edj.layout, "swallow.all_widgets_check", tab_edj.ch_all);
    elm_object_part_text_set(tab_edj.layout, "label.widgets", _("Widgets:"));
@@ -598,11 +598,11 @@ _tab_import_edj_add(void)
 
    /* genlist */
    tab_edj.genlist = elm_genlist_add(ap.win);
-   evas_object_smart_callback_add(tab_edj.genlist, "activated", _on_item_activated, NULL);
-   evas_object_smart_callback_add(tab_edj.genlist, "expand,request", _expand_request_cb, NULL);
-   evas_object_smart_callback_add(tab_edj.genlist, "contract,request", _contract_request_cb, NULL);
-   evas_object_smart_callback_add(tab_edj.genlist, "expanded", _expanded_cb, NULL);
-   evas_object_smart_callback_add(tab_edj.genlist, "contracted", _contracted_cb, NULL);
+   evas_object_smart_callback_add(tab_edj.genlist, signals.elm.genlist.activated, _on_item_activated, NULL);
+   evas_object_smart_callback_add(tab_edj.genlist, signals.elm.genlist.expand_request, _expand_request_cb, NULL);
+   evas_object_smart_callback_add(tab_edj.genlist, signals.elm.genlist.contract_request, _contract_request_cb, NULL);
+   evas_object_smart_callback_add(tab_edj.genlist, signals.elm.genlist.expanded, _expanded_cb, NULL);
+   evas_object_smart_callback_add(tab_edj.genlist, signals.elm.genlist.contracted, _contracted_cb, NULL);
 
    elm_object_part_content_set(tab_edj.layout, "swallow.widgets", tab_edj.genlist);
    evas_object_event_callback_add(tab_edj.layout, EVAS_CALLBACK_DEL, _tab_import_edj_del, NULL);
@@ -708,16 +708,15 @@ _tab_import_edj_data_set(const char *name, const char *path, const char *edj, co
         if (!item)
           {
              item = elm_genlist_first_item_get(tab_edj.genlist);
-             do
+             while (item)
                {
                   node = elm_object_item_data_get(item);
                   if (!strcmp(node->name, "elm/"))
                     break;
                   item = elm_genlist_item_next_get(item);
                }
-             while (item);
           }
-        if (node->list)
+        if (node && node->list)
           {
              EINA_LIST_FOREACH(node->list, l1, sub)
              {

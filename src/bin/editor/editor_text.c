@@ -24,17 +24,20 @@
 #include "change.h"
 
 extern int _editor_signals_blocked;
-EDITOR_STATE_DOUBLE(text_align_x, ATTRIBUTE_STATE_TEXT_ALIGN_X)
-EDITOR_STATE_DOUBLE(text_align_y, ATTRIBUTE_STATE_TEXT_ALIGN_Y)
+EDITOR_STATE_DOUBLE(text_align_x, RM_ATTRIBUTE_STATE_TEXT_ALIGN_X)
+EDITOR_STATE_DOUBLE(text_align_y, RM_ATTRIBUTE_STATE_TEXT_ALIGN_Y)
 
-EDITOR_STATE_DOUBLE(text_elipsis, ATTRIBUTE_STATE_TEXT_ELIPSIS)
+EDITOR_STATE_DOUBLE(text_elipsis, RM_ATTRIBUTE_STATE_TEXT_ELIPSIS)
 
 Eina_Bool
 editor_state_text_size_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
                            const char *part_name, const char *state_name, double state_val, int new_val)
 {
    Diff *diff;
-   Attribute attribute = ATTRIBUTE_STATE_TEXT_SIZE;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_TEXT_SIZE;
 
    assert(edit_object != NULL);
    assert(part_name != NULL);
@@ -66,37 +69,45 @@ editor_state_text_size_set(Evas_Object *edit_object, Change *change, Eina_Bool m
      {
         CRIT_ON_FAIL(edje_edit_state_text_size_set(edit_object, part_name, state_name, state_val, new_val));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
 
-EDITOR_STATE_BOOL(text_fit_x, ATTRIBUTE_STATE_TEXT_FIT_X)
-EDITOR_STATE_BOOL(text_fit_y, ATTRIBUTE_STATE_TEXT_FIT_Y)
-EDITOR_STATE_BOOL(text_max_x, ATTRIBUTE_STATE_TEXT_MAX_X)
-EDITOR_STATE_BOOL(text_max_y, ATTRIBUTE_STATE_TEXT_MAX_Y)
-EDITOR_STATE_BOOL(text_min_x, ATTRIBUTE_STATE_TEXT_MIN_X)
-EDITOR_STATE_BOOL(text_min_y, ATTRIBUTE_STATE_TEXT_MIN_Y)
+EDITOR_STATE_BOOL(text_fit_x, RM_ATTRIBUTE_STATE_TEXT_FIT_X)
+EDITOR_STATE_BOOL(text_fit_y, RM_ATTRIBUTE_STATE_TEXT_FIT_Y)
+EDITOR_STATE_BOOL(text_max_x, RM_ATTRIBUTE_STATE_TEXT_MAX_X)
+EDITOR_STATE_BOOL(text_max_y, RM_ATTRIBUTE_STATE_TEXT_MAX_Y)
+EDITOR_STATE_BOOL(text_min_x, RM_ATTRIBUTE_STATE_TEXT_MIN_X)
+EDITOR_STATE_BOOL(text_min_y, RM_ATTRIBUTE_STATE_TEXT_MIN_Y)
 
-EDITOR_STATE_STRING(text_source, ATTRIBUTE_STATE_TEXT_SOURCE, true)
-EDITOR_STATE_STRING(text_text_source, ATTRIBUTE_STATE_TEXT_TEXT_SOURCE, true)
+EDITOR_STATE_STRING(text_source, RM_ATTRIBUTE_STATE_TEXT_SOURCE, true)
+EDITOR_STATE_STRING(text_text_source, RM_ATTRIBUTE_STATE_TEXT_TEXT_SOURCE, true)
 
-EDITOR_STATE_STRING_WITH_FALLBACK(font, ATTRIBUTE_STATE_FONT, NULL, false)
+EDITOR_STATE_STRING_WITH_FALLBACK(font, RM_ATTRIBUTE_STATE_FONT, NULL, false)
 TODO("Add style fallback here")
-EDITOR_STATE_STRING_WITH_FALLBACK(text_style, ATTRIBUTE_STATE_TEXT_STYLE, NULL, true)
+EDITOR_STATE_STRING_WITH_FALLBACK(text_style, RM_ATTRIBUTE_STATE_TEXT_STYLE, NULL, true)
 
 Eina_Bool
 editor_state_text_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
                       const char *part_name, const char *state_name, double state_val, const char *new_val)
 {
    Diff *diff;
-   Attribute attribute = ATTRIBUTE_STATE_TEXT_STYLE;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_TEXT;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
+   Eina_Stringshare *old_value = edje_edit_state_text_get(edit_object, part_name, state_name, state_val);
+   send.part_name = eina_stringshare_add(part_name);
+   send.state_name = eina_stringshare_add(state_name);
+   send.state_value = state_val;
+   send.old_value = eina_stringshare_add(old_value);
+   send.value = eina_stringshare_add(new_val);
    if (change)
      {
-        Eina_Stringshare *old_value = edje_edit_state_text_get(edit_object, part_name, state_name, state_val);
         diff = mem_calloc(1, sizeof(Diff));
         diff->redo.type = FUNCTION_TYPE_STRING_STRING_DOUBLE_STRING;
         diff->redo.function = editor_state_text_set;
@@ -119,7 +130,11 @@ editor_state_text_set(Evas_Object *edit_object, Change *change, Eina_Bool merge,
      {
        CRIT_ON_FAIL(edje_edit_state_text_set(edit_object, part_name, state_name, state_val, new_val ? new_val : ""));
        _editor_project_changed();
-       if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+       if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
+   eina_stringshare_del(send.part_name);
+   eina_stringshare_del(send.state_name);
+   eina_stringshare_del(send.old_value);
+   eina_stringshare_del(send.value);
    return true;
 }

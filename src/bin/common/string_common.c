@@ -75,8 +75,8 @@ string_cat(const char *str1, const char *str2)
 const char *
 string_rstr(const char *str1, const char *str2)
 {
-   unsigned int str2len = 0;
-   unsigned int i = 0, j = 0;
+   size_t str2len = 0;
+   size_t i = 0, j = 0;
 
    str2len = strlen(str2) - 1;
 
@@ -96,4 +96,36 @@ string_rstr(const char *str1, const char *str2)
           }
      }
    return NULL;
+}
+
+/**
+ * ref http://docs.enlightenment.org/auto/edje/group__Edje__Object__Part.html
+ */
+static char *part_types[] = {
+     "None",
+     "Rectangle",
+     "Text",
+     "Image",
+     "Swallow",
+     "Textblock",
+     "Gradient",
+     "Group",
+     "Box",
+     "Table",
+     "External",
+     "Proxy",
+     "Spacer",
+     "Mesh node",
+     "Light",
+     "Camera",
+     "Snapshot"
+};
+static unsigned int part_types_count = 16;
+
+const char *
+part_type_text_get(Edje_Part_Type part_type)
+{
+   assert(part_type <= part_types_count);
+
+   return part_types[part_type];
 }

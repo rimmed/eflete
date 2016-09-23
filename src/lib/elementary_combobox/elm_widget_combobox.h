@@ -22,6 +22,8 @@
  * widgets which are a combobox with some more logic on top.
  */
 
+#define CRI CRIT
+
 /**
  * Base button smart data extended with combobox instance data.
  */
@@ -57,7 +59,7 @@ struct _Elm_Combobox_Data
   ELM_COMBOBOX_DATA_GET(o, ptr);                     \
   if (EINA_UNLIKELY(!ptr))                           \
     {                                                \
-       CRI("No widget data for object %p (%s)",      \
+       CRIT("No widget data for object %p (%s)",      \
            o, evas_object_type_get(o));              \
        return;                                       \
     }
@@ -66,7 +68,7 @@ struct _Elm_Combobox_Data
   ELM_COMBOBOX_DATA_GET(o, ptr);                         \
   if (EINA_UNLIKELY(!ptr))                               \
     {                                                    \
-       CRI("No widget data for object %p (%s)",          \
+       CRIT("No widget data for object %p (%s)",          \
            o, evas_object_type_get(o));                  \
        return val;                                       \
     }

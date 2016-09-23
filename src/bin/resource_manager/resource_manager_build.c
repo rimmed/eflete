@@ -19,7 +19,7 @@
 
 #include "resource_manager2.h"
 #include "resource_manager_private.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "string_common.h"
 
 /***********************************************/
@@ -99,7 +99,7 @@ _state_dependency_load(Project *pro, Group2 *group, Part2 *part, State2 *state)
 
    if (part->type == EDJE_PART_TYPE_IMAGE)
      {
-        if (strcmp(state->normal, EFLETE_DUMMY_IMAGE_NAME))
+        if (state->normal && strcmp(state->normal, EFLETE_DUMMY_IMAGE_NAME))
           {
              if (edje_edit_image_set_exists(group->edit_object, state->normal))
                res = resource_manager_find(pro->RM.image_sets, state->normal);
@@ -157,6 +157,15 @@ _state_dependency_load(Project *pro, Group2 *group, Part2 *part, State2 *state)
         if (res)
           _resource_usage_resource_add((Resource2 *)state, res);
         edje_edit_string_free(source);
+
+        source = edje_edit_state_text_source_get(group->edit_object,
+                                                 part->common.name,
+                                                 state->common.name,
+                                                 state->val);
+        res = resource_manager_find(group->parts, source);
+        if (res)
+          _resource_usage_resource_add((Resource2 *)state, res);
+        edje_edit_string_free(source);
      }
 
    if (part->type == EDJE_PART_TYPE_TEXTBLOCK)
@@ -166,7 +175,8 @@ _state_dependency_load(Project *pro, Group2 *group, Part2 *part, State2 *state)
                                                     state->common.name,
                                                     state->val);
         res = resource_manager_find(pro->RM.styles, style_name);
-        _resource_usage_resource_add((Resource2 *)state, res);
+        if (res)
+          _resource_usage_resource_add((Resource2 *)state, res);
         edje_edit_string_free(style_name);
      }
    TODO("Implement size_class and text_class stuff")
@@ -248,6 +258,7 @@ _program_dependency_load(Project *pro, Group2 *group, Program2 *program)
    res = resource_manager_find(group->parts, name);
    if (res)
      {
+        program->filter_part = eina_stringshare_add(name);
         _resource_usage_resource_add((Resource2 *)program, res);
         state = edje_edit_program_filter_state_get(group->edit_object, program->common.name);
         res_state = resource_manager_find(((Part2 *)res)->states, state);
@@ -276,7 +287,7 @@ _group_dependency_load(Project *pro, Group2 *group)
    Eina_Stringshare *main_group_name;
    Eina_List *l;
 
-   _resource_group_edit_object_load(pro, group, evas_object_evas_get(pro->global_object));
+   resource_group_edit_object_load(pro, group, evas_object_evas_get(pro->global_object));
    if (edje_edit_group_alias_is(group->edit_object, group->common.name))
      {
         main_group_name = edje_edit_group_aliased_get(group->edit_object, group->common.name);
@@ -299,7 +310,27 @@ _group_dependency_load(Project *pro, Group2 *group)
              _program_dependency_load(pro, group, program);
           }
      }
-   _resource_group_edit_object_unload(group);
+   resource_group_edit_object_unload(group);
+}
+
+void
+_style_dependency_load(Project *pro)
+{
+   Style2 *style;
+   Resource2 *res;
+   Eina_List *l1, *l2;
+   Style_Tag2 *tag;
+
+   /* image_set */
+   EINA_LIST_FOREACH(pro->RM.styles, l1, style)
+     {
+        EINA_LIST_FOREACH(style->tags, l2, tag)
+          {
+             res = resource_manager_find(pro->RM.fonts, tag->font);
+             if (res)
+               _resource_usage_resource_add((Resource2 *)tag, res);
+          }
+     }
 }
 
 void
@@ -322,6 +353,9 @@ _resource_dependency_load(Project *pro)
           }
         edje_edit_string_list_free(set_images);
      }
+
+   /* font <===> style dependencies */
+   _style_dependency_load(pro);
 
    /* groups */
    EINA_LIST_FOREACH(pro->RM.groups, l1, group)

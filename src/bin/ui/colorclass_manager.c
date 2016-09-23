@@ -22,7 +22,7 @@
 
 #include "main_window.h"
 #include "validator.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "modal_window.h"
 
 static Elm_Genlist_Item_Class *_itc_ccl = NULL;
@@ -106,7 +106,6 @@ _colorclass_add_popup_close_cb(void *data,
    Colorclasses_Manager *edit = (Colorclasses_Manager *)data;
    Colorclass_Item *it = NULL;
    Elm_Object_Item *glit_ccl = NULL;
-   Colorclass_Resource *res;
    Popup_Button btn_res = (Popup_Button)event_info;
 
    assert(edit != NULL);
@@ -116,8 +115,6 @@ _colorclass_add_popup_close_cb(void *data,
         it = (Colorclass_Item *)mem_calloc(1, sizeof(Colorclass_Item));
         it->name = elm_entry_entry_get(mng.entry);
 
-        res = (Colorclass_Resource *)resource_add(it->name, RESOURCE_TYPE_COLORCLASS);
-        resource_insert(&ap.project->colorclasses, (Resource *)res);
         CRIT_ON_FAIL(editor_color_class_add(ap.project->global_object, eina_stringshare_add(it->name), true));
 
         glit_ccl = elm_genlist_item_append(mng.genlist, _itc_ccl, it, NULL,
@@ -140,7 +137,7 @@ _colorclass_add_cb(void *data,
 {
    Evas_Object *popup;
    mng.name_validator = resource_name_validator_new(NAME_REGEX, NULL);
-   resource_name_validator_list_set(mng.name_validator, &ap.project->colorclasses, true);
+   resource_name_validator_list_set(mng.name_validator, &ap.project->RM.colorclasses, true);
    popup = popup_add(_("Create a new layout"), NULL, BTN_OK|BTN_CANCEL, _add_colorclass_content_get, mng.entry);
    evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _colorclass_add_popup_close_cb, data);
 }
@@ -150,20 +147,13 @@ _colorclass_del_cb(void *data __UNUSED__,
                    Evas_Object *obj __UNUSED__,
                    void *event_info __UNUSED__)
 {
-   Resource *res;
-   Resource request;
    Attribute attribute = ATTRIBUTE_STATE_COLOR_CLASS;
 
    Elm_Object_Item *it = elm_genlist_selected_item_get(mng.genlist);
    Elm_Object_Item *next = elm_genlist_item_next_get(it);
    Colorclass_Item *ccl = elm_object_item_data_get(it);
 
-   request.resource_type = RESOURCE_TYPE_COLORCLASS;
-   request.name = ccl->name;
-   res = resource_get(ap.project->colorclasses, &request);
    CRIT_ON_FAIL(editor_color_class_del(ap.project->global_object, ccl->name, true));
-   resource_remove(&ap.project->colorclasses, res);
-   resource_free(res);
    elm_object_item_del(it);
    evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
 
@@ -186,7 +176,7 @@ _colorclass_del_cb(void *data __UNUSED__,
           {
              snprintf(buf + symbs, BUFF_MAX - symbs, _("<br>group: %s<br>part: %s<br>state: \"%s\" %2.1f"),
                       state->part->group->name, state->part->name, state->parsed_name, state->parsed_val);
-             symbs += strlen(res->name);
+             symbs += strlen(res->common.name);
              break; TODO("remove this break after warning style remake")
           }
         WARN("%s", buf);
@@ -357,7 +347,7 @@ _radio_switcher_add(Evas_Object *obj,
    evas_object_show(radio);
    elm_object_style_set(radio, style);
    elm_radio_state_value_set(radio, state_value);
-   evas_object_smart_callback_add(radio, "changed", func, obj);
+   evas_object_smart_callback_add(radio, signals.elm.radio.changed, func, obj);
    elm_radio_group_add(radio, group);
 
    return radio;
@@ -393,11 +383,11 @@ _colorclass_manager_init(void)
 {
    Eina_List *l = NULL;
    Colorclass_Item *it = NULL;
-   Colorclass_Resource *res;
+   Colorclass2 *res;
 
    assert(ap.project != NULL);
 
-   EINA_LIST_FOREACH(ap.project->colorclasses, l, res)
+   EINA_LIST_FOREACH(ap.project->RM.colorclasses, l, res)
      {
         it = (Colorclass_Item *)mem_calloc(1, sizeof(Colorclass_Item));
 
@@ -416,7 +406,7 @@ _colorclass_manager_init(void)
         it->b3 = res->color3.b;
         it->a3 = res->color3.a;
 
-        it->name = eina_stringshare_add(res->name);
+        it->name = eina_stringshare_add(res->common.name);
         elm_genlist_item_append(mng.genlist, _itc_ccl, it, NULL,
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
      }
@@ -443,8 +433,8 @@ colorclass_manager_add(void)
    /* Creating main layout of window */
    mng.win = mw_add();
    mw_title_set(mng.win, _("Color class manager"));
-   evas_object_smart_callback_add(mng.win, "cancel", _mw_cancel_cb, NULL);
-   evas_object_smart_callback_add(mng.win, "done", _mw_done_cb, NULL);
+   evas_object_smart_callback_add(mng.win, signals.eflete.modal_window.cancel, _mw_cancel_cb, NULL);
+   evas_object_smart_callback_add(mng.win, signals.eflete.modal_window.done, _mw_done_cb, NULL);
 #if !HAVE_TIZEN
    ic = elm_icon_add(mng.win);
    elm_icon_standard_set(ic, "image2");
@@ -458,7 +448,7 @@ colorclass_manager_add(void)
    elm_layout_text_set(mng.layout, "elm.subtext", _("Color classes list"));
    mng.panes = elm_panes_add(mng.win);
    elm_panes_content_right_size_set(mng.panes, 0);
-   elm_panes_content_right_min_size_set(mng.panes, 355);
+   elm_panes_content_right_min_size_set(mng.panes, 400);
    elm_object_content_set(mng.win, mng.panes);
    elm_object_part_content_set(mng.panes, "left", mng.layout);
    elm_object_part_content_set(mng.panes, "right", ap.property.color_manager);
@@ -470,26 +460,26 @@ colorclass_manager_add(void)
 #endif
    evas_object_show(mng.genlist);
    elm_object_part_content_set(mng.layout, "elm.swallow.list", mng.genlist);
-   evas_object_smart_callback_add(mng.genlist, "selected", _on_selected, NULL);
-   evas_object_smart_callback_add(mng.genlist, "unselected", _on_unselected, NULL);
+   evas_object_smart_callback_add(mng.genlist, signals.elm.genlist.selected, _on_selected, NULL);
+   evas_object_smart_callback_add(mng.genlist, signals.elm.genlist.unselected, _on_unselected, NULL);
+   evas_object_smart_callback_add(mng.genlist, signals.elm.genlist.pressed, _search_reset_cb, &(mng.style_search_data));
 
    search = _manager_search_field_create(mng.layout);
    elm_object_part_content_set(mng.layout, "elm.swallow.search", search);
-   evas_object_smart_callback_add(search, "changed", _search_changed, NULL);
-   evas_object_smart_callback_add(search, "activated", _search_nxt_gd_item, NULL);
-   evas_object_smart_callback_add(mng.genlist, "pressed", _search_reset_cb, &(mng.style_search_data));
+   evas_object_smart_callback_add(search, signals.elm.entry.changed, _search_changed, NULL);
+   evas_object_smart_callback_add(search, signals.elm.entry.activated, _search_nxt_gd_item, NULL);
    mng.style_search_data.search_entry = search;
    mng.style_search_data.last_item_found = NULL;
 
    /* Controls (add, remove) of colorclasses */
    button = elm_button_add(mng.layout);
    elm_object_style_set(button, "plus_managers");
-   evas_object_smart_callback_add(button, "clicked", _colorclass_add_cb, &mng);
+   evas_object_smart_callback_add(button, signals.elm.button.clicked, _colorclass_add_cb, &mng);
    elm_object_part_content_set(mng.layout, "elm.swallow.btn_add", button);
 
    mng.del_button = elm_button_add(mng.layout);
    elm_object_style_set(mng.del_button, "minus_managers");
-   evas_object_smart_callback_add(mng.del_button, "clicked", _colorclass_del_cb, NULL);
+   evas_object_smart_callback_add(mng.del_button, signals.elm.button.clicked, _colorclass_del_cb, NULL);
    elm_object_part_content_set(mng.layout, "elm.swallow.btn_del", mng.del_button);
    elm_object_disabled_set(mng.del_button, EINA_TRUE);
 

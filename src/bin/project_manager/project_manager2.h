@@ -1,6 +1,6 @@
 /*
  * Edje Theme Editor
- * Copyright (C) 2013-2014 Samsung Electronics.
+ * Copyright (C) 2013-2016 Samsung Electronics.
  *
  * This file is part of Edje Theme Editor.
  *
@@ -34,13 +34,10 @@
  */
 
 #include "eflete.h"
-#include "group_manager.h"
-#include "resource_manager.h"
+#include "resource_manager2.h"
 
 /* don't forget to update on major changes */
 #define PROJECT_FILE_VERSION 5
-
-typedef struct _Enventor_Data Enventor_Data;
 
 /**
  * @struct _Project
@@ -109,21 +106,12 @@ struct _Project
 
    Eina_List *nsimage_list;
 
-   TODO("Fix paths in enventor mode. Looks like enventor project can't be moved")
-   struct
-   {
-      Eina_List *images;  /**< pathes to the image dirs */
-      Eina_List *sounds;  /**< pathes to the sound dirs */
-      Eina_List *fonts;   /**< pathes to the font dirs */
-   } res;  /**< pathes to resource directories, which needed for opened project */
-
 #ifdef HAVE_ENVENTOR
    Enventor_Data *enventor;
 #endif
 
    Eina_Bool changed : 1;
    Eina_Bool close_request : 1;
-   //Ecore_Timer *autosave_timer;
 };
 
 /**
@@ -152,7 +140,7 @@ enum _Build
  */
 enum _PM_Project_Result
 {
-   PM_PROJECT_SUCCESS,
+   PM_PROJECT_SUCCESS = 0,
    PM_PROJECT_CANCEL,
    PM_PROJECT_ERROR,
    PM_PROJECT_LOCKED,
@@ -273,16 +261,6 @@ pm_project_open(const char *path,
                 const void *data);
 
 /**
- * Reloading dev file. Should be called after every save.
- *
- * @param project The project.
- *
- * @ingroup ProjectManager
- */
-void
-pm_dev_file_reload(Project *project);
-
-/**
  * Save all changes in current project to the dev file.
  *
  * @param project The project what should be saved.
@@ -298,44 +276,6 @@ pm_project_save(Project *project,
                 PM_Project_Progress_Cb func_progress,
                 PM_Project_End_Cb func_end,
                 const void *data) EINA_ARG_NONNULL(1);
-
-/**
- * Cancel the Project thread, and called func_end.
- *
- * @return EINA_TRUE on success, otherwise EINA_FALSE.
- *
- * @ingroup ProjectManager
- */
-Eina_Bool
-pm_project_thread_cancel(void);
-
-
-/**
- * Save a current opened Style source code by the path. Backup file will created
- * after success project save.
- *
- * @param project The current opened project,
- * @param file The path to text file where will be saved a source code.
- *
- * @return EINA_TRUE if file is saved, otherwise EINA_FALSE.
- *
- * @ingroup ProjectManager
- */
-Eina_Bool
-pm_project_style_save_as(Project *project, const char *file);
-
-/**
- * Build the current project by one of profile #Build.
- *
- * @param project The current opened project,
- * @param build_profile The #Build profile.
- *
- * @return EINA_TRUE if project build succesful, otherwise EINA_FALSE.
- *
- * @ingroup ProjectManager
- */
-Eina_Bool
-pm_project_build(Project *project, Build build_profile);
 
 /**
  * Close the current project. Information about the project will be updated in
@@ -395,22 +335,6 @@ pm_project_meta_data_set(Project *project,
                          const char *comment) EINA_ARG_NONNULL(1);
 
 /**
- * Export opened project resource. Export images, sounds, fonts and data from
- * opened project to specific folder-container.
- * This data will be used on compile debug and release edj file. Also Enventor
- * used this data.
- *
- * @param pro The opened project.
- * @param dir_path export directory path;
- *
- * @return EINA_TRUE on success, otherwise EINA_FALSE.
- *
- * @ingroup ProjectManager.
- */
-Eina_Bool
-pm_project_resource_export(Project *pro, const char* dir_path);
-
-/**
  * Export the source code of Group (edje object) to file.
  *
  * @param pro The opened project;
@@ -424,7 +348,7 @@ pm_project_resource_export(Project *pro, const char* dir_path);
  */
 void
 pm_group_source_code_export(Project *project,
-                            Group *group,
+                            Group2 *group,
                             const char *path,
                             PM_Project_Progress_Cb func_progress,
                             PM_Project_End_Cb func_end,
@@ -456,6 +380,7 @@ pm_project_source_code_export(Project *project,
  *
  * @param pro The opened project;
  * @param path Path to save the edj file.
+ * @param groups The groups list for export
  * @param func_progress The progress callback;
  * @param func_end The end callback, this callback be called on the end of
  *        Project progress;
@@ -466,6 +391,7 @@ pm_project_source_code_export(Project *project,
 void
 pm_project_develop_export(Project *pro,
                           const char *path,
+                          Eina_List *groups,
                           PM_Project_Progress_Cb func_progress,
                           PM_Project_End_Cb func_end,
                           const void *data) EINA_ARG_NONNULL(1, 2);
@@ -490,25 +416,6 @@ pm_project_release_export(Project *pro,
                           PM_Project_End_Cb func_end,
                           const void *data) EINA_ARG_NONNULL(1, 2);
 
-
-/**
- * Save the current editing style as edj file.
- *
- * @param project The project what should be saved.
- * @param func_progress The progress callback;
- * @param func_end The end callback, this callback be called on the end of
- *        Project progress;
- * @param data The user data.
- *
- * @warning Use only in enventor mode.
- *
- * @ingroup ProjectManager
- */
-void
-pm_project_enventor_save(Project *project,
-                         PM_Project_Progress_Cb func_progress,
-                         PM_Project_End_Cb func_end,
-                         const void *data) EINA_ARG_NONNULL(1);
 
 /**
  * Check the lock of given file.

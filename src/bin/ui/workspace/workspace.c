@@ -26,7 +26,7 @@
 #include "history.h"
 #include "history_ui.h"
 #include "demo.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "change.h"
 #include "syntax_color.h"
 #include "shortcuts.h"
@@ -139,7 +139,7 @@ struct _Workspace_Data
       double size;
    } code;
    Workspace_Mode mode;
-   Group *group;
+   Group2 *group;
    double zoom_factor;
    Eina_Bool markers : 1;
 };
@@ -234,7 +234,7 @@ _workspace_del(void *data,
    assert(data != NULL);
 
    Workspace_Data *wd = data;
-   gm_group_edit_object_unload(wd->group);
+   resource_group_edit_object_unload(wd->group);
    color_term(wd->code.color_data);
 
    TODO("remove after moving from smart object");
@@ -289,7 +289,7 @@ _members_zoom_set(Workspace_Data *wd)
    double zoom_calc;
    int step, step_val;
 
-   DBG("Set the zoom factor %f in tab '%s'", wd->zoom_factor * 100, wd->group->name);
+   DBG("Set the zoom factor %f in tab '%s'", wd->zoom_factor * 100, wd->group->common.name);
    area = _scroll_area_get(wd);
 
    container_zoom_factor_set(area->container, wd->zoom_factor);
@@ -451,7 +451,7 @@ _zoom_controls_add(Workspace_Data *wd)
    Elm_Object_Item *tb_it;
 
    wd->toolbar.zoom.fit = elm_button_add(wd->toolbar.obj);
-   evas_object_smart_callback_add(wd->toolbar.zoom.fit, "clicked", _fit_cb, wd);
+   evas_object_smart_callback_add(wd->toolbar.zoom.fit, signals.elm.button.clicked, _fit_cb, wd);
 #if HAVE_TIZEN
    elm_object_style_set(wd->toolbar.zoom.fit, "fit");
 #else
@@ -467,19 +467,19 @@ _zoom_controls_add(Workspace_Data *wd)
    wd->toolbar.zoom.slider = elm_slider_add(wd->toolbar.obj);
    elm_slider_min_max_set(wd->toolbar.zoom.slider, 10.0, 1000.0);
    elm_slider_value_set(wd->toolbar.zoom.slider, 100);
-   evas_object_smart_callback_add(wd->toolbar.zoom.slider, "slider,drag,start", _slider_zoom_start_cb, wd);
-   evas_object_smart_callback_add(wd->toolbar.zoom.slider, "changed", _slider_zoom_cb, wd);
-   evas_object_smart_callback_add(wd->toolbar.zoom.slider, "slider,drag,stop", _slider_zoom_stop_cb, wd);
+   evas_object_smart_callback_add(wd->toolbar.zoom.slider, signals.elm.slider.drag_start, _slider_zoom_start_cb, wd);
+   evas_object_smart_callback_add(wd->toolbar.zoom.slider, signals.elm.slider.changed, _slider_zoom_cb, wd);
+   evas_object_smart_callback_add(wd->toolbar.zoom.slider, signals.elm.slider.drag_stop, _slider_zoom_stop_cb, wd);
 #if HAVE_TIZEN
    Evas_Object *btn = elm_button_add(wd->toolbar.obj);
    elm_object_style_set(btn, "minus_zoom");
    evas_object_show(btn);
-   evas_object_smart_callback_add(btn, "clicked", _btn_minus_zoom_cb, wd);
+   evas_object_smart_callback_add(btn, signals.elm.button.clicked, _btn_minus_zoom_cb, wd);
    elm_object_part_content_set(wd->toolbar.zoom.slider, "elm.swallow.icon", btn);
    btn = elm_button_add(wd->toolbar.obj);
    elm_object_style_set(btn, "plus_zoom");
    evas_object_show(btn);
-   evas_object_smart_callback_add(btn, "clicked", _btn_plus_zoom_cb, wd);
+   evas_object_smart_callback_add(btn, signals.elm.button.clicked, _btn_plus_zoom_cb, wd);
    elm_object_part_content_set(wd->toolbar.zoom.slider, "elm.swallow.end", btn);
 #else
    IMAGE_ADD_NEW(wd->toolbar.zoom.slider, img, "icon", "scale_smaller")
@@ -502,7 +502,7 @@ _zoom_controls_add(Workspace_Data *wd)
    SPINNER_ADD(wd->toolbar.obj, wd->toolbar.zoom.cmb_zoom, 10, 1000, 10, true);
    evas_object_size_hint_min_set(wd->toolbar.zoom.cmb_zoom, 76, 0);
    elm_spinner_value_set(wd->toolbar.zoom.cmb_zoom, 100);
-   evas_object_smart_callback_add(wd->toolbar.zoom.cmb_zoom, "changed", _spinner_zoom_cb, wd);
+   evas_object_smart_callback_add(wd->toolbar.zoom.cmb_zoom, signals.elm.spinner.changed_user, _spinner_zoom_cb, wd);
    elm_object_part_content_set(zoom_layout, "swallow.spinner", wd->toolbar.zoom.cmb_zoom);
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
    elm_object_item_part_content_set(tb_it, NULL, zoom_layout);
@@ -518,7 +518,7 @@ _zoom_controls_add(Workspace_Data *wd)
    wd->toolbar.zoom.itc->func.del = _combobox_item_del;
    evas_object_size_hint_min_set(wd->toolbar.zoom.cmb_zoom, 70, 0);
    elm_object_text_set(wd->toolbar.zoom.cmb_zoom, _("100%"));
-   evas_object_smart_callback_add(wd->toolbar.zoom.cmb_zoom, "item,pressed", _zoom_selected_cb, wd);
+   evas_object_smart_callback_add(wd->toolbar.zoom.cmb_zoom, signals.elm.combobox.item_pressed, _zoom_selected_cb, wd);
    while (zoom_values[i])
     {
       text = eina_stringshare_printf("%d%%", zoom_values[i]);
@@ -610,7 +610,7 @@ _container_size_controls_add(Workspace_Data *wd)
 
    wd->toolbar.container_sizer.check_lock = elm_check_add(wd->toolbar.obj);
    elm_object_style_set(wd->toolbar.container_sizer.check_lock, "locker");
-   evas_object_smart_callback_add(wd->toolbar.container_sizer.check_lock, "changed", _container_lock, wd);
+   evas_object_smart_callback_add(wd->toolbar.container_sizer.check_lock, signals.elm.check.changed, _container_lock, wd);
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
    elm_object_item_part_content_set(tb_it, NULL, wd->toolbar.container_sizer.check_lock);
 
@@ -618,11 +618,9 @@ _container_size_controls_add(Workspace_Data *wd)
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
    elm_toolbar_item_separator_set(tb_it, true);
 
-   wd->toolbar.container_sizer.spinner_w = elm_spinner_add(wd->toolbar.obj);
-   elm_spinner_min_max_set(wd->toolbar.container_sizer.spinner_w, 0, 9999);
-   elm_spinner_editable_set(wd->toolbar.container_sizer.spinner_w, true);
+   SPINNER_ADD(wd->toolbar.obj, wd->toolbar.container_sizer.spinner_w, 0, 9999, 1, true);
    elm_object_style_set(wd->toolbar.container_sizer.spinner_w, "vertical");
-   evas_object_smart_callback_add(wd->toolbar.container_sizer.spinner_w, "changed", _spinner_container_change, wd);
+   evas_object_smart_callback_add(wd->toolbar.container_sizer.spinner_w, signals.elm.spinner.changed_user, _spinner_container_change, wd);
 #if !HAVE_TIZEN
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
    elm_object_item_part_content_set(tb_it, NULL, wd->toolbar.container_sizer.spinner_w);
@@ -632,7 +630,7 @@ _container_size_controls_add(Workspace_Data *wd)
 
    wd->toolbar.container_sizer.check_chain = elm_check_add(wd->toolbar.obj);
    elm_object_style_set(wd->toolbar.container_sizer.check_chain, "chain");
-   evas_object_smart_callback_add(wd->toolbar.container_sizer.check_chain, "changed", _container_aspect_change, wd);
+   evas_object_smart_callback_add(wd->toolbar.container_sizer.check_chain, signals.elm.check.changed, _container_aspect_change, wd);
 
 #if !HAVE_TIZEN
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
@@ -641,11 +639,9 @@ _container_size_controls_add(Workspace_Data *wd)
    elm_object_part_content_set(size_controls, "chain", wd->toolbar.container_sizer.check_chain);
 #endif
 
-   wd->toolbar.container_sizer.spinner_h = elm_spinner_add(wd->toolbar.obj);
-   elm_spinner_min_max_set(wd->toolbar.container_sizer.spinner_h, 0, 9999);
-   elm_spinner_editable_set(wd->toolbar.container_sizer.spinner_h, true);
+   SPINNER_ADD(wd->toolbar.obj, wd->toolbar.container_sizer.spinner_h, 0, 9999, 1, true);
    elm_object_style_set(wd->toolbar.container_sizer.spinner_h, "vertical");
-   evas_object_smart_callback_add(wd->toolbar.container_sizer.spinner_h, "changed", _spinner_container_change, wd);
+   evas_object_smart_callback_add(wd->toolbar.container_sizer.spinner_h, signals.elm.spinner.changed_user, _spinner_container_change, wd);
 #if !HAVE_TIZEN
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
    elm_object_item_part_content_set(tb_it, NULL, wd->toolbar.container_sizer.spinner_h);
@@ -671,7 +667,7 @@ _radio_switcher_add(Workspace_Data *wd,
    radio = elm_radio_add(wd->layout);
    elm_object_style_set(radio, style);
    elm_radio_state_value_set(radio, state_value);
-   evas_object_smart_callback_add(radio, "changed", func, wd);
+   evas_object_smart_callback_add(radio, signals.elm.radio.changed, func, wd);
    elm_radio_group_add(radio, group);
 
    return radio;
@@ -698,21 +694,21 @@ _ruler_add(Evas_Object *parent, Ruler *ruler, Eina_Bool scale_rel)
      }
 }
 
-static inline const Part *
-_group_part_selected_get(const Group *group)
+static inline const Part2 *
+_group_part_selected_get(const Group2 *group)
 {
    assert(group != NULL);
    if (!group->current_selected)
      return NULL;
 
-   if (group->current_selected->resource_type == RESOURCE_TYPE_PART)
-     return (const Part *)group->current_selected;
+   if (group->current_selected->common.type == RESOURCE2_TYPE_PART)
+     return (const Part2 *)group->current_selected;
 
-   if (group->current_selected->resource_type == RESOURCE_TYPE_STATE)
-     return (const Part *)((State *)group->current_selected)->part;
+   if (group->current_selected->common.type == RESOURCE2_TYPE_STATE)
+     return (const Part2 *)((State2 *)group->current_selected)->part;
 
-   if (group->current_selected->resource_type == RESOURCE_TYPE_ITEM)
-     return (const Part *)((Part_Item *)group->current_selected)->part;
+   if (group->current_selected->common.type == RESOURCE2_TYPE_ITEM)
+     return (const Part2 *)((Part_Item2 *)group->current_selected)->part;
 
    return NULL;
 }
@@ -724,7 +720,7 @@ _markers_calculate(Workspace_Data *wd)
    Evas_Coord x, y;
    Scroll_Area *area;
    Eina_Stringshare *to;
-   const Part *part;
+   const Part2 *part;
    Eina_Strbuf *buf;
 
    area = _scroll_area_get(wd);
@@ -746,12 +742,12 @@ _markers_calculate(Workspace_Data *wd)
    if (part_geom)
      {
         buf = eina_strbuf_new();
-        eina_strbuf_append_printf(buf, _("Part '%s' width: %d"), part->name, part_geom->w);
+        eina_strbuf_append_printf(buf, _("Part '%s' width: %d"), part->common.name, part_geom->w);
         MARKER_GEOM_SET(area->ruler_h.obj, area->ruler_h.mr_part,
                         part_geom->x - x, part_geom->w, eina_strbuf_string_get(buf));
 
         eina_strbuf_reset(buf);
-        eina_strbuf_append_printf(buf, _("Part '%s' heigth: %d"), part->name, part_geom->h);
+        eina_strbuf_append_printf(buf, _("Part '%s' heigth: %d"), part->common.name, part_geom->h);
         MARKER_GEOM_SET(area->ruler_v.obj, area->ruler_v.mr_part,
                         part_geom->y - y, part_geom->h, eina_strbuf_string_get(buf));
         eina_strbuf_free(buf);
@@ -767,17 +763,17 @@ _markers_calculate(Workspace_Data *wd)
         if (!part_geom) return;
 
         buf = eina_strbuf_new();
-        eina_strbuf_append_printf(buf, _("Part '%s' object area width: %d"), part->name, part_geom->w);
+        eina_strbuf_append_printf(buf, _("Part '%s' object area width: %d"), part->common.name, part_geom->w);
         MARKER_GEOM_SET(area->ruler_h.obj, area->ruler_h.mr_obj_area,
                         part_geom->x - x, part_geom->w, eina_strbuf_string_get(buf));
 
         eina_strbuf_reset(buf);
-        eina_strbuf_append_printf(buf, _("Part '%s' object area heigth: %d"), part->name, part_geom->h);
+        eina_strbuf_append_printf(buf, _("Part '%s' object area heigth: %d"), part->common.name, part_geom->h);
         MARKER_GEOM_SET(area->ruler_v.obj, area->ruler_v.mr_obj_area,
                         part_geom->y - y, part_geom->h, eina_strbuf_string_get(buf));
 
-        to = edje_edit_state_rel1_to_x_get(wd->group->edit_object, part->name,
-                                           part->current_state->name, part->current_state->val);
+        to = edje_edit_state_rel1_to_x_get(wd->group->edit_object, part->common.name,
+                                           part->current_state->common.name, part->current_state->val);
         if (to)
           {
              part_geom = groupview_part_geom_get(area->content, to);
@@ -786,8 +782,8 @@ _markers_calculate(Workspace_Data *wd)
              MARKER_GEOM_SET(area->ruler_h.obj, area->ruler_h.mr_rel1,
                              part_geom->x - x, part_geom->w, eina_strbuf_string_get(buf));
           }
-        to = edje_edit_state_rel2_to_x_get(wd->group->edit_object, part->name,
-                                           part->current_state->name, part->current_state->val);
+        to = edje_edit_state_rel2_to_x_get(wd->group->edit_object, part->common.name,
+                                           part->current_state->common.name, part->current_state->val);
         if (to)
           {
              part_geom = groupview_part_geom_get(area->content, to);
@@ -796,8 +792,8 @@ _markers_calculate(Workspace_Data *wd)
              MARKER_GEOM_SET(area->ruler_h.obj, area->ruler_h.mr_rel2,
                              part_geom->x - x, part_geom->w, eina_strbuf_string_get(buf));
           }
-        to = edje_edit_state_rel1_to_y_get(wd->group->edit_object, part->name,
-                                           part->current_state->name, part->current_state->val);
+        to = edje_edit_state_rel1_to_y_get(wd->group->edit_object, part->common.name,
+                                           part->current_state->common.name, part->current_state->val);
         if (to)
           {
              part_geom = groupview_part_geom_get(area->content, to);
@@ -806,8 +802,8 @@ _markers_calculate(Workspace_Data *wd)
              MARKER_GEOM_SET(area->ruler_v.obj, area->ruler_v.mr_rel1,
                              part_geom->y - y, part_geom->h, eina_strbuf_string_get(buf));
           }
-        to = edje_edit_state_rel2_to_y_get(wd->group->edit_object, part->name,
-                                           part->current_state->name, part->current_state->val);
+        to = edje_edit_state_rel2_to_y_get(wd->group->edit_object, part->common.name,
+                                           part->current_state->common.name, part->current_state->val);
         if (to)
           {
              part_geom = groupview_part_geom_get(area->content, to);
@@ -1045,7 +1041,7 @@ static void
 _menu_add(Workspace_Data *wd)
 {
    wd->menu.obj = elm_menu_add(ap.win);
-   evas_object_smart_callback_add(wd->menu.obj, "clicked", _menu_dismissed, wd);
+   evas_object_smart_callback_add(wd->menu.obj, signals.elm.menu.clicked, _menu_dismissed, wd);
    MENU_ITEM_ADD(wd->menu.obj, NULL, NULL, _("Undo"), _menu_undo, "Ctrl-Z", NULL, wd);
    MENU_ITEM_ADD(wd->menu.obj, NULL, NULL, _("Redo"), _menu_redo, "Ctrl-Y", NULL, wd);
    elm_menu_item_separator_add(wd->menu.obj, NULL);
@@ -1104,7 +1100,7 @@ _scroll_area_add(Workspace_Data *wd, Scroll_Area *area, Eina_Bool scale_rel)
    area->container = container_add(area->scroller);
    evas_object_size_hint_weight_set(area->container, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    container_handler_size_set(area->container, 8, 8);
-   evas_object_smart_callback_add(area->container, "container,changed", _container_changed, wd);
+   evas_object_smart_callback_add(area->container, signals.eflete.container.changed, _container_changed, wd);
    elm_object_content_set(area->helper, area->container);
    container_container_size_set(area->container, 350, 350);
 
@@ -1188,6 +1184,7 @@ _mode_cb(void *data,
          //elm_object_part_content_set(wd->panes, "right", wd->group_navi);
          evas_object_show(wd->group_navi);
          _zoom_controls_disabled_set(wd, false);
+         elm_object_disabled_set(wd->toolbar.history, false);
          evas_object_smart_callback_call(ap.win, SIGNAL_GROUP_CHANGED, wd->group);
 
          area = &wd->normal;
@@ -1207,6 +1204,7 @@ _mode_cb(void *data,
          demo_group_demo_update(wd->demo_navi);
 
          _zoom_controls_disabled_set(wd, true);
+         elm_object_disabled_set(wd->toolbar.history, true);
          evas_object_smart_callback_call(ap.win, SIGNAL_DIFFERENT_TAB_CLICKED, NULL);
 
          area = &wd->demo;
@@ -1275,12 +1273,12 @@ _part_select(void *data,
              void *event_info)
 {
    Workspace_Data *wd = data;
-   Part *part = event_info;
+   Part2 *part = event_info;
 
    assert((MODE_NORMAL == wd->mode) || (MODE_CODE == wd->mode));
 
    groupview_hard_update(wd->normal.content);
-   groupview_part_select(wd->normal.content, (part) ? part->name : NULL);
+   groupview_part_select(wd->normal.content, (part) ? part->common.name : NULL);
    _markers_calculate(wd);
 }
 
@@ -1290,7 +1288,7 @@ _part_visible(void *data,
               void *event_info)
 {
    Workspace_Data *wd = data;
-   Part *part = event_info;
+   Part2 *part = event_info;
 
    assert((MODE_NORMAL == wd->mode) || (MODE_CODE == wd->mode));
 
@@ -1306,12 +1304,12 @@ _groupview_clicked(void *data,
                    void *event_info)
 {
    Workspace_Data *wd = data;
-   Part *part = event_info;
+   Part2 *part = event_info;
 
    assert((MODE_NORMAL == wd->mode) || (MODE_CODE == wd->mode));
 
-   group_navigator_select(wd->group_navi, part ? (Resource *)part : NULL);
-   groupview_part_select(wd->normal.content, part ? part->name : NULL);
+   group_navigator_select(wd->group_navi, part ? (Resource2 *)part : NULL);
+   groupview_part_select(wd->normal.content, part ? part->common.name : NULL);
 }
 
 static void
@@ -1325,20 +1323,20 @@ _groupview_hl_part_drag_start(void *data,
    change = change_add(NULL);
    if (MIDDLE != event->hl_type)
      {
-        part_w = edje_edit_state_max_w_get(wd->group->edit_object, event->part->name,
-                                           event->part->current_state->name,
+        part_w = edje_edit_state_max_w_get(wd->group->edit_object, event->part->common.name,
+                                           event->part->current_state->common.name,
                                            event->part->current_state->val);
-        part_h = edje_edit_state_max_h_get(wd->group->edit_object, event->part->name,
-                                           event->part->current_state->name,
+        part_h = edje_edit_state_max_h_get(wd->group->edit_object, event->part->common.name,
+                                           event->part->current_state->common.name,
                                            event->part->current_state->val);
      }
    else
      {
-        part_align_x = edje_edit_state_align_x_get(wd->group->edit_object, event->part->name,
-                                                   event->part->current_state->name,
+        part_align_x = edje_edit_state_align_x_get(wd->group->edit_object, event->part->common.name,
+                                                   event->part->current_state->common.name,
                                                    event->part->current_state->val);
-        part_align_y = edje_edit_state_align_y_get(wd->group->edit_object, event->part->name,
-                                                   event->part->current_state->name,
+        part_align_y = edje_edit_state_align_y_get(wd->group->edit_object, event->part->common.name,
+                                                   event->part->current_state->common.name,
                                                    event->part->current_state->val);
      }
    shortcuts_object_push(obj);
@@ -1357,13 +1355,13 @@ _groupview_hl_part_changed(void *data,
    if (MIDDLE != event->hl_type)
      {
         CRIT_ON_FAIL(editor_state_max_w_set(wd->group->edit_object, change, true, true,
-                                            event->part->name,
-                                            event->part->current_state->name,
+                                            event->part->common.name,
+                                            event->part->current_state->common.name,
                                             event->part->current_state->val,
                                             event->w));
         CRIT_ON_FAIL(editor_state_max_h_set(wd->group->edit_object, change, true, true,
-                                            event->part->name,
-                                            event->part->current_state->name,
+                                            event->part->common.name,
+                                            event->part->current_state->common.name,
                                             event->part->current_state->val,
                                             event->h));
      }
@@ -1380,12 +1378,12 @@ _groupview_hl_part_changed(void *data,
         if (align_x > 1.0) align_x = 1.0;
         if (align_y > 1.0) align_y = 1.0;
         CRIT_ON_FAIL(editor_state_align_x_set(wd->group->edit_object, change, true, true,
-                                              event->part->name,
-                                              event->part->current_state->name,
+                                              event->part->common.name,
+                                              event->part->current_state->common.name,
                                               event->part->current_state->val, align_x));
         CRIT_ON_FAIL(editor_state_align_y_set(wd->group->edit_object, change, true, true,
-                                              event->part->name,
-                                              event->part->current_state->name,
+                                              event->part->common.name,
+                                              event->part->current_state->common.name,
                                               event->part->current_state->val, align_y));
      }
 }
@@ -1413,11 +1411,13 @@ _groupview_hl_part_drag_stop(void *data,
      }
    else
      {
-        double align_x = edje_edit_state_align_x_get(wd->group->edit_object, event->part->name,
-                                                     event->part->current_state->name,
+        double align_x = edje_edit_state_align_x_get(wd->group->edit_object,
+                                                     event->part->common.name,
+                                                     event->part->current_state->common.name,
                                                      event->part->current_state->val);
-        double align_y = edje_edit_state_align_y_get(wd->group->edit_object, event->part->name,
-                                                     event->part->current_state->name,
+        double align_y = edje_edit_state_align_y_get(wd->group->edit_object,
+                                                     event->part->common.name,
+                                                     event->part->current_state->common.name,
                                                      event->part->current_state->val);
         if ((align_x == part_align_x) && (align_y == part_align_y))
           change_free(change);
@@ -1456,7 +1456,7 @@ _panes_h_press(void *data __UNUSED__,
 }
 
 Evas_Object *
-workspace_add(Evas_Object *parent, Group *group)
+workspace_add(Evas_Object *parent, Group2 *group)
 {
    Workspace_Data *wd;
    Elm_Object_Item *tb_it;
@@ -1465,7 +1465,7 @@ workspace_add(Evas_Object *parent, Group *group)
    assert(group != NULL);
 
    /* load the editable object */
-   gm_group_edit_object_load(ap.project, group, evas_object_evas_get(ap.win));
+   resource_group_edit_object_load(ap.project, group, evas_object_evas_get(ap.win));
    edje_object_animation_set(group->edit_object, false);
 
    wd = mem_calloc(1, sizeof(Workspace_Data));
@@ -1509,7 +1509,7 @@ workspace_add(Evas_Object *parent, Group *group)
    evas_object_size_hint_min_set(wd->toolbar.libraries_switcher, 95, 0);
    elm_object_text_set(wd->toolbar.libraries_switcher, _("Library"));
    elm_object_style_set(wd->toolbar.libraries_switcher, "library");
-   evas_object_smart_callback_add(wd->toolbar.libraries_switcher, "item,pressed", _library_select, wd);
+   evas_object_smart_callback_add(wd->toolbar.libraries_switcher, signals.elm.combobox.item_pressed, _library_select, wd);
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
    elm_object_item_part_content_set(tb_it, NULL, wd->toolbar.libraries_switcher);
 
@@ -1563,7 +1563,7 @@ workspace_add(Evas_Object *parent, Group *group)
 #else
    CHECK_ADD(wd->layout, wd->toolbar.mode_switcher);
    elm_object_style_set(wd->toolbar.mode_switcher, "demo");
-   evas_object_smart_callback_add(wd->toolbar.mode_switcher, "changed", _mode_cb, wd);
+   evas_object_smart_callback_add(wd->toolbar.mode_switcher, signals.elm.check.changed, _mode_cb, wd);
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
    elm_object_item_part_content_set(tb_it, NULL, wd->toolbar.mode_switcher);
    tb_it = elm_toolbar_item_append(wd->toolbar.obj, NULL, NULL, NULL, NULL);
@@ -1592,8 +1592,8 @@ workspace_add(Evas_Object *parent, Group *group)
    elm_object_style_set(wd->panes_h, "pan_hide");
    elm_panes_horizontal_set(wd->panes_h, true);
    elm_panes_content_right_size_set(wd->panes_h, 0); /* set the default min size */
-   evas_object_smart_callback_add(wd->panes_h, "press", _panes_h_press, wd);
-   evas_object_smart_callback_add(wd->panes_h, "unpress", _panes_h_unpress, wd);
+   evas_object_smart_callback_add(wd->panes_h, signals.elm.panes.press, _panes_h_press, wd);
+   evas_object_smart_callback_add(wd->panes_h, signals.elm.panes.unpress, _panes_h_unpress, wd);
    elm_layout_content_set(wd->layout, NULL, wd->panes_h);
 
    ENTRY_ADD(wd->panes_h, wd->code.obj, false)
@@ -1652,7 +1652,7 @@ workspace_mode_set(Evas_Object *obj, Workspace_Mode mode)
 }
 
 void
-workspace_group_navigator_update_part(Evas_Object *obj, Part *part)
+workspace_group_navigator_update_part(Evas_Object *obj, Part2 *part)
 {
    WS_DATA_GET(obj);
 
@@ -1662,7 +1662,7 @@ workspace_group_navigator_update_part(Evas_Object *obj, Part *part)
 }
 
 void
-workspace_group_navigator_update_group_data(Evas_Object *obj, Resource *group_data)
+workspace_group_navigator_update_group_data(Evas_Object *obj, Resource2 *group_data)
 {
    WS_DATA_GET(obj);
 
@@ -1756,11 +1756,11 @@ workspace_parts_markers_visible_get(Evas_Object *obj)
 void
 workspace_part_add(Evas_Object *obj, Eina_Stringshare *part_name)
 {
-   Part *part;
+   Part2 *part;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
 
-   part = gm_part_add(ap.project, wd->group, part_name);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
    groupview_part_add(wd->normal.content, part);
    group_navigator_part_add(wd->group_navi, part);
    demo_group_part_add(wd->demo_navi, part);
@@ -1769,18 +1769,14 @@ workspace_part_add(Evas_Object *obj, Eina_Stringshare *part_name)
 void
 workspace_part_del(Evas_Object *obj, Eina_Stringshare *part_name)
 {
-   Part *part;
-   Resource request;
+   Part2 *part;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_PART;
-   request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &request);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
    group_navigator_part_del(wd->group_navi, part);
    demo_group_part_del(wd->demo_navi, part);
    groupview_part_del(wd->normal.content, part);
-   gm_part_del(ap.project, part);
 }
 
 void
@@ -1788,21 +1784,17 @@ workspace_part_item_add(Evas_Object *obj,
                         Eina_Stringshare *part_name,
                         Eina_Stringshare *item_name)
 {
-   Part *part;
-   Resource request;
+   Part2 *part;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
    assert(item_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_PART;
-   request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &request);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
 
    assert((part->type == EDJE_PART_TYPE_TABLE) ||
           (part->type == EDJE_PART_TYPE_BOX));
 
-   group_navigator_select(wd->group_navi, (Resource *)part);
-   gm_part_item_add(ap.project, part, item_name);
+   group_navigator_select(wd->group_navi, (Resource2 *)part);
    groupview_hard_update(wd->normal.content);
    group_navigator_part_item_add(wd->group_navi, part, item_name);
 }
@@ -1812,29 +1804,24 @@ workspace_part_item_del(Evas_Object *obj,
                         Eina_Stringshare *part_name,
                         Eina_Stringshare *item_name)
 {
-   Part *part;
-   Part_Item *item;
-   Resource request;
+   Part2 *part;
+   Part_Item2 *item;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
    assert(item_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_PART;
-   request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &request);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
 
    assert((part->type == EDJE_PART_TYPE_TABLE) ||
           (part->type == EDJE_PART_TYPE_BOX));
 
-   request.resource_type = RESOURCE_TYPE_ITEM;
-   request.name = item_name;
-   item = (Part_Item *)resource_get(part->items, &request);
+   item = (Part_Item2 *)resource_manager_find(part->items, item_name);
 
    assert(item != NULL);
 
-   group_navigator_select(wd->group_navi, (Resource *)part);
+   group_navigator_select(wd->group_navi, (Resource2 *)part);
    group_navigator_part_item_del(wd->group_navi, item);
-   gm_part_item_del(ap.project, part, item_name);
+
 }
 
 void
@@ -1843,19 +1830,15 @@ workspace_part_state_add(Evas_Object *obj,
                          Eina_Stringshare *state_name,
                          double state_val)
 {
-   Part *part;
-   Resource request;
-   State *state;
+   Part2 *part;
+   State2 *state;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
    assert(state_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_PART;
-   request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &request);
-
-   group_navigator_select(wd->group_navi, (Resource *)part);
-   state = gm_state_add(ap.project, part, state_name, state_val);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
+   group_navigator_select(wd->group_navi, (Resource2 *)part);
+   state = (State2 *)resource_manager_v_find(part->states, state_name, state_val);
    group_navigator_part_state_add(wd->group_navi, part, state);
 }
 
@@ -1865,20 +1848,14 @@ workspace_part_state_select(Evas_Object *obj,
                             Eina_Stringshare *state_name,
                             double state_val)
 {
-   Part *part;
-   Resource part_request;
-   State *state, request;
+   Part2 *part;
+   State2 *state;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
    assert(state_name != NULL);
 
-   part_request.resource_type = RESOURCE_TYPE_PART;
-   part_request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &part_request);
-   request.resource_type = RESOURCE_TYPE_STATE;
-   request.name = state_name;
-   request.val = state_val;
-   state = (State *)resource_get(part->states, (Resource *)&request);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
+   state = (State2 *)resource_manager_v_find(part->states, state_name, state_val);
 
    groupview_hard_update(wd->normal.content);
    group_navigator_part_state_select(wd->group_navi, state);
@@ -1890,24 +1867,17 @@ workspace_part_state_del(Evas_Object *obj,
                          Eina_Stringshare *state_name,
                          double state_val)
 {
-   Part *part;
-   Resource part_request;
-   State *state, request;
+   Part2 *part;
+   State2 *state;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
    assert(state_name != NULL);
 
-   part_request.resource_type = RESOURCE_TYPE_PART;
-   part_request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &part_request);
-   request.resource_type = RESOURCE_TYPE_STATE;
-   request.name = state_name;
-   request.val = state_val;
-   state = (State *)resource_get(part->states, (Resource *)&request);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
+   state = (State2 *)resource_manager_v_find(part->states, state_name, state_val);
 
-   group_navigator_select(wd->group_navi, (Resource *)part);
+   group_navigator_select(wd->group_navi, (Resource2 *)part);
    group_navigator_part_state_del(wd->group_navi, part, state);
-   gm_state_del(ap.project, state);
 }
 
 void
@@ -1915,24 +1885,17 @@ workspace_part_restack(Evas_Object *obj,
                        Eina_Stringshare *part_name,
                        Eina_Stringshare *relative_part_name)
 {
-   Part *part, *rel_part = NULL;
-   Resource request;
+   Part2 *part, *rel_part = NULL;
    WS_DATA_GET(obj);
    assert(part_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_PART;
-   request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &request);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
+
    if (relative_part_name)
-     {
-        request.name = relative_part_name;
-        rel_part = (Part *)resource_get(wd->group->parts, &request);
-     }
+     rel_part = (Part2 *)resource_manager_find(wd->group->parts, relative_part_name);
 
-   group_navigator_select(wd->group_navi, (Resource *)part);
+   group_navigator_select(wd->group_navi, (Resource2 *)part);
    group_navigator_part_restack(wd->group_navi, part, rel_part);
-   gm_part_restack(part, rel_part);
-
    groupview_part_restack(wd->normal.content, part_name, relative_part_name);
 }
 
@@ -1942,33 +1905,14 @@ workspace_part_item_restack(Evas_Object *obj,
                             Eina_Stringshare *part_item_name,
                             Eina_Stringshare *relative_part_item_name)
 {
-   Part *part;
-   Part_Item *item, *rel_item;
-   Resource request;
+   Part2 *part;
    WS_DATA_GET(obj);
    assert(part_item_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_PART;
-   request.name = part_name;
-   part = (Part *)resource_get(wd->group->parts, &request);
+   part = (Part2 *)resource_manager_find(wd->group->parts, part_name);
 
-   request.resource_type = RESOURCE_TYPE_ITEM;
-   request.name = part_item_name;
-   item = (Part_Item *)resource_get(part->items, &request);
-
-   if (relative_part_item_name)
-     {
-        request.resource_type = RESOURCE_TYPE_ITEM;
-        request.name = relative_part_item_name;
-        rel_item = (Part_Item *)resource_get(part->items, &request);
-     }
-   else
-     rel_item = NULL;
-
-   group_navigator_select(wd->group_navi, (Resource *)part);
-   gm_part_item_restack(item, rel_item);
+   group_navigator_select(wd->group_navi, (Resource2 *)part);
    group_navigator_part_item_restack(wd->group_navi, part, part_item_name, relative_part_item_name);
-
    groupview_hard_update(wd->normal.content);
 }
 
@@ -1978,23 +1922,18 @@ workspace_program_add(Evas_Object *obj, Eina_Stringshare *program_name)
    WS_DATA_GET(obj);
    assert(program_name != NULL);
 
-   gm_program_add(ap.project, wd->group, program_name);
    group_navigator_program_add(wd->group_navi, program_name);
 }
 
 void
 workspace_program_del(Evas_Object *obj, Eina_Stringshare *program_name)
 {
-   Resource request;
-   Program *program;
+   Program2 *program;
    WS_DATA_GET(obj);
    assert(program_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_PROGRAM;
-   request.name = program_name;
-   program = (Program *)resource_get(wd->group->programs, &request);
+   program = (Program2 *)resource_manager_find(wd->group->programs, program_name);
 
-   gm_program_del(ap.project, wd->group, program_name);
    group_navigator_program_del(wd->group_navi, program);
    demo_group_program_del(wd->demo_navi, program_name);
 }
@@ -2005,24 +1944,18 @@ workspace_group_data_add(Evas_Object *obj, Eina_Stringshare *group_data_name)
    WS_DATA_GET(obj);
    assert(group_data_name != NULL);
 
-   gm_group_data_add(ap.project, wd->group, group_data_name);
    group_navigator_group_data_add(wd->group_navi, group_data_name);
 }
 
 void
 workspace_group_data_del(Evas_Object *obj, Eina_Stringshare *group_data_name)
 {
-   Resource request;
-   Resource *group_data;
+   Resource2 *group_data;
    WS_DATA_GET(obj);
    assert(group_data_name != NULL);
 
-   request.resource_type = RESOURCE_TYPE_DATA;
-   request.name = group_data_name;
-   group_data = resource_get(wd->group->data_items, &request);
-
+   group_data = resource_manager_find(wd->group->data_items, group_data_name);
    group_navigator_group_data_del(wd->group_navi, group_data);
-   gm_group_data_del(ap.project, wd->group, group_data_name);
 }
 
 void
@@ -2291,7 +2224,7 @@ workspace_code_changed(Evas_Object *obj)
    elm_object_text_set(layout, _("Project is changed"));
    btn = elm_button_add(layout);
    elm_object_text_set(btn, _("Reload"));
-   evas_object_smart_callback_add(btn, "clicked", _code_reload, wd);
+   evas_object_smart_callback_add(btn, signals.elm.button.clicked, _code_reload, wd);
    elm_object_content_set(layout, btn);
 
    elm_object_part_content_set(wd->code.obj, "elm.swallow.overlay", layout);
