@@ -20,7 +20,7 @@
 #include "property.h"
 #include "property_private.h"
 #include "main_window.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 
 /* gengrid base functions */
 
@@ -90,7 +90,7 @@ _del_tween_image(void *data,
      }
 
    eina_list_free(selected);
-   evas_object_smart_callback_call(control, "image,tween,changed", NULL);
+   evas_object_smart_callback_call(control, signals.eflete.property.image_tween_control.changed, NULL);
 }
 
 static Eina_Bool
@@ -110,7 +110,7 @@ _on_image_editor_tween_done(void *data,
         added_tweens = eina_list_append(added_tweens, name);
      }
 
-   evas_object_smart_callback_call(control, "image,tween,changed", NULL);
+   evas_object_smart_callback_call(control, signals.eflete.property.image_tween_control.changed, NULL);
 TODO("apply when popup will be fixed");
 //   elm_object_scroll_freeze_pop(tween_list);
 
@@ -218,14 +218,14 @@ property_image_tween_control_add(Evas_Object *parent)
    BUTTON_ADD(item, button, NULL)
    ICON_STANDARD_ADD(button, icon, true, "plus");
    elm_object_part_content_set(button, NULL, icon);
-   evas_object_smart_callback_add(button, "clicked", _add_tween_image,
+   evas_object_smart_callback_add(button, signals.elm.button.clicked, _add_tween_image,
                                   item);
    elm_layout_content_set(item, "elm.swallow.add", button);
 
    BUTTON_ADD(item, button, NULL)
    ICON_STANDARD_ADD(button, icon, true, "minus");
    elm_object_part_content_set(button, NULL, icon);
-   evas_object_smart_callback_add(button, "clicked", _del_tween_image,
+   evas_object_smart_callback_add(button, signals.elm.button.clicked, _del_tween_image,
                                   item);
    elm_layout_content_set(item, "elm.swallow.del", button);
 

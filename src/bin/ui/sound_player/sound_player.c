@@ -83,7 +83,7 @@ _player_units_format(double val)
 {
    char *units = mem_malloc(sizeof(char) * 16);
    int tmp = (int)val;
-   snprintf(units, 16, "%02.0f:%02.0f", (double)(tmp / 60), (double)(tmp % 60));
+   snprintf(units, 16, "%02d:%02d", (int)(tmp / 60), (tmp % 60));
    return units;
 }
 
@@ -179,14 +179,14 @@ _tone_play()
 {
    double value;
    Eina_Bool ret = false;
-   Tone_Resource *tone;
+   Tone2 *tone;
 
-   tone = (Tone_Resource *)snd->resource;
+   tone = (Tone2 *)snd->resource;
 
    if (!in)
      {
         in = eo_add(ECORE_AUDIO_IN_TONE_CLASS, NULL);
-        eo_do(in, ecore_audio_obj_name_set(tone->name));
+        eo_do(in, ecore_audio_obj_name_set(tone->common.name));
         eo_do(in, eo_key_data_set(ECORE_AUDIO_ATTR_TONE_FREQ, &tone->freq));
         eo_do(in, ecore_audio_obj_in_length_set(TONE_PLAYING_DURATION));
         eo_do(in, eo_event_callback_add(ECORE_AUDIO_IN_EVENT_IN_STOPPED,
@@ -218,14 +218,14 @@ _sample_play()
 {
    double value, len = 0.0;
    Eina_Bool ret = false;
-   External_Resource *sample;
+   Sound2 *sample;
 
    if (!in)
      {
-        sample = (External_Resource *)snd->resource;
+        sample = (Sound2 *)snd->resource;
         _create_io_stream();
-        eo_do(in, ecore_audio_obj_name_set(sample->path));
-        eo_do(in, ret = ecore_audio_obj_source_set(sample->path));
+        eo_do(in, ecore_audio_obj_name_set(sample->source));
+        eo_do(in, ret = ecore_audio_obj_source_set(sample->source));
         if (!ret)
           {
              ERR("Can not set source obj for added sample");
@@ -234,7 +234,7 @@ _sample_play()
         eo_do(in, len = ecore_audio_obj_in_length_get());
         elm_slider_min_max_set(rewin, 0, len);
         elm_slider_value_set(rewin, 0.0);
-        length = ecore_file_size(sample->path);
+        length = ecore_file_size(sample->source);
      }
 
    eo_do(out, ret = ecore_audio_obj_out_input_attach(in));
@@ -376,11 +376,11 @@ sound_player_add(Evas_Object *parent)
    evas_object_size_hint_weight_set(rewin, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_show(rewin);
    elm_object_part_content_set(control, "eflete.swallow.fast", rewin);
-   evas_object_smart_callback_add(rewin, "changed", _on_rewin_cb, NULL);
+   evas_object_smart_callback_add(rewin, signals.elm.slider.changed, _on_rewin_cb, NULL);
 
    BT_ADD(control, play, icon, "media_player/play");
    elm_object_part_content_set(rewin, NULL, play);
-   evas_object_smart_callback_add(play, "clicked", _on_play_cb, NULL);
+   evas_object_smart_callback_add(play, signals.elm.button.clicked, _on_play_cb, NULL);
    elm_object_disabled_set(play, true);
 
    vio.get_length = _snd_file_get_length;

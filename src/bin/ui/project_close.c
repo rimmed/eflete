@@ -19,7 +19,7 @@
 
 #include "main_window.h"
 #include "tabs.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "project_navigator.h"
 
 static Eina_Bool
@@ -96,10 +96,11 @@ _setup_save_splash(void *data, Splash_Status status __UNUSED__)
    else
      {
 #endif /* HAVE_ENVENTOR */
-        pm_project_save(ap.project,
-                        _progress_print,
-                        _progress_end,
-                        data);
+        if (!pm_project_save(ap.project,
+                             _progress_print,
+                             _progress_end,
+                             data))
+          return false;
 #ifdef HAVE_ENVENTOR
      }
 #endif /* HAVE_ENVENTOR */
@@ -177,6 +178,7 @@ project_close(void)
 
    assert(ap.project != NULL);
 
+#ifndef HAVE_TIZEN
    if (ap.project->changed)
      {
         title = eina_stringshare_printf(_("Close project %s"), ap.project->name);
@@ -189,6 +191,10 @@ project_close(void)
         eina_stringshare_del(title);
         return false;
      }
+#endif
+   project_to_close = ap.project;
+   if (!pm_project_close(project_to_close))
+     return false;
 
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_BASE, true);
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_STYLE_ONLY, true);
@@ -197,9 +203,7 @@ project_close(void)
 
    /* some code in close project callback checks ap.project for NULL, so we need to
       change it before closing project */
-   project_to_close = ap.project;
    ap.project = NULL;
-   pm_project_close(project_to_close);
    elm_layout_text_set(ap.win_layout, "eflete.project.time", _("Last saved: none"));
    elm_layout_text_set(ap.win_layout, "eflete.project.part", _("Project path: none"));
 

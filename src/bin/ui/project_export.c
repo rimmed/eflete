@@ -19,7 +19,7 @@
 
 #include "main_window.h"
 #include "tabs.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "project_common.h"
 
 static Eina_Bool
@@ -36,7 +36,9 @@ _export_develop_setup(void *data, Splash_Status status __UNUSED__)
 
    assert(path != NULL);
 
-   pm_project_develop_export(ap.project, path, progress_print, progress_end, NULL);
+   if (!pm_project_develop_export(ap.project, path, ap.project->groups,
+                                  progress_print, progress_end, NULL))
+     return false;
    return true;
 }
 
@@ -46,7 +48,8 @@ _after_export_dev_check(void *data)
    ap.splash = splash_add(ap.win, _export_develop_setup, _export_teardown, NULL, data);
    evas_object_focus_set(ap.splash, true);
    evas_object_show(ap.splash);
-   popup_fileselector_helper_dismiss();
+   if (!ap.path.export_edj)
+     popup_fileselector_helper_dismiss();
 }
 
 static Eina_Bool
@@ -111,7 +114,8 @@ _export_release_setup(void *data, Splash_Status status __UNUSED__)
 
    assert(path != NULL);
 
-   pm_project_release_export(ap.project, path, progress_print, progress_end, NULL);
+   if (!pm_project_release_export(ap.project, path, progress_print, progress_end, NULL))
+     return false;
    return true;
 }
 
@@ -122,7 +126,8 @@ _after_export_release_check(void *data)
                            NULL, data);
    evas_object_focus_set(ap.splash, true);
    evas_object_show(ap.splash);
-   popup_fileselector_helper_dismiss();
+   if (!ap.path.export_edj)
+     popup_fileselector_helper_dismiss();
 }
 
 static Eina_Bool
@@ -188,11 +193,12 @@ _export_source_code_setup(void *data, Splash_Status status __UNUSED__)
 
    assert(path != NULL);
 
-   pm_project_source_code_export(ap.project,
-                                 path,
-                                 progress_print,
-                                 progress_end,
-                                 NULL);
+   if (!pm_project_source_code_export(ap.project,
+                                      path,
+                                      progress_print,
+                                      progress_end,
+                                      NULL))
+     return false;
    return true;
 }
 
@@ -202,7 +208,8 @@ _after_export_source_code_check(void *data)
    ap.splash = splash_add(ap.win, _export_source_code_setup, _export_teardown, NULL, data);
    evas_object_focus_set(ap.splash, true);
    evas_object_show(ap.splash);
-   popup_fileselector_helper_dismiss();
+   if (!ap.path.export_edc.path)
+     popup_fileselector_helper_dismiss();
 }
 
 static Eina_Bool
@@ -259,12 +266,13 @@ _export_group_source_code_setup(void *data, Splash_Status status __UNUSED__)
 
    assert(path != NULL);
 
-   pm_group_source_code_export(ap.project,
-                               tabs_current_group_get(),
-                               path,
-                               progress_print,
-                               progress_end,
-                               NULL);
+   if (!pm_group_source_code_export(ap.project,
+                                    tabs_current_group_get(),
+                                    path,
+                                    progress_print,
+                                    progress_end,
+                                    NULL))
+     return false;
    return true;
 }
 
@@ -286,12 +294,12 @@ _export_group_source_code(void *data __UNUSED__,
    Eina_Stringshare *path;
    Eina_Strbuf *buf;
    char *name;
-   Group *group;
+   Group2 *group;
 
    assert(selected != NULL);
 
    group = tabs_current_group_get();
-   name = strdup(group->name);
+   name = strdup(group->common.name);
    string_char_replace(name, '/', '_');
 
    path = eina_stringshare_add((const char *)eina_list_data_get(selected));

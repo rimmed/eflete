@@ -21,7 +21,7 @@
 #include <Ecore_Getopt.h>
 #include <regex.h>
 #include "project_navigator.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "project_common.h"
 #include "tabs.h"
 /* it's really bad idia, but need haven't time to make it correctly */
@@ -82,14 +82,16 @@ static const Ecore_Getopt options = {
 static Eina_Bool
 _setup_open_splash(void *data, Splash_Status status __UNUSED__)
 {
+   Eina_Bool ret = true;
    Eina_Stringshare *path = data;
 
    assert(path != NULL);
 
-   pm_project_open(path, progress_print, _tabs_progress_end, NULL);
+   if (!pm_project_open(path, progress_print, _tabs_progress_end, NULL))
+     ret = false;
    eina_stringshare_del(path);
 
-   return true;
+   return ret;
 }
 
 static Eina_Bool
@@ -101,7 +103,7 @@ _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 __UNUSED__ static Eina_Bool
 _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
-   pm_project_thread_cancel();
+   //pm_project_thread_cancel();
    return true;
 }
 

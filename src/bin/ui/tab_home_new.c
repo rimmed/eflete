@@ -169,7 +169,7 @@ _genlist_content_get(void *data,
    CHECK_ADD(ap.win, check);
    elm_object_focus_allow_set(check, false);
    elm_check_state_set(check, widget_data->check);
-   evas_object_smart_callback_add(check, "changed", _check_widget, data);
+   evas_object_smart_callback_add(check, signals.elm.check.changed, _check_widget, data);
    return check;
 }
 
@@ -448,6 +448,7 @@ _progress_end(void *data, PM_Project_Result result, Project *project)
 static Eina_Bool
 _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
+   Eina_Bool ret = true;
    Eina_Tmpstr *tmp_dir;
    Eina_Strbuf *edc, *flags;
    Eina_Stringshare *edc_path;
@@ -461,6 +462,7 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    tab_new.tmp_dir_path = eina_stringshare_add(tmp_dir);
    eina_tmpstr_del(tmp_dir);
 
+   TODO("replace from eina_stringshare to char[]");
    edc_path = eina_stringshare_printf("%s/new_project_tmp.edc", tab_new.tmp_dir_path);
    edc = _edc_code_generate(tab_new.tmp_dir_path);
 
@@ -469,24 +471,29 @@ _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    if (!fp)
      {
         ERR("Failed to open file \"%s\"", edc_path);
-        return false;
+        ret = false;
+        goto exit;
      }
    fputs(eina_strbuf_string_get(edc), fp);
-   fclose(fp);
 
    flags = eina_strbuf_new();
    eina_strbuf_append_printf(flags, "-id \"%s/template/images\" -sd \"%s/template/sounds\" -v",
                              ap.path.edj_path, ap.path.edj_path);
 
-   pm_project_import_edc(elm_entry_entry_get(tab_new.name),
-                         elm_entry_entry_get(tab_new.path),
-                         edc_path,
-                         eina_strbuf_string_get(flags),
-                         progress_print,
-                         _progress_end,
-                         &tab_new.meta);
+   if (!pm_project_import_edc(elm_entry_entry_get(tab_new.name),
+                              elm_entry_entry_get(tab_new.path),
+                              edc_path,
+                              eina_strbuf_string_get(flags),
+                              progress_print,
+                              _progress_end,
+                              &tab_new.meta))
+     ret = false;
 
-   return true;
+   eina_strbuf_free(flags);
+exit:
+   eina_strbuf_free(edc);
+   fclose(fp);
+   return ret;
 }
 
 static Eina_Bool
@@ -503,7 +510,7 @@ _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 static Eina_Bool
 _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
-   pm_project_thread_cancel();
+   //pm_project_thread_cancel();
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
@@ -597,7 +604,7 @@ _tab_new_project_add(void)
 
    BUTTON_ADD(tab_new.layout, tab_new.btn_create, _("Create"))
    elm_object_part_content_set(tab_new.layout, "elm.swallow.btn_create", tab_new.btn_create);
-   evas_object_smart_callback_add(tab_new.btn_create, "clicked", _on_create, NULL);
+   evas_object_smart_callback_add(tab_new.btn_create, signals.elm.button.clicked, _on_create, NULL);
    elm_object_disabled_set(tab_new.btn_create, true);
 
    /* label.name */
@@ -617,13 +624,13 @@ _tab_new_project_add(void)
 
    /* check all */
    CHECK_ADD(tab_new.layout, tab_new.ch_all);
-   evas_object_smart_callback_add(tab_new.ch_all, "changed", _on_check_all, NULL);
+   evas_object_smart_callback_add(tab_new.ch_all, signals.elm.check.changed, _on_check_all, NULL);
    elm_object_part_content_set(tab_new.layout, "swallow.all_widgets_check", tab_new.ch_all);
    elm_object_part_text_set(tab_new.layout, "label.widgets", _("Widgets:"));
 
    /* genlist */
    tab_new.genlist = elm_genlist_add(ap.win);
-   evas_object_smart_callback_add(tab_new.genlist, "activated", _on_item_activated, NULL);
+   evas_object_smart_callback_add(tab_new.genlist, signals.elm.genlist.activated, _on_item_activated, NULL);
    itc = elm_genlist_item_class_new();
    itc->item_style = "default";
    itc->func.text_get = _genlist_label_get;

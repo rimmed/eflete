@@ -17,7 +17,7 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 #include "validator.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include <regex.h>
 
 struct _Resource_Name_Validator
@@ -27,7 +27,7 @@ struct _Resource_Name_Validator
    regex_t regex;
    Eina_List **list;
    Eina_Bool sorted;
-   Resource *res;
+   Resource2 *res;
 };
 
 void
@@ -41,7 +41,7 @@ resource_name_validator_list_set(Resource_Name_Validator *validator, Eina_List *
 }
 
 void
-resource_name_validator_resource_set(Resource_Name_Validator *validator, Resource *resource)
+resource_name_validator_resource_set(Resource_Name_Validator *validator, Resource2 *resource)
 {
    assert(validator != NULL);
 
@@ -86,8 +86,7 @@ resource_name_validator_helper(void *data,
                                const Eo_Event_Description *desc EINA_UNUSED,
                                void *event_info)
 {
-   Resource *res = NULL;
-   Resource request;
+   Resource2 *res = NULL;
    Elm_Validate_Content *vc = event_info;
    Resource_Name_Validator *validator = (Resource_Name_Validator *)data;
 
@@ -100,10 +99,7 @@ resource_name_validator_helper(void *data,
         /* check if resource with this name already exists in list */
         if (eina_list_data_get(*validator->list))
           {
-             request.name = vc->text;
-             request.resource_type = ((Resource *)eina_list_data_get(*validator->list))->resource_type;
-             TODO("remove sorted flag");
-             res = resource_get(*validator->list, &request);
+             res = resource_manager_find(*validator->list, vc->text);
           }
 
         if (!res) /* name is free */

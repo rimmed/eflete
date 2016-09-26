@@ -22,6 +22,8 @@
  * widgets which are a combobox with some more logic on top.
  */
 
+#define CRI CRIT
+
 /**
  * Base button smart data extended with combobox instance data.
  */

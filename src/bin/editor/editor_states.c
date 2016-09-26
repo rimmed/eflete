@@ -24,34 +24,34 @@
 #include "diff.h"
 
 extern int _editor_signals_blocked;
-EDITOR_STATE_DOUBLE(rel1_relative_x, ATTRIBUTE_STATE_REL1_RELATIVE_X)
-EDITOR_STATE_DOUBLE(rel1_relative_y, ATTRIBUTE_STATE_REL1_RELATIVE_Y)
-EDITOR_STATE_DOUBLE(rel2_relative_x, ATTRIBUTE_STATE_REL2_RELATIVE_X)
-EDITOR_STATE_DOUBLE(rel2_relative_y, ATTRIBUTE_STATE_REL2_RELATIVE_Y)
+EDITOR_STATE_DOUBLE(rel1_relative_x, RM_ATTRIBUTE_STATE_REL1_RELATIVE_X)
+EDITOR_STATE_DOUBLE(rel1_relative_y, RM_ATTRIBUTE_STATE_REL1_RELATIVE_Y)
+EDITOR_STATE_DOUBLE(rel2_relative_x, RM_ATTRIBUTE_STATE_REL2_RELATIVE_X)
+EDITOR_STATE_DOUBLE(rel2_relative_y, RM_ATTRIBUTE_STATE_REL2_RELATIVE_Y)
 
-EDITOR_STATE_INT(rel1_offset_x, ATTRIBUTE_STATE_REL1_OFFSET_X)
-EDITOR_STATE_INT(rel1_offset_y, ATTRIBUTE_STATE_REL1_OFFSET_Y)
-EDITOR_STATE_INT(rel2_offset_x, ATTRIBUTE_STATE_REL2_OFFSET_X)
-EDITOR_STATE_INT(rel2_offset_y, ATTRIBUTE_STATE_REL2_OFFSET_Y)
+EDITOR_STATE_INT(rel1_offset_x, RM_ATTRIBUTE_STATE_REL1_OFFSET_X)
+EDITOR_STATE_INT(rel1_offset_y, RM_ATTRIBUTE_STATE_REL1_OFFSET_Y)
+EDITOR_STATE_INT(rel2_offset_x, RM_ATTRIBUTE_STATE_REL2_OFFSET_X)
+EDITOR_STATE_INT(rel2_offset_y, RM_ATTRIBUTE_STATE_REL2_OFFSET_Y)
 
-EDITOR_STATE_DOUBLE(aspect_min, ATTRIBUTE_STATE_ASPECT_MIN)
-EDITOR_STATE_DOUBLE(aspect_max, ATTRIBUTE_STATE_ASPECT_MAX)
+EDITOR_STATE_DOUBLE(aspect_min, RM_ATTRIBUTE_STATE_ASPECT_MIN)
+EDITOR_STATE_DOUBLE(aspect_max, RM_ATTRIBUTE_STATE_ASPECT_MAX)
 
-EDITOR_STATE_DOUBLE(fill_origin_relative_x, ATTRIBUTE_STATE_FILL_ORIGIN_RELATIVE_X)
-EDITOR_STATE_DOUBLE(fill_origin_relative_y, ATTRIBUTE_STATE_FILL_ORIGIN_RELATIVE_Y)
-EDITOR_STATE_INT(fill_origin_offset_x, ATTRIBUTE_STATE_FILL_ORIGIN_OFFSET_X)
-EDITOR_STATE_INT(fill_origin_offset_y, ATTRIBUTE_STATE_FILL_ORIGIN_OFFSET_Y)
+EDITOR_STATE_DOUBLE(fill_origin_relative_x, RM_ATTRIBUTE_STATE_FILL_ORIGIN_RELATIVE_X)
+EDITOR_STATE_DOUBLE(fill_origin_relative_y, RM_ATTRIBUTE_STATE_FILL_ORIGIN_RELATIVE_Y)
+EDITOR_STATE_INT(fill_origin_offset_x, RM_ATTRIBUTE_STATE_FILL_ORIGIN_OFFSET_X)
+EDITOR_STATE_INT(fill_origin_offset_y, RM_ATTRIBUTE_STATE_FILL_ORIGIN_OFFSET_Y)
 
-EDITOR_STATE_DOUBLE(fill_size_relative_x, ATTRIBUTE_STATE_FILL_SIZE_RELATIVE_X)
-EDITOR_STATE_DOUBLE(fill_size_relative_y, ATTRIBUTE_STATE_FILL_SIZE_RELATIVE_Y)
-EDITOR_STATE_INT(fill_size_offset_x, ATTRIBUTE_STATE_FILL_SIZE_OFFSET_X)
-EDITOR_STATE_INT(fill_size_offset_y, ATTRIBUTE_STATE_FILL_SIZE_OFFSET_Y)
+EDITOR_STATE_DOUBLE(fill_size_relative_x, RM_ATTRIBUTE_STATE_FILL_SIZE_RELATIVE_X)
+EDITOR_STATE_DOUBLE(fill_size_relative_y, RM_ATTRIBUTE_STATE_FILL_SIZE_RELATIVE_Y)
+EDITOR_STATE_INT(fill_size_offset_x, RM_ATTRIBUTE_STATE_FILL_SIZE_OFFSET_X)
+EDITOR_STATE_INT(fill_size_offset_y, RM_ATTRIBUTE_STATE_FILL_SIZE_OFFSET_Y)
 
-EDITOR_STATE_DOUBLE_SAVE(container_align_x, ATTRIBUTE_STATE_CONTAINER_ALIGN_X)
-EDITOR_STATE_DOUBLE_SAVE(container_align_y, ATTRIBUTE_STATE_CONTAINER_ALIGN_Y)
+EDITOR_STATE_DOUBLE_SAVE(container_align_x, RM_ATTRIBUTE_STATE_CONTAINER_ALIGN_X)
+EDITOR_STATE_DOUBLE_SAVE(container_align_y, RM_ATTRIBUTE_STATE_CONTAINER_ALIGN_Y)
 
-EDITOR_STATE_DOUBLE(minmul_h, ATTRIBUTE_STATE_MINMUL_H)
-EDITOR_STATE_DOUBLE(minmul_w, ATTRIBUTE_STATE_MINMUL_W)
+EDITOR_STATE_DOUBLE(minmul_h, RM_ATTRIBUTE_STATE_MINMUL_H)
+EDITOR_STATE_DOUBLE(minmul_w, RM_ATTRIBUTE_STATE_MINMUL_W)
 
 #define MAX_SET(VAL, VAL_CAPS) \
 Eina_Bool \
@@ -61,7 +61,10 @@ editor_state_max_## VAL ##_set(Evas_Object *edit_object, Change *change, Eina_Bo
    int old_value; \
    int min_value; \
    Diff *diff; \
-   Attribute attribute = ATTRIBUTE_STATE_MAX_##VAL_CAPS; \
+   Editor_Attribute_Change send; \
+   send.edit_object = edit_object; \
+ \
+   send.attribute = RM_ATTRIBUTE_STATE_MAX_##VAL_CAPS; \
  \
    assert(edit_object != NULL); \
    assert(new_value >= -1); \
@@ -96,7 +99,7 @@ editor_state_max_## VAL ##_set(Evas_Object *edit_object, Change *change, Eina_Bo
      { \
         CRIT_ON_FAIL(edje_edit_state_max_## VAL ##_set(edit_object, part_name, state_name, state_val, new_value)); \
         _editor_project_changed(); \
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute); \
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send); \
      } \
    return true; \
 }
@@ -112,7 +115,10 @@ editor_state_min_## VAL ##_set(Evas_Object *edit_object, Change *change, Eina_Bo
    int old_value; \
    int max_value; \
    Diff *diff; \
-   Attribute attribute = ATTRIBUTE_STATE_MIN_##VAL_CAPS; \
+   Editor_Attribute_Change send; \
+   send.edit_object = edit_object; \
+ \
+   send.attribute = RM_ATTRIBUTE_STATE_MIN_##VAL_CAPS; \
  \
    assert(edit_object != NULL); \
    assert(new_value >= 0); \
@@ -147,7 +153,7 @@ editor_state_min_## VAL ##_set(Evas_Object *edit_object, Change *change, Eina_Bo
      { \
         CRIT_ON_FAIL(edje_edit_state_min_## VAL ##_set(edit_object, part_name, state_name, state_val, new_value)); \
         _editor_project_changed(); \
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute); \
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send); \
      } \
    return true; \
 }
@@ -155,13 +161,16 @@ editor_state_min_## VAL ##_set(Evas_Object *edit_object, Change *change, Eina_Bo
 MIN_SET(w, W)
 MIN_SET(h, H)
 
-#define ALIGN_SET(FUNC, ATTRIBUTE) \
+#define ALIGN_SET(FUNC, RM_ATTRIBUTE) \
 Eina_Bool \
 editor_state_## FUNC ##_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply, \
                             const char *part_name, const char *state_name, double state_val, double new_val) \
 { \
    Diff *diff; \
-   Attribute attribute = ATTRIBUTE; \
+   Editor_Attribute_Change send; \
+   send.edit_object = edit_object; \
+ \
+   send.attribute = RM_ATTRIBUTE; \
    assert(edit_object != NULL); \
    assert(part_name != NULL); \
    assert(state_name != NULL); \
@@ -190,37 +199,37 @@ editor_state_## FUNC ##_set(Evas_Object *edit_object, Change *change, Eina_Bool 
      { \
        CRIT_ON_FAIL(edje_edit_state_## FUNC ##_set(edit_object, part_name, state_name, state_val, new_val)); \
        _editor_project_changed(); \
-       if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute); \
+       if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send); \
      } \
    return true; \
 }
 
-ALIGN_SET(align_x, ATTRIBUTE_STATE_ALIGN_X)
-ALIGN_SET(align_y, ATTRIBUTE_STATE_ALIGN_Y)
+ALIGN_SET(align_x, RM_ATTRIBUTE_STATE_ALIGN_X)
+ALIGN_SET(align_y, RM_ATTRIBUTE_STATE_ALIGN_Y)
 
-EDITOR_STATE_BOOL(fixed_h, ATTRIBUTE_STATE_FIXED_H)
-EDITOR_STATE_BOOL(fixed_w, ATTRIBUTE_STATE_FIXED_W)
-EDITOR_STATE_BOOL(fill_smooth, ATTRIBUTE_STATE_FILL_SMOOTH)
-EDITOR_STATE_BOOL(visible, ATTRIBUTE_STATE_VISIBLE)
-EDITOR_STATE_BOOL(container_min_h, ATTRIBUTE_STATE_CONTAINER_MIN_H)
-EDITOR_STATE_BOOL(container_min_v, ATTRIBUTE_STATE_CONTAINER_MIN_V)
+EDITOR_STATE_BOOL(fixed_h, RM_ATTRIBUTE_STATE_FIXED_H)
+EDITOR_STATE_BOOL(fixed_w, RM_ATTRIBUTE_STATE_FIXED_W)
+EDITOR_STATE_BOOL(fill_smooth, RM_ATTRIBUTE_STATE_FILL_SMOOTH)
+EDITOR_STATE_BOOL(visible, RM_ATTRIBUTE_STATE_VISIBLE)
+EDITOR_STATE_BOOL(container_min_h, RM_ATTRIBUTE_STATE_CONTAINER_MIN_H)
+EDITOR_STATE_BOOL(container_min_v, RM_ATTRIBUTE_STATE_CONTAINER_MIN_V)
 
-EDITOR_STATE_STRING_WITH_RESET(rel1_to_x, ATTRIBUTE_STATE_REL1_TO_X, true, rel1_relative_x)
-EDITOR_STATE_STRING_WITH_RESET(rel1_to_y, ATTRIBUTE_STATE_REL1_TO_Y, true, rel1_relative_y)
-EDITOR_STATE_STRING_WITH_RESET(rel2_to_x, ATTRIBUTE_STATE_REL2_TO_X, true, rel2_relative_x)
-EDITOR_STATE_STRING_WITH_RESET(rel2_to_y, ATTRIBUTE_STATE_REL2_TO_Y, true, rel2_relative_y)
-EDITOR_STATE_STRING(proxy_source, ATTRIBUTE_STATE_PROXY_SOURCE, true)
+EDITOR_STATE_STRING_WITH_RESET(rel1_to_x, RM_ATTRIBUTE_STATE_REL1_TO_X, true, rel1_relative_x)
+EDITOR_STATE_STRING_WITH_RESET(rel1_to_y, RM_ATTRIBUTE_STATE_REL1_TO_Y, true, rel1_relative_y)
+EDITOR_STATE_STRING_WITH_RESET(rel2_to_x, RM_ATTRIBUTE_STATE_REL2_TO_X, true, rel2_relative_x)
+EDITOR_STATE_STRING_WITH_RESET(rel2_to_y, RM_ATTRIBUTE_STATE_REL2_TO_Y, true, rel2_relative_y)
+EDITOR_STATE_STRING(proxy_source, RM_ATTRIBUTE_STATE_PROXY_SOURCE, true)
 
-EDITOR_STATE_BOOL(map_on, ATTRIBUTE_STATE_MAP_ON)
-EDITOR_STATE_BOOL(map_perspective_on, ATTRIBUTE_STATE_MAP_PERSPECTIVE_ON)
-EDITOR_STATE_STRING(map_perspective, ATTRIBUTE_STATE_MAP_PERSPECTIVE, true)
-EDITOR_STATE_STRING(map_light, ATTRIBUTE_STATE_MAP_LIGHT, true)
-EDITOR_STATE_BOOL(map_smooth, ATTRIBUTE_STATE_MAP_SMOOTH)
-EDITOR_STATE_BOOL(map_alpha, ATTRIBUTE_STATE_MAP_ALPHA)
-EDITOR_STATE_BOOL(map_backface_cull, ATTRIBUTE_STATE_MAP_BACKFACE_CULL)
-EDITOR_STATE_INT(map_perspective_focal, ATTRIBUTE_STATE_MAP_PERSPECTIVE_FOCAL)
-EDITOR_STATE_INT(map_perspective_zplane, ATTRIBUTE_STATE_MAP_PERSPECTIVE_ZPLANE)
-EDITOR_STATE_STRING(map_rotation_center, ATTRIBUTE_STATE_MAP_ROTATION_CENTER, true)
+EDITOR_STATE_BOOL(map_on, RM_ATTRIBUTE_STATE_MAP_ON)
+EDITOR_STATE_BOOL(map_perspective_on, RM_ATTRIBUTE_STATE_MAP_PERSPECTIVE_ON)
+EDITOR_STATE_STRING(map_perspective, RM_ATTRIBUTE_STATE_MAP_PERSPECTIVE, true)
+EDITOR_STATE_STRING(map_light, RM_ATTRIBUTE_STATE_MAP_LIGHT, true)
+EDITOR_STATE_BOOL(map_smooth, RM_ATTRIBUTE_STATE_MAP_SMOOTH)
+EDITOR_STATE_BOOL(map_alpha, RM_ATTRIBUTE_STATE_MAP_ALPHA)
+EDITOR_STATE_BOOL(map_backface_cull, RM_ATTRIBUTE_STATE_MAP_BACKFACE_CULL)
+EDITOR_STATE_INT(map_perspective_focal, RM_ATTRIBUTE_STATE_MAP_PERSPECTIVE_FOCAL)
+EDITOR_STATE_INT(map_perspective_zplane, RM_ATTRIBUTE_STATE_MAP_PERSPECTIVE_ZPLANE)
+EDITOR_STATE_STRING(map_rotation_center, RM_ATTRIBUTE_STATE_MAP_ROTATION_CENTER, true)
 
 //map_rotation (3 values)
 Eina_Bool
@@ -229,7 +238,10 @@ editor_state_map_rotation_x_set(Evas_Object *edit_object, Change *change, Eina_B
 {
    Diff *diff;
    double o4, o5, o6;
-   Attribute attribute = ATTRIBUTE_STATE_MAP_ROTATION_X;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_MAP_ROTATION_X;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -258,7 +270,7 @@ editor_state_map_rotation_x_set(Evas_Object *edit_object, Change *change, Eina_B
      {
         CRIT_ON_FAIL(edje_edit_state_map_rotation_set(edit_object, part_name, state_name, state_val, n4, o5, o6));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
@@ -269,7 +281,10 @@ editor_state_map_rotation_y_set(Evas_Object *edit_object, Change *change, Eina_B
 {
    Diff *diff;
    double o4, o5, o6;
-   Attribute attribute = ATTRIBUTE_STATE_MAP_ROTATION_Y;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_MAP_ROTATION_Y;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -298,7 +313,7 @@ editor_state_map_rotation_y_set(Evas_Object *edit_object, Change *change, Eina_B
      {
         CRIT_ON_FAIL(edje_edit_state_map_rotation_set(edit_object, part_name, state_name, state_val, o4, n5, o6));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
@@ -309,7 +324,10 @@ editor_state_map_rotation_z_set(Evas_Object *edit_object, Change *change, Eina_B
 {
    Diff *diff;
    double o4, o5, o6;
-   Attribute attribute = ATTRIBUTE_STATE_MAP_ROTATION_Z;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_MAP_ROTATION_Z;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -338,28 +356,28 @@ editor_state_map_rotation_z_set(Evas_Object *edit_object, Change *change, Eina_B
      {
         CRIT_ON_FAIL(edje_edit_state_map_rotation_set(edit_object, part_name, state_name, state_val, o4, o5, n6));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
 
-EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, ATTRIBUTE_STATE_MAP_POINT_COLOR, 1)
-EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, ATTRIBUTE_STATE_MAP_POINT_COLOR, 2)
-EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, ATTRIBUTE_STATE_MAP_POINT_COLOR, 3)
-EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, ATTRIBUTE_STATE_MAP_POINT_COLOR, 4)
+EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, RM_ATTRIBUTE_STATE_MAP_POINT_COLOR, 1)
+EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, RM_ATTRIBUTE_STATE_MAP_POINT_COLOR, 2)
+EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, RM_ATTRIBUTE_STATE_MAP_POINT_COLOR, 3)
+EDITOR_STATE_INT_INT_INT_INT_INT(map_point_color, map_point_color, RM_ATTRIBUTE_STATE_MAP_POINT_COLOR, 4)
 
 TODO("Fix edje_edit API")
-//EDITOR_STATE_STRING(box_layout, ATTRIBUTE_STATE_BOX_LAYOUT)
-//EDITOR_STATE_STRING(box_alt_layout, ATTRIBUTE_STATE_BOX_ALT_LAYOUT)
+//EDITOR_STATE_STRING(box_layout, RM_ATTRIBUTE_STATE_BOX_LAYOUT)
+//EDITOR_STATE_STRING(box_alt_layout, RM_ATTRIBUTE_STATE_BOX_ALT_LAYOUT)
 
-EDITOR_STATE_STRING(color_class, ATTRIBUTE_STATE_COLOR_CLASS, true)
+EDITOR_STATE_STRING(color_class, RM_ATTRIBUTE_STATE_COLOR_CLASS, true)
 
 TODO("Replace with image stub")
-EDITOR_STATE_STRING_WITH_FALLBACK(image, ATTRIBUTE_STATE_IMAGE, NULL, false)
+EDITOR_STATE_STRING_WITH_FALLBACK(image, RM_ATTRIBUTE_STATE_IMAGE, NULL, false)
 
-EDITOR_STATE_INT_INT_INT_INT(color, color, ATTRIBUTE_STATE_COLOR)
-EDITOR_STATE_INT_INT_INT_INT(outline_color, color2, ATTRIBUTE_STATE_OUTLINE_COLOR)
-EDITOR_STATE_INT_INT_INT_INT(shadow_color, color3, ATTRIBUTE_STATE_SHADOW_COLOR)
+EDITOR_STATE_INT_INT_INT_INT(color, color, RM_ATTRIBUTE_STATE_COLOR)
+EDITOR_STATE_INT_INT_INT_INT(outline_color, color2, RM_ATTRIBUTE_STATE_OUTLINE_COLOR)
+EDITOR_STATE_INT_INT_INT_INT(shadow_color, color3, RM_ATTRIBUTE_STATE_SHADOW_COLOR)
 
 /* IMAGE BORDER */
 
@@ -369,7 +387,10 @@ editor_state_image_border_left_set(Evas_Object *edit_object, Change *change, Ein
 {
    Diff *diff;
    int o4, o5, o6, o7;
-   Attribute attribute = ATTRIBUTE_STATE_IMAGE_BORDER_LEFT;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_IMAGE_BORDER_LEFT;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -397,8 +418,9 @@ editor_state_image_border_left_set(Evas_Object *edit_object, Change *change, Ein
    if (apply)
      {
         CRIT_ON_FAIL(edje_edit_state_image_border_set(edit_object, part_name, state_name, state_val, n4, o5, o6, o7));
+        CRIT_ON_FAIL(editor_save(edit_object));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
@@ -409,7 +431,10 @@ editor_state_image_border_right_set(Evas_Object *edit_object, Change *change, Ei
 {
    Diff *diff;
    int o4, o5, o6, o7;
-   Attribute attribute = ATTRIBUTE_STATE_IMAGE_BORDER_RIGHT;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_IMAGE_BORDER_RIGHT;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -437,8 +462,9 @@ editor_state_image_border_right_set(Evas_Object *edit_object, Change *change, Ei
    if (apply)
      {
         CRIT_ON_FAIL(edje_edit_state_image_border_set(edit_object, part_name, state_name, state_val, o4, n5, o6, o7));
+        CRIT_ON_FAIL(editor_save(edit_object));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
@@ -449,7 +475,10 @@ editor_state_image_border_top_set(Evas_Object *edit_object, Change *change, Eina
 {
    Diff *diff;
    int o4, o5, o6, o7;
-   Attribute attribute = ATTRIBUTE_STATE_IMAGE_BORDER_TOP;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_IMAGE_BORDER_TOP;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -477,8 +506,9 @@ editor_state_image_border_top_set(Evas_Object *edit_object, Change *change, Eina
    if (apply)
      {
         CRIT_ON_FAIL(edje_edit_state_image_border_set(edit_object, part_name, state_name, state_val, o4, o5, n6, o7));
+        CRIT_ON_FAIL(editor_save(edit_object));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
@@ -489,7 +519,10 @@ editor_state_image_border_bottom_set(Evas_Object *edit_object, Change *change, E
 {
    Diff *diff;
    int o4, o5, o6, o7;
-   Attribute attribute = ATTRIBUTE_STATE_IMAGE_BORDER_BOTTOM;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_STATE_IMAGE_BORDER_BOTTOM;
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
@@ -517,21 +550,22 @@ editor_state_image_border_bottom_set(Evas_Object *edit_object, Change *change, E
    if (apply)
      {
         CRIT_ON_FAIL(edje_edit_state_image_border_set(edit_object, part_name, state_name, state_val, o4, o5, o6, n7));
+        CRIT_ON_FAIL(editor_save(edit_object));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
 
 /**********************/
 
-EDITOR_STATE_UCHAR(image_border_fill, ATTRIBUTE_STATE_IMAGE_BORDER_FILL)
-EDITOR_STATE_UCHAR(fill_type, ATTRIBUTE_STATE_FILL_TYPE)
-EDITOR_STATE_UCHAR(aspect_pref, ATTRIBUTE_STATE_ASPECT_PREF)
-EDITOR_STATE_UCHAR(table_homogeneous, ATTRIBUTE_STATE_TABLE_HOMOGENEOUS)
+EDITOR_STATE_UCHAR(image_border_fill, RM_ATTRIBUTE_STATE_IMAGE_BORDER_FILL, true)
+EDITOR_STATE_UCHAR(fill_type, RM_ATTRIBUTE_STATE_FILL_TYPE, false)
+EDITOR_STATE_UCHAR(aspect_pref, RM_ATTRIBUTE_STATE_ASPECT_PREF, false)
+EDITOR_STATE_UCHAR(table_homogeneous, RM_ATTRIBUTE_STATE_TABLE_HOMOGENEOUS, false)
 
-EDITOR_STATE_INT_SAVE(container_padding_x, ATTRIBUTE_STATE_CONTAINER_PADING_X)
-EDITOR_STATE_INT_SAVE(container_padding_y, ATTRIBUTE_STATE_CONTAINER_PADING_Y)
+EDITOR_STATE_INT_SAVE(container_padding_x, RM_ATTRIBUTE_STATE_CONTAINER_PADING_X)
+EDITOR_STATE_INT_SAVE(container_padding_y, RM_ATTRIBUTE_STATE_CONTAINER_PADING_Y)
 
 Eina_Bool
 editor_state_tween_add(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
@@ -539,10 +573,18 @@ editor_state_tween_add(Evas_Object *edit_object, Change *change, Eina_Bool merge
                        Eina_Stringshare *name)
 {
    Diff *diff;
-   Attribute attribute = ATTRIBUTE_STATE_IMAGE_TWEEN;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
+   send.attribute = RM_ATTRIBUTE_STATE_IMAGE_TWEEN;
+   send.part_name = eina_stringshare_add(part_name);
+   send.state_name = eina_stringshare_add(state_name);
+   send.state_value = state_val;
+   send.value = eina_stringshare_add(name); /* field for add tween */
+   send.old_value = NULL;
    if (change)
      {
         diff = mem_calloc(1, sizeof(Diff));
@@ -568,8 +610,11 @@ editor_state_tween_add(Evas_Object *edit_object, Change *change, Eina_Bool merge
         CRIT_ON_FAIL(edje_edit_state_tween_add(edit_object, part_name, state_name, state_val, name));
         _editor_project_changed();
         if (!_editor_signals_blocked)
-          evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+          evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
+   eina_stringshare_del(send.part_name);
+   eina_stringshare_del(send.state_name);
+   eina_stringshare_del(send.value);
    return true;
 }
 Eina_Bool
@@ -578,10 +623,18 @@ editor_state_tween_del(Evas_Object *edit_object, Change *change, Eina_Bool merge
                        Eina_Stringshare *name)
 {
    Diff *diff;
-   Attribute attribute = ATTRIBUTE_STATE_IMAGE_TWEEN;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
    assert(edit_object != NULL);
    assert(part_name != NULL);
    assert(state_name != NULL);
+   send.attribute = RM_ATTRIBUTE_STATE_IMAGE_TWEEN;
+   send.part_name = eina_stringshare_add(part_name);
+   send.state_name = eina_stringshare_add(state_name);
+   send.state_value = state_val;
+   send.old_value = eina_stringshare_add(name); /* field for del tween */
+   send.value = NULL;
    if (change)
      {
         diff = mem_calloc(1, sizeof(Diff));
@@ -607,8 +660,11 @@ editor_state_tween_del(Evas_Object *edit_object, Change *change, Eina_Bool merge
         CRIT_ON_FAIL(edje_edit_state_tween_del(edit_object, part_name, state_name, state_val, name));
         _editor_project_changed();
         if (!_editor_signals_blocked)
-          evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+          evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
+   eina_stringshare_del(send.part_name);
+   eina_stringshare_del(send.state_name);
+   eina_stringshare_del(send.old_value);
    return true;
 }
 
@@ -670,7 +726,7 @@ editor_state_reset(Evas_Object *edit_object, Change *change, Eina_Bool apply,
 
          tweens = edje_edit_state_tweens_list_get(edit_object, part_name, state_name, state_val);
          EINA_LIST_FOREACH(tweens, l, tween)
-            res = res && editor_state_tween_del(edit_object, change, apply, false, part_name, state_name, state_val, tween);
+            res = res && editor_state_tween_del(edit_object, change, false, apply, part_name, state_name, state_val, tween);
          edje_edit_string_list_free(tweens);
          break;
       case EDJE_PART_TYPE_PROXY:
@@ -851,7 +907,15 @@ editor_state_del(Evas_Object *edit_object, Change *change, Eina_Bool merge __UNU
    event_info.state_name = eina_stringshare_add(state_name);
    event_info.state_value = state_val;
    event_info.change = change;
-   if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_STATE_DELETED, (void *)&event_info);
+   if (!_editor_signals_blocked)
+     {
+        /* so in here we need to delete part from workspace, groupedit,
+           all kind of UI part lists since they use original Resource structure,
+           and only after that we can finally delete it,
+           so keep those signals in this order please */
+        evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_STATE_PREDELETED, (void *)&event_info);
+        evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_STATE_DELETED, (void *)&event_info);
+     }
    if (change)
      {
         if (!editor_state_reset(edit_object, change, apply, part_name, state_name, state_val))

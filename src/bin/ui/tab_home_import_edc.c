@@ -142,7 +142,7 @@ _btn_add_add(Evas_Object *item, Evas_Smart_Cb add_func)
    elm_icon_standard_set(ic, "plus");
    elm_object_part_content_set(btn, NULL, ic);
    elm_layout_content_set(item, "swallow.button_add", btn);
-   evas_object_smart_callback_add(btn, "clicked", add_func, NULL);
+   evas_object_smart_callback_add(btn, signals.elm.button.clicked, add_func, NULL);
 }
 
 static void
@@ -231,7 +231,7 @@ _dir_item_add(Evas_Smart_Cb del_func)
    ic = elm_icon_add(dir_data->btn_del);
    elm_icon_standard_set(ic, "minus");
    elm_object_part_content_set(dir_data->btn_del, NULL, ic);
-   evas_object_smart_callback_add(dir_data->btn_del, "clicked", del_func, dir_data);
+   evas_object_smart_callback_add(dir_data->btn_del, signals.elm.button.clicked, del_func, dir_data);
    elm_layout_content_set(dir_data->item, "swallow.button_del", dir_data->btn_del);
 
    return dir_data;
@@ -381,19 +381,21 @@ _progress_end(void *data, PM_Project_Result result, Project *project)
 static Eina_Bool
 _setup_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
+   Eina_Bool ret = true;
    Eina_Strbuf *flags = _edje_cc_opt_build();
 
    eina_strbuf_reset(tab_edc.log);
-   pm_project_import_edc(elm_entry_entry_get(tab_edc.name),
-                         elm_entry_entry_get(tab_edc.path),
-                         elm_entry_entry_get(tab_edc.edc),
-                         eina_strbuf_string_get(flags),
-                         _progress_print,
-                         _progress_end,
-                         &tab_edc.meta);
+   if (!pm_project_import_edc(elm_entry_entry_get(tab_edc.name),
+                              elm_entry_entry_get(tab_edc.path),
+                              elm_entry_entry_get(tab_edc.edc),
+                              eina_strbuf_string_get(flags),
+                              _progress_print,
+                              _progress_end,
+                              &tab_edc.meta))
+     ret = false;
 
    eina_strbuf_free(flags);
-   return true;
+   return ret;
 }
 
 static Eina_Bool
@@ -406,7 +408,7 @@ _teardown_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 static Eina_Bool
 _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 {
-   pm_project_thread_cancel();
+//   pm_project_thread_cancel();
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
    return true;
 }
@@ -483,7 +485,7 @@ _tab_import_edc_add(void)
 
    BUTTON_ADD(tab_edc.layout, tab_edc.btn_create, _("Import"))
    elm_object_part_content_set(tab_edc.layout, "elm.swallow.btn_create", tab_edc.btn_create);
-   evas_object_smart_callback_add(tab_edc.btn_create, "clicked", _import, NULL);
+   evas_object_smart_callback_add(tab_edc.btn_create, signals.elm.button.clicked, _import, NULL);
    elm_object_disabled_set(tab_edc.btn_create, true);
 
    SCROLLER_ADD(tab_edc.layout, sc);
@@ -510,7 +512,7 @@ _tab_import_edc_add(void)
    LAYOUT_PROP_ADD(tab_edc.box, _("Path to edc-file:"), "tab_home", "item")
    ENTRY_ADD(item, tab_edc.edc, true)
    elm_layout_content_set(item, NULL, tab_edc.edc);
-   evas_object_smart_callback_add(tab_edc.edc, "changed", _validate, NULL);
+   evas_object_smart_callback_add(tab_edc.edc, signals.elm.entry.changed, _validate, NULL);
    elm_box_pack_end(tab_edc.box, item);
    elipsis_btn_add(tab_edc.edc, _elipsis_edc, NULL);
    /* separator 1 */

@@ -26,9 +26,10 @@
 #include "group_manager.h"
 #include "history.h"
 #include "change.h"
-#include "project_manager.h"
+#include "project_manager2.h"
 #include "validator.h"
 #include "shortcuts.h"
+#include "string_common.h"
 
 #define PART_MASK(TYPE) (1u << TYPE)
 #define PART_RECTANGLE PART_MASK(EDJE_PART_TYPE_RECTANGLE)
@@ -61,7 +62,7 @@
 #define ACTION_SOUND_TONE ACTION_MASK(EDJE_ACTION_TYPE_SOUND_TONE)
 
 struct _Property_Group_Data {
-   Group *group;
+   Group2 *group;
 
    Resource_Name_Validator *part_name_validator;
    Resource_Name_Validator *group_data_name_validator;
@@ -205,17 +206,6 @@ static const char *image_border_fill_strings[] = { STR_NONE,
                                                    "Default",
                                                    "Solid",
                                                    NULL};
-_spinner_value_set(Evas_Object *obj, double val)
-{
-#ifdef HAVE_TIZEN
-   evas_object_data_set(obj, "by_api", EINA_TRUE);
-#endif
-   elm_spinner_value_set(obj, val);
-#ifdef HAVE_TIZEN
-   evas_object_data_set(obj, "by_api", EINA_FALSE);
-#endif
-}
-
 /* defines for args */
 static inline const char *
 _part_name_get(void)
@@ -224,14 +214,14 @@ _part_name_get(void)
    if (!group_pd.group->current_selected)
      return NULL;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PART)
-     return group_pd.group->current_selected->name;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PART)
+     return group_pd.group->current_selected->common.name;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_STATE)
-     return ((State *)group_pd.group->current_selected)->part->name;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE)
+     return ((State2 *)group_pd.group->current_selected)->part->common.name;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_ITEM)
-     return ((Part_Item *)group_pd.group->current_selected)->part->name;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_ITEM)
+     return ((Part_Item2 *)group_pd.group->current_selected)->part->common.name;
 
    TODO("Add item case")
    return NULL;
@@ -244,8 +234,8 @@ _state_name_get(void)
    if (!group_pd.group->current_selected)
      return NULL;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_STATE)
-     return group_pd.group->current_selected->name;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE)
+     return group_pd.group->current_selected->common.name;
 
    return NULL;
 }
@@ -257,8 +247,8 @@ _state_val_get(void)
    if (!group_pd.group->current_selected)
      return 0;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_STATE)
-     return ((State *)group_pd.group->current_selected)->val;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE)
+     return ((State2 *)group_pd.group->current_selected)->val;
 
    return 0;
 }
@@ -270,8 +260,8 @@ _item_name_get(void)
    if (!group_pd.group->current_selected)
      return NULL;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_ITEM)
-     return group_pd.group->current_selected->name;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_ITEM)
+     return group_pd.group->current_selected->common.name;
 
    return NULL;
 }
@@ -283,8 +273,8 @@ _data_name_get(void)
    if (!group_pd.group->current_selected)
      return NULL;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_DATA)
-     return group_pd.group->current_selected->name;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_DATA_GROUP)
+     return group_pd.group->current_selected->common.name;
 
    return NULL;
 }
@@ -296,8 +286,8 @@ _program_name_get(void)
    if (!group_pd.group->current_selected)
      return NULL;
 
-   if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PROGRAM)
-     return group_pd.group->current_selected->name;
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PROGRAM)
+     return group_pd.group->current_selected->common.name;
 
    return NULL;
 }
@@ -344,32 +334,32 @@ _on_group_changed(void *data,
 
    if (!group_pd.group->current_selected) /* group_only */
      {
-        DBG("selected group \"%s\"", group_pd.group ? group_pd.group->name : NULL);
+        DBG("selected group \"%s\"", group_pd.group ? group_pd.group->common.name : NULL);
         property_item_update_recursively(&group_pd.items[PROPERTY_GROUP_ITEM_GROUP_TITLE]);
      }
-   else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PART)
+   else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PART)
      {
-        DBG("selected part \"%s\"", group_pd.group->current_selected->name);
+        DBG("selected part \"%s\"", group_pd.group->current_selected->common.name);
         property_item_update_recursively(&group_pd.items[PROPERTY_GROUP_ITEM_PART_TITLE]);
      }
-   else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_STATE)
+   else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE)
      {
         DBG("selected state \"%s %.2f\"", _state_name_get(), _state_val_get());
         property_item_update_recursively(&group_pd.items[PROPERTY_GROUP_ITEM_STATE_TITLE]);
      }
-   else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_ITEM)
+   else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_ITEM)
      {
-        DBG("selected program \"%s\"", group_pd.group->current_selected->name);
+        DBG("selected program \"%s\"", group_pd.group->current_selected->common.name);
         property_item_update_recursively(&group_pd.items[PROPERTY_GROUP_ITEM_PART_ITEM_TITLE]);
      }
-   else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_DATA)
+   else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_DATA_GROUP)
      {
-        DBG("selected group_data \"%s\"", group_pd.group->current_selected->name);
+        DBG("selected group_data \"%s\"", group_pd.group->current_selected->common.name);
         property_item_update_recursively(&group_pd.items[PROPERTY_GROUP_ITEM_GROUP_DATA_TITLE]);
      }
-   else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PROGRAM)
+   else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PROGRAM)
      {
-        DBG("selected program \"%s\"", group_pd.group->current_selected->name);
+        DBG("selected program \"%s\"", group_pd.group->current_selected->common.name);
         property_item_update_recursively(&group_pd.items[PROPERTY_GROUP_ITEM_PROGRAM_TITLE]);
 
         if (_expand_done)
@@ -420,25 +410,25 @@ _filter_cb(Property_Attribute *pa)
       case PROPERTY_GROUP_ITEM_GROUP_TITLE:
          return group_pd.group->current_selected == NULL;
       case PROPERTY_GROUP_ITEM_PART_TITLE:
-         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PART));
+         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PART));
       case PROPERTY_GROUP_ITEM_STATE_TITLE:
-         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_STATE));
+         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE));
       case PROPERTY_GROUP_ITEM_PART_ITEM_TITLE:
-         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_ITEM));
+         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_ITEM));
       case PROPERTY_GROUP_ITEM_PROGRAM_TITLE:
-         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PROGRAM));
+         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PROGRAM));
       case PROPERTY_GROUP_ITEM_GROUP_DATA_TITLE:
-         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_DATA));
+         return ((group_pd.group->current_selected != NULL) && (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_DATA_GROUP));
 
       default:
          if (group_pd.group->current_selected == NULL)
             return true;
-         else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PART)
-           return !!(pa->filter_data.part_types & PART_MASK(((Part *)group_pd.group->current_selected)->type));
-         else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_STATE)
-           return !!(pa->filter_data.part_types & PART_MASK(((State *)group_pd.group->current_selected)->part->type));
-         else if (group_pd.group->current_selected->resource_type == RESOURCE_TYPE_PROGRAM)
-           return !!(pa->filter_data.action_types & ACTION_MASK(((Program *)group_pd.group->current_selected)->type));
+         else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PART)
+           return !!(pa->filter_data.part_types & PART_MASK(((Part2 *)group_pd.group->current_selected)->type));
+         else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE)
+           return !!(pa->filter_data.part_types & PART_MASK(((State2 *)group_pd.group->current_selected)->part->type));
+         else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PROGRAM)
+           return !!(pa->filter_data.action_types & ACTION_MASK(((Program2 *)group_pd.group->current_selected)->type));
          else
            return true;
      }
@@ -448,10 +438,10 @@ static Eina_Bool
 _transition_filter_cb(Property_Attribute *pa)
 {
    if (!group_pd.group->current_selected) return false;
-   if (group_pd.group->current_selected->resource_type != RESOURCE_TYPE_PROGRAM) return false;
-   if (((Program *)group_pd.group->current_selected)->type != EDJE_ACTION_TYPE_STATE_SET) return false;
+   if (group_pd.group->current_selected->common.type != RESOURCE2_TYPE_PROGRAM) return false;
+   if (((Program2 *)group_pd.group->current_selected)->type != EDJE_ACTION_TYPE_STATE_SET) return false;
 
-   Edje_Tween_Mode type = editor_program_transition_type_get(EDIT_OBJ, group_pd.group->current_selected->name);
+   Edje_Tween_Mode type = editor_program_transition_type_get(EDIT_OBJ, group_pd.group->current_selected->common.name);
 
    assert(pa != NULL);
 
@@ -1113,7 +1103,7 @@ static void
 _styles_combobox_fill(Evas_Object *combo, const char *selected)
 {
    Eina_List *l;
-   Resource *style;
+   Style2 *style;
    Combobox_Item *combobox_item;
    Elm_Genlist_Item_Class *itc;
    unsigned int i = 0;
@@ -1141,11 +1131,11 @@ _styles_combobox_fill(Evas_Object *combo, const char *selected)
                            ELM_GENLIST_ITEM_NONE, NULL, NULL);
 
 
-   EINA_LIST_FOREACH(ap.project->styles, l, style)
+   EINA_LIST_FOREACH(ap.project->RM.styles, l, style)
      {
         combobox_item = mem_malloc(sizeof(Combobox_Item));
         combobox_item->index = i++;
-        combobox_item->data = eina_stringshare_add(style->name);
+        combobox_item->data = eina_stringshare_add(style->common.name);
         elm_genlist_item_append(combo, itc,
                                 combobox_item, NULL,
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1156,7 +1146,7 @@ static void
 _groups_combobox_fill(Evas_Object *combo, const char *selected, Eina_Bool with_none)
 {
    Eina_List *l;
-   Group *group;
+   Group2 *group;
    Combobox_Item *combobox_item;
    Elm_Genlist_Item_Class *itc;
    unsigned int i = 0;
@@ -1180,13 +1170,13 @@ _groups_combobox_fill(Evas_Object *combo, const char *selected, Eina_Bool with_n
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
      }
 
-   EINA_LIST_FOREACH(ap.project->groups, l, group)
+   EINA_LIST_FOREACH(ap.project->RM.groups, l, group)
      {
         if (group != group_pd.group)
           {
              combobox_item = mem_malloc(sizeof(Combobox_Item));
              combobox_item->index = i++;
-             combobox_item->data = eina_stringshare_add(group->name);
+             combobox_item->data = eina_stringshare_add(group->common.name);
              elm_genlist_item_append(combo, itc,
                                      combobox_item, NULL,
                                      ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1201,7 +1191,7 @@ _sample_combobox_fill(Evas_Object *combo, const char *selected, Eina_Bool with_n
    Combobox_Item *combobox_item;
    Elm_Genlist_Item_Class *itc;
    unsigned int i = 0;
-   Resource *sample;
+   Sound2 *sample;
 
    assert(with_none || selected != NULL);
 
@@ -1230,12 +1220,12 @@ _sample_combobox_fill(Evas_Object *combo, const char *selected, Eina_Bool with_n
                            ELM_GENLIST_ITEM_NONE, NULL, NULL);
 
 
-   EINA_LIST_FOREACH(ap.project->sounds, l, sample)
+   EINA_LIST_FOREACH(ap.project->RM.sounds, l, sample)
      {
-        if (!strcmp(sample->name, EFLETE_DUMMY_SAMPLE_NAME)) continue;
+        if (!strcmp(sample->common.name, EFLETE_DUMMY_SAMPLE_NAME)) continue;
         combobox_item = mem_malloc(sizeof(Combobox_Item));
         combobox_item->index = i++;
-        combobox_item->data = eina_stringshare_add(sample->name);
+        combobox_item->data = eina_stringshare_add(sample->common.name);
         elm_genlist_item_append(combo, itc,
                                 combobox_item, NULL,
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1249,7 +1239,7 @@ _tone_combobox_fill(Evas_Object *combo, const char *selected, Eina_Bool with_non
    Combobox_Item *combobox_item;
    Elm_Genlist_Item_Class *itc;
    unsigned int i = 0;
-   Resource *tone;
+   Tone2 *tone;
 
    assert(with_none || selected != NULL);
 
@@ -1270,11 +1260,11 @@ _tone_combobox_fill(Evas_Object *combo, const char *selected, Eina_Bool with_non
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
      }
 
-   EINA_LIST_FOREACH(ap.project->tones, l, tone)
+   EINA_LIST_FOREACH(ap.project->RM.tones, l, tone)
      {
         combobox_item = mem_malloc(sizeof(Combobox_Item));
         combobox_item->index = i++;
-        combobox_item->data = eina_stringshare_add(tone->name);
+        combobox_item->data = eina_stringshare_add(tone->common.name);
         elm_genlist_item_append(combo, itc,
                                 combobox_item, NULL,
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1285,7 +1275,7 @@ static void
 _parts_combobox_fill(Evas_Object *combo, const char *selected, int allowed_types_mask)
 {
    Eina_List *l;
-   Part *part;
+   Part2 *part, *part_check;
    unsigned int i = 1;
    Combobox_Item *combobox_item;
    Elm_Genlist_Item_Class *itc;
@@ -1306,15 +1296,20 @@ _parts_combobox_fill(Evas_Object *combo, const char *selected, int allowed_types
                            combobox_item, NULL,
                            ELM_GENLIST_ITEM_NONE, NULL, NULL);
 
+   if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE)
+     part_check = ((State2 *)group_pd.group->current_selected)->part;
+   else
+     part_check = (Part2 *)group_pd.group->current_selected;
+
    if (allowed_types_mask)
      {
         EINA_LIST_FOREACH(group_pd.group->parts, l, part)
           {
-             if ((PART_MASK(part->type) & allowed_types_mask) && (part != (Part *)group_pd.group->current_selected))
+             if ((PART_MASK(part->type) & allowed_types_mask) && (part != part_check))
                {
                   combobox_item = mem_malloc(sizeof(Combobox_Item));
                   combobox_item->index = i++;
-                  combobox_item->data = eina_stringshare_add(part->name);
+                  combobox_item->data = eina_stringshare_add(part->common.name);
                   elm_genlist_item_append(combo, itc,
                                           combobox_item, NULL,
                                           ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1325,11 +1320,11 @@ _parts_combobox_fill(Evas_Object *combo, const char *selected, int allowed_types
      {
         EINA_LIST_FOREACH(group_pd.group->parts, l, part)
           {
-             if (part != (Part *)group_pd.group->current_selected)
+             if (part != part_check)
                {
                   combobox_item = mem_malloc(sizeof(Combobox_Item));
                   combobox_item->index = i++;
-                  combobox_item->data = eina_stringshare_add(part->name);
+                  combobox_item->data = eina_stringshare_add(part->common.name);
                   elm_genlist_item_append(combo, itc,
                                           combobox_item, NULL,
                                           ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1342,9 +1337,8 @@ static void
 _part_states_combobox_fill(Evas_Object *combo, const char *part_name, const char *selected, Eina_Bool ignore_value)
 {
    Eina_List *l;
-   Resource request;
-   Part *part;
-   State *state;
+   Part2 *part;
+   State2 *state;
    const char *state_name = NULL;
    unsigned int i = 1;
    Combobox_Item *combobox_item;
@@ -1367,24 +1361,22 @@ _part_states_combobox_fill(Evas_Object *combo, const char *part_name, const char
 
    elm_object_disabled_set(combo, false);
 
-   request.resource_type = RESOURCE_TYPE_PART;
-   request.name = part_name;
-   part = (Part *)resource_get(group_pd.group->parts, &request);
+   part = (Part2 *)resource_manager_find(group_pd.group->parts, part_name);
 
    if (ignore_value)
      {
         /* skipping states with same name but different value */
         EINA_LIST_FOREACH(part->states, l, state)
           {
-             if (state_name && !strcmp(state_name, state->name))
+             if (state_name && !strcmp(state_name, state->common.name))
                continue;
              combobox_item = mem_malloc(sizeof(Combobox_Item));
              combobox_item->index = i++;
-             combobox_item->data = eina_stringshare_add(state->name);
+             combobox_item->data = eina_stringshare_add(state->common.name);
              elm_genlist_item_append(combo, itc,
                                      combobox_item, NULL,
                                      ELM_GENLIST_ITEM_NONE, NULL, NULL);
-             state_name = state->name;
+             state_name = state->common.name;
           }
      }
    else
@@ -1393,7 +1385,7 @@ _part_states_combobox_fill(Evas_Object *combo, const char *part_name, const char
           {
              combobox_item = mem_malloc(sizeof(Combobox_Item));
              combobox_item->index = i++;
-             combobox_item->data = eina_stringshare_add(state->name);
+             combobox_item->data = eina_stringshare_add(state->common.name);
              elm_genlist_item_append(combo, itc,
                                      combobox_item, NULL,
                                      ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1495,7 +1487,7 @@ static void
 _programs_combobox_fill(Evas_Object *combo, const char *selected)
 {
    Eina_List *l;
-   Program *program;
+   Program2 *program;
    Elm_Genlist_Item_Class *itc;
    unsigned int i = 0;
    Combobox_Item *combobox_item;
@@ -1518,7 +1510,7 @@ _programs_combobox_fill(Evas_Object *combo, const char *selected)
      {
         combobox_item = mem_malloc(sizeof(Combobox_Item));
         combobox_item->index = i++;
-        combobox_item->data = eina_stringshare_add(program->name);
+        combobox_item->data = eina_stringshare_add(program->common.name);
         elm_genlist_item_append(combo, itc,
                                 combobox_item, NULL,
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -1596,7 +1588,7 @@ _afters_get(Property_Attribute *pa __UNUSED__)
 
    if (!group_pd.group) return NULL;
    if (!group_pd.group->current_selected) return NULL;
-   if (group_pd.group->current_selected->resource_type != RESOURCE_TYPE_PROGRAM) return NULL;
+   if (group_pd.group->current_selected->common.type != RESOURCE2_TYPE_PROGRAM) return NULL;
 
    afters = edje_edit_program_afters_get(EDIT_OBJ, PROGRAM_ARGS);
    afters = eina_list_append(afters, NULL);
@@ -1627,7 +1619,7 @@ _targets_init_cb(Property_Attribute *pa, Property_Action *action)
    assert(action != NULL);
    assert(action->control != NULL);
 
-   switch (((Program *)group_pd.group->current_selected)->type)
+   switch (((Program2 *)group_pd.group->current_selected)->type)
      {
       case EDJE_ACTION_TYPE_ACTION_STOP:
          _programs_combobox_fill(action->control, pa->data);
@@ -1696,7 +1688,7 @@ _targets_get(Property_Attribute *pa __UNUSED__)
 
    if (!group_pd.group) return NULL;
    if (!group_pd.group->current_selected) return NULL;
-   if (group_pd.group->current_selected->resource_type != RESOURCE_TYPE_PROGRAM) return NULL;
+   if (group_pd.group->current_selected->common.type != RESOURCE2_TYPE_PROGRAM) return NULL;
 
    targets = edje_edit_program_targets_get(EDIT_OBJ, PROGRAM_ARGS);
    targets = eina_list_append(targets, NULL);
@@ -1737,7 +1729,7 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
    switch (action->type.attribute)
      {
       case ATTRIBUTE_GROUP_NAME:
-         property_entry_set(action->control, group_pd.group->name);
+         property_entry_set(action->control, group_pd.group->common.name);
          return true;
       case ATTRIBUTE_STATE_NAME:
          str_val1 = eina_stringshare_printf("%s %.2f",
@@ -1781,19 +1773,19 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return images_list == NULL;
       case ATTRIBUTE_GROUP_MIN_W:
          int_val1 = edje_edit_group_min_w_get(EDIT_OBJ);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return !int_val1;
       case ATTRIBUTE_GROUP_MIN_H:
          int_val1 = edje_edit_group_min_h_get(EDIT_OBJ);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return !int_val1;
       case ATTRIBUTE_GROUP_MAX_W:
          int_val1 = edje_edit_group_max_w_get(EDIT_OBJ);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return !int_val1;
       case ATTRIBUTE_GROUP_MAX_H:
          int_val1 = edje_edit_group_max_h_get(EDIT_OBJ);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return !int_val1;
       case ATTRIBUTE_PART_NAME:
          property_entry_set(action->control, PART_ARGS);
@@ -1809,10 +1801,10 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          edje_edit_string_free(str_val1);
          return true;
       case ATTRIBUTE_PART_TYPE:
-         elm_layout_text_set(action->control, NULL, gm_part_type_text_get(((Part *)group_pd.group->current_selected)->type));
+         elm_layout_text_set(action->control, NULL, part_type_text_get(((Part2 *)group_pd.group->current_selected)->type));
          return true;
       case ATTRIBUTE_PROGRAM_ACTION:
-         elm_layout_text_set(action->control, NULL, action_type[((Part *)group_pd.group->current_selected)->type]);
+         elm_layout_text_set(action->control, NULL, action_type[((Part2 *)group_pd.group->current_selected)->type]);
          return true;
       case ATTRIBUTE_PART_SCALE:
          bool_val1 = edje_edit_part_scale_get(EDIT_OBJ, PART_ARGS);
@@ -1865,27 +1857,27 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_part_text_shadow_direction_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_DRAG_X:
          int_val1 = edje_edit_part_drag_x_get(EDIT_OBJ, PART_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_drag_x_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_DRAG_Y:
          int_val1 = edje_edit_part_drag_y_get(EDIT_OBJ, PART_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_drag_y_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_DRAG_STEP_X:
          int_val1 = edje_edit_part_drag_step_x_get(EDIT_OBJ, PART_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_drag_step_x_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_DRAG_STEP_Y:
          int_val1 = edje_edit_part_drag_step_y_get(EDIT_OBJ, PART_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_drag_step_y_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_DRAG_COUNT_X:
          int_val1 = edje_edit_part_drag_count_x_get(EDIT_OBJ, PART_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_drag_count_x_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_DRAG_COUNT_Y:
          int_val1 = edje_edit_part_drag_count_y_get(EDIT_OBJ, PART_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_drag_count_y_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_DRAG_CONFINE:
          elm_genlist_clear(action->control);
@@ -1954,19 +1946,19 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
 
       case ATTRIBUTE_STATE_CONTAINER_ALIGN_X:
          double_val1 = edje_edit_state_container_align_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_container_align_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_CONTAINER_ALIGN_Y:
          double_val1 = edje_edit_state_container_align_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_container_align_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_CONTAINER_PADING_X:
          int_val1 = edje_edit_state_container_padding_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_container_padding_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_CONTAINER_PADING_Y:
          int_val1 = edje_edit_state_container_padding_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_container_padding_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_CONTAINER_MIN_V:
          bool_val1 = edje_edit_state_container_min_v_get(EDIT_OBJ, STATE_ARGS);
@@ -1987,43 +1979,43 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return true;
       case ATTRIBUTE_PART_ITEM_MIN_W:
          int_val1 = edje_edit_part_item_min_w_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_min_w_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_MIN_H:
          int_val1 = edje_edit_part_item_min_h_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_min_h_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_MAX_W:
          int_val1 = edje_edit_part_item_max_w_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_max_w_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_MAX_H:
          int_val1 = edje_edit_part_item_max_h_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_max_h_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_PREFER_W:
          int_val1 = edje_edit_part_item_prefer_w_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_prefer_w_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_PREFER_H:
          int_val1 = edje_edit_part_item_prefer_h_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_prefer_h_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_WEIGHT_X:
          double_val1 = edje_edit_part_item_weight_x_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_part_item_weight_x_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_WEIGHT_Y:
          double_val1 = edje_edit_part_item_weight_y_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_part_item_weight_y_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_ALIGN_X:
          double_val1 = edje_edit_part_item_align_x_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_part_item_align_x_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_ALIGN_Y:
          double_val1 = edje_edit_part_item_align_y_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_part_item_align_y_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_ASPECT_MODE:
          elm_object_text_set(action->control, item_aspect_mode_strings[(int) edje_edit_part_item_aspect_mode_get(EDIT_OBJ, ITEM_ARGS)]);
@@ -2034,53 +2026,53 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_program_transition_type_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PART_ITEM_ASPECT_W:
          int_val1 = edje_edit_part_item_aspect_w_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_aspect_w_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_ASPECT_H:
          int_val1 = edje_edit_part_item_aspect_h_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_aspect_h_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_SPREAD_W:
          int_val1 = edje_edit_part_item_spread_w_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_spread_w_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_SPREAD_H:
          int_val1 = edje_edit_part_item_spread_h_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_spread_h_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_SPAN_COL:
          ushort_val1 = edje_edit_part_item_span_col_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, ushort_val1);
+         elm_spinner_value_set(action->control, ushort_val1);
          return editor_part_item_span_col_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_SPAN_ROW:
          ushort_val1 = edje_edit_part_item_span_row_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, ushort_val1);
+         elm_spinner_value_set(action->control, ushort_val1);
          return editor_part_item_span_row_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_POSITION_COL:
          ushort_val1 = edje_edit_part_item_position_col_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, ushort_val1);
+         elm_spinner_value_set(action->control, ushort_val1);
          return editor_part_item_position_col_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_POSITION_ROW:
          ushort_val1 = edje_edit_part_item_position_row_get(EDIT_OBJ, ITEM_ARGS);
-         _spinner_value_set(action->control, ushort_val1);
+         elm_spinner_value_set(action->control, ushort_val1);
          return editor_part_item_position_row_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_PADDING_LEFT:
          edje_edit_part_item_padding_get(EDIT_OBJ, ITEM_ARGS, &int_val1, NULL, NULL, NULL);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_padding_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_PADDING_RIGHT:
          edje_edit_part_item_padding_get(EDIT_OBJ, ITEM_ARGS, NULL, &int_val1, NULL, NULL);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_part_item_padding_default_is(EDIT_OBJ, ITEM_ARGS);
       case ATTRIBUTE_PART_ITEM_PADDING_TOP:
          edje_edit_part_item_padding_get(EDIT_OBJ, ITEM_ARGS, NULL, NULL, &int_val1, NULL);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          /* updating two-item attribute: caption should be updated in first item */
          property_item_update(&group_pd.items[PROPERTY_GROUP_ITEM_PART_ITEM_PADDING_H]);
          return true;
       case ATTRIBUTE_PART_ITEM_PADDING_BOTTOM:
          edje_edit_part_item_padding_get(EDIT_OBJ, ITEM_ARGS, NULL, NULL, NULL, &int_val1);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          /* updating two-item attribute: caption should be updated in first item */
          property_item_update(&group_pd.items[PROPERTY_GROUP_ITEM_PART_ITEM_PADDING_H]);
          return true;
@@ -2112,19 +2104,19 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_fill_smooth_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MIN_W:
          int_val1 = edje_edit_state_min_w_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_min_w_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MIN_H:
          int_val1 = edje_edit_state_min_h_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_min_h_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MINMUL_W:
          int_val1 = edje_edit_state_minmul_w_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_minmul_w_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MINMUL_H:
          int_val1 = edje_edit_state_minmul_h_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_minmul_h_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FIXED_W:
          bool_val1 = edje_edit_state_fixed_w_get(EDIT_OBJ, STATE_ARGS);
@@ -2136,30 +2128,30 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_fixed_h_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MAX_W:
          int_val1 = edje_edit_state_max_w_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_max_w_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MAX_H:
          int_val1 = edje_edit_state_max_h_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_max_h_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_ASPECT_MIN:
          double_val1 = edje_edit_state_aspect_min_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_aspect_min_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_ASPECT_MAX:
          double_val1 = edje_edit_state_aspect_max_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_aspect_max_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_ASPECT_PREF:
          elm_object_text_set(action->control, aspect_preference_strings[(int) edje_edit_state_aspect_pref_get(EDIT_OBJ, STATE_ARGS)]);
          return editor_state_aspect_pref_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_ALIGN_X:
          double_val1 = edje_edit_state_align_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_align_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_ALIGN_Y:
          double_val1 = edje_edit_state_align_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_align_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL1_TO_X:
          elm_genlist_clear(action->control);
@@ -2175,19 +2167,19 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_rel1_to_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL1_RELATIVE_X:
          double_val1 = edje_edit_state_rel1_relative_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel1_relative_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL1_RELATIVE_Y:
          double_val1 = edje_edit_state_rel1_relative_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel1_relative_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL1_OFFSET_X:
          double_val1 = edje_edit_state_rel1_offset_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel1_offset_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL1_OFFSET_Y:
          double_val1 = edje_edit_state_rel1_offset_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel1_offset_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL2_TO_X:
          elm_genlist_clear(action->control);
@@ -2203,37 +2195,37 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_rel2_to_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL2_RELATIVE_X:
          double_val1 = edje_edit_state_rel2_relative_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel2_relative_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL2_RELATIVE_Y:
          double_val1 = edje_edit_state_rel2_relative_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel2_relative_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL2_OFFSET_X:
          double_val1 = edje_edit_state_rel2_offset_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel2_offset_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_REL2_OFFSET_Y:
          double_val1 = edje_edit_state_rel2_offset_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_rel2_offset_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_IMAGE_BORDER_LEFT:
          edje_edit_state_image_border_get(EDIT_OBJ, STATE_ARGS, &int_val1, NULL, NULL, NULL);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_image_border_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_IMAGE_BORDER_RIGHT:
          edje_edit_state_image_border_get(EDIT_OBJ, STATE_ARGS, NULL, &int_val1, NULL, NULL);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_image_border_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_IMAGE_BORDER_TOP:
          edje_edit_state_image_border_get(EDIT_OBJ, STATE_ARGS, NULL, NULL, &int_val1, NULL);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          /* updating two-item attribute: caption should be updated in first item */
          property_item_update(&group_pd.items[PROPERTY_GROUP_ITEM_STATE_IMAGE_BORDER_H]);
          return true;
       case ATTRIBUTE_STATE_IMAGE_BORDER_BOTTOM:
          edje_edit_state_image_border_get(EDIT_OBJ, STATE_ARGS, NULL, NULL, NULL, &int_val1);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          /* updating two-item attribute: caption should be updated in first item */
          property_item_update(&group_pd.items[PROPERTY_GROUP_ITEM_STATE_IMAGE_BORDER_H]);
          return true;
@@ -2242,35 +2234,35 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_image_border_fill_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_ORIGIN_RELATIVE_X:
          double_val1 = edje_edit_state_fill_origin_relative_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_origin_relative_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_ORIGIN_RELATIVE_Y:
          double_val1 = edje_edit_state_fill_origin_relative_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_origin_relative_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_SIZE_RELATIVE_X:
          double_val1 = edje_edit_state_fill_size_relative_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_size_relative_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_SIZE_RELATIVE_Y:
          double_val1 = edje_edit_state_fill_size_relative_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_size_relative_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_ORIGIN_OFFSET_X:
          double_val1 = edje_edit_state_fill_origin_offset_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_origin_offset_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_ORIGIN_OFFSET_Y:
          double_val1 = edje_edit_state_fill_origin_offset_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_origin_offset_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_SIZE_OFFSET_X:
          double_val1 = edje_edit_state_fill_size_offset_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_size_offset_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_FILL_SIZE_OFFSET_Y:
          double_val1 = edje_edit_state_fill_size_offset_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_fill_size_offset_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_COLOR:
          edje_edit_state_color_get(EDIT_OBJ, STATE_ARGS, &int_val1, &int_val2, &int_val3, &int_val4);
@@ -2332,11 +2324,11 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_text_max_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_TEXT_ALIGN_X:
          double_val1 = edje_edit_state_text_align_x_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_text_align_x_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_TEXT_ALIGN_Y:
          double_val1 = edje_edit_state_text_align_y_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_state_text_align_y_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_TEXT_FIT_X:
          bool_val1 = edje_edit_state_text_fit_x_get(EDIT_OBJ, STATE_ARGS);
@@ -2354,15 +2346,15 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          elm_object_disabled_set(action->control, (!!str_val1 || bool_val1));
 
          if (!str_val1)
-           _spinner_value_set(action->control, int_val1);
+           elm_spinner_value_set(action->control, int_val1);
          else
-           _spinner_value_set(action->control, edje_edit_state_text_size_get(EDIT_OBJ, STATE_SOURCE_ARGS));
+           elm_spinner_value_set(action->control, edje_edit_state_text_size_get(EDIT_OBJ, STATE_SOURCE_ARGS));
 
          edje_edit_string_free(str_val1);
          return editor_state_text_size_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_TEXT_ELIPSIS:
          double_val1 = edje_edit_state_text_elipsis_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          elm_object_disabled_set(action->control, double_val1 < 0);
          elm_check_state_set(pa->action1.control, double_val1 >= 0);
          return editor_state_text_elipsis_default_is(EDIT_OBJ, STATE_ARGS);
@@ -2399,60 +2391,60 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_program_source_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_IN_FROM:
          double_val1 = edje_edit_program_in_from_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_in_from_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_IN_RANGE:
          double_val1 = edje_edit_program_in_range_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_in_range_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_TIME:
          double_val1 = edje_edit_program_transition_time_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_time_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_FACTOR:
          double_val1 = edje_edit_program_transition_factor_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_factor_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_GRADIENT:
          double_val1 = edje_edit_program_transition_gradient_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_gradient_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_DECAY:
          double_val1 = edje_edit_program_transition_decay_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_decay_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_BOUNCES:
          double_val1 = edje_edit_program_transition_bounces_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_bounces_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_SWINGS:
          double_val1 = edje_edit_program_transition_swings_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_swings_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_BEZIER_X1:
          double_val1 = edje_edit_program_transition_bezier_x1_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_bezier_x1_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_BEZIER_Y1:
          double_val1 = edje_edit_program_transition_bezier_y1_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_bezier_y1_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_BEZIER_X2:
          double_val1 = edje_edit_program_transition_bezier_x2_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_bezier_x2_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TRANSITION_BEZIER_Y2:
          double_val1 = edje_edit_program_transition_bezier_y2_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_transition_bezier_y2_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_TONE_DURATION:
          double_val1 = edje_edit_program_tone_duration_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_tone_duration_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_SAMPLE_NAME:
          elm_genlist_clear(action->control);
          str_val1 = edje_edit_program_sample_name_get(EDIT_OBJ, PROGRAM_ARGS);
-         if (!strcmp(str_val1, EFLETE_DUMMY_SAMPLE_NAME))
+         if (!str_val1 || !strcmp(str_val1, EFLETE_DUMMY_SAMPLE_NAME))
            {
               edje_edit_string_free(str_val1);
               str_val1 = eina_stringshare_add(_("None"));
@@ -2471,19 +2463,19 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_program_channel_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_SAMPLE_SPEED:
          double_val1 = edje_edit_program_sample_speed_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_sample_speed_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_DRAG_VALUE_X:
          double_val1 = edje_edit_program_drag_value_x_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_drag_value_x_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_DRAG_VALUE_Y:
          double_val1 = edje_edit_program_drag_value_y_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_drag_value_y_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_VALUE:
          double_val1 = edje_edit_program_value_get(EDIT_OBJ, PROGRAM_ARGS);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          return editor_program_value_default_is(EDIT_OBJ, PROGRAM_ARGS);
       case ATTRIBUTE_PROGRAM_FILTER_PART:
          elm_genlist_clear(action->control);
@@ -2534,11 +2526,11 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_map_backface_cull_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MAP_PERSPECTIVE_FOCAL:
          int_val1 = edje_edit_state_map_perspective_focal_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_map_perspective_focal_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MAP_PERSPECTIVE_ZPLANE:
          int_val1 = edje_edit_state_map_perspective_zplane_get(EDIT_OBJ, STATE_ARGS);
-         _spinner_value_set(action->control, int_val1);
+         elm_spinner_value_set(action->control, int_val1);
          return editor_state_map_perspective_zplane_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MAP_ROTATION_CENTER:
          elm_genlist_clear(action->control);
@@ -2548,17 +2540,17 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_map_rotation_center_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_MAP_ROTATION_X:
          edje_edit_state_map_rotation_get(EDIT_OBJ, STATE_ARGS, &double_val1, NULL, NULL);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          TODO("replace this with _default_get when correct version will be available");
          return double_val1 == 0;
       case ATTRIBUTE_STATE_MAP_ROTATION_Y:
          edje_edit_state_map_rotation_get(EDIT_OBJ, STATE_ARGS, NULL, &double_val1, NULL);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          TODO("replace this with _default_get when correct version will be available");
          return double_val1 == 0;
       case ATTRIBUTE_STATE_MAP_ROTATION_Z:
          edje_edit_state_map_rotation_get(EDIT_OBJ, STATE_ARGS, NULL, NULL, &double_val1);
-         _spinner_value_set(action->control, double_val1);
+         elm_spinner_value_set(action->control, double_val1);
          TODO("replace this with _default_get when correct version will be available");
          return double_val1 == 0;
       case ATTRIBUTE_STATE_MAP_POINT_COLOR_1:
@@ -2616,11 +2608,11 @@ _start_cb(Property_Attribute *pa, Property_Action *action)
      {
       case ATTRIBUTE_GROUP_NAME:
          group_pd.history.format = _("group name changed from \"%s\" to \"%s\"");
-         STR_VAL(str_val1, eina_stringshare_add(group_pd.group->name));
+         STR_VAL(str_val1, eina_stringshare_add(group_pd.group->common.name));
          break;
       case ATTRIBUTE_STATE_NAME:
          group_pd.history.format = _("state name changed from \"%s\" to \"%s\"");
-         STR_VAL(str_val1, eina_stringshare_add(group_pd.group->current_selected->name));
+         STR_VAL(str_val1, eina_stringshare_add(group_pd.group->current_selected->common.name));
          break;
       case ATTRIBUTE_PROGRAM_NAME:
          group_pd.history.format = _("program name changed from \"%s\" to \"%s\"");
@@ -4159,6 +4151,7 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
       case ATTRIBUTE_PROGRAM_FILTER_PART:
          assert(cb_item_combo != NULL);
          str_val1 = (cb_item_combo->index != 0) ? eina_stringshare_add(cb_item_combo->data) : NULL;
+         CRIT_ON_FAIL(editor_program_filter_state_set(EDIT_OBJ, CHANGE_NO_MERGE, PROGRAM_ARGS, NULL));
          CRIT_ON_FAIL(editor_program_filter_part_set(EDIT_OBJ, CHANGE_NO_MERGE, PROGRAM_ARGS, str_val1));
          eina_stringshare_del(group_pd.history.new.str_val1);
          group_pd.history.new.str_val1 = str_val1;

@@ -82,7 +82,10 @@ editor_group_del(Evas_Object *obj, const char *name, Eina_Bool notify)
    /* for deleting and cleaning up dependencies, for groups it is important to
       delete after cleaning up */
    if (notify)
-     evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_GROUP_DELETED, (void *)name);
+     {
+        evas_object_smart_callback_call(ap.win, SIGNAL_GROUP_DELETED, (void *)name);
+        evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_GROUP_DELETED, (void *)name);
+     }
 
    if (!edje_edit_group_del(obj, name))
       return false;
@@ -126,7 +129,10 @@ editor_group_max_## VAL ##_set(Evas_Object *obj, Change *change, Eina_Bool merge
    int old_value; \
    int min_value; \
    Diff *diff; \
-   Attribute attribute = ATTRIBUTE_GROUP_MAX_##VAL_CAPS; \
+   Editor_Attribute_Change send; \
+   send.edit_object = obj; \
+ \
+   send.attribute = RM_ATTRIBUTE_GROUP_MAX_##VAL_CAPS; \
  \
    assert(obj != NULL); \
    assert(new_value >= 0); \
@@ -155,7 +161,7 @@ editor_group_max_## VAL ##_set(Evas_Object *obj, Change *change, Eina_Bool merge
      { \
         CRIT_ON_FAIL(edje_edit_group_max_## VAL ##_set(obj, new_value)); \
         _editor_project_changed(); \
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute); \
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send); \
      } \
    return true; \
 }
@@ -171,7 +177,10 @@ editor_group_min_## VAL ##_set(Evas_Object *obj, Change *change, Eina_Bool merge
    int old_value; \
    int max_value; \
    Diff *diff; \
-   Attribute attribute = ATTRIBUTE_GROUP_MIN_##VAL_CAPS; \
+   Editor_Attribute_Change send; \
+   send.edit_object = obj; \
+ \
+   send.attribute = RM_ATTRIBUTE_GROUP_MIN_##VAL_CAPS; \
  \
    assert(obj != NULL); \
    assert(new_value >= 0); \
@@ -200,7 +209,7 @@ editor_group_min_## VAL ##_set(Evas_Object *obj, Change *change, Eina_Bool merge
      { \
         CRIT_ON_FAIL(edje_edit_group_min_## VAL ##_set(obj, new_value)); \
         _editor_project_changed(); \
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute); \
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send); \
      } \
    return true; \
 }
@@ -213,7 +222,10 @@ editor_group_name_set(Evas_Object *edit_object, Change *change, Eina_Bool merge,
                       const char *new_val)
 {
    Diff *diff;
-   Attribute attribute = ATTRIBUTE_GROUP_NAME;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_GROUP_NAME;
    assert(edit_object != NULL);
    assert(new_val != NULL);
    if (change)
@@ -236,7 +248,7 @@ editor_group_name_set(Evas_Object *edit_object, Change *change, Eina_Bool merge,
      {
         CRIT_ON_FAIL(edje_edit_group_name_set(edit_object, new_val));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
@@ -246,7 +258,10 @@ editor_group_data_value_set(Evas_Object *edit_object, Change *change, Eina_Bool 
                             const char *item_name, const char *new_val)
 {
    Diff *diff;
-   Attribute attribute = ATTRIBUTE_GROUP_DATA_VALUE;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
+   send.attribute = RM_ATTRIBUTE_GROUP_DATA_VALUE;
    assert(edit_object != NULL);
    assert(item_name != NULL);
    assert(new_val != NULL);
@@ -271,7 +286,7 @@ editor_group_data_value_set(Evas_Object *edit_object, Change *change, Eina_Bool 
      {
         CRIT_ON_FAIL(edje_edit_group_data_value_set(edit_object, item_name, new_val));
         _editor_project_changed();
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
      }
    return true;
 }
@@ -282,10 +297,16 @@ editor_group_data_name_set(Evas_Object *edit_object, Change *change, Eina_Bool m
 {
    Diff *diff;
    Rename ren;
-   Attribute attribute = ATTRIBUTE_GROUP_DATA_NAME;
+   Editor_Attribute_Change send;
+   send.edit_object = edit_object;
+
    assert(edit_object != NULL);
    assert(item_name != NULL);
    assert(new_val != NULL);
+
+   send.attribute = RM_ATTRIBUTE_GROUP_DATA_NAME;
+   send.old_value = eina_stringshare_add(item_name);
+   send.value = eina_stringshare_add(new_val);
    if (change)
      {
         diff = mem_calloc(1, sizeof(Diff));
@@ -308,9 +329,14 @@ editor_group_data_name_set(Evas_Object *edit_object, Change *change, Eina_Bool m
         _editor_project_changed();
         ren.old_name = item_name;
         ren.new_name = new_val;
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_GROUP_DATA_RENAMED, &ren);
-        if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
+        if (!_editor_signals_blocked)
+          {
+             evas_object_smart_callback_call(ap.win, SIGNAL_GROUP_DATA_RENAMED, &ren);
+             evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED, &send);
+          }
      }
+   eina_stringshare_del(send.old_value);
+   eina_stringshare_del(send.value);
    return true;
 }
 
@@ -361,7 +387,15 @@ editor_group_data_del(Evas_Object *edit_object, Change *change, Eina_Bool merge 
    assert(item_name != NULL);
 
    event_info = eina_stringshare_add(item_name);
-   if (!_editor_signals_blocked) evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_GROUP_DATA_DELETED, (void *)event_info);
+   if (!_editor_signals_blocked)
+     {
+        /* so in here we need to delete part from workspace, groupedit,
+           all kind of UI part lists since they use original Resource structure,
+           and only after that we can finally delete it,
+           so keep those signals in this order please */
+        evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_GROUP_DATA_PREDELETED, (void *)event_info);
+        evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_GROUP_DATA_DELETED, (void *)event_info);
+     }
 
    if (change)
      {
