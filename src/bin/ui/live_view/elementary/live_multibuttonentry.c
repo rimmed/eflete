@@ -36,6 +36,7 @@ _on_multibutton_swallow_check(void *data __UNUSED__,
                {
                   content = elm_object_part_content_unset(multi_item, part->name);
                   evas_object_del(content);
+                  content = NULL;
                   part->object = NULL;
                }
 
@@ -99,7 +100,7 @@ _multibutton_send_signal(void *data __UNUSED__,
 }
 
 Evas_Object *
-widget_multibuttonentry_create(Evas_Object *parent, const Group2 *group)
+widget_multibuttonentry_create(Evas_Object *parent, const Group *group)
 {
    assert(parent != NULL);
    assert(group != NULL);

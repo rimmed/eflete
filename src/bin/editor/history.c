@@ -19,10 +19,10 @@
 
 #include "history.h"
 #include "change.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 
 History *
-history_add(Group2 *group)
+history_add(Group *group)
 {
    History *history;
 

@@ -22,6 +22,9 @@
 #include "main_window.h"
 #include "shortcuts.h"
 
+#define SIGNAL_DONE "done"
+#define SIGNAL_CANCEL "cancel"
+
 static void
 _response_cb(void *data,
              Evas_Object *obj __UNUSED__,
@@ -54,7 +57,7 @@ _mw_info(void *data,
 
    BUTTON_ADD(popup, bt, _("Ok"));
    elm_object_part_content_set(popup, "button1", bt);
-   evas_object_smart_callback_add(bt, signals.elm.button.clicked, _response_cb, popup);
+   evas_object_smart_callback_add(bt, "clicked", _response_cb, popup);
    evas_object_show(popup);
 }
 
@@ -68,7 +71,7 @@ _on_key_down(void *data,
    Evas_Event_Key_Down *ev = (Evas_Event_Key_Down *)event_info;
    Evas_Object *btn_close = (Evas_Object *) data;
    if (strcmp(ev->keyname, "Escape") == 0)
-     evas_object_smart_callback_call(btn_close, signals.elm.button.clicked, NULL);
+     evas_object_smart_callback_call(btn_close, "clicked", NULL);
 }
 */
 
@@ -84,7 +87,7 @@ _anim_show_finish(void *data,
 
    assert(mw != NULL);
 
-   evas_object_smart_callback_call(mw, signals.eflete.modal_window.show_animation_finished, "eflete");
+   evas_object_smart_callback_call(mw, "show,anim,finished", "eflete");
 
    img = elm_layout_content_get(obj, "elm.swallow.content");
    evas_object_image_source_visible_set(img, true);
@@ -104,7 +107,7 @@ _anim_hide_finish(void *data,
 
    assert(mw != NULL);
 
-   evas_object_smart_callback_call(mw, signals.eflete.modal_window.hide_animation_finished, "eflete");
+   evas_object_smart_callback_call(mw, "hide,anim,finished", "eflete");
 
    img = elm_layout_content_get(obj, "elm.swallow.content");
    evas_object_image_source_visible_set(img, true);
@@ -154,7 +157,7 @@ _mw_close(void *data,
    assert(mw != NULL);
 
    _anim_hide(elm_object_parent_widget_get(mw), evas_object_evas_get(mw), mw, NULL);
-   evas_object_smart_callback_call(mw, signals.eflete.modal_window.cancel, NULL);
+   evas_object_smart_callback_call(mw, SIGNAL_CANCEL, NULL);
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
 }
 
@@ -168,7 +171,7 @@ _mw_done(void *data,
    assert(mw != NULL);
 
    _anim_hide(elm_object_parent_widget_get(mw), evas_object_evas_get(mw), mw, NULL);
-   evas_object_smart_callback_call(mw, signals.eflete.modal_window.done, NULL);
+   evas_object_smart_callback_call(mw, SIGNAL_DONE, NULL);
    ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
 }
 
@@ -197,15 +200,15 @@ mw_add(void)
 
         BUTTON_ADD(mw, btn, NULL);
         elm_object_style_set(btn, "close");
-        evas_object_smart_callback_add(btn, signals.elm.button.clicked, _mw_close, mw);
+        evas_object_smart_callback_add(btn, "clicked", _mw_close, mw);
         elm_object_part_content_set(mw, "elm.swallow.close", btn);
 
         BUTTON_ADD(mw, btn, _("Cancel"))
-           evas_object_smart_callback_add(btn, signals.elm.button.clicked, _mw_close, mw);
+           evas_object_smart_callback_add(btn, "clicked", _mw_close, mw);
         elm_object_part_content_set(mw, "eflete.swallow.btn_close", btn);
 
         BUTTON_ADD(mw, btn, _("Ok"))
-           evas_object_smart_callback_add(btn, signals.elm.button.clicked, _mw_done, mw);
+           evas_object_smart_callback_add(btn, "clicked", _mw_done, mw);
         elm_object_part_content_set(mw, "eflete.swallow.btn_ok", btn);
      }
 
@@ -244,7 +247,7 @@ mw_info_text_set(Evas_Object *object, const char *text)
 
    bt_info = elm_button_add(object);
    evas_object_size_hint_align_set(bt_info, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_smart_callback_add(bt_info, signals.elm.button.clicked, _mw_info, text);
+   evas_object_smart_callback_add(bt_info, "clicked", _mw_info, text);
    ICON_STANDARD_ADD(bt_info, ic_info, false, "info");
    elm_layout_content_set(bt_info, "icon", ic_info);
    elm_layout_content_set(object, "elm.swallow.info", bt_info);

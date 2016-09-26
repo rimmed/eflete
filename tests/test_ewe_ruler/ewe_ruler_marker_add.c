@@ -54,7 +54,6 @@
 
 EFLETE_TEST(ewe_ruler_marker_add_test_p)
 {
-   logger_init();
    ewe_init(0, 0);
    Evas_Object *ruler, *parent;
    Ewe_Ruler_Marker *result;
@@ -93,7 +92,6 @@ END_TEST
  */
 EFLETE_TEST(ewe_ruler_marker_add_test_n)
 {
-   logger_init();
    ewe_init(0, 0);
    Ewe_Ruler_Marker *result;
 

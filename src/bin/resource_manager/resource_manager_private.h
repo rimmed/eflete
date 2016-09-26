@@ -54,31 +54,28 @@ Eina_Bool
 _colorclasses_resources_load(Project *project);
 
 Eina_Bool
-_styles_tag_resources_load(Project *pro, Eina_Stringshare *name, Style2 *style);
-
-Eina_Bool
 _styles_resources_load(Project *project);
 
 Eina_Bool
 _global_data_resources_load(Project *project);
 
 State2 *
-_state_add(Project *pro,
+_gm_state_add(Project *pro,
               Group2 *group,
               Part2 *part,
               const char *state_name,
               double state_value);
 
 Part_Item2 *
-_part_item_add(Part2 *part,
+_gm_part_item_add(Part2 *part,
                   Eina_Stringshare *item_name,
                   unsigned int i);
 
 Part2 *
-_part_add(Project *project, Group2 *group, const char *part_name);
+_gm_part_add(Project *project, Group2 *group, const char *part_name);
 
 Group_Data2 *
-_group_data_add(Project *pro,
+_gm_group_data_add(Project *pro,
                    Group2 *group,
                    Eina_Stringshare *group_data_name);
 
@@ -86,13 +83,19 @@ Program2 *
 _program_load(Group2 *group, Eina_Stringshare *program_name);
 
 Group2 *
-_group_add(Project *pro, Eina_Stringshare *group_name);
+_gm_group_add(Project *pro, Eina_Stringshare *group_name);
 
 void
 _group_load(Project *pro, Group2 *group);
 
 void
-_groups_load(Project *project);
+_gm_groups_load(Project *project);
+
+void
+_resource_group_edit_object_load(Project *pro, Group2 *group, Evas *e);
+
+void
+_resource_group_edit_object_unload(Group2 *group);
 
 /* DEPENDENCY BUILD */
 
@@ -114,9 +117,6 @@ _group_dependency_load(Project *pro, Group2 *group);
 void
 _resource_dependency_load(Project *pro);
 
-void
-_style_dependency_load(Project *pro);
-
 /* REACTION TO EDITOR AND EDJE EDIT */
 
 void
@@ -131,7 +131,7 @@ void
 _resource_state_free(Part2 *part, State2 *state);
 
 void
-_resource_state_del(Project *pro, Part2 *part, State2 *state, Change *change);
+_resource_state_del(Part2 *part, State2 *state, Change *change);
 
 void
 _resource_part_item_free(Part2 *part, Part_Item2 *item);
@@ -143,13 +143,13 @@ void
 _resource_part_free(Group2 *group, Part2 *part);
 
 void
-_resource_part_del(Project *pro, Group2 *group, Part2 *part, Change *change);
+_resource_part_del(Group2 *group, Part2 *part, Change *change);
 
 void
 _resource_program_free(Group2 *group, Program2 *program);
 
 void
-_resource_program_del(Project *pro, Group2 *group, Program2 *program, Change *change);
+_resource_program_del(Group2 *group, Program2 *program);
 
 void
 _resource_group_data_free(Group2 *group, Group_Data2 *data);
@@ -188,9 +188,6 @@ _resource_colorclass_free(Project *pro, Colorclass2 *res);
 
 void
 _resource_colorclass_del(Project *pro, Colorclass2 *res_colorclass);
-
-void
-_resource_style_tag_free(Style_Tag2 *res);
 
 void
 _resource_style_free(Project *pro, Style2 *res);

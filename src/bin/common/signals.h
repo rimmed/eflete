@@ -20,185 +20,6 @@
 #ifndef SIGNALS_H
 #define SIGNALS_H
 
-typedef struct {
-   const struct {
-      const char *del;
-      const char *help;
-      const char *quit;
-      const char *save;
-      const struct {
-         const char *data_item;
-         const char *group;
-         const char *item;
-         const char *part;
-         const char *program;
-         const char *state;
-      } add;
-      const struct {
-         const char *redo;
-         const char *undo;
-      } history;
-      const struct {
-         const char *color_class;
-         const char *image;
-         const char *sound;
-         const char *style;
-      } manager;
-      const struct {
-         const char *cancel;
-         const char *done;
-      } popup;
-      const struct {
-         const char *close;
-         const char *next;
-         const char *prev;
-         const char *num; /* event_info - tab number */
-      } tab;
-      const struct {
-         const char *fill;
-         const struct {
-            const char *code;
-            const char *demo;
-            const char *normal;
-         } mode;
-         const struct {
-            const char *object_area;
-            const char *part;
-            const char *all_parts;
-            const char *rulers;
-         } show_hide;
-         const struct {
-            const char *part_next;
-            const char *part_prev;
-            const char *state_next;
-         } select;
-         const struct {
-            const char *in;
-            const char *out;
-            const char *reset;
-            const char *fit;
-         } zoom;
-      } workspace;
-   } shortcut;
-
-   const struct {
-      const struct {
-         const char *done;
-         const char *cancel;
-         const char *show_animation_finished;
-         const char *hide_animation_finished;
-      } modal_window;
-      const struct {
-         const char *changed;
-         const char *handler_br_moved;
-      } container;
-      const struct {
-         const char *drag_start;
-         const char *drag_stop;
-         const char *changed;
-      } highlight;
-      const struct {
-         const struct {
-            const char *changed;
-            const char *dismissed;
-         } color_control;
-         const struct {
-            const char *changed;
-         } image_normal_control;
-         const struct {
-            const char *changed;
-         } image_tween_control;
-         const struct {
-            const char *changed;
-         } image_selector;
-      } property;
-   } eflete;
-
-   const struct {
-      const struct {
-         const char *changed;
-         const char *changed_user;
-         const char *drag_start;
-         const char *drag_stop;
-      } spinner;
-      const struct {
-         const char *clicked;
-      } button;
-      const struct {
-         const char *changed;
-         const char *changed_user;
-         const char *activated;
-         const char *clicked;
-         const char *unfocused;
-      } entry;
-      const struct {
-         const char *clicked;
-         const char *selected;
-         const char *dismissed;
-      } hoversel;
-      const struct {
-         const char *changed;
-      } radio;
-      const struct {
-         const char *changed;
-      } check;
-      const struct {
-         const char *expand_request;
-         const char *expanded;
-         const char *contract_request;
-         const char *contracted;
-         const char *selected;
-         const char *unselected;
-         const char *pressed;
-         const char *activated;
-         const char *realized;
-         const char *unrealized;
-         const char *clicked_double;
-      } genlist;
-      const struct {
-         const char *unselected;
-         const char *clicked_double;
-      } gengrid;
-      const struct {
-         const char *changed;
-         const char *drag_start;
-         const char *drag_stop;
-      } slider;
-      const struct {
-         const char *delete_request;
-         const char *unfocused;
-      } win;
-      const struct {
-         const char *expanded;
-         const char *dismissed;
-         const char *item_pressed;
-         const char *item_selected;
-      } combobox;
-      const struct {
-         const char *clicked;
-      } menu;
-      const struct {
-         const char *press;
-         const char *unpress;
-      } panes;
-      const struct {
-         const char *done;
-         const char *selected;
-         const char *activated;
-      } fileselector;
-      const struct {
-         const char *color_item_selected;
-         const char *color_item_longpressed;
-         const char *changed;
-         const char *changed_user;
-      } colorselector;
-      const struct {
-         const char *dismissed;
-      } ctxpopup;
-   } elm;
-} Signals;
-
-extern const Signals signals;
 /**
  * emited when active group changed.
  * eventinfo - pointer to Group structure.
@@ -329,26 +150,8 @@ typedef struct {
  */
 #define SIGNAL_PROPERTY_ATTRIBUTE_CHANGED "SIGNAL_PROPERTY_ATTRIBUTE_CHANGED"
 
-
 /**
- * emited when any attribute is changed.
- * This signal goes into resource manager
- * eventinfo - Pointer to Attribute
- *
- * @ingroup Window
- */
-#define SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED "SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED"
-
-/**
- * emited when any attribute of top level resource (image, colorclass etc) is changed in editor.
- * eventinfo - Pointer to Attribute
- *
- * @ingroup Window
- */
-#define SIGNAL_EDITOR_RM_RESOURCE_ATTRIBUTE_CHANGED "SIGNAL_EDITOR_RM_RESOURCE_ATTRIBUTE_CHANGED"
-
-/**
- * emited when any attribute is sent by resource manager (after editor).
+ * emited when any attribute is changed in editor.
  * eventinfo - Pointer to Attribute
  *
  * @ingroup Window
@@ -356,13 +159,12 @@ typedef struct {
 #define SIGNAL_EDITOR_ATTRIBUTE_CHANGED "SIGNAL_EDITOR_ATTRIBUTE_CHANGED"
 
 /**
- * emited when any attribute of top level resource (image, colorclass etc)
- * is sent by resource manager (after editor).
+ * emited when any attribute of top level resource (image, colorclass etc) is changed in editor.
  * eventinfo - Pointer to Attribute
  *
  * @ingroup Window
  */
-#define SIGNAL_EDITOR_RESOURCE_ATTRIBUTE_CHANGED "SIGNAL_EDITOR_RM_ATTRIBUTE_CHANGED"
+#define SIGNAL_EDITOR_RESOURCE_ATTRIBUTE_CHANGED "SIGNAL_EDITOR_RESOURCE_ATTRIBUTE_CHANGED"
 
 typedef struct {
    const char *part_name;
@@ -384,7 +186,6 @@ typedef struct {
  *
  * @ingroup Window
  */
-#define SIGNAL_EDITOR_STATE_PREDELETED "SIGNAL_EDITOR_STATE_PREDELETED"
 #define SIGNAL_EDITOR_STATE_DELETED "SIGNAL_EDITOR_STATE_DELETED"
 
 typedef struct {
@@ -406,7 +207,6 @@ typedef struct {
  *
  * @ingroup Window
  */
-#define SIGNAL_EDITOR_PART_ITEM_PREDELETED "SIGNAL_EDITOR_PART_ITEM_PREDELETED"
 #define SIGNAL_EDITOR_PART_ITEM_DELETED "SIGNAL_EDITOR_PART_ITEM_DELETED"
 
 /**
@@ -427,7 +227,6 @@ typedef struct {
    const char *part_name;
    Change *change;
 } Editor_Part;
-#define SIGNAL_EDITOR_PART_PREDELETED "SIGNAL_EDITOR_PART_PREDELETED"
 #define SIGNAL_EDITOR_PART_DELETED "SIGNAL_EDITOR_PART_DELETED"
 
 /**
@@ -452,11 +251,6 @@ typedef struct {
  *
  * @ingroup Window
  */
-typedef struct {
-   const char *program_name;
-   Change *change;
-} Editor_Program;
-#define SIGNAL_EDITOR_PROGRAM_PREDELETED "SIGNAL_EDITOR_PROGRAM_PREDELETED"
 #define SIGNAL_EDITOR_PROGRAM_DELETED "SIGNAL_EDITOR_PROGRAM_DELETED"
 
 /**
@@ -473,7 +267,6 @@ typedef struct {
  *
  * @ingroup Window
  */
-#define SIGNAL_EDITOR_GROUP_DATA_PREDELETED "SIGNAL_EDITOR_GROUP_DATA_PREDELETED"
 #define SIGNAL_EDITOR_GROUP_DATA_DELETED "SIGNAL_EDITOR_GROUP_DATA_DELETED"
 
 typedef struct {
@@ -580,20 +373,6 @@ typedef struct {
  * @ingroup Window
  */
 #define SIGNAL_EDITOR_STYLE_DELETED "SIGNAL_EDITOR_STYLE_DELETED"
-
-typedef struct {
-   const char *style_name;
-   const char *tag_name;
-   const char *old_value;
-   const char *value;
-} Font_Change;
-/**
- * emited when font was changed in property of textblock manager.
- * eventinfo - Font_Change struct
- *
- * @ingroup Window
- */
-#define SIGNAL_EDITOR_STYLE_TAG_CHANGED "SIGNAL_EDITOR_STYLE_TAG_CHANGED"
 
 /**
  * emited when part state is selected.
@@ -778,6 +557,57 @@ typedef struct {
  * @ingroup Window
  */
 #define SIGNAL_DEMO_SIGNAL_SEND "SIGNAL_DEMO_SIGNAL_SEND"
+
+/**
+ * emited when shortcut is pressed.
+ * eventinfo - NULL.
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_SHORTCUT_QUIT "SIGNAL_SHORTCUT_QUIT"
+#define SIGNAL_SHORTCUT_UNDO "SIGNAL_SHORTCUT_UNDO"
+#define SIGNAL_SHORTCUT_REDO "SIGNAL_SHORTCUT_REDO"
+#define SIGNAL_SHORTCUT_SAVE "SIGNAL_SHORTCUT_SAVE"
+#define SIGNAL_SHORTCUT_ADD_GROUP "SIGNAL_SHORTCUT_ADD_GROUP"
+#define SIGNAL_SHORTCUT_ADD_PART "SIGNAL_SHORTCUT_ADD_PART"
+#define SIGNAL_SHORTCUT_ADD_STATE "SIGNAL_SHORTCUT_ADD_STATE"
+#define SIGNAL_SHORTCUT_ADD_ITEM "SIGNAL_SHORTCUT_ADD_ITEM"
+#define SIGNAL_SHORTCUT_ADD_PROGRAM "SIGNAL_SHORTCUT_ADD_PROGRAM"
+#define SIGNAL_SHORTCUT_ADD_DATA_ITEM "SIGNAL_SHORTCUT_ADD_DATA_ITEM"
+#define SIGNAL_SHORTCUT_DEL "SIGNAL_SHORTCUT_DEL"
+#define SIGNAL_SHORTCUT_TAB_NEXT "SIGNAL_SHORTCUT_TAB_NEXT"
+#define SIGNAL_SHORTCUT_TAB_PREV "SIGNAL_SHORTCUT_TAB_PREV"
+#define SIGNAL_SHORTCUT_TAB_CLOSE "SIGNAL_SHORTCUT_TAB_CLOSE"
+#define SIGNAL_SHORTCUT_TAB_IMAGE_MANAGER "SIGNAL_SHORTCUT_TAB_IMAGE_MANAGER"
+#define SIGNAL_SHORTCUT_TAB_SOUND_MANAGER "SIGNAL_SHORTCUT_TAB_SOUND_MANAGER"
+#define SIGNAL_SHORTCUT_TAB_COLOR_CLASS_MANAGER "SIGNAL_SHORTCUT_TAB_COLOR_CLASS_MANAGER"
+#define SIGNAL_SHORTCUT_TAB_STYLE_MANAGER "SIGNAL_SHORTCUT_TAB_STYLE_MANAGER"
+#define SIGNAL_SHORTCUT_MODE_NORMAL "SIGNAL_SHORTCUT_MODE_NORMAL"
+#define SIGNAL_SHORTCUT_MODE_CODE "SIGNAL_SHORTCUT_MODE_CODE"
+#define SIGNAL_SHORTCUT_MODE_DEMO "SIGNAL_SHORTCUT_MODE_DEMO"
+#define SIGNAL_SHORTCUT_STATE_NEXT "SIGNAL_SHORTCUT_STATE_NEXT"
+#define SIGNAL_SHORTCUT_PART_NEXT "SIGNAL_SHORTCUT_PART_NEXT"
+#define SIGNAL_SHORTCUT_PART_PREV "SIGNAL_SHORTCUT_PART_PREV"
+#define SIGNAL_SHORTCUT_PART_SHOWHIDE "SIGNAL_SHORTCUT_PART_SHOWHIDE"
+#define SIGNAL_SHORTCUT_ALL_PARTS_SHOWHIDE "SIGNAL_SHORTCUT_ALL_PARTS_SHOWHIDE"
+#define SIGNAL_SHORTCUT_ZOOM_IN "SIGNAL_SHORTCUT_ZOOM_IN"
+#define SIGNAL_SHORTCUT_ZOOM_OUT "SIGNAL_SHORTCUT_ZOOM_OUT"
+#define SIGNAL_SHORTCUT_ZOOM_RESET "SIGNAL_SHORTCUT_ZOOM_RESET"
+#define SIGNAL_SHORTCUT_FILL "SIGNAL_SHORTCUT_FILL"
+#define SIGNAL_SHORTCUT_FIT "SIGNAL_SHORTCUT_FIT"
+#define SIGNAL_SHORTCUT_OBJECT_AREA "SIGNAL_SHORTCUT_OBJECT_AREA"
+#define SIGNAL_SHORTCUT_RULERS_SHOW "SIGNAL_SHORTCUT_RULERS_SHOW"
+#define SIGNAL_SHORTCUT_CANCEL "SIGNAL_SHORTCUT_POPUP_CANCEL"
+#define SIGNAL_SHORTCUT_DONE "SIGNAL_SHORTCUT_POPUP_DONE"
+#define SIGNAL_SHORTCUT_HELP "SIGNAL_SHORTCUT_POPUP_HELP"
+
+/**
+ * emited when shortcut is pressed.
+ * eventinfo - tab number.
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_SHORTCUT_TAB_NUM "SIGNAL_SHORTCUT_TAB_NUM"
 
 /**
  * emited when workspace is changed.

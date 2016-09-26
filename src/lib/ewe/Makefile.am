@@ -1,7 +1,7 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 EOLIAN_FLAGS = @DEPS_EOLIAN_FLAGS@ \
-	       -I$(top_srcdir)/src/lib
+	       -I$(top_srcdir)/src/lib/ewe
 
 include $(top_srcdir)/Makefile_Eolian_Helper.am
 
@@ -11,7 +11,7 @@ AM_CPPFLAGS = \
 -I$(top_srcdir) \
 -I$(top_srcdir)/src/lib/ewe \
 -I$(top_builddir)/src/lib/ewe \
--I${top_srcdir}/src/bin/logger \
+-I${top_srcdir}/src/lib/logger \
 -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
 -DLOCALE_DIR=\"@LOCALE_DIR@\" \
 -DPACKAGE_LIB_DIR=\"$(libdir)\" \
@@ -20,25 +20,35 @@ AM_CPPFLAGS = \
 -DEFL_BETA_API_SUPPORT \
 -DELM_INTERNAL_API_ARGESFSDFEFC \
 -DEWE_BUILD \
-@EFL_CFLAGS@ \
 @ELEMENTARY_CFLAGS@
 
-noinst_LTLIBRARIES = libewe.a
+lib_LTLIBRARIES = libewe.la
 
-libewe_a_SOURCES = \
+includes_HEADERS = \
+Ewe.h
+includesdir = $(pkgincludedir)-@VMAJ@
+
+includesub_HEADERS = \
+ewe_main.h \
+ewe_ruler.h \
+ewe_ruler_legacy.h \
+ewe_ruler_eo.h \
+ewe_ruler_common.h
+
+includesubdir = $(pkgincludedir)-@VMAJ@
+
+libewe_la_LIBADD = @ELEMENTARY_LIBS@
+libewe_la_LDFLAGS = @EWE_LTLIBRARY_FLAGS@
+libewe_la_SOURCES = \
+../logger/logger.c \
 ewe_main.c \
-ewe_ruler.c
+ewe_ruler.c \
+ewe_private.h
 
 BUILT_SOURCES = \
 ewe_ruler.eo.c \
 ewe_ruler.eo.h
 
 EXTRA_DIST = ewe_ruler.eo \
-ewe_widget_ruler.h \
-ewe_private.h \
-ewe_main.h \
-ewe_ruler.h \
-ewe_ruler_legacy.h \
-ewe_ruler_eo.h \
-ewe_ruler_common.h \
-Ewe.h
+../logger/logger.h \
+ewe_widget_ruler.h

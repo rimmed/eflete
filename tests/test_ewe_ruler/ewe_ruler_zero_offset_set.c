@@ -54,7 +54,6 @@
 
 EFLETE_TEST(ewe_ruler_zero_offset_set_test_p)
 {
-   logger_init();
    ewe_init(0, 0);
    int zero_offset;
    Evas_Object *win = elm_win_util_standard_add("test", "test");
@@ -97,7 +96,6 @@ END_TEST
  */
 EFLETE_TEST(ewe_ruler_zero_offset_set_test_n)
 {
-   logger_init();
    ewe_init(0, 0);
 
    ck_assert_msg(ewe_ruler_zero_offset_set(NULL, NULL, 100) == EINA_FALSE,

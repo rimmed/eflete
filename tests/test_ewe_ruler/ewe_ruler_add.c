@@ -52,7 +52,6 @@
 
 EFLETE_TEST(ewe_ruler_add_test_p)
 {
-   logger_init();
    ewe_init(0, 0);
    Evas_Object *result, *parent;
    parent = elm_win_add(NULL, "test", ELM_WIN_BASIC);
@@ -88,7 +87,6 @@ END_TEST
  */
 EFLETE_TEST(ewe_ruler_add_test_n)
 {
-   logger_init();
    ewe_init(0, 0);
    Evas_Object *result;
 

@@ -29,7 +29,6 @@
  */
 
 #include "eflete.h"
-#include "resource_manager2.h"
 
 /**
  * Create widget according to it's name, class and style.
@@ -46,7 +45,7 @@
  * @ingroup Live_View_Widget
  */
 Evas_Object *
-live_widget_create(Group2 *group, Evas_Object *parent);
+live_widget_create(Group *group, Evas_Object *parent);
 
 /**
  * Delete previously created widget object.

@@ -28,7 +28,7 @@
  */
 
 #include "eflete.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 #include "live_widgets.h"
 #include "demo_group.h"
 #include "widget_macro.h"
@@ -102,103 +102,103 @@ send_signal(void *data, Evas_Object *obj, void *event_info);
  * !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  ! *
  *****************************************************/
 Evas_Object *
-layout_custom_create(Evas_Object *parent, const Group2 *group);
+layout_custom_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_actionslider_create(Evas_Object *parent, const Group2 *group);
+widget_actionslider_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_bg_create(Evas_Object *parent, const Group2 *group);
+widget_bg_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_bubble_create(Evas_Object *parent, const Group2 *group);
+widget_bubble_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_button_create(Evas_Object *parent, const Group2 *group);
+widget_button_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_calendar_create(Evas_Object *parent, const Group2 *group);
+widget_calendar_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_check_create(Evas_Object *parent, const Group2 *group);
+widget_check_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_clock_create(Evas_Object *parent, const Group2 *group);
+widget_clock_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_ctxpopup_create(Evas_Object *parent, const Group2 *group);
+widget_ctxpopup_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_datetime_create(Evas_Object *parent, const Group2 *group);
+widget_datetime_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_entry_create(Evas_Object *parent, const Group2 *group);
+widget_entry_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_frame_create(Evas_Object *parent, const Group2 *group);
+widget_frame_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_gengrid_create(Evas_Object *parent, const Group2 *group);
+widget_gengrid_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_genlist_create(Evas_Object *parent, const Group2 *group);
+widget_genlist_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_label_create(Evas_Object *parent, const Group2 *group);
+widget_label_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_layout_create(Evas_Object *parent, const Group2 *group);
+widget_layout_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_list_create(Evas_Object *parent, const Group2 *group);
+widget_list_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_map_create(Evas_Object *parent, const Group2 *group);
+widget_map_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_multibuttonentry_create(Evas_Object *parent, const Group2 *group);
+widget_multibuttonentry_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_notify_create(Evas_Object *parent, const Group2 *group);
+widget_notify_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_panel_create(Evas_Object *parent, const Group2 *group);
+widget_panel_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_panes_create(Evas_Object *parent, const Group2 *group);
+widget_panes_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_popup_create(Evas_Object *parent, const Group2 *group);
+widget_popup_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_radio_create(Evas_Object *parent, const Group2 *group);
+widget_radio_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_scroller_create(Evas_Object *parent, const Group2 *group);
+widget_scroller_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_segment_control_create(Evas_Object *parent, const Group2 *group);
+widget_segment_control_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_separator_create(Evas_Object *parent, const Group2 *group);
+widget_separator_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_slider_create(Evas_Object *parent, const Group2 *group);
+widget_slider_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_spinner_create(Evas_Object *parent, const Group2 *group);
+widget_spinner_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_toolbar_create(Evas_Object *parent, const Group2 *group);
+widget_toolbar_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_progressbar_create(Evas_Object *parent, const Group2 *group);
+widget_progressbar_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_naviframe_create(Evas_Object *parent, const Group2 *group);
+widget_naviframe_create(Evas_Object *parent, const Group *group);
 
 Evas_Object *
-widget_colorselector_create(Evas_Object *parent, const Group2 *group);
+widget_colorselector_create(Evas_Object *parent, const Group *group);
 
 /*****************************************************
  *****************************************************

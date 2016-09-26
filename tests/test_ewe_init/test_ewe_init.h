@@ -18,7 +18,6 @@
 
 #include "utc_common.h"
 #include "Ewe.h"
-#include "logger.h"
 
 /**
  * @defgroup ewe_test

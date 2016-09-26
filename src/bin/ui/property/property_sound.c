@@ -21,7 +21,7 @@
 #include "property_private.h"
 #include "sound_player.h"
 #include "main_window.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 
 #define SOUND_MASK(TYPE) (1u << TYPE)
 #define SOUND_SAMPLE SOUND_MASK(SOUND_TYPE_SAMPLE)
@@ -29,8 +29,8 @@
 
 struct _Property_Sound_Data {
    Sound_Data *snd;
-   Sound2 *sample;
-   Tone2 *tone;
+   External_Resource *sample;
+   Tone_Resource *tone;
    Property_Attribute items[PROPERTY_SOUND_ITEM_LAST];
 };
 typedef struct _Property_Sound_Data Property_Sound_Data;
@@ -345,13 +345,13 @@ _on_grid_clicked(void *data,
 
    if (sound_pd.snd && sound_pd.snd->type == SOUND_TYPE_SAMPLE)
      {
-        sound_pd.sample = (Sound2 *)sound_pd.snd->resource;
+        sound_pd.sample = (External_Resource *)sound_pd.snd->resource;
         sound_pd.tone = NULL;
      }
    else if (sound_pd.snd && sound_pd.snd->type == SOUND_TYPE_TONE)
      {
         sound_pd.sample = NULL;
-        sound_pd.tone = (Tone2 *)sound_pd.snd->resource;
+        sound_pd.tone = (Tone_Resource *)sound_pd.snd->resource;
      }
    else
      {

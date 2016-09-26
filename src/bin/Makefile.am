@@ -2,8 +2,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 LOCALE_DIR = @LOCALE_DIR@
 
-bin_PROGRAMS = eflete \
-					eflete_exporter
+bin_PROGRAMS = eflete
 
 EXTRA_DIST = \
 	eflete.h \
@@ -28,12 +27,11 @@ EXTRA_DIST = \
 	external/syntax_color.h \
 	logger/logger.h \
 	project_manager/group_manager.h \
-	project_manager/group_manager_resources.h \
-	project_manager/project_manager2.h \
+	project_manager/project_manager.h \
+	project_manager/project_manager_private.h \
 	project_manager/resource_manager.h \
 	resource_manager/resource_manager2.h \
 	resource_manager/resource_manager_private.h \
-	resource_manager/resource_manager_signals.h \
 	ui/cursor.h \
 	ui/history_ui.h \
 	ui/main_window.h \
@@ -50,6 +48,7 @@ EXTRA_DIST = \
 	ui/live_view/live_widgets.h \
 	ui/live_view/elementary/live_elementary_widgets.h \
 	ui/modal_window/modal_window.h \
+	ui/preference/preference.h \
 	ui/shortcuts/shortcuts.h \
 	ui/workspace/groupview.h \
 	ui/workspace/groupview_private.h \
@@ -63,12 +62,17 @@ noinst_LIBRARIES = libete.a
 libete_a_SOURCES = \
 ../../src/bin/eflete.c \
 ../../src/bin/common/string_common.c \
-../../src/bin/common/signals.c \
-../../src/bin/common/tizen_hacks.c \
 ../../src/bin/common/validator.c \
 ../../src/bin/common/widget_list.c \
 ../../src/bin/project_manager/group_manager.c \
-../../src/bin/project_manager/project_manager2.c \
+../../src/bin/project_manager/project_manager.c \
+../../src/bin/project_manager/project_manager_open.c \
+../../src/bin/project_manager/project_manager_import_edj.c \
+../../src/bin/project_manager/project_manager_import_edc.c \
+../../src/bin/project_manager/project_manager_export_resources.c \
+../../src/bin/project_manager/project_manager_export_edc.c \
+../../src/bin/project_manager/project_manager_export_edj.c \
+../../src/bin/project_manager/resource_manager.c \
 ../../src/bin/resource_manager/resource_manager2.c \
 ../../src/bin/resource_manager/resource_manager_load.c \
 ../../src/bin/resource_manager/resource_manager_build.c \
@@ -178,6 +182,7 @@ eflete_CPPFLAGS = \
 -I${top_srcdir}/src/bin/alloc \
 -I${top_srcdir}/src/bin/editor \
 -I${top_srcdir}/src/bin/external \
+-I${top_srcdir}/src/bin/preference \
 -I${top_srcdir}/src/bin/common \
 -I${top_srcdir}/src/bin/logger \
 -I${top_srcdir}/src/bin/project_manager \
@@ -195,9 +200,9 @@ eflete_CPPFLAGS = \
 -I${top_srcdir}/src/bin/ui/workspace \
 -I${top_srcdir}/src/bin/ui/live_view \
 -I${top_srcdir}/src/bin/ui/live_view/elementary \
-@EFL_CFLAGS@ \
-@EFLETE_DEFINE@ \
-@ELEMENTARY_CFLAGS@
+-I${top_srcdir}/src/bin/ui/preference \
+@ELEMENTARY_CFLAGS@ \
+@EFLETE_DEFINE@
 
 libete_a_CPPFLAGS = ${eflete_CPPFLAGS} \
    -DLOCALE_DIR=\"@LOCALE_DIR@\"
@@ -206,13 +211,9 @@ eflete_LDADD = \
 libete.a \
 @EFL_LIBS@ \
 @ELEMENTARY_LIBS@ \
-${top_builddir}/src/lib/ewe/libewe.a \
-${top_builddir}/src/lib/elementary_combobox/libcmb.a \
+${top_builddir}/src/lib/ewe/libewe.la \
+${top_builddir}/src/lib/elementary_combobox/libcmb.la \
 @LTLIBINTL@
-
-eflete_exporter_SOURCES = ../../src/bin/exporter/eflete_exporter.c
-eflete_exporter_CPPFLAGS = ${libete_a_CPPFLAGS}
-eflete_exporter_LDADD = ${eflete_LDADD}
 
 #Enable after Enventor compabitility will be implement
 #if HAVE_ENVENTOR

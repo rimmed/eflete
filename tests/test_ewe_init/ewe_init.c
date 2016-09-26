@@ -18,7 +18,7 @@
 #include "test_ewe_init.h"
 
 /**
- * @addtogroup ewe_init_test
+ * @addtogroup ewe_test
  * @{
  * @addtogroup ewe_init
  * @{
@@ -32,7 +32,7 @@
   * @{
   * <tr>
   * <td>ewe_init</td>
-  * <td>ewe_init_test_p</td>
+  * <td>TEST_CASE_NAME</td>
   * <td>
   * @procedure
   * @step 1 init ewe
@@ -49,7 +49,6 @@
   */
 EFLETE_TEST(ewe_init_test_p)
 {
-M_ logger_init();
 M_ int elm_inits = ewe_init(0, 0);
 M_ ck_assert_msg(elm_inits > 0, "Init failure");
 M_ ck_assert_msg(ewe_shutdown() == elm_inits - 1, "Shutdown failure");

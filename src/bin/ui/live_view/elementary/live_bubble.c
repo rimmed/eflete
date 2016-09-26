@@ -39,7 +39,7 @@ _bubble_pos_get(const char *class)
 }
 
 Evas_Object *
-widget_bubble_create(Evas_Object *parent, const Group2 *group)
+widget_bubble_create(Evas_Object *parent, const Group *group)
 {
    assert(parent != NULL);
    assert(group != NULL);

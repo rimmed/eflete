@@ -23,7 +23,7 @@
 #include "project_navigator.h"
 #include "main_window.h"
 #include "validator.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 #include "widget_list.h"
 
 typedef struct
@@ -63,11 +63,11 @@ _group_item_label_get(void *data,
                       const char *part __UNUSED__)
 {
    const char *pos;
-   Group2 *group = data;
+   Group *group = data;
 
-   pos = strrchr(group->common.name, '/');
+   pos = strrchr(group->name, '/');
    if (pos) return strdup(pos + 1);
-   else return strdup(group->common.name);
+   else return strdup(group->name);
 }
 
 static char *
@@ -119,7 +119,7 @@ _group_item_icon_get(void *data,
                      const char *part)
 {
    Evas_Object *icon = NULL;
-   Group2 *group = data;
+   Group *group = data;
 
    if (!strcmp(part, "elm.swallow.icon"))
      {
@@ -191,12 +191,12 @@ _expanded_cb(void *data __UNUSED__,
              Evas_Object *o __UNUSED__,
              void *event_info)
 {
-   Group2 *group;
+   Group *group;
    Eina_List *folders = NULL, *groups = NULL;
    Elm_Object_Item *glit = event_info;
    Eina_Stringshare *prefix = elm_object_item_data_get(glit);
 
-   widget_tree_items_get(ap.project->RM.groups, prefix, &folders, &groups);
+   widget_tree_items_get(ap.project->groups, prefix, &folders, &groups);
    EINA_LIST_FREE(folders, prefix)
      {
         elm_genlist_item_append(project_navigator.genlist,
@@ -237,7 +237,7 @@ _on_clicked_double(void *data __UNUSED__,
 
    if (elm_genlist_item_type_get(glit) != ELM_GENLIST_ITEM_TREE)
      {
-        Group2 *group = (Group2 *)elm_object_item_data_get(glit);
+        Group *group = (Group *)elm_object_item_data_get(glit);
         evas_object_smart_callback_call(project_navigator.layout, SIGNAL_GROUP_OPEN, group);
      }
 }
@@ -277,9 +277,9 @@ _items_compare(const void *data1, const void *data2)
    if (elm_genlist_item_item_class_get(it1) == project_navigator.itc_group)
      {
         if (elm_genlist_item_item_class_get(it2) != project_navigator.itc_folder)
-          str2 = ((Group2 *)elm_object_item_data_get(it2))->common.name;
+          str2 = ((Group *)elm_object_item_data_get(it2))->name;
         else return 1;
-        str1 = ((Group2 *)elm_object_item_data_get(it1))->common.name;
+        str1 = ((Group *)elm_object_item_data_get(it1))->name;
      }
    else /* add folder */
      {
@@ -296,15 +296,15 @@ _group_add(void *data __UNUSED__,
            Evas_Object *obj __UNUSED__,
            void *event_info)
 {
-   Group2 *group;
+   Group *group;
    Elm_Object_Item *item, *parent = NULL;
    char **arr;
    unsigned int count, i;
    Eina_Stringshare *prefix;
 
-   group = (Group2 *)event_info;
+   group = (Group *)event_info;
    item = elm_genlist_first_item_get(project_navigator.genlist);
-   arr = eina_str_split_full(group->common.name, "/", 0, &count);
+   arr = eina_str_split_full(group->name, "/", 0, &count);
 
    for (i = 0; i < count; i++)
      {
@@ -316,9 +316,9 @@ _group_add(void *data __UNUSED__,
         item = eina_list_data_get(elm_genlist_item_subitems_get(item));
      }
 
-   if ((i > 0) && (count > 0) && (i != count - 1))
+   if (i != count - 1)
      {
-        prefix = widget_prefix_get(group->common.name, i, NULL);
+        prefix = widget_prefix_get(group->name, i, NULL);
         elm_genlist_item_sorted_insert(project_navigator.genlist,
                                        project_navigator.itc_folder,
                                        prefix,
@@ -390,7 +390,7 @@ static Evas_Object *
 _add_group_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Object **to_focus)
 {
    Evas_Object *item;
-   Group2 *group;
+   Group *group;
    Eina_List *l;
    Elm_Object_Item *glit;
    Combobox_Item *combobox_item;
@@ -412,13 +412,13 @@ _add_group_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Object **
    LAYOUT_PROP_ADD(layout_p.box, _("Copy of"), "popup", "1swallow")
    layout_p.layout_combo = item;
    COMBOBOX_ADD(item, layout_p.combobox)
-   evas_object_smart_callback_add(layout_p.combobox, signals.elm.combobox.item_pressed, _group_sel, NULL);
+   evas_object_smart_callback_add(layout_p.combobox, "item,pressed", _group_sel, NULL);
    elm_layout_content_set(item, NULL, layout_p.combobox);
    elm_box_pack_end(layout_p.box, item);
    /* alias: check */
    LAYOUT_PROP_ADD(layout_p.box, _("Alias"), "popup", "1swallow")
    CHECK_ADD(item, layout_p.check)
-   evas_object_smart_callback_add(layout_p.check, signals.elm.check.changed, _alias_ch, NULL);
+   evas_object_smart_callback_add(layout_p.check, "changed", _alias_ch, NULL);
    elm_object_disabled_set(layout_p.check, true);
    elm_layout_content_set(item, NULL, layout_p.check);
    elm_box_pack_end(layout_p.box, item);
@@ -430,11 +430,11 @@ _add_group_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Object **
    elm_genlist_item_append(layout_p.combobox, layout_p.combobox_itc,
                            combobox_item, NULL,
                            ELM_GENLIST_ITEM_NONE, NULL, NULL);
-   EINA_LIST_FOREACH(ap.project->RM.groups, l, group)
+   EINA_LIST_FOREACH(ap.project->groups, l, group)
      {
         combobox_item = mem_malloc(sizeof(Combobox_Item));
         combobox_item->index = i++;
-        combobox_item->data = eina_stringshare_add(group->common.name);
+        combobox_item->data = eina_stringshare_add(group->name);
         elm_genlist_item_append(layout_p.combobox, layout_p.combobox_itc,
                                 combobox_item, NULL,
                                 ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -465,6 +465,7 @@ _add_group_popup_close_cb(void *data __UNUSED__,
                CRIT_ON_FAIL(editor_group_alias_add(ap.project->global_object, layout_p.selected->data, elm_entry_entry_get(layout_p.entry), true));
           }
         TODO("Delete gm_group_add after RM integration");
+        gm_group_add(ap.project, elm_entry_entry_get(layout_p.entry), true);
      }
 
    evas_object_del(layout_p.box);
@@ -486,7 +487,7 @@ _btn_add_group_cb(void *data __UNUSED__,
    assert(validator == NULL);
 
    validator = resource_name_validator_new(LAYOUT_NAME_REGEX, NULL);
-   resource_name_validator_list_set(validator, &ap.project->RM.groups, false);
+   resource_name_validator_list_set(validator, &ap.project->groups, false);
    popup = popup_add(_("Create a new layout"), NULL, BTN_OK|BTN_CANCEL, _add_group_content_get, layout_p.entry);
    popup_button_disabled_set(popup, BTN_OK, true);
    evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _add_group_popup_close_cb, NULL);
@@ -497,9 +498,9 @@ _folder_del(const char *prefix)
 {
    Eina_List *folders = NULL, *groups = NULL;
    Eina_Stringshare *tmp, *msg;
-   Group2 *group;
+   Group *group, *alias;
 
-   widget_tree_items_get(ap.project->RM.groups, prefix, &folders, &groups);
+   widget_tree_items_get(ap.project->groups, prefix, &folders, &groups);
    EINA_LIST_FREE(folders, tmp)
      {
        _folder_del(tmp);
@@ -507,23 +508,41 @@ _folder_del(const char *prefix)
 
    EINA_LIST_FREE(groups, group)
      {
-        tmp = eina_stringshare_add(group->common.name);
-        if (!editor_group_del(ap.project->global_object, tmp, true))
+        if (group->main_group) continue;
+        EINA_LIST_FREE(group->aliases, alias)
+          {
+             tmp = eina_stringshare_add(alias->name);
+             if (editor_group_del(ap.project->global_object, tmp, true))
+               gm_group_del(ap.project, alias);
+             else
+               {
+                  msg = eina_stringshare_printf(_("Can't delete alias layout \"%s\""), alias->name);
+                  TODO("Check if it's correct to ignore error");
+                  popup_add(_("Error"), msg, BTN_OK, NULL, NULL);
+                  eina_stringshare_del(msg);
+               }
+             eina_stringshare_del(tmp);
+          }
+
+        tmp = eina_stringshare_add(group->name);
+        if (editor_group_del(ap.project->global_object, tmp, true))
+          gm_group_del(ap.project, group);
+        else
           {
              msg = eina_stringshare_printf(_("Can't delete layout \"%s\". "
-                                             "Please close a tab with given group."),
-                                           group->common.name);
+                                            "Please close a tab with given group."), group->name);
              TODO("Check if it's correct to ignore error");
              popup_add(_("Error"), msg, BTN_OK, NULL, NULL);
              eina_stringshare_del(msg);
           }
+        eina_stringshare_del(tmp);
      }
 }
 
 static int
-group_cmp(Resource2 *res1, const char *name)
+group_cmp(Resource *res1, const char *name)
 {
-   return strncmp(res1->common.name, name, strlen(name));
+   return strncmp(res1->name, name, strlen(name));
 }
 
 static void
@@ -544,7 +563,7 @@ _group_del(void *data __UNUSED__,
    arr = eina_str_split_full(group_name, "/", 0, &depth);
    for (i = 0; i < depth; i++)
      {
-        item = _find_item(item, arr[i]);
+        item  =_find_item(item, arr[i]);
         eina_strbuf_append_printf(buf, "%s", arr[i]);
         if (!item) break;
         if (i != depth - 1)
@@ -559,17 +578,14 @@ _group_del(void *data __UNUSED__,
              break;
           }
         if (!elm_genlist_item_expanded_get(item) &&
-            NULL != eina_list_search_sorted_list(ap.project->RM.groups, (Eina_Compare_Cb)group_cmp, eina_strbuf_string_get(buf)))
-          {
-             stack = eina_list_append(stack, item);
-             break;
-          }
+            NULL != eina_list_search_sorted_list(ap.project->groups, (Eina_Compare_Cb)group_cmp, eina_strbuf_string_get(buf)))
+          break;
         stack = eina_list_append(stack, item);
         item = eina_list_data_get(elm_genlist_item_subitems_get(item));
      }
    EINA_LIST_REVERSE_FOREACH(stack, l, item)
      {
-        if (elm_genlist_item_subitems_count(item) == 0)
+        if (0 == elm_genlist_item_subitems_count(item))
           elm_object_item_del(item);
      }
 
@@ -598,20 +614,21 @@ _group_del_popup_close_cb(void *data,
                           void *event_info)
 {
    Eina_Stringshare *tmp, *msg;
-   Group2 *group = data;
+   Group *group = data;
    Popup_Button btn_res = (Popup_Button) event_info;
 
    if (BTN_CANCEL == btn_res) return;
 
-   tmp = eina_stringshare_add(group->common.name);
-
-   if (!editor_group_del(ap.project->global_object, tmp, true))
+   tmp = eina_stringshare_add(group->name);
+   if (editor_group_del(ap.project->global_object, tmp, true))
+     gm_group_del(ap.project, group);
+   else
      {
-        msg = eina_stringshare_printf(_("Can't delete layout \"%s\""), group->common.name);
-        TODO("Check if it's correct to ignore error");
-        popup_add(_("Error"), msg, BTN_OK, NULL, NULL);
+        msg = eina_stringshare_printf(_("Can't delete layout \"%s\""), group->name);
         eina_stringshare_del(msg);
      }
+   eina_stringshare_del(tmp);
+
    elm_object_disabled_set(project_navigator.btn_del, true);
 }
 
@@ -620,7 +637,7 @@ _btn_del_group_cb(void *data __UNUSED__,
                   Evas_Object *obj __UNUSED__,
                   void *event_info __UNUSED__)
 {
-   Group2 *group;
+   Group *group;
    Evas_Object *popup;
    Elm_Object_Item *glit;
 
@@ -635,7 +652,7 @@ _btn_del_group_cb(void *data __UNUSED__,
      }
    else
      {
-        group = (Group2 *)elm_object_item_data_get(glit);
+        group = (Group *)elm_object_item_data_get(glit);
         /* if Group have an object then we cann't close tab with this object
          * and delete it */
         if (group->edit_object)
@@ -732,12 +749,12 @@ project_navigator_add(void)
    evas_object_show(project_navigator.layout);
 
    project_navigator.btn_add = elm_button_add(project_navigator.layout);
-   evas_object_smart_callback_add(project_navigator.btn_add, signals.elm.button.clicked, _btn_add_group_cb, NULL);
+   evas_object_smart_callback_add(project_navigator.btn_add, "clicked", _btn_add_group_cb, NULL);
    elm_object_style_set(project_navigator.btn_add, "plus");
    elm_object_part_content_set(project_navigator.layout, "elm.swallow.btn1", project_navigator.btn_add);
 
    project_navigator.btn_del = elm_button_add(project_navigator.layout);
-   evas_object_smart_callback_add (project_navigator.btn_del, signals.elm.button.clicked, _btn_del_group_cb, NULL);
+   evas_object_smart_callback_add (project_navigator.btn_del, "clicked", _btn_del_group_cb, NULL);
    elm_object_style_set(project_navigator.btn_del, "minus");
    elm_object_part_content_set(project_navigator.layout, "elm.swallow.btn0", project_navigator.btn_del);
    elm_object_disabled_set(project_navigator.btn_del, true);
@@ -746,23 +763,23 @@ project_navigator_add(void)
    elm_genlist_homogeneous_set(project_navigator.genlist, true);
    evas_object_show(project_navigator.genlist);
    elm_object_content_set(project_navigator.layout, project_navigator.genlist);
-
-   evas_object_smart_callback_add(project_navigator.genlist, signals.elm.genlist.clicked_double, _on_clicked_double, NULL);
-   evas_object_smart_callback_add(project_navigator.genlist, signals.elm.genlist.expand_request, _expand_request_cb, NULL);
-   evas_object_smart_callback_add(project_navigator.genlist, signals.elm.genlist.contract_request, _contract_request_cb, NULL);
-   evas_object_smart_callback_add(project_navigator.genlist, signals.elm.genlist.expanded, _expanded_cb, NULL);
-   evas_object_smart_callback_add(project_navigator.genlist, signals.elm.genlist.contracted, _contracted_cb, NULL);
-   evas_object_smart_callback_add(project_navigator.genlist, signals.elm.genlist.selected, _selected_cb, NULL);
-   evas_object_smart_callback_add(project_navigator.genlist, signals.elm.genlist.unselected, _unselected_cb, NULL);
+   evas_object_smart_callback_add (project_navigator.genlist, "selected", _selected_cb, NULL);
+   evas_object_smart_callback_add (project_navigator.genlist, "unselected", _unselected_cb, NULL);
    /*elm_genlist_tree_effect_enabled_set(project_navigator.genlist, EINA_TRUE);*/
 
    elm_object_text_set(project_navigator.layout, _("None"));
    elm_object_disabled_set(project_navigator.layout, true);
 
+   evas_object_smart_callback_add(project_navigator.genlist, "clicked,double", _on_clicked_double, NULL);
+   evas_object_smart_callback_add(project_navigator.genlist, "expand,request", _expand_request_cb, NULL);
+   evas_object_smart_callback_add(project_navigator.genlist, "contract,request", _contract_request_cb, NULL);
+   evas_object_smart_callback_add(project_navigator.genlist, "expanded", _expanded_cb, NULL);
+   evas_object_smart_callback_add(project_navigator.genlist, "contracted", _contracted_cb, NULL);
+
    evas_object_smart_callback_add(ap.win, SIGNAL_GROUP_ADDED, _group_add, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_GROUP_DELETED, _group_del, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.add.group, _btn_add_group_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.save, _shortcut_save_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ADD_GROUP, _btn_add_group_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_SAVE, _shortcut_save_cb, NULL);
 
    TODO("Add deletion callback and free resources");
 
@@ -774,10 +791,10 @@ project_navigator_project_set(void)
 {
    Eina_List *folders = NULL, *groups = NULL;
    Eina_Stringshare *prefix;
-   Group2 *group;
+   Group *group;
 
    elm_object_text_set(project_navigator.layout, ap.project->name);
-   widget_tree_items_get(ap.project->RM.groups, "", &folders, &groups);
+   widget_tree_items_get(ap.project->groups, "", &folders, &groups);
 
    EINA_LIST_FREE(folders, prefix)
      {

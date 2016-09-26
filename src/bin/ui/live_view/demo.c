@@ -18,11 +18,11 @@
  */
 
 #include "live_widget.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 #include "live_elementary_widgets.h"
 
 Evas_Object *
-demo_add(Evas_Object *parent, Group2 *group)
+demo_add(Evas_Object *parent, Group *group)
 {
    Evas_Object *obj = NULL;
 

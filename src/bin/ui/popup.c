@@ -19,7 +19,7 @@
 
 #include "main_window.h"
 #include "widget_macro.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 #include "config.h"
 #include "shortcuts.h"
 
@@ -97,9 +97,7 @@ _popup_btn_cb(void *data,
 
    ecore_job_add(_popup_del_job, pd);
    evas_object_smart_callback_call(pd->popup, POPUP_CLOSE_CB, data);
-   /* menu clould be deleted in POPUP_CLOSE_CB in exit confirmation popup */
-   if (ap.menu)
-     ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
+   ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_MAIN, false);
 }
 
 static Evas_Object *
@@ -113,12 +111,12 @@ _button_add(Popup_Data *pd, int *btn_pos, const char *text, Popup_Button pb)
    assert(*btn_pos < 3); /* maximum buttons count */
    assert(text != NULL);
 
-   if (pb == BTN_NONE)
+   if (!pb)
      return NULL;
 
    BUTTON_ADD(pd->popup, btn, text);
    evas_object_data_set(btn, POPUP_DATA, pd);
-   evas_object_smart_callback_add(btn, signals.elm.button.clicked, _popup_btn_cb, (void *)pb);
+   evas_object_smart_callback_add(btn, "clicked", _popup_btn_cb, (void *)pb);
    elm_object_part_content_set(pd->popup, position_name[*btn_pos], btn);
    *btn_pos = *btn_pos + 1;
 
@@ -177,7 +175,7 @@ popup_button_disabled_set(Evas_Object *popup, Popup_Button btn, Eina_Bool disabl
 {
    assert(popup != NULL);
 
-   if (btn == BTN_NONE) return;
+   if (!btn) return;
 
    Popup_Data *pd = evas_object_data_get(popup, POPUP_DATA);
    switch (btn)
@@ -317,9 +315,6 @@ _helper_colorclass_dismiss(void *data,
                            const char *source __UNUSED__)
 {
    Helper_Data *helper_data = (Helper_Data *)data;
-
-   assert(helper_data != NULL);
-
    Evas_Object *follow_up = helper_data->follow_up;
 
    evas_object_event_callback_del_full(follow_up, EVAS_CALLBACK_RESIZE, _helper_obj_follow, NULL);
@@ -341,7 +336,7 @@ _helper_colorclass_dismiss(void *data,
    if (helper_data->button)
      evas_object_del(helper_data->button);
 
-   free(helper_data);
+   if (helper_data) free(helper_data);
 
    ecore_job_add(_delete_object_job, helper);
 }
@@ -479,8 +474,8 @@ _fileselector_helper(const char *title,
 
    elm_fileselector_path_set(fs, (path && (strcmp(path, ""))) ? path :
                              (ap.last_path) ? ap.last_path : profile_get()->general.projects_folder);
-   evas_object_smart_callback_add(fs, signals.elm.fileselector.done, _done, follow_up);
-   evas_object_smart_callback_add(fs, signals.elm.fileselector.activated, _done, follow_up);
+   evas_object_smart_callback_add(fs, "done", _done, follow_up);
+   evas_object_smart_callback_add(fs, "activated", _done, follow_up);
    evas_object_size_hint_min_set(helper, FS_W, FS_H);
    evas_object_resize(helper, FS_W, FS_H);
 
@@ -691,9 +686,9 @@ _image_gengrid_init(Helper_Data *helper_data)
    Item *it = NULL;
    Eina_List *images = NULL;
    int counter = 0;
-   Image2 *res;
+   External_Resource *res;
 
-   images = ap.project->RM.images;
+   images = ap.project->images;
 
    /* initial zero image */
    it = (Item *)mem_malloc(sizeof(Item));
@@ -706,16 +701,16 @@ _image_gengrid_init(Helper_Data *helper_data)
         EINA_LIST_FOREACH(images, l, res)
            {
               counter++;
-              if (!res->common.name)
+              if (!res->name)
                 {
                    ERR("name not found for image #%d",counter);
                    continue;
                 }
-              if (!strcmp(res->common.name, EFLETE_DUMMY_IMAGE_NAME)) continue;
+              if (!strcmp(res->name, EFLETE_DUMMY_IMAGE_NAME)) continue;
 
               it = (Item *)mem_malloc(sizeof(Item));
-              it->image_name = eina_stringshare_add(res->common.name);
-              it->source = eina_stringshare_add(res->source);
+              it->image_name = eina_stringshare_add(res->name);
+              it->source = eina_stringshare_add(res->path);
               elm_gengrid_item_append(helper_data->gengrid, gic, it, NULL, NULL);
            }
          elm_gengrid_item_bring_in(elm_gengrid_first_item_get(helper_data->gengrid),
@@ -749,7 +744,7 @@ _grid_content_get(void *data,
    Item *it = data;
    Evas_Object *image_obj = NULL;
    Evas_Object *grid = (Evas_Object *)obj;
-   Resource2 *res;
+   Resource *res, request;
 
    assert(it != NULL);
    assert(grid != NULL);
@@ -764,8 +759,10 @@ _grid_content_get(void *data,
      }
    else if ((!strcmp(part, "elm.swallow.end") && (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) != 0)))
      {
-        res = resource_manager_find(ap.project->RM.images, it->image_name);
-        if (eina_list_count(res->common.used_in) == 0)
+        request.resource_type = RESOURCE_TYPE_IMAGE;
+        request.name = it->image_name;
+        res = resource_get(ap.project->images, &request);
+        if (eina_list_count(res->used_in) == 0)
           {
              image_obj = elm_icon_add(grid);
              elm_image_file_set(image_obj, ap.path.theme_edj, "elm/image/icon/attention");
@@ -813,18 +810,12 @@ _search_next_gengrid_item_cb(void *data,
 }
 
 static void
-_image_manager_add_job(void *data __UNUSED__)
-{
-   image_manager_add();
-}
-
-static void
 _btn_image_manager_cb(void *data __UNUSED__,
                       Evas_Object *obj __UNUSED__,
                       void *event_info __UNUSED__)
 {
    _helper_dismiss(NULL, helper, NULL, NULL);
-   ecore_job_add(_image_manager_add_job, NULL);
+   image_manager_add();
 }
 
 void
@@ -860,7 +851,7 @@ popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
 
         BUTTON_ADD(fs, helper_data->button, _("Ok"))
         elm_object_part_content_set(helper, "elm.swallow.ok", helper_data->button);
-        evas_object_smart_callback_add(helper_data->button, signals.elm.button.clicked, _done_image, helper_data);
+        evas_object_smart_callback_add(helper_data->button, "clicked", _done_image, helper_data);
         evas_object_show(helper_data->button);
      }
    else
@@ -868,7 +859,7 @@ popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
         elm_gengrid_multi_select_set(helper_data->gengrid, false);
         elm_gengrid_multi_select_mode_set(helper_data->gengrid,
                                           ELM_OBJECT_MULTI_SELECT_MODE_WITH_CONTROL);
-        evas_object_smart_callback_add(helper_data->gengrid, signals.elm.gengrid.clicked_double, _done_image, helper_data);
+        evas_object_smart_callback_add(helper_data->gengrid, "clicked,double", _done_image, helper_data);
      }
    elm_gengrid_item_size_set(helper_data->gengrid, ITEM_WIDTH, ITEM_HEIGHT);
    elm_gengrid_align_set(helper_data->gengrid, 0.0, 0.0);
@@ -897,9 +888,9 @@ popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
 #endif
 
    elm_object_part_content_set(fs, "eflete.swallow.search_line", entry);
-   evas_object_smart_callback_add(entry, signals.elm.entry.changed,
+   evas_object_smart_callback_add(entry, "changed",
                                   _on_images_search_entry_changed_cb, helper_data);
-   evas_object_smart_callback_add(entry, signals.elm.entry.activated,
+   evas_object_smart_callback_add(entry, "activated",
                                   _search_next_gengrid_item_cb, helper_data);
    helper_data->image_search_data.search_entry = entry;
    helper_data->image_search_data.last_item_found = NULL;
@@ -907,7 +898,7 @@ popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
    BUTTON_ADD(fs, button, NULL);
    ICON_STANDARD_ADD(button, icon, true, "image2");
    elm_object_content_set(button, icon);
-   evas_object_smart_callback_add(button, signals.elm.button.clicked, _btn_image_manager_cb, NULL);
+   evas_object_smart_callback_add(button, "clicked", _btn_image_manager_cb, NULL);
    elm_object_part_content_set(fs, "eflete.swallow.button", button);
    elm_layout_signal_emit(fs, "button,show", "eflete");
 
@@ -1002,9 +993,9 @@ popup_colorselector_helper(Evas_Object *follow_up,
    elm_colorselector_palette_color_add(fs, 255, 255, 255, 255);
    elm_colorselector_palette_color_add(fs, 200, 200, 200, 255);
 #endif
-   evas_object_smart_callback_add(fs, signals.elm.colorselector.changed, func_change, data);
-   evas_object_smart_callback_add(fs, signals.elm.colorselector.color_item_selected, func_change, data);
-   evas_object_smart_callback_add(fs, signals.elm.colorselector.color_item_longpressed, func_change, data);
+   evas_object_smart_callback_add(fs, "changed", func_change, data);
+   evas_object_smart_callback_add(fs, "color,item,selected", func_change, data);
+   evas_object_smart_callback_add(fs, "color,item,longpressed", func_change, data);
 
    /* small hack, hide not necessary button */
    evas_object_hide(elm_layout_content_unset(fs, "elm.swallow.cancel"));
@@ -1014,7 +1005,7 @@ popup_colorselector_helper(Evas_Object *follow_up,
 #if !HAVE_TIZEN
    BUTTON_ADD(fs, helper_data->button, _("Ok"))
    elm_object_part_content_set(helper, "elm.swallow.ok", helper_data->button);
-   evas_object_smart_callback_add(helper_data->button, signals.elm.button.clicked, _colorclass_done, helper_data);
+   evas_object_smart_callback_add(helper_data->button, "clicked", _colorclass_done, helper_data);
    evas_object_show(helper_data->button);
 #endif
 

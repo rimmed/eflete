@@ -18,10 +18,10 @@
  */
 
 #include "main_window.h"
+#include "preference.h"
 #include "tabs.h"
 #include "workspace.h"
 #include "shortcuts.h"
-#include "project_manager2.h"
 
 static int _menu_delayed_event = 0;
 

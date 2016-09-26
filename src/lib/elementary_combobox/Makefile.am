@@ -10,7 +10,7 @@ AM_CPPFLAGS = \
 -I$(top_builddir) \
 -I$(top_srcdir) \
 -I$(top_srcdir)/src/lib/elementary_combobox \
--I$(top_builddir)/src/bin/logger \
+-I$(top_builddir)/src/lib/logger \
 -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
 -DLOCALE_DIR=\"@LOCALE_DIR@\" \
 -DPACKAGE_LIB_DIR=\"$(libdir)\" \
@@ -20,18 +20,29 @@ AM_CPPFLAGS = \
 -DCMB_BUILD \
 @ELEMENTARY_CFLAGS@
 
-noinst_LTLIBRARIES = libcmb.a
+lib_LTLIBRARIES = libcmb.la
 
-libcmb_a_SOURCES = \
+includes_HEADERS = \
+Elementary_Combobox.h
+includesdir = $(pkgincludedir)-@VMAJ@
+
+includesub_HEADERS = \
+../logger/logger.h \
+elc_combobox.h \
+elc_combobox_legacy.h \
+elm_widget_combobox.h
+
+includesubdir = $(pkgincludedir)-@VMAJ@
+
+libcmb_la_LIBADD = @ELEMENTARY_LIBS@
+libcmb_la_LDFLAGS = @CMB_LTLIBRARY_FLAGS@
+libcmb_la_SOURCES = \
+../logger/logger.c \
+elm_priv.h \
 elc_combobox.c
 
 BUILT_SOURCES = \
 elm_combobox.eo.c \
 elm_combobox.eo.h
 
-EXTRA_DIST = elm_combobox.eo \
-elc_combobox.h \
-elc_combobox_legacy.h \
-elm_widget_combobox.h \
-elm_priv.h \
-Elementary_Combobox.h
+EXTRA_DIST = elm_combobox.eo

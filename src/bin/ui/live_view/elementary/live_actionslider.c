@@ -20,7 +20,7 @@
 #include "live_elementary_widgets.h"
 
 Evas_Object *
-widget_actionslider_create(Evas_Object *parent, const Group2 *group)
+widget_actionslider_create(Evas_Object *parent, const Group *group)
 {
    assert(parent != NULL);
    assert(group != NULL);

@@ -279,6 +279,8 @@ markup_skip(Eina_Strbuf *strbuf, const char **src, int length, char **cur,
         *prev = *cur;
         return -1;
      }
+
+   return 1;
 }
 
 static int
@@ -345,6 +347,8 @@ comment_apply(Eina_Strbuf *strbuf, const char **src, int length, char **cur,
         *prev = *cur;
         return 1;
      }
+
+   return -1;
 }
 
 static int

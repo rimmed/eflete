@@ -36,6 +36,7 @@ FLAGS = \
 -I${top_srcdir}/src/bin/ui/dialogs \
 -I${top_srcdir}/src/bin/ui/editors \
 -I${top_srcdir}/src/bin/ui/notification \
+-I${top_srcdir}/src/bin/ui/preference \
 -I${top_srcdir}/src/bin/ui/live_view \
 -I${top_srcdir}/src/bin/ui/live_view/elementary \
 -I${top_srcdir}/tests \
@@ -45,9 +46,11 @@ FLAGS = \
 @CHECK_CFLAGS@
 
 LD = $(top_builddir)/src/bin/libete.a \
-${top_builddir}/src/lib/libewe.a \
 @CHECK_LIBS@ \
-@EFL_LIBS@
+@EFL_LIBS@ \
+@ELEMENTARY_LIBS@ \
+${top_builddir}/src/lib/ewe/libewe.la \
+${top_builddir}/src/lib/elementary_combobox/libcmb.la
 
 
 
@@ -175,6 +178,13 @@ cursor_test_SOURCES = \
 ../tests/test_cursor/cursor_type_get.c
 cursor_test_CFLAGS = ${FLAGS}
 cursor_test_LDADD = ${LD}
+
+live_widget_test_SOURCES = \
+../tests/test_live_widget/test_live_widget.c \
+../tests/test_live_widget/live_widget_create.c \
+../tests/test_live_widget/live_widget_del.c
+live_widget_test_CFLAGS = ${FLAGS}
+live_widget_test_LDADD = ${LD}
 
 coverage:
 	echo "<html><body>" > ../coverage.html

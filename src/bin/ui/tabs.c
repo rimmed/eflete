@@ -21,12 +21,12 @@
 #include "workspace.h"
 #include "tabs.h"
 #include "history.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 #include "main_window.h"
 #include "change.h"
 
 struct _Tabs_Item {
-   Group2 *group;
+   Group *group;
    Elm_Object_Item *toolbar_item;
    Evas_Object *content;
    Eina_Bool need_recalc : 1;
@@ -58,7 +58,7 @@ struct _Tabs {
    Elm_Object_Item *selected;
    Eina_List *items;
    Evas_Object *current_workspace;
-   Group2 *current_group;
+   Group *current_group;
    Tab_Home home;
 };
 
@@ -166,7 +166,7 @@ _mode_changed(void *data __UNUSED__,
 }
 
 static Tabs_Item *
-_find_tab(Group2 *group)
+_find_tab(Group *group)
 {
    Eina_List *l;
    Tabs_Item *item;
@@ -414,13 +414,17 @@ _part_renamed(void *data __UNUSED__,
               void *ei)
 {
    Rename *ren = ei;
-   Part2 *part;
+   Part *part;
+   Resource request;
 
    assert(tabs.current_group != NULL);
    assert(tabs.current_workspace != NULL);
    assert(ren != NULL);
 
-   part = (Part2 *)resource_manager_find(tabs.current_group->parts, ren->old_name);
+   request.resource_type = RESOURCE_TYPE_PART;
+   request.name = ren->old_name;
+   part = (Part *)resource_get(tabs.current_group->parts, &request);
+   gm_part_rename(part, ren->new_name);
    workspace_group_navigator_update_part(tabs.current_workspace, part);
 }
 
@@ -430,13 +434,17 @@ _group_data_renamed(void *data __UNUSED__,
               void *ei)
 {
    Rename *ren = ei;
-   Resource2 *group_data;
+   Resource *group_data;
+   Resource request;
 
    assert(tabs.current_group != NULL);
    assert(tabs.current_workspace != NULL);
    assert(ren != NULL);
 
-   group_data = resource_manager_find(tabs.current_group->data_items, ren->old_name);
+   request.resource_type = RESOURCE_TYPE_DATA;
+   request.name = ren->old_name;
+   group_data = resource_get(tabs.current_group->data_items, &request);
+   gm_group_data_rename(ap.project, tabs.current_group, group_data, ren->new_name);
    workspace_group_navigator_update_group_data(tabs.current_workspace, group_data);
 }
 
@@ -448,11 +456,11 @@ _editor_saved(void *data __UNUSED__,
    Eina_List *l;
    Tabs_Item *item;
 
-   //pm_dev_file_reload(ap.project);
+   pm_dev_file_reload(ap.project);
    EINA_LIST_FOREACH(tabs.items, l, item)
      {
         if (!item->group) continue; /* skip home tab */
-        resource_group_edit_object_reload(ap.project, item->group);
+        gm_group_edit_object_reload(ap.project, item->group);
         if (item->content == tabs.current_workspace)
           workspace_groupview_hard_update(tabs.current_workspace);
         else
@@ -511,7 +519,7 @@ _editor_part_deleted_cb(void *data __UNUSED__,
                         Evas_Object *obj __UNUSED__,
                         void *event_info)
 {
-   const Editor_Part *part = (Editor_Part *)event_info;
+   Editor_Part *part = (Editor_Part *)event_info;
 
    assert(part != NULL);
    assert(tabs.current_group != NULL);
@@ -539,13 +547,13 @@ _editor_program_deleted_cb(void *data __UNUSED__,
                            Evas_Object *obj __UNUSED__,
                            void *event_info)
 {
-   const Editor_Program *program = (Editor_Program *)event_info;
+   Eina_Stringshare *program_name = event_info;
 
-   assert(program != NULL);
+   assert(program_name != NULL);
    assert(tabs.current_group != NULL);
    assert(tabs.current_workspace != NULL);
 
-   workspace_program_del(tabs.current_workspace, program->program_name);
+   workspace_program_del(tabs.current_workspace, program_name);
 }
 
 static void
@@ -1019,48 +1027,48 @@ tabs_add(void)
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, _property_attribute_changed, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_STATE_SELECTED, _editor_part_state_selected_cb, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_ADDED, _editor_part_added_cb, NULL);
-   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_PREDELETED, _editor_part_deleted_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_DELETED, _editor_part_deleted_cb, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_ITEM_ADDED, _editor_part_item_added_cb, NULL);
-   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_ITEM_PREDELETED, _editor_part_item_deleted_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_ITEM_DELETED, _editor_part_item_deleted_cb, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_RESTACKED, _editor_part_restacked_cb, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PART_ITEM_RESTACKED, _editor_part_item_restacked_cb, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_STATE_ADDED, _editor_state_added_cb, NULL);
-   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_STATE_PREDELETED, _editor_state_deleted_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_STATE_DELETED, _editor_state_deleted_cb, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PROGRAM_ADDED, _editor_program_added_cb, NULL);
-   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PROGRAM_PREDELETED, _editor_program_deleted_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_PROGRAM_DELETED, _editor_program_deleted_cb, NULL);
    evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_GROUP_DATA_ADDED, _editor_group_data_added_cb, NULL);
-   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_GROUP_DATA_PREDELETED, _editor_group_data_deleted_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_EDITOR_GROUP_DATA_DELETED, _editor_group_data_deleted_cb, NULL);
 
-   evas_object_smart_callback_add(ap.win, signals.shortcut.add.part, _shortcut_add_part_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.add.item, _shortcut_add_part_item_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.add.state, _shortcut_add_state_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.add.program, _shortcut_add_program_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.add.data_item, _shortcut_add_data_item_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.del, _shortcut_del_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.select.state_next, _shortcut_state_next_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.select.part_next, _shortcut_part_next_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.select.part_prev, _shortcut_part_prev_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.show_hide.part, _shortcut_part_showhide_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.popup.cancel, _shortcut_part_unselect_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.show_hide.all_parts, _shortcut_all_parts_showhide_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.tab.next, _shortcut_tab_next_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.tab.prev, _shortcut_tab_prev_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.tab.num, _shortcut_tab_num_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.tab.close, _shortcut_tab_close_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.mode.normal, _shortcut_mode_normal_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ADD_PART, _shortcut_add_part_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ADD_ITEM, _shortcut_add_part_item_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ADD_STATE, _shortcut_add_state_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ADD_PROGRAM, _shortcut_add_program_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ADD_DATA_ITEM, _shortcut_add_data_item_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_DEL, _shortcut_del_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_STATE_NEXT, _shortcut_state_next_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_PART_NEXT, _shortcut_part_next_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_PART_PREV, _shortcut_part_prev_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_PART_SHOWHIDE, _shortcut_part_showhide_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_CANCEL, _shortcut_part_unselect_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ALL_PARTS_SHOWHIDE, _shortcut_all_parts_showhide_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_TAB_NEXT, _shortcut_tab_next_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_TAB_PREV, _shortcut_tab_prev_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_TAB_NUM, _shortcut_tab_num_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_TAB_CLOSE, _shortcut_tab_close_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_MODE_NORMAL, _shortcut_mode_normal_cb, NULL);
 #if !HAVE_TIZEN
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.mode.code, _shortcut_mode_code_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_MODE_CODE, _shortcut_mode_code_cb, NULL);
 #endif
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.mode.demo, _shortcut_mode_demo_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.zoom.in, _shortcut_zoom_in_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.zoom.out, _shortcut_zoom_out_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.zoom.reset, _shortcut_zoom_reset_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.zoom.fit, _shortcut_fit_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.fill, _shortcut_fill_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.show_hide.object_area, _shortcut_object_area_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.show_hide.rulers, _shortcut_rulers_show_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.history.undo, _shortcut_undo_cb, NULL);
-   evas_object_smart_callback_add(ap.win, signals.shortcut.history.redo, _shortcut_redo_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_MODE_DEMO, _shortcut_mode_demo_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ZOOM_IN, _shortcut_zoom_in_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ZOOM_OUT, _shortcut_zoom_out_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_ZOOM_RESET, _shortcut_zoom_reset_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_FIT, _shortcut_fit_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_FILL, _shortcut_fill_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_OBJECT_AREA, _shortcut_object_area_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_RULERS_SHOW, _shortcut_rulers_show_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_UNDO, _shortcut_undo_cb, NULL);
+   evas_object_smart_callback_add(ap.win, SIGNAL_SHORTCUT_REDO, _shortcut_redo_cb, NULL);
 
    evas_object_smart_callback_add(ap.win, SIGNAL_HISTORY_CHANGE_ADDED, _history_update_cb, NULL);
 
@@ -1104,7 +1112,6 @@ _tab_close(void *data,
    _del_tab(item);
    if (tabs.selected == it)
      {
-        tabs.selected = NULL;
         content = elm_layout_content_unset(ap.panes.left_ver, "right");
         evas_object_hide(content);
         elm_layout_content_set(ap.panes.left_ver, "right", workspace_group_navigator_get(NULL));
@@ -1115,7 +1122,7 @@ _tab_close(void *data,
 }
 
 void
-tabs_tab_add(Group2 *group)
+tabs_tab_add(Group *group)
 {
    Tabs_Item *item;
 
@@ -1138,24 +1145,11 @@ tabs_tab_add(Group2 *group)
    item->group = group;
    item->content = workspace_add(tabs.layout, group);
 
-   item->toolbar_item = elm_toolbar_item_append(tabs.toolbar, NULL, group->common.name,
+   item->toolbar_item = elm_toolbar_item_append(tabs.toolbar, NULL, group->name,
                                                _content_set, (void *)item);
    elm_toolbar_item_selected_set(item->toolbar_item, true);
    elm_object_item_signal_callback_add(item->toolbar_item, "tab,close", "eflete", _tab_close, (void *)item);
    tabs.items = eina_list_append(tabs.items, item);
-}
-
-static void
-_tab_home_del(void *data __UNUSED__,
-              Evas *e __UNUSED__,
-              Evas_Object *obj __UNUSED__,
-              void *event_info __UNUSED__)
-{
-   evas_object_del(tabs.home.content_open_project);
-   evas_object_del(tabs.home.content_new_project);
-   evas_object_del(tabs.home.content_import_edj);
-   evas_object_del(tabs.home.content_import_edc);
-   evas_object_del(tabs.home.content_project_info);
 }
 
 void
@@ -1177,7 +1171,6 @@ tabs_home_tab_add(Tabs_Menu view)
    evas_object_show(scroller);
 
    tabs.home.content = elm_layout_add(ap.win);
-   evas_object_event_callback_add(tabs.home.content, EVAS_CALLBACK_DEL, _tab_home_del, NULL);
    elm_layout_theme_set(tabs.home.content, "layout", "tab_home", "default");
    tabs.home.tabs = elm_toolbar_add(tabs.home.content);
    elm_layout_content_set(tabs.home.content, "elm.swallow.toolbar", tabs.home.tabs);
@@ -1247,7 +1240,7 @@ subtab_select:
    Evas_Object *content, *button;
    content = elm_layout_content_get(tabs.home.content, NULL);
    button = elm_object_part_content_get(content, "elm.swallow.btn_create");
-   evas_object_smart_callback_call(button, signals.elm.button.clicked, NULL);
+   evas_object_smart_callback_call(button, "clicked", NULL);
 #endif /* HAVE_TIZEN */
    elm_toolbar_item_selected_set(item->toolbar_item, true);
 }
@@ -1282,7 +1275,7 @@ tabs_current_workspace_get(void)
    return tabs.current_workspace;
 }
 
-Group2 *
+Group *
 tabs_current_group_get(void)
 {
    return tabs.current_group;

@@ -16,7 +16,6 @@
 *.eo.c
 intl/
 src/bin/eflete
-src/bin/eflete_exporter
 *.dirstamp
 *.log
 *.trs

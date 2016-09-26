@@ -1,6 +1,6 @@
 /**
  * Edje Theme Editor
- * Copyright (C) 2013-2016 Samsung Electronics.
+ * Copyright (C) 2013-2014 Samsung Electronics.
  *
  * This file is part of Edje Theme Editor.
  *
@@ -17,19 +17,19 @@
  * along with this program; If not, see www.gnu.org/licenses/lgpl.html.
  */
 
-#include <Evas.h>
+#include "utc_common.h"
+#include "preference.h"
+#include "main_window.h"
 
-Eina_List *
-_object_images_get(Evas_Object *obj);
+/**
+ * @defgroup test_preference
+ */
 
-Eina_List *
-_object_samples_get(Evas_Object *obj);
+#define TEST_NAME "preference"
 
-Eina_List *
-_object_fonts_get(Evas_Object *obj);
+void preferences_window_add_test_p1(int);
+void preferences_window_add_test_p2(int);
 
-Eina_List *
-_object_groups_get(Evas_Object *obj);
-
-Eina_List *
-_strings_list_duplicates_del(Eina_List *list);
+void preferences_project_autosave_update_test_p(int);
+void preferences_project_autosave_update_test_n1(int);
+void preferences_project_autosave_update_test_n2(int);

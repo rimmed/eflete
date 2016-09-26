@@ -21,7 +21,6 @@
 #define RESOURCE_MANAGER2_H
 
 #include "eflete.h"
-#include "resource_manager_signals.h"
 
 enum _Resource2_Type
 {
@@ -42,7 +41,6 @@ enum _Resource2_Type
    RESOURCE2_TYPE_FONT,
    RESOURCE2_TYPE_COLORCLASS,
    RESOURCE2_TYPE_STYLE,
-   RESOURCE2_TYPE_STYLE_TAG,
    RESOURCE2_TYPE_SIZECLASS,
    RESOURCE2_TYPE_TEXTCLASS,
    RESOURCE2_TYPE_VIBRO, /* something for now? */
@@ -75,7 +73,6 @@ typedef struct _Style2 Style2;
 typedef struct _Image2 Image2;
 typedef struct _Image_Set2 Image_Set2;
 typedef struct _Tone2 Tone2;
-typedef struct _Style_Tag2 Style_Tag2;
 typedef struct _Colorclass2 Colorclass2;
 
 typedef struct _Sound2 Sound2;
@@ -103,7 +100,7 @@ struct _Group2
    Eina_Stringshare *style;   /**< parsed style name */
 
    Evas_Object *edit_object;  /**< object needed to access group with edje_edit functions. Should be NULL if group is not open */
-   Resource2 *current_selected;
+//   Resource *current_selected;
    History *history;          /**< history of changes in the group */
 };
 
@@ -142,7 +139,6 @@ struct _Program2
    Edje_Action_Type type;
    Eina_List *targets;
    Eina_List *afters;
-   Eina_Stringshare *filter_part;
    Group2 *group;
 };
 
@@ -150,14 +146,30 @@ struct _Style2
 {
    Resource2_Internal common;
    Eina_Stringshare *raw_style; //for set to textblock and to edje_edit
-   Eina_List *tags;
-};
 
-struct _Style_Tag2
-{
-   Resource2_Internal common;
+   /* all parsed values goes below */
    Eina_Stringshare *font;
-   Style2 *style;
+   int font_size;
+   int font_style_weight;
+   int font_style_width;
+   struct {
+      int r, g, b, a;
+   } color, bg_color, outer_color, inner_color, shadow_color;
+   int font_align_hor;
+   int font_valign_hor;
+   int left_margin, right_margin;
+   int wrap;
+   int linerelsize, linesize, tabstops;
+   Eina_Bool pass, bg_check, ellipsis_check;
+   int ellipsis_value;
+   int glow_style;
+   int direction;
+   Eina_Bool strikethrough_check;
+   struct {
+      int r, g, b, a;
+   } underone_color, undertwo_color, strikethrough_color, dash_color;
+   int underline;
+   int dash_width, dash_gap;
 };
 
 struct _Image2
@@ -200,7 +212,6 @@ struct _Colorclass2
    struct {
       int r,g,b,a;
    } color3;
-   Eina_Stringshare *description;
 };
 
 Eina_Bool
@@ -217,14 +228,5 @@ resource_manager_v_find(const Eina_List *list, Eina_Stringshare *name, double va
 
 Resource2 *
 resource_manager_id_find(const Eina_List *list, unsigned int id);
-
-void
-resource_group_edit_object_load(Project *pro, Group2 *group, Evas *e);
-
-void
-resource_group_edit_object_unload(Group2 *group);
-
-void
-resource_group_edit_object_reload(Project *pro, Group2 *group);
 
 #endif /* RESOURCE_MANAGER2_H */

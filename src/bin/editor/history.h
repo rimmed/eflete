@@ -20,17 +20,16 @@
 #ifndef NEW_HISTORY_H
 #define NEW_HISTORY_H
 #include "eflete.h"
-#include "resource_manager2.h"
 
 struct _History {
-   Group2 *group;
+   Group *group;
    Eina_List *changes;
    Eina_List *current_change;
 };
 typedef struct _History History;
 
 History *
-history_add(Group2 *group);
+history_add(Group *group);
 
 void
 history_del(History *history);

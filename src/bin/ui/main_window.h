@@ -31,7 +31,6 @@
 
 #include "eflete.h"
 #include "widget_macro.h"
-#include "resource_manager2.h"
 
 #ifdef HAVE_AUDIO
 TODO("Check pulse_audio on configure and add COREAUDIO support")
@@ -545,7 +544,7 @@ typedef enum {
 
 struct _Sound_Data {
    Sound_Type type;
-   Resource2 *resource; /* for SAMPLE it's External_Resource, TONE - Tone_Resource */
+   Resource *resource; /* for SAMPLE it's External_Resource, TONE - Tone_Resource */
    Eina_Stringshare *name;
    Eina_Stringshare *type_label;
 };

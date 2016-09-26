@@ -53,7 +53,6 @@
  */
 EFLETE_TEST(ewe_ruler_scale_middle_mark_get_test_p)
 {
-   logger_init();
    ewe_init(0, 0);
    Evas_Object *win = elm_win_util_standard_add("test", "test");
    Evas_Object *ruler = ewe_ruler_add(win);
@@ -90,7 +89,6 @@ END_TEST
  */
 EFLETE_TEST(ewe_ruler_scale_middle_mark_get_test_n)
 {
-   logger_init();
    ewe_init(0, 0);
 
    ck_assert_msg(ewe_ruler_scale_middle_mark_get(NULL, NULL) == EINA_FALSE, "Getted visibility from NULL ruler object");

@@ -21,7 +21,7 @@
 #define EFL_EO_API_SUPPORT
 
 #include "main_window.h"
-#include "project_manager2.h"
+#include "project_manager.h"
 #include "modal_window.h"
 #include "config.h"
 #include "validator.h"
@@ -130,24 +130,28 @@ _grid_sel_cb(void *data __UNUSED__,
              Evas_Object *obj __UNUSED__,
              void *event_info)
 {
-   Resource2 *res = NULL;
+   External_Resource *res = NULL;
+   Resource request;
    Sound_Data *snd;
 
    snd = elm_object_item_data_get((Elm_Gengrid_Item *)event_info);
    switch (snd->type)
      {
       case SOUND_TYPE_SAMPLE:
-         res = resource_manager_find(ap.project->RM.sounds, snd->name);
+         request.name = snd->name;
+         request.resource_type = RESOURCE_TYPE_SOUND;
+         res = (External_Resource *)resource_get(ap.project->sounds, &request);
          break;
       case SOUND_TYPE_TONE:
-         res = resource_manager_find(ap.project->RM.tones, snd->name);
+         request.name = snd->name;
+         request.resource_type = RESOURCE_TYPE_TONE;
+         res = (External_Resource *)resource_get(ap.project->tones, &request);
          break;
      }
 
    assert(res != NULL);
 
-   if (!res->common.used_in)
-     elm_object_disabled_set(mng.btn_del, false);
+   if (!res->used_in) elm_object_disabled_set(mng.btn_del, false);
 
    sound_player_sound_set(snd);
    evas_object_smart_callback_call(ap.win, SIGNAL_SOUND_SELECT, snd);
@@ -157,8 +161,8 @@ static void
 _sound_manager_init(void)
 {
    Eina_List *l;
-   Sound2 *sample;
-   Tone2 *tone;
+   External_Resource *sample;
+   Tone_Resource *tone;
    Sound_Data *snd;
 
    assert(ap.project != NULL);
@@ -166,27 +170,27 @@ _sound_manager_init(void)
    snd = (Sound_Data *)mem_calloc(1, sizeof(Sound_Data));
    snd->name = eina_stringshare_add(_("Sound Samples"));
    elm_gengrid_item_append(mng.gengrid, ggic, snd, NULL, NULL);
-   EINA_LIST_FOREACH(ap.project->RM.sounds, l, sample)
+   EINA_LIST_FOREACH(ap.project->sounds, l, sample)
      {
-        if (!strcmp(sample->common.name, EFLETE_DUMMY_SAMPLE_NAME)) continue;
+        if (!strcmp(sample->name, EFLETE_DUMMY_SAMPLE_NAME)) continue;
         snd = (Sound_Data *)mem_calloc(1, sizeof(Sound_Data));
-        snd->name = eina_stringshare_ref(sample->common.name);
+        snd->name = eina_stringshare_ref(sample->name);
         snd->type_label = _sound_format_get(sample->source);
         snd->type = SOUND_TYPE_SAMPLE;
-        snd->resource = (Resource2 *)sample;
+        snd->resource = (Resource *)sample;
         elm_gengrid_item_append(mng.gengrid, gic, snd, _grid_sel_cb, NULL);
      }
 
    snd = (Sound_Data *)mem_calloc(1, sizeof(Sound_Data));
    snd->name = eina_stringshare_add(_("Sound Tones"));
    mng.tone_header = elm_gengrid_item_append(mng.gengrid, ggic, snd, NULL, NULL);
-   EINA_LIST_FOREACH(ap.project->RM.tones, l, tone)
+   EINA_LIST_FOREACH(ap.project->tones, l, tone)
      {
         snd = (Sound_Data *)mem_calloc(1, sizeof(Sound_Data));
-        snd->name = eina_stringshare_ref(tone->common.name);
+        snd->name = eina_stringshare_ref(tone->name);
         snd->type_label = eina_stringshare_printf("%d", tone->freq);
         snd->type = SOUND_TYPE_TONE;
-        snd->resource = (Resource2 *)tone;
+        snd->resource = (Resource *)tone;
         elm_gengrid_item_append(mng.gengrid, gic, snd, _grid_sel_cb, NULL);
      }
 }
@@ -207,16 +211,16 @@ _add_sample_done(void *data __UNUSED__,
 {
    Sound_Data *snd;
    Attribute attribute = ATTRIBUTE_PROGRAM_SAMPLE_NAME;
-   Eina_Stringshare *sound_name, *res_path;
+   Eina_Stringshare *sound_name;
    Eina_List *samples_list, *l;
    Eina_Bool exist = false;
-   Sound2 *res;
+   External_Resource *res;
    const char *file_name;
 
    Eina_List *selected_list = (Eina_List *)event_info;
    const char *selected = eina_list_data_get(selected_list);
 
-   samples_list = ap.project->RM.sounds;
+   samples_list = ap.project->sounds;
 
    if (!ecore_file_exists(selected))
      {
@@ -232,7 +236,7 @@ _add_sample_done(void *data __UNUSED__,
    file_name = ecore_file_file_get(selected);
    sound_name = eina_stringshare_add(file_name);
    EINA_LIST_FOREACH(samples_list, l, res)
-      if (res->common.name == sound_name) /* they both are stringshares */
+      if (res->name == sound_name) /* they both are stringshares */
         {
            exist = true;
            break;
@@ -244,29 +248,33 @@ _add_sample_done(void *data __UNUSED__,
         return false;
      }
 
-   res_path = eina_stringshare_printf("%s/sounds/%s", ap.project->develop_path, sound_name);
+   res = (External_Resource *)resource_add(file_name, RESOURCE_TYPE_SOUND);
+   res->path = eina_stringshare_printf("%s/sounds/%s", ap.project->develop_path, sound_name);
+   res->source = eina_stringshare_add(sound_name);
+   res->name = eina_stringshare_add(sound_name);
 
-   if (!ecore_file_exists(res_path))
+   if (!ecore_file_exists(res->path))
      {
-        ecore_file_cp(selected, res_path);
+        ecore_file_cp(selected, res->path);
+
+        resource_insert(&ap.project->sounds, (Resource *)res);
      }
    else
      {
-        ERR(_("File '%s' exist"), res_path);
+        ERR(_("File '%s' exist"), res->path);
+        resource_free((Resource *)res);
         return true;
      }
 
-   CRIT_ON_FAIL(editor_sound_sample_add(ap.project->global_object, sound_name, selected, true));
-   res = (Sound2 *)resource_manager_find(ap.project->RM.sounds, sound_name);
+   CRIT_ON_FAIL(editor_sound_sample_add(ap.project->global_object, res->name, res->source, true));
 
    snd = (Sound_Data *)mem_malloc(sizeof(Sound_Data));
-   snd->name = eina_stringshare_ref(res->common.name);
-   snd->type_label = _sound_format_get(res->source);
+   snd->name = eina_stringshare_ref(res->name);
+   snd->type_label = _sound_format_get(res->path);
    snd->type = SOUND_TYPE_SAMPLE;
-   snd->resource = (Resource2 *)res;
+   snd->resource = (Resource *)res;
    elm_gengrid_item_insert_before(mng.gengrid, gic, snd, mng.tone_header, _grid_sel_cb, NULL);
    evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
-   eina_stringshare_del(res_path);
 
    return true;
 }
@@ -278,19 +286,21 @@ _tone_add(void)
    Attribute attribute = ATTRIBUTE_PROGRAM_TONE_NAME;
    Eina_Stringshare *tone_name;
    int frq;
-   Resource2 *tone;
+   Tone_Resource *tone;
 
    tone_name = eina_stringshare_add(elm_entry_entry_get(mng.tone_entry));
    frq = atoi(elm_entry_entry_get(mng.frq_entry));
    CRIT_ON_FAIL(editor_sound_tone_add(ap.project->global_object, tone_name, frq, true));
 
-   tone = resource_manager_find(ap.project->RM.tones, tone_name);
+   tone = (Tone_Resource *)resource_add(tone_name, RESOURCE_TYPE_TONE);
+   tone->freq = frq;
+   resource_insert(&ap.project->tones, (Resource *)tone);
 
    snd = (Sound_Data *)mem_malloc(sizeof(Sound_Data));
-   snd->name = eina_stringshare_ref(tone->common.name);
+   snd->name = eina_stringshare_ref(tone->name);
    snd->type_label = eina_stringshare_add(elm_entry_entry_get(mng.frq_entry));
    snd->type = SOUND_TYPE_TONE;
-   snd->resource = (Resource2 *)tone;
+   snd->resource = (Resource *)tone;
    elm_gengrid_item_append(mng.gengrid, gic, snd, _grid_sel_cb, NULL);
 
    evas_object_smart_callback_call(ap.win, SIGNAL_EDITOR_ATTRIBUTE_CHANGED, &attribute);
@@ -400,7 +410,7 @@ _tone_add_cb(void *data __UNUSED__,
 {
    Evas_Object *popup;
    mng.tone_validator = resource_name_validator_new(NAME_REGEX, NULL);
-   resource_name_validator_list_set(mng.tone_validator, &ap.project->RM.tones, true);
+   resource_name_validator_list_set(mng.tone_validator, &ap.project->tones, true);
    mng.frq_validator = elm_validator_regexp_new(FREQUENCY_REGEX, NULL);
 
    popup = popup_add(_("Create a new layout"), NULL, BTN_OK|BTN_CANCEL, _add_tone_content_get, mng.tone_entry);
@@ -431,6 +441,8 @@ _sound_del_cb(void *data __UNUSED__,
    Elm_Object_Item *grid_it;
    Sound_Data *snd;
    Eina_List *list, *l, *l_next;
+   External_Resource *res;
+   Resource request;
    Attribute attribute;
 
    list = (Eina_List *)elm_gengrid_selected_items_get(mng.gengrid);
@@ -442,13 +454,23 @@ _sound_del_cb(void *data __UNUSED__,
           {
            case SOUND_TYPE_SAMPLE:
               attribute = ATTRIBUTE_PROGRAM_SAMPLE_NAME;
+              request.name = snd->name;
+              request.resource_type = RESOURCE_TYPE_SOUND;
+              res = (External_Resource *)resource_get(ap.project->sounds, &request);
+              if (res->used_in) ERR("Unable to delete sample '%s'", res->name);
               CRIT_ON_FAIL(editor_sound_sample_del(ap.project->global_object, snd->name, true));
-              ecore_file_unlink(((Sound2 *)snd->resource)->source);
+              ecore_file_unlink(res->path);
+              resource_remove(&ap.project->sounds, (Resource *)res);
               elm_object_item_del(grid_it);
               break;
            case SOUND_TYPE_TONE:
               attribute = ATTRIBUTE_PROGRAM_TONE_NAME;
+              request.name = snd->name;
+              request.resource_type = RESOURCE_TYPE_TONE;
+              res = (External_Resource *)resource_get(ap.project->tones, &request);
+              if (res->used_in) ERR("Unable to delete tone '%s'", res->name);
               CRIT_ON_FAIL(editor_sound_tone_del(ap.project->global_object, snd->name, true));
+              resource_remove(&ap.project->tones, (Resource *)res);
               elm_object_item_del(grid_it);
               break;
           }
@@ -468,6 +490,7 @@ _search_changed_cb(void *data __UNUSED__,
 {
    _gengrid_item_search(mng.gengrid, &(mng.sound_search_data),
                         mng.sound_search_data.last_item_found);
+
 }
 
 static void
@@ -533,8 +556,8 @@ sound_manager_add(void)
 
    mng.win = mw_add();
    mw_title_set(mng.win, _("Sound manager"));
-   evas_object_smart_callback_add(mng.win, signals.eflete.modal_window.cancel, _mw_cancel_cb, NULL);
-   evas_object_smart_callback_add(mng.win, signals.eflete.modal_window.done, _mw_done_cb, NULL);
+   evas_object_smart_callback_add(mng.win, "cancel", _mw_cancel_cb, NULL);
+   evas_object_smart_callback_add(mng.win, "done", _mw_done_cb, NULL);
 #if !HAVE_TIZEN
    ic = elm_icon_add(mng.win);
    elm_icon_standard_set(ic, "image2");
@@ -571,7 +594,7 @@ sound_manager_add(void)
    elm_object_part_content_set(mng.property_panes, "right", ap.property.sound_manager);
 #endif
    elm_panes_content_right_size_set(mng.panes, 0);
-   elm_panes_content_right_min_size_set(mng.panes, 400);
+   elm_panes_content_right_min_size_set(mng.panes, 355);
 
    if (!gic)
      {
@@ -595,18 +618,18 @@ sound_manager_add(void)
    elm_gengrid_item_size_set(mng.gengrid, ITEM_WIDTH, ITEM_HEIGHT);
    elm_gengrid_align_set(mng.gengrid, 0.0, 0.0);
    elm_gengrid_group_item_size_set(mng.gengrid, ITEM_HEIGHT/3, ITEM_HEIGHT/3);
-   evas_object_smart_callback_add(mng.gengrid, signals.elm.gengrid.unselected, _grid_unsel_cb, NULL);
+   evas_object_smart_callback_add(mng.gengrid, "unselected", _grid_unsel_cb, NULL);
    elm_scroller_policy_set(mng.gengrid, ELM_SCROLLER_POLICY_OFF, ELM_SCROLLER_POLICY_AUTO);
    elm_object_part_content_set(mng.layout, "elm.swallow.list", mng.gengrid);
 
    button = elm_button_add(mng.layout);
    elm_object_style_set(button, "plus_managers");
-   evas_object_smart_callback_add(button, signals.elm.button.clicked, _sound_add_cb, NULL);
+   evas_object_smart_callback_add(button, "clicked", _sound_add_cb, NULL);
    elm_object_part_content_set(mng.layout, "elm.swallow.btn_add", button);
 
    mng.btn_del = elm_button_add(mng.layout);
    elm_object_style_set(mng.btn_del, "minus_managers");
-   evas_object_smart_callback_add(mng.btn_del, signals.elm.button.clicked, _sound_del_cb, NULL);
+   evas_object_smart_callback_add(mng.btn_del, "clicked", _sound_del_cb, NULL);
    elm_object_part_content_set(mng.layout, "elm.swallow.btn_del", mng.btn_del);
    elm_object_disabled_set(mng.btn_del, true);
 
@@ -623,8 +646,8 @@ sound_manager_add(void)
    elm_object_style_set(search_entry, "search");
 #endif
    elm_layout_content_set(mng.layout, "elm.swallow.search", search_entry);
-   evas_object_smart_callback_add(search_entry, signals.elm.entry.changed, _search_changed_cb, NULL);
-   evas_object_smart_callback_add(search_entry, signals.elm.entry.activated, _find_next_cb, NULL);
+   evas_object_smart_callback_add(search_entry, "changed", _search_changed_cb, NULL);
+   evas_object_smart_callback_add(search_entry, "activated", _find_next_cb, NULL);
    mng.sound_search_data.search_entry = search_entry;
    mng.sound_search_data.last_item_found = NULL;
 

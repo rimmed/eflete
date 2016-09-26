@@ -24,7 +24,7 @@
  * @{
  * @addtogroup change_add
  * @{
- * Change
+ * Alloc
  * <TABLE>
  * @}
  */
