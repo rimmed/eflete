@@ -166,6 +166,9 @@ _project_special_group_add(Project *project)
 
    assert(project != NULL);
 
+   if (edje_file_group_exists(project->saved_edj, EFLETE_INTERNAL_GROUP_NAME))
+     return true;
+
    groups = edje_file_collection_list(project->saved_edj);
    ecore_evas = ecore_evas_buffer_new(0, 0);
    obj = edje_edit_object_add(ecore_evas_get(ecore_evas));
@@ -214,6 +217,7 @@ _project_create(Project_Process_Data *ppd)
    pro->develop_path = eina_stringshare_printf("%s/develop", buf);
 
    snprintf(buf, sizeof(buf), "%s/%s/%s.pro", ppd->path, ppd->name, ppd->name);
+   pro->pro_path = eina_stringshare_add(buf);
    pro->ef = eet_open(buf, EET_FILE_MODE_READ_WRITE);
    DBG("Create a specific project file '%s': %s", buf, error ? "failed" : "success");
    pro->pro_fd = -1;
@@ -229,7 +233,6 @@ _project_create(Project_Process_Data *ppd)
      error = true;
 
    _pm_project_descriptor_shutdown(ppd);
-   eet_close(pro->ef);
    if (error)
      {
         ERR("Could't create a .pro file! ")
@@ -249,16 +252,30 @@ _project_dummy_sample_add(Project *project)
 {
    Eina_Bool ret = true;
    char buf[PATH_MAX];
-   Eina_List *groups;
+   Eina_List *list, *l;
    Evas_Object *obj;
    Ecore_Evas *ecore_evas;
+   const char *data;
 
    assert(project != NULL);
 
-   groups = edje_file_collection_list(project->saved_edj);
+   list = edje_file_collection_list(project->saved_edj);
    ecore_evas = ecore_evas_buffer_new(0, 0);
    obj = edje_edit_object_add(ecore_evas_get(ecore_evas));
-   edje_object_file_set(obj, project->saved_edj, eina_list_data_get(groups));
+   edje_object_file_set(obj, project->saved_edj, eina_list_data_get(list));
+   edje_edit_string_list_free(list);
+
+   /* check if sample exist */
+   list = edje_edit_sound_samples_list_get(obj);
+   EINA_LIST_FOREACH(list, l, data)
+     {
+        if (!strcmp(data, EFLETE_DUMMY_SAMPLE_NAME))
+          {
+             edje_edit_string_list_free(list);
+             return true;
+          }
+     }
+   edje_edit_string_list_free(list);
 
    snprintf(buf, sizeof(buf), "%s"EFLETE_DUMMY_SAMPLE_NAME, ap.path.sound_path);
    you_shall_not_pass_editor_signals(NULL);
@@ -275,7 +292,6 @@ _project_dummy_sample_add(Project *project)
    you_shall_pass_editor_signals(NULL);
 
    ecore_evas_free(ecore_evas);
-   edje_edit_string_list_free(groups);
 
    return ret;
 }
@@ -285,16 +301,30 @@ _project_dummy_image_add(Project *project)
 {
    Eina_Bool ret = true;
    char buf[PATH_MAX];
-   Eina_List *groups;
+   Eina_List *list, *l;
    Evas_Object *obj;
    Ecore_Evas *ecore_evas;
+   const char *data;
 
    assert(project != NULL);
 
-   groups = edje_file_collection_list(project->saved_edj);
+   list = edje_file_collection_list(project->saved_edj);
    ecore_evas = ecore_evas_buffer_new(0, 0);
    obj = edje_edit_object_add(ecore_evas_get(ecore_evas));
-   edje_object_file_set(obj, project->saved_edj, eina_list_data_get(groups));
+   edje_object_file_set(obj, project->saved_edj, eina_list_data_get(list));
+   edje_edit_string_list_free(list);
+
+   /* check if images exist */
+   list = edje_edit_images_list_get(obj);
+   EINA_LIST_FOREACH(list, l, data)
+     {
+        if (!strcmp(data, EFLETE_DUMMY_IMAGE_NAME))
+          {
+             edje_edit_string_list_free(list);
+             return true;
+          }
+     }
+   edje_edit_string_list_free(list);
 
    snprintf(buf, sizeof(buf), "%s"EFLETE_DUMMY_IMAGE_NAME, ap.path.image_path);
    you_shall_not_pass_editor_signals(NULL);
@@ -311,7 +341,6 @@ _project_dummy_image_add(Project *project)
    you_shall_pass_editor_signals(NULL);
 
    ecore_evas_free(ecore_evas);
-   edje_edit_string_list_free(groups);
 
    return ret;
 }
@@ -831,10 +860,7 @@ _project_import_edj(Project_Process_Data *ppd)
             !_project_dummy_sample_add(ppd->project))
           return false;
         if (!_project_open_internal(ppd))
-          {
-             _project_process_data_cleanup(ppd);
-             return false;
-          }
+          return false;
      }
    return true;
 }
@@ -1104,19 +1130,21 @@ pm_project_meta_data_set(Project *project,
                          const char *comment)
 {
    int bytes, size;
-   Eina_Bool res;
+   Eina_Bool res = true;
 
    assert(project != NULL);
    assert(project->ef != NULL);
-
-   res = true;
 
 #define DATA_WRITE(DATA, KEY) \
    if (DATA) \
      { \
         size = (strlen(DATA) + 1) * sizeof(char); \
         bytes = eet_write(project->ef, KEY, DATA, size, compess_level); \
-        if (bytes <= 0 ) res = false; \
+        if (bytes <= 0 && size > 0) \
+          { \
+             CRIT("Could not write data '"#DATA"' size %i write %i\n", size, bytes);   \
+             res = false; \
+          }\
      }
 
    DATA_WRITE(name,    PROJECT_KEY_NAME);
@@ -1125,7 +1153,6 @@ pm_project_meta_data_set(Project *project,
    DATA_WRITE(license, PROJECT_KEY_LICENSE);
    DATA_WRITE(comment, PROJECT_KEY_COMMENT);
 
-#undef DATA_WRITE
    return res;
 }
 

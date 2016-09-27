@@ -514,7 +514,7 @@ _resource_part_del(Project *pro, Group2 *group, Part2 *part, Change *change)
                                                                  change,
                                                                  false,
                                                                  true,
-                                                                 part->common.name,
+                                                                 state->part->common.name,
                                                                  state->common.name,
                                                                  state->val,
                                                                  NULL));
@@ -522,7 +522,7 @@ _resource_part_del(Project *pro, Group2 *group, Part2 *part, Change *change)
                                                             change,
                                                             false,
                                                             true,
-                                                            part->common.name,
+                                                            state->part->common.name,
                                                             state->common.name,
                                                             state->val,
                                                             NULL));
@@ -724,7 +724,7 @@ TODO("Apply more complex work (with warning and error maybe?)"
 void
 _resource_group_del(Project *pro, Group2 *group)
 {
-   Eina_List *l;
+   Eina_List *l, *l_next;
    Resource2 *res;
    Program2 *program;
    Part2 *part;
@@ -738,10 +738,14 @@ _resource_group_del(Project *pro, Group2 *group)
       Since edje edit together with group deletion also delete all it's aliases
       it's important to update dependencies and recursively remove deps for
       every aliased group. */
-   EINA_LIST_FOREACH(group->aliases, l, alias_group)
+   EINA_LIST_FOREACH_SAFE(group->aliases, l, l_next, alias_group)
      {
         CRIT_ON_FAIL(editor_group_del(ap.project->global_object, alias_group->common.name, true));
      }
+
+   /* If this group is alias, then delete it from aliased */
+   if (group->main_group)
+     group->main_group->aliases = eina_list_remove(group->main_group->aliases, group);
 
    EINA_LIST_FOREACH(group->common.used_in, l, res)
      {
