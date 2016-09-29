@@ -260,7 +260,6 @@ _colorclasses_resources_load(Project *project)
           {
              description = edje_edit_color_class_description_get(project->global_object, name);
              res->description = eina_stringshare_add(description);
-             edje_edit_string_free(description);
              project->RM.colorclasses = eina_list_append(project->RM.colorclasses, res);
           }
      }
@@ -280,7 +279,7 @@ _styles_tag_resources_load(Project *pro, Eina_Stringshare *name, Style2 *style)
                                          style->common.name,
                                          name);
    data = strdup(value);
-   edje_edit_string_free(data);
+   edje_edit_string_free(value);
    pch = strstr(data, "font");
    if (!pch)
      {
@@ -388,7 +387,7 @@ _state_add(Project *pro, Group2 *group, Part2 *part, const char *state_name, dou
                                                part->common.name,
                                                state->common.name,
                                                state->val);
-        if (strcmp(image_name, EFLETE_DUMMY_IMAGE_NAME))
+        if (image_name && strcmp(image_name, EFLETE_DUMMY_IMAGE_NAME))
           state->normal = eina_stringshare_add(image_name);
         edje_edit_string_free(image_name);
 
