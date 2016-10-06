@@ -48,24 +48,38 @@ typedef Eina_Bool (* function_type_string_int) (Evas_Object *, Change*, Eina_Boo
                                                 const char *, int);
 typedef Eina_Bool (* function_type_string_string) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                    const char *, const char *);
+typedef Eina_Bool (* function_type_string_uint) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
+                                                   const char *, unsigned int);
 typedef Eina_Bool (* function_type_string) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                             const char *);
 typedef Eina_Bool (* function_type_string_string_edjeaspectcontrol) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                                      const char *, const char *, Edje_Aspect_Control);
 typedef Eina_Bool (* function_type_string_uint_edjeaspectcontrol) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
-                                                                     const char *, unsigned int index, Edje_Aspect_Control);
+                                                                     const char *, unsigned int, Edje_Aspect_Control);
 typedef Eina_Bool (* function_type_string_edjeparttype) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                          const char *, Edje_Part_Type);
 typedef Eina_Bool (* function_type_string_edjepartcopy) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                          const char *, const char *);
 typedef Eina_Bool (* function_type_string_string_double) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                           const char *, const char *, double);
+typedef Eina_Bool (* function_type_string_uint_double) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
+                                                        const char *, unsigned int, double);
 typedef Eina_Bool (* function_type_string_string_int) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                        const char *, const char *, int);
+typedef Eina_Bool (* function_type_string_uint_int) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
+                                                     const char *, unsigned int, int);
 typedef Eina_Bool (* function_type_string_string_ushort) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                           const char *, const char *, unsigned short);
+typedef Eina_Bool (* function_type_string_uint_ushort) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
+                                                        const char *, unsigned int, unsigned short);
 typedef Eina_Bool (* function_type_string_string_string) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                           const char *, const char *, const char *);
+typedef Eina_Bool (* function_type_string_string_string_uint) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
+                                                          const char *, const char *, const char *, unsigned int);
+typedef Eina_Bool (* function_type_string_uint_uint) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
+                                                          const char *, unsigned int, unsigned int);
+typedef Eina_Bool (* function_type_string_uint_string) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
+                                                        const char *, unsigned int, const char *);
 typedef Eina_Bool (* function_type_string_string_int_int_int_int) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
                                                                    const char *, const char *, int, int, int, int);
 typedef Eina_Bool (* function_type_string_edjeeditselectmode) (Evas_Object *, Change*, Eina_Bool, Eina_Bool,
@@ -139,6 +153,9 @@ _apply(Evas_Object *obj, Function_Info *fi)
       case FUNCTION_TYPE_STRING_STRING_RENAME:
          return ((function_type_string_string)fi->function)(obj, NULL, false, true,
                   fi->args.type_ss.s1, fi->args.type_ss.s2);
+      case FUNCTION_TYPE_STRING_UINT:
+         return ((function_type_string_uint)fi->function)(obj, NULL, false, true,
+                  fi->args.type_sui.s1, fi->args.type_sui.ui2);
       case FUNCTION_TYPE_STRING:
          return ((function_type_string)fi->function)(obj, NULL, false, true,
                   fi->args.type_s.s1);
@@ -151,15 +168,33 @@ _apply(Evas_Object *obj, Function_Info *fi)
       case FUNCTION_TYPE_STRING_STRING_DOUBLE:
          return ((function_type_string_string_double)fi->function)(obj, NULL, false, true,
                   fi->args.type_ssd.s1, fi->args.type_ssd.s2, fi->args.type_ssd.d3);
+      case FUNCTION_TYPE_STRING_UINT_DOUBLE:
+         return ((function_type_string_uint_double)fi->function)(obj, NULL, false, true,
+                  fi->args.type_suid.s1, fi->args.type_suid.ui2, fi->args.type_suid.d3);
       case FUNCTION_TYPE_STRING_STRING_INT:
          return ((function_type_string_string_int)fi->function)(obj, NULL, false, true,
                   fi->args.type_ssi.s1, fi->args.type_ssi.s2, fi->args.type_ssi.i3);
+      case FUNCTION_TYPE_STRING_UINT_INT:
+         return ((function_type_string_uint_int)fi->function)(obj, NULL, false, true,
+                  fi->args.type_suii.s1, fi->args.type_suii.ui2, fi->args.type_suii.i3);
       case FUNCTION_TYPE_STRING_STRING_USHORT:
          return ((function_type_string_string_ushort)fi->function)(obj, NULL, false, true,
                   fi->args.type_ssus.s1, fi->args.type_ssus.s2, fi->args.type_ssus.us3);
+      case FUNCTION_TYPE_STRING_UINT_USHORT:
+         return ((function_type_string_uint_ushort)fi->function)(obj, NULL, false, true,
+                  fi->args.type_suius.s1, fi->args.type_suius.ui2, fi->args.type_suius.us3);
       case FUNCTION_TYPE_STRING_STRING_STRING:
          return ((function_type_string_string_string)fi->function)(obj, NULL, false, true,
                   fi->args.type_sss.s1, fi->args.type_sss.s2, fi->args.type_sss.s3);
+      case FUNCTION_TYPE_STRING_STRING_STRING_UINT:
+         return ((function_type_string_string_string_uint)fi->function)(obj, NULL, false, true,
+                  fi->args.type_sssui.s1, fi->args.type_sssui.s2, fi->args.type_sssui.s3, fi->args.type_sssui.ui4);
+      case FUNCTION_TYPE_STRING_UINT_UINT:
+         return ((function_type_string_uint_uint)fi->function)(obj, NULL, false, true,
+                  fi->args.type_suiui.s1, fi->args.type_suiui.ui2, fi->args.type_suiui.ui3);
+      case FUNCTION_TYPE_STRING_UINT_STRING:
+         return ((function_type_string_uint_string)fi->function)(obj, NULL, false, true,
+                  fi->args.type_suis.s1, fi->args.type_suis.ui2, fi->args.type_suis.s3);
       case FUNCTION_TYPE_STRING_STRING_INT_INT_INT_INT:
          return ((function_type_string_string_int_int_int_int)fi->function)(obj, NULL, false, true,
                   fi->args.type_ssiiii.s1, fi->args.type_ssiiii.s2, fi->args.type_ssiiii.i3, fi->args.type_ssiiii.i4, fi->args.type_ssiiii.i5, fi->args.type_ssiiii.i6);
@@ -307,6 +342,10 @@ diff_update(Diff *diff, Diff *new_diff)
          eina_stringshare_ref(new_diff->redo.args.type_ss.s1);
          eina_stringshare_ref(new_diff->redo.args.type_ss.s2);
          break;
+      case FUNCTION_TYPE_STRING_UINT:
+         eina_stringshare_del(diff->redo.args.type_sui.s1);
+         eina_stringshare_ref(new_diff->redo.args.type_sui.s1);
+         break;
       case FUNCTION_TYPE_STRING_STRING_RENAME:
          /* rename needs special update */
          assert(diff->redo.type == diff->undo.type);
@@ -338,17 +377,29 @@ diff_update(Diff *diff, Diff *new_diff)
          eina_stringshare_ref(new_diff->redo.args.type_ssd.s1);
          eina_stringshare_ref(new_diff->redo.args.type_ssd.s2);
          break;
+      case FUNCTION_TYPE_STRING_UINT_DOUBLE:
+         eina_stringshare_del(diff->redo.args.type_suid.s1);
+         eina_stringshare_ref(new_diff->redo.args.type_suid.s1);
+         break;
       case FUNCTION_TYPE_STRING_STRING_INT:
          eina_stringshare_del(diff->redo.args.type_ssi.s1);
          eina_stringshare_del(diff->redo.args.type_ssi.s2);
          eina_stringshare_ref(new_diff->redo.args.type_ssi.s1);
          eina_stringshare_ref(new_diff->redo.args.type_ssi.s2);
          break;
+      case FUNCTION_TYPE_STRING_UINT_INT:
+         eina_stringshare_del(diff->redo.args.type_suii.s1);
+         eina_stringshare_ref(new_diff->redo.args.type_suii.s1);
+         break;
       case FUNCTION_TYPE_STRING_STRING_USHORT:
          eina_stringshare_del(diff->redo.args.type_ssus.s1);
          eina_stringshare_del(diff->redo.args.type_ssus.s2);
          eina_stringshare_ref(new_diff->redo.args.type_ssus.s1);
          eina_stringshare_ref(new_diff->redo.args.type_ssus.s2);
+         break;
+      case FUNCTION_TYPE_STRING_UINT_USHORT:
+         eina_stringshare_del(diff->redo.args.type_suius.s1);
+         eina_stringshare_ref(new_diff->redo.args.type_suius.s1);
          break;
       case FUNCTION_TYPE_STRING_STRING_STRING:
          eina_stringshare_del(diff->redo.args.type_sss.s1);
@@ -357,6 +408,24 @@ diff_update(Diff *diff, Diff *new_diff)
          eina_stringshare_ref(new_diff->redo.args.type_sss.s1);
          eina_stringshare_ref(new_diff->redo.args.type_sss.s2);
          eina_stringshare_ref(new_diff->redo.args.type_sss.s3);
+         break;
+      case FUNCTION_TYPE_STRING_STRING_STRING_UINT:
+         eina_stringshare_del(diff->redo.args.type_sss.s1);
+         eina_stringshare_del(diff->redo.args.type_sss.s2);
+         eina_stringshare_del(diff->redo.args.type_sss.s3);
+         eina_stringshare_ref(new_diff->redo.args.type_sss.s1);
+         eina_stringshare_ref(new_diff->redo.args.type_sss.s2);
+         eina_stringshare_ref(new_diff->redo.args.type_sss.s3);
+         break;
+      case FUNCTION_TYPE_STRING_UINT_UINT:
+         eina_stringshare_del(diff->redo.args.type_suiui.s1);
+         eina_stringshare_ref(new_diff->redo.args.type_suiui.s1);
+         break;
+      case FUNCTION_TYPE_STRING_UINT_STRING:
+         eina_stringshare_del(diff->redo.args.type_suis.s1);
+         eina_stringshare_del(diff->redo.args.type_suis.s3);
+         eina_stringshare_ref(new_diff->redo.args.type_suis.s1);
+         eina_stringshare_ref(new_diff->redo.args.type_suis.s3);
          break;
       case FUNCTION_TYPE_STRING_STRING_INT_INT_INT_INT:
          eina_stringshare_del(diff->redo.args.type_ssiiii.s1);
@@ -470,6 +539,9 @@ diff_free(Diff *diff)
          eina_stringshare_del(diff->redo.args.type_ss.s1);
          eina_stringshare_del(diff->redo.args.type_ss.s2);
          break;
+      case FUNCTION_TYPE_STRING_UINT:
+         eina_stringshare_del(diff->redo.args.type_sui.s1);
+         break;
       case FUNCTION_TYPE_STRING:
          eina_stringshare_del(diff->redo.args.type_s.s1);
          break;
@@ -484,18 +556,39 @@ diff_free(Diff *diff)
          eina_stringshare_del(diff->redo.args.type_ssd.s1);
          eina_stringshare_del(diff->redo.args.type_ssd.s2);
          break;
+      case FUNCTION_TYPE_STRING_UINT_DOUBLE:
+         eina_stringshare_del(diff->redo.args.type_suid.s1);
+         break;
       case FUNCTION_TYPE_STRING_STRING_INT:
          eina_stringshare_del(diff->redo.args.type_ssi.s1);
          eina_stringshare_del(diff->redo.args.type_ssi.s2);
+         break;
+      case FUNCTION_TYPE_STRING_UINT_INT:
+         eina_stringshare_del(diff->redo.args.type_suii.s1);
          break;
       case FUNCTION_TYPE_STRING_STRING_USHORT:
          eina_stringshare_del(diff->redo.args.type_ssus.s1);
          eina_stringshare_del(diff->redo.args.type_ssus.s2);
          break;
+      case FUNCTION_TYPE_STRING_UINT_USHORT:
+         eina_stringshare_del(diff->redo.args.type_suius.s1);
+         break;
       case FUNCTION_TYPE_STRING_STRING_STRING:
          eina_stringshare_del(diff->redo.args.type_sss.s1);
          eina_stringshare_del(diff->redo.args.type_sss.s2);
          eina_stringshare_del(diff->redo.args.type_sss.s3);
+         break;
+      case FUNCTION_TYPE_STRING_STRING_STRING_UINT:
+         eina_stringshare_del(diff->redo.args.type_sss.s1);
+         eina_stringshare_del(diff->redo.args.type_sss.s2);
+         eina_stringshare_del(diff->redo.args.type_sss.s3);
+         break;
+      case FUNCTION_TYPE_STRING_UINT_UINT:
+         eina_stringshare_del(diff->redo.args.type_suiui.s1);
+         break;
+      case FUNCTION_TYPE_STRING_UINT_STRING:
+         eina_stringshare_del(diff->redo.args.type_suis.s1);
+         eina_stringshare_del(diff->redo.args.type_suis.s3);
          break;
       case FUNCTION_TYPE_STRING_STRING_INT_INT_INT_INT:
          eina_stringshare_del(diff->redo.args.type_ssiiii.s1);

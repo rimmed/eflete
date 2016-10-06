@@ -776,10 +776,9 @@ _editor_part_item_added_cb(void *data,
    Project *pro = (Project *)data;
    Group2 *group = tabs_current_group_get();
    Part2 *part = (Part2 *)resource_manager_find(group->parts, editor_item->part_name);
-   unsigned int count = eina_list_count(part->items);
 
    /* we can use _item_dependency_load here, but let's avoid using edje edit */
-   item = _part_item_add(part, editor_item->item_name, count);
+   item = _part_item_add(part, editor_item->item_name, editor_item->item_index);
    used = resource_manager_find(pro->RM.groups, editor_item->source);
    if (used)
      _resource_usage_resource_add((Resource2 *)item, used);
@@ -793,7 +792,7 @@ _editor_part_item_deleted_cb(void *data __UNUSED__,
    const Editor_Item *editor_item = event_info;
    Group2 *group = tabs_current_group_get();
    Part2 *part = (Part2 *)resource_manager_find(group->parts, editor_item->part_name);
-   Part_Item2 *item = (Part_Item2 *)resource_manager_find(part->items, editor_item->item_name);
+   Part_Item2 *item = (Part_Item2 *)resource_manager_id_find(part->items, editor_item->item_index);
 
    _resource_part_item_del(part, item);
 }
@@ -864,19 +863,31 @@ _editor_part_item_restacked_cb(void *data __UNUSED__,
    Part_Item2 *part_item, *relative_part_item;
    Part2 *part = (Part2 *)resource_manager_find(group->parts,
                                                 editor_part_item_restack->part_name);
-   part_item = (Part_Item2 *)resource_manager_find(part->items,
-                                                   editor_part_item_restack->part_item);
-   relative_part_item = (Part_Item2 *)resource_manager_find(part->items,
-                                                            editor_part_item_restack->relative_part_item);
 
-   part->items = eina_list_remove(part->items, part_item);
-
-   if (relative_part_item)
-     part->items = eina_list_prepend_relative(part->items,
-                                              part_item,
-                                              relative_part_item);
+   part_item = (Part_Item2 *)resource_manager_id_find(part->items,
+                                                      editor_part_item_restack->item_index);
+   if (editor_part_item_restack->item_move_up)
+     {
+        relative_part_item = (Part_Item2 *)resource_manager_id_find(part->items,
+                                                                    editor_part_item_restack->item_index - 1);
+        part->items = eina_list_remove(part->items, part_item);
+        part->items = eina_list_prepend_relative(part->items,
+                                                 part_item,
+                                                 relative_part_item);
+        relative_part_item->common.id++;
+        part_item->common.id--;
+     }
    else
-     part->items = eina_list_append(part->items, part_item);
+     {
+        relative_part_item = (Part_Item2 *)resource_manager_id_find(part->items,
+                                                                    editor_part_item_restack->item_index + 1);
+        part->items = eina_list_remove(part->items, part_item);
+        part->items = eina_list_append_relative(part->items,
+                                                part_item,
+                                                relative_part_item);
+        relative_part_item->common.id--;
+        part_item->common.id++;
+     }
 }
 
 static void

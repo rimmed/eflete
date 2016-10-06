@@ -391,6 +391,7 @@ typedef struct {
    const char *part_name;
    const char *item_name;
    const char *source;
+   unsigned int item_index;
 } Editor_Item;
 /**
  * emited when item is added in editor.
@@ -490,8 +491,8 @@ typedef struct {
 
 typedef struct {
    const char *part_name;
-   const char *part_item;
-   const char *relative_part_item;
+   unsigned int item_index;
+   Eina_Bool item_move_up;
 } Editor_Part_Item_Restack;
 /**
  * emited when part item is restacked.

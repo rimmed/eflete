@@ -39,14 +39,21 @@ typedef enum {
    FUNCTION_TYPE_STRING_BOOL,
    FUNCTION_TYPE_STRING_INT,
    FUNCTION_TYPE_STRING_STRING,
+   FUNCTION_TYPE_STRING_UINT,
    FUNCTION_TYPE_STRING_STRING_RENAME,
    FUNCTION_TYPE_STRING,
    FUNCTION_TYPE_STRING_STRING_EDJEASPECTCONTROL,
    FUNCTION_TYPE_STRING_UINT_EDJEASPECTCONTROL,
    FUNCTION_TYPE_STRING_STRING_DOUBLE,
+   FUNCTION_TYPE_STRING_UINT_DOUBLE,
    FUNCTION_TYPE_STRING_STRING_INT,
+   FUNCTION_TYPE_STRING_UINT_INT,
    FUNCTION_TYPE_STRING_STRING_USHORT,
+   FUNCTION_TYPE_STRING_UINT_USHORT,
    FUNCTION_TYPE_STRING_STRING_STRING,
+   FUNCTION_TYPE_STRING_STRING_STRING_UINT,
+   FUNCTION_TYPE_STRING_UINT_UINT,
+   FUNCTION_TYPE_STRING_UINT_STRING,
    FUNCTION_TYPE_STRING_STRING_INT_INT_INT_INT,
    FUNCTION_TYPE_STRING_EDJEEDITSELECTMODE,
    FUNCTION_TYPE_STRING_EDJEEDITENTRYMODE,
@@ -142,6 +149,10 @@ struct _Function_Info {
       } type_ss;
       struct {
          Eina_Stringshare *s1;
+         unsigned int ui2;
+      } type_sui;
+      struct {
+         Eina_Stringshare *s1;
       } type_s;
       struct {
          Eina_Stringshare *s1;
@@ -160,9 +171,19 @@ struct _Function_Info {
       } type_ssd;
       struct {
          Eina_Stringshare *s1;
+         unsigned int ui2;
+         double d3;
+      } type_suid;
+      struct {
+         Eina_Stringshare *s1;
          Eina_Stringshare *s2;
          int i3;
       } type_ssi;
+      struct {
+         Eina_Stringshare *s1;
+         unsigned int ui2;
+         int i3;
+      } type_suii;
       struct {
          Eina_Stringshare *s1;
          Eina_Stringshare *s2;
@@ -170,9 +191,30 @@ struct _Function_Info {
       } type_ssus;
       struct {
          Eina_Stringshare *s1;
+         unsigned int ui2;
+         unsigned short us3;
+      } type_suius;
+      struct {
+         Eina_Stringshare *s1;
          Eina_Stringshare *s2;
          Eina_Stringshare *s3;
       } type_sss;
+      struct {
+         Eina_Stringshare *s1;
+         Eina_Stringshare *s2;
+         Eina_Stringshare *s3;
+         unsigned int ui4;
+      } type_sssui;
+      struct {
+         Eina_Stringshare *s1;
+         unsigned int ui2;
+         unsigned int ui3;
+      } type_suiui;
+      struct {
+         Eina_Stringshare *s1;
+         unsigned int ui2;
+         Eina_Stringshare *s3;
+      } type_suis;
       struct {
          Eina_Stringshare *s1;
          Eina_Stringshare *s2;
