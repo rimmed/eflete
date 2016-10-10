@@ -31,7 +31,7 @@
  *
  * @see elm_shutdown().
  */
-EAPI int       ewe_init(int argc, char **argv);
+ int       ewe_init(int argc, char **argv);
 
 /**
  * Shut down Elementary Widget Extensions library
@@ -45,6 +45,6 @@ EAPI int       ewe_init(int argc, char **argv);
  *
  * @see elm_init()
  */
-EAPI int       ewe_shutdown(void);
+ int       ewe_shutdown(void);
 
 #endif /* EWE_MAIN_H */

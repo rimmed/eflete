@@ -22,20 +22,20 @@ typedef Eo Elm_Combobox;
  *
  * @ingroup Elm_Combobox
  */
-EAPI Eina_Bool elm_combobox_expanded_get(const Elm_Combobox *obj);
+Eina_Bool elm_combobox_expanded_get(const Elm_Combobox *obj);
 
 /** This triggers the combobox popup from code, the same as if the user had
  * clicked the button.
  *
  * @ingroup Elm_Combobox
  */
-EAPI void elm_combobox_hover_begin(Elm_Combobox *obj);
+void elm_combobox_hover_begin(Elm_Combobox *obj);
 
 /** This dismisses the combobox popup as if the user had clicked outside the
  * hover.
  *
  * @ingroup Elm_Combobox
  */
-EAPI void elm_combobox_hover_end(Elm_Combobox *obj);
+void elm_combobox_hover_end(Elm_Combobox *obj);
 
 #endif

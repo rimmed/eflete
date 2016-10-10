@@ -206,10 +206,10 @@ libete_a_CPPFLAGS = ${eflete_CPPFLAGS} \
 
 eflete_LDADD = \
 libete.a \
-@EFL_LIBS@ \
-@ELEMENTARY_LIBS@ \
 ${top_builddir}/src/lib/ewe/libewe.a \
 ${top_builddir}/src/lib/elementary_combobox/libcmb.a \
+@EFL_LIBS@ \
+@ELEMENTARY_LIBS@ \
 @LTLIBINTL@
 
 eflete_exporter_SOURCES = ../../src/bin/exporter/eflete_exporter.c

@@ -1013,7 +1013,7 @@ _ewe_ruler_elm_widget_theme_apply(Eo *obj, Ewe_Ruler_Smart_Data *sd)
 
 /*---------------------------Legacy functions --------------------------------*/
 
-EAPI Evas_Object *
+Evas_Object *
 ewe_ruler_add(Evas_Object *parent)
 {
    EINA_SAFETY_ON_NULL_RETURN_VAL(parent, NULL);
@@ -1040,6 +1040,11 @@ _ewe_ruler_class_constructor(Eo_Class *klass)
 {
    evas_smart_legacy_type_register(MY_CLASS_NAME_LEGACY, klass);
 }
+
+#ifdef EAPI
+#undef EAPI
+#define EAPI
+#endif
 
 #include "ewe_ruler.eo.c"
 #undef _EWE_RULER_UNIT_ADD

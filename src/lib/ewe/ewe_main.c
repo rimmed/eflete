@@ -19,14 +19,14 @@
 #include "ewe_private.h"
 #include "ewe_main.h"
 
-EAPI int
+int
 ewe_init(int argc, char **argv)
 {
    elm_theme_extension_add(NULL, EWE_THEME);
    return elm_init(argc, argv);
 }
 
-EAPI int
+int
 ewe_shutdown(void)
 {
    elm_theme_extension_del(NULL, EWE_THEME);

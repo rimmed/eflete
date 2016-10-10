@@ -26,7 +26,7 @@
 
 const Eo_Class *ewe_obj_ruler_class_get(void) EINA_CONST;
 
-extern EAPI Eo_Op EWE_OBJ_RULER_BASE_ID;
+extern Eo_Op EWE_OBJ_RULER_BASE_ID;
 #define EWE_OBJ_RULER_ID(sub_id) (EWE_OBJ_RULER_BASE_ID + sub_id)
 
 enum

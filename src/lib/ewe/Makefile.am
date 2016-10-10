@@ -29,10 +29,6 @@ libewe_a_SOURCES = \
 ewe_main.c \
 ewe_ruler.c
 
-BUILT_SOURCES = \
-ewe_ruler.eo.c \
-ewe_ruler.eo.h
-
 EXTRA_DIST = ewe_ruler.eo \
 ewe_widget_ruler.h \
 ewe_private.h \

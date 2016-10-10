@@ -25,10 +25,6 @@ noinst_LTLIBRARIES = libcmb.a
 libcmb_a_SOURCES = \
 elc_combobox.c
 
-BUILT_SOURCES = \
-elm_combobox.eo.c \
-elm_combobox.eo.h
-
 EXTRA_DIST = elm_combobox.eo \
 elc_combobox.h \
 elc_combobox_legacy.h \

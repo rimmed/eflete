@@ -6,6 +6,6 @@
  *
  * @ingroup Elm_Combobox
  */
-EAPI Evas_Object                 *elm_combobox_add(Evas_Object *parent);
+Evas_Object                 *elm_combobox_add(Evas_Object *parent);
 
 #include "elm_combobox.eo.legacy.h"

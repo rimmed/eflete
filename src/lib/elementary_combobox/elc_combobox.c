@@ -321,7 +321,7 @@ EO_CALLBACKS_ARRAY_DEFINE(entry_callbacks,
        { ELM_ENTRY_EVENT_CHANGED_USER, _on_changed },
        { ELM_ENTRY_EVENT_ABORTED, _on_aborted });
 
-EAPI Evas_Object *
+Evas_Object *
 elm_combobox_add(Evas_Object *parent)
 {
    EINA_SAFETY_ON_NULL_RETURN_VAL(parent, NULL);
@@ -556,4 +556,10 @@ _elm_combobox_evas_object_smart_resize(Eo *obj, Elm_Combobox_Data *pd,
    eo_do_super(obj, MY_CLASS, evas_obj_smart_resize(w, h));
    if (pd->count > 0) _table_resize(obj);
 }
+
+#ifdef EAPI
+#undef EAPI
+#define EAPI
+#endif
+
 #include "elm_combobox.eo.c"
