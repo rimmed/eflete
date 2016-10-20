@@ -1,7 +1,8 @@
+
 MAINTAINERCLEANFILES = Makefile.in
 
 EOLIAN_FLAGS = @DEPS_EOLIAN_FLAGS@ \
--I$(top_srcdir)/src/lib
+	       -I$(top_srcdir)/src/lib
 
 include $(top_srcdir)/Makefile_Eolian_Helper.am
 
@@ -15,7 +16,7 @@ AM_CPPFLAGS = \
 -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
 -DLOCALE_DIR=\"@LOCALE_DIR@\" \
 -DPACKAGE_LIB_DIR=\"$(libdir)\" \
--DEWE_THEME=\"${datadir}/ewe/themes/ewe.edj\" \
+-DEWE_THEME=\"${datadir}/$(PACKAGE)/themes/default/ewe.edj\" \
 -DEFL_EO_API_SUPPORT \
 -DEFL_BETA_API_SUPPORT \
 -DELM_INTERNAL_API_ARGESFSDFEFC \
@@ -26,13 +27,15 @@ AM_CPPFLAGS = \
 noinst_LTLIBRARIES = libewe.a
 
 libewe_a_SOURCES = \
-ewe_main.c \
 ewe_ruler.c
+
+BUILT_SOURCES = \
+ewe_ruler.eo.c \
+ewe_ruler.eo.h
 
 EXTRA_DIST = ewe_ruler.eo \
 ewe_widget_ruler.h \
 ewe_private.h \
-ewe_main.h \
 ewe_ruler.h \
 ewe_ruler_legacy.h \
 ewe_ruler_eo.h \

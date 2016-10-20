@@ -529,6 +529,8 @@ _exporter_finish_handler(void *data,
    Project *project = (Project *) ppd->project;
    Ecore_Exe_Event_Del *exporter_exit = (Ecore_Exe_Event_Del *)event_info;
 
+   _ecore_event_handlers_del(ppd);
+
    if (exporter_exit->exit_code != 0)
      {
         last_error = exporter_exit->exit_code;
@@ -730,7 +732,7 @@ _project_open_internal(Project_Process_Data *ppd)
 /******************************************************************************/
    file_dir = ecore_file_dir_get(ppd->path);
    snprintf(cmd, sizeof(cmd),
-            "%s/eflete_exporter --edj %s --path %s/develop", elm_app_bin_dir_get(), ppd->project->saved_edj, file_dir);
+            "%s --edj %s --path %s/develop", ap.path.exporter, ppd->project->saved_edj, file_dir);
 
    ecore_exe_pipe_run(cmd, FLAGS, NULL);
 
@@ -1205,17 +1207,18 @@ _group_export_finish_handler(void *data,
 
 PM_Project_Result
 pm_group_source_code_export(Project *project,
-                            Group2 *group,
+                            Eina_List *groups,
                             const char *path,
                             PM_Project_Progress_Cb func_progress,
                             PM_Project_End_Cb func_end,
                             const void *data)
 {
    Project_Process_Data *ppd;
-   char buf[PATH_MAX];
+   Group2 *group;
+   Eina_Strbuf *cmd;
+   Eina_List *g, *l;
 
    assert(project != NULL);
-   assert(group != NULL);
    assert(path != NULL);
 
    last_error = PM_PROJECT_SUCCESS;
@@ -1224,14 +1227,19 @@ pm_group_source_code_export(Project *project,
    ppd->func_end = func_end;
    ppd->data = (void *)data;
 
-   snprintf(buf, sizeof(buf),
-            "%s/eflete_exporter --edj %s --path %s -g %s -s", elm_app_bin_dir_get(), project->saved_edj, path, group->common.name);
+   cmd = eina_strbuf_new();
+   eina_strbuf_append_printf(cmd, "%s --edj %s --path %s -s -u", ap.path.exporter, project->saved_edj, path);
 
-   ecore_exe_pipe_run(buf, FLAGS, NULL);
+   g = groups ? groups : project->groups;
+   EINA_LIST_FOREACH(g, l, group)
+      eina_strbuf_append_printf(cmd, " -g %s", group->common.name);
+
+   ecore_exe_pipe_run(eina_strbuf_string_get(cmd), FLAGS, NULL);
 
    ppd->data_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DATA, _exe_output_handler, ppd);
    ppd->del_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _group_export_finish_handler, ppd);
 
+   eina_strbuf_free(cmd);
    return last_error;
 }
 
@@ -1255,7 +1263,7 @@ pm_project_source_code_export(Project *project,
    ppd->data = (void *)data;
 
    snprintf(buf, sizeof(buf),
-            "%s/eflete_exporter --edj %s --path %s -s", elm_app_bin_dir_get(), project->saved_edj, path);
+            "%s --edj %s --path %s -s", ap.path.exporter, project->saved_edj, path);
 
    ecore_exe_pipe_run(buf, FLAGS, NULL);
 
@@ -1314,7 +1322,6 @@ pm_project_develop_export(Project *project,
 
    assert(project != NULL);
    assert(path != NULL);
-   assert(groups != NULL);
 
    last_error = PM_PROJECT_SUCCESS;
    ppd = mem_calloc(1, sizeof(Project_Process_Data));
@@ -1326,25 +1333,33 @@ pm_project_develop_export(Project *project,
 
    CRIT_ON_FAIL(editor_save_all(project->global_object));
 
-   cmd = eina_strbuf_new();
-   if (!ecore_file_exists(ppd->path))
-     eina_strbuf_append_printf(cmd, "edje_pick -o %s", path);
-   else
+   if (groups)
      {
-        eina_file_mkstemp("eflete_export_XXXXXX", &ppd->tmp_dirname);
-        eina_strbuf_append_printf(cmd, "edje_pick -o %s", ppd->tmp_dirname);
-        eina_strbuf_append_printf(cmd, " -a %s", path);
+        cmd = eina_strbuf_new();
+        if (!ecore_file_exists(ppd->path))
+          eina_strbuf_append_printf(cmd, "edje_pick -o %s", path);
+        else
+          {
+             eina_file_mkstemp("eflete_export_XXXXXX", &ppd->tmp_dirname);
+             eina_strbuf_append_printf(cmd, "edje_pick -o %s", ppd->tmp_dirname);
+             eina_strbuf_append_printf(cmd, " -a %s", path);
+          }
+        eina_strbuf_append_printf(cmd, " -i %s", project->dev);
+
+        EINA_LIST_FOREACH(groups, l, group)
+           eina_strbuf_append_printf(cmd, " -g %s", group->common.name);
+
+        DBG("Run command for export: %s", eina_strbuf_string_get(cmd));
+        ecore_exe_pipe_run(eina_strbuf_string_get(cmd), FLAGS, NULL);
+
+        ppd->data_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DATA, _exe_output_handler, ppd);
+        ppd->del_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _develop_export_finish_handler, ppd);
      }
-   eina_strbuf_append_printf(cmd, " -i %s", project->dev);
+   else
+     eina_file_copy(ppd->project->dev, path,
+                            EINA_FILE_COPY_PERMISSION | EINA_FILE_COPY_XATTR,
+                            _copy_progress, ppd);
 
-   EINA_LIST_FOREACH(groups, l, group)
-     eina_strbuf_append_printf(cmd, " -g %s", group->common.name);
-
-   DBG("Run command for export: %s", eina_strbuf_string_get(cmd));
-   ecore_exe_pipe_run(eina_strbuf_string_get(cmd), FLAGS, NULL);
-
-   ppd->data_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DATA, _exe_output_handler, ppd);
-   ppd->del_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _develop_export_finish_handler, ppd);
 
    return last_error;
 }
@@ -1356,7 +1371,10 @@ _release_export_build_finish_handler(void *data,
 {
    Project_Process_Data *ppd = data;
 
-   last_error = PM_PROJECT_SUCCESS;
+   if (!ecore_file_exists(ppd->edj))
+     last_error = PM_PROJECT_EXPORT_RELEASE_EDJ_FAILED;
+   else
+     last_error = PM_PROJECT_SUCCESS;
    _end_send(ppd);
    return ECORE_CALLBACK_DONE;
 }
@@ -1418,7 +1436,7 @@ pm_project_release_export(Project *project,
 
    eina_file_mkdtemp("eflete_export_XXXXXX", &ppd->tmp_dirname);
    snprintf(buf, sizeof(buf),
-            "%s/eflete_exporter --edj %s --path %s -s", elm_app_bin_dir_get(), ppd->project->saved_edj, ppd->tmp_dirname);
+            "%s --edj %s --path %s -s", ap.path.exporter, ppd->project->saved_edj, ppd->tmp_dirname);
    ppd->edc = eina_stringshare_printf("%s/generated.edc", ppd->tmp_dirname);
    ecore_exe_pipe_run(buf, FLAGS, NULL);
 
@@ -1489,10 +1507,20 @@ pm_project_result_string_get(PM_Project_Result result)
          return "Could not create a object";
       case  PM_PROJECT_EXPORT_DEVELOP_EDJ_FAILED:
          return "Could not save develop edj file";
+      case  PM_PROJECT_EXPORT_RELEASE_EDJ_FAILED:
+         return "Could not save release edj file";
       case  PM_PROJECT_BUILD_SOURCE_EDC_FAILED:
          return "Could not build edj file from edc";
       case PM_PROJECT_LAST:
       default:
          return "Unknown error";
      }
+}
+
+void
+pm_project_file_reload(Project *project)
+{
+   eina_file_close(project->mmap_file);
+   project->mmap_file = eina_file_open(project->dev, false);
+   edje_object_mmap_set(project->global_object, project->mmap_file, EFLETE_INTERNAL_GROUP_NAME);
 }

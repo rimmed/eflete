@@ -448,7 +448,7 @@ _editor_saved(void *data __UNUSED__,
    Eina_List *l;
    Tabs_Item *item;
 
-   //pm_dev_file_reload(ap.project);
+   pm_project_file_reload(ap.project);
    EINA_LIST_FOREACH(tabs.items, l, item)
      {
         if (!item->group) continue; /* skip home tab */
@@ -1288,4 +1288,19 @@ Group2 *
 tabs_current_group_get(void)
 {
    return tabs.current_group;
+}
+
+Eina_List *
+tabs_open_groups_get(void)
+{
+   Eina_List *list = NULL, *l;
+   Tabs_Item *item;
+
+   EINA_LIST_FOREACH(tabs.items, l, item)
+     {
+        if (!item->group) continue;
+        list = eina_list_append(list, item->group);
+     }
+
+   return list;
 }

@@ -131,16 +131,14 @@ struct _App_Data
    } block;
    struct {
       Eina_Stringshare *theme_edj;
+      Eina_Stringshare *ewe_edj;
       Eina_Stringshare *layout_edj;
       Eina_Stringshare *edj_path;
       Eina_Stringshare *image_path;
       Eina_Stringshare *sound_path;
       Eina_Stringshare *export_edj;
-      struct {
-         Eina_Stringshare *path;
-         Eina_Stringshare *folder;
-         Eina_Stringshare *file;
-      } export_edc;
+      Eina_Stringshare *export_edc;
+      Eina_Stringshare *exporter;
    } path;
    Project *project;
    Shortcut_Module *shortcuts; /**< Structure with data from shortcuts module */

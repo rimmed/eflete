@@ -20,7 +20,7 @@
 #define ELEMENTARY_WIDGET_EXTENSIONS_H
 
 #include <Elementary.h>
-#include "ewe_main.h"
+
 #include "ewe_ruler.h"
 
 #endif  /* ELEMENTARY_WIDGET_EXTENTIONS_H */

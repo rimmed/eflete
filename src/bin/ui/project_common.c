@@ -22,28 +22,39 @@
 
 typedef struct {
    Eina_Strbuf *buf, *buf_msg;
-   const char *name;
+   char *name;
    const char *title;
-   const char *path;
+   char *path;
    Ecore_Cb func;
    const void *data;
 } Permission_Check_Data;
+
+static void _permision_popup_job(void *data)
+{
+   Permission_Check_Data *pcd = data;
+   Eina_Strbuf *buf_msg;
+
+   buf_msg = eina_strbuf_new();
+   eina_strbuf_append_printf(buf_msg, _("Haven't permision to overwrite '%s' in '%s'"), pcd->name, pcd->path);
+   popup_add(pcd->title, eina_strbuf_string_get(buf_msg), BTN_OK, NULL, NULL);
+
+   eina_strbuf_free(buf_msg);
+   eina_strbuf_free(pcd->buf);
+   free(pcd->name);
+   free(pcd);
+}
 
 static void
 _exist_permission_popup_close_cb(void *data, Evas_Object *obj __UNUSED__, void *event_info)
 {
    Popup_Button btn_res = (Popup_Button) event_info;
    Permission_Check_Data *pcd = data;
-   Eina_Strbuf *buf_msg;
 
    if (btn_res == BTN_CANCEL) goto end;
    if (!ecore_file_can_write(eina_strbuf_string_get(pcd->buf)))
      {
-        buf_msg = eina_strbuf_new();
-        eina_strbuf_append_printf(buf_msg, _("Haven't permision to overwrite '%s' in '%s'"), pcd->name, pcd->path);
-        popup_add(pcd->title, eina_strbuf_string_get(buf_msg), BTN_OK, NULL, NULL);
-        eina_strbuf_free(buf_msg);
-        goto end;
+        ecore_job_add(_permision_popup_job, pcd);
+        return;
      }
    if (btn_res == BTN_REPLACE)
      ecore_file_recursive_rm(eina_strbuf_string_get(pcd->buf));
@@ -52,6 +63,7 @@ _exist_permission_popup_close_cb(void *data, Evas_Object *obj __UNUSED__, void *
 
 end:
    eina_strbuf_free(pcd->buf);
+   free(pcd->name);
    free(pcd);
 }
 
@@ -64,14 +76,15 @@ exist_permission_check(const char *path, const char *name,
    Evas_Object *popup;
    Eina_Strbuf *buf_msg;
    Permission_Check_Data *pcd = mem_calloc(1, sizeof(Permission_Check_Data));
+   Eina_Bool ret = true;
 
    assert(path != NULL);
    assert(name != NULL);
    assert(title != NULL);
 
-   pcd->name = name;
+   pcd->name = strdup(name);
    pcd->title = title;
-   pcd->path = path;
+   pcd->path = strdup(path);
    pcd->func = func;
    pcd->data = data;
    /* we alwayes imported and exported project to folder by given path, means
@@ -83,8 +96,8 @@ exist_permission_check(const char *path, const char *name,
         eina_strbuf_append_printf(buf_msg, _("Haven't permision to write '%s'"), path);
         popup_add(title, eina_strbuf_string_get(buf_msg), BTN_OK, NULL, NULL);
         eina_strbuf_free(buf_msg);
-        free(pcd);
-        return false;
+        ret = false;
+        goto exit;
      }
    pcd->buf = eina_strbuf_new();
    eina_strbuf_append_printf(pcd->buf, "%s/%s", path, name);
@@ -93,16 +106,24 @@ exist_permission_check(const char *path, const char *name,
         if (pcd->func)
           pcd->func((void *)pcd->data);
         eina_strbuf_free(pcd->buf);
-        free(pcd);
-        return true;
+        goto exit;
      }
    if (!append)
-     popup = popup_add(title, msg, BTN_REPLACE | BTN_CANCEL, NULL, NULL);
-   else
-     popup = popup_add(title, msg, BTN_APPEND | BTN_REPLACE | BTN_CANCEL, NULL, NULL);
-   evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _exist_permission_popup_close_cb, pcd);
+     {
+        popup = popup_add(title, msg, BTN_REPLACE | BTN_CANCEL, NULL, NULL);
+        evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _exist_permission_popup_close_cb, pcd);
+        return ret;
+     }
+   else if (pcd->func)
+     {
+        pcd->func((void *)pcd->data);
+     }
 
-   return true;
+exit:
+   free(pcd->name);
+   free(pcd->path);
+   free(pcd);
+   return ret;
 }
 
 Eina_Bool
@@ -149,6 +170,7 @@ progress_end(void *data __UNUSED__, PM_Project_Result result, Project *project _
       case PM_PROJECT_EXPORT_SAVE_FONT_FAILED:
       case PM_PROJECT_EXPORT_CREATE_OBJECT_FAILED:
       case PM_PROJECT_EXPORT_DEVELOP_EDJ_FAILED:
+      case PM_PROJECT_EXPORT_RELEASE_EDJ_FAILED:
       case PM_PROJECT_BUILD_SOURCE_EDC_FAILED:
       case PM_PROJECT_LAST:
       default:

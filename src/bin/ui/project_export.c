@@ -22,6 +22,13 @@
 #include "project_manager2.h"
 #include "project_common.h"
 
+struct _Export_Data
+{
+   Eina_Stringshare *path;
+   Eina_List *groups;
+};
+typedef struct _Export_Data Export_Data;
+
 static Eina_Bool
 _export_teardown(void *data, Splash_Status status __UNUSED__)
 {
@@ -35,17 +42,33 @@ _export_develop_setup(void *data, Splash_Status status __UNUSED__)
    char buf[PATH_MAX];
    PM_Project_Result result;
    const char *path  = (const char *)data;
+   Eina_List *groups = NULL;
 
    assert(path != NULL);
 
-   result = pm_project_develop_export(ap.project, path, ap.project->groups,
+#ifdef HAVE_TIZEN
+   groups = tabs_open_groups_get();
+#endif /* HAVE_TIZEN */
+   result = pm_project_develop_export(ap.project, path, groups,
                                   progress_print, progress_end, NULL);
+   eina_list_free(groups);
    if (PM_PROJECT_SUCCESS != result)
      {
         snprintf(buf, sizeof(buf), "Warning: %s", pm_project_result_string_get(result));
         popup_add(_("Export develop edj"), NULL, BTN_CANCEL, NULL, NULL);
      return false;
      }
+   else
+     {
+        /* HOTFIX: export develop edj file is only file copy, and if file is
+         * small spash animation start after file copy and animation will player
+         * n loop. For avoid this situation I was add this hack.
+         *
+         * Need to update it, and rewrite correctly.
+         */
+        return false;
+     }
+
    return true;
 }
 
@@ -61,12 +84,16 @@ _after_export_dev_check(void *data)
 
 static Eina_Bool
 _export_dev(void *data __UNUSED__,
-            Evas_Object *obj, /* this is fileselector from popup */
+            Evas_Object *obj __UNUSED__, /* this is fileselector from popup */
             void *event_info)
 {
    Eina_List *selected = (Eina_List *)event_info;
    Eina_Strbuf *buf;
    const char *path = (const char *)eina_list_data_get(selected);
+   char **arr;
+   char *name = NULL;
+   int i;
+   char pp[BUFF_MAX];
 
    assert(selected != NULL);
 
@@ -83,11 +110,19 @@ _export_dev(void *data __UNUSED__,
    eina_strbuf_append_printf(buf,
                              _("<font_size=16>A project file '%s' already exist."
                                "Do you want to replace it?</font_size>"), path);
-   exist_permission_check(elm_fileselector_path_get(obj),
-                          elm_fileselector_current_name_get(obj),
+   arr = eina_str_split(path, "/", 0);
+   for(i = 0; arr[i] != NULL; i++)
+     name = arr[i];
+   strncpy(pp, path, strlen(path) - strlen(name));
+   if (ap.path.export_edj)
+     ecore_file_mkpath(pp);
+   exist_permission_check(pp,
+                          name,
                           _("Export to develop edj-file"),
-                          eina_strbuf_string_get(buf), EINA_TRUE,
+                          eina_strbuf_string_get(buf), EINA_TRUE, /* check this true on upstream I have doubts about that */
                           _after_export_dev_check, (void *)eina_stringshare_add(path));
+   free(arr[0]);
+   free(arr);
    eina_strbuf_free(buf);
 
    return false;
@@ -206,15 +241,14 @@ _export_source_code_setup(void *data, Splash_Status status __UNUSED__)
 {
    char buf[PATH_MAX];
    PM_Project_Result result;
-   Eina_Stringshare *path = (Eina_Stringshare *)data;
+   Export_Data *exdata = data;
 
-   assert(path != NULL);
-
-   result = pm_project_source_code_export(ap.project,
-                                          path,
-                                          progress_print,
-                                          progress_end,
-                                          NULL);
+   result = pm_group_source_code_export(ap.project,
+                                        exdata->groups,
+                                        exdata->path,
+                                        progress_print,
+                                        progress_end,
+                                        NULL);
    if (PM_PROJECT_SUCCESS != result)
      {
         snprintf(buf, sizeof(buf), "Warning: %s", pm_project_result_string_get(result));
@@ -230,53 +264,54 @@ _after_export_source_code_check(void *data)
    ap.splash = splash_add(ap.win, _export_source_code_setup, _export_teardown, NULL, data);
    evas_object_focus_set(ap.splash, true);
    evas_object_show(ap.splash);
-   if (!ap.path.export_edc.path)
+   if (!ap.path.export_edc)
      popup_fileselector_helper_dismiss();
 }
 
 static Eina_Bool
-_export_source_code(void *data __UNUSED__,
+_export_source_code(void *data,
                     Evas_Object *obj __UNUSED__, /* this is fileselector from popup */
                     void *event_info)
 {
    Eina_List *selected = (Eina_List *)event_info;
-   Eina_Stringshare *path, *folder;
+   Eina_Stringshare *path;
    Eina_Strbuf *buf;
+   Export_Data *exdata;
 
    assert(selected != NULL);
 
    path = eina_stringshare_add((const char *)eina_list_data_get(selected));
    buf = eina_strbuf_new();
-   if (!ap.path.export_edc.folder)
-     folder = ap.project->name;
-   else
-     folder = ap.path.export_edc.folder;
 
    eina_strbuf_append_printf(buf,
-                             _("<font_size=16>A project file '%s/%s' already exist."
+                             _("<font_size=16>A project folder '%s' already exist."
                                "Do you want to replace it?</font_size>"),
-                             path,
-                             folder);
-   exist_permission_check(path,
-                          folder,
+                             path);
+   exdata = mem_malloc(sizeof(Export_Data));
+   exdata->path = eina_stringshare_printf("%s/%s", path, ap.project->name);
+   exdata->groups = data;
+
+   ecore_file_mkpath(exdata->path);
+   exist_permission_check(exdata->path,
+                          ap.project->name,
                           _("Export to develop edj-file"),
                           eina_strbuf_string_get(buf), EINA_FALSE,
-                          _after_export_source_code_check, (void *)path);
+                          _after_export_source_code_check, exdata);
    eina_strbuf_free(buf);
 
    return false;
 }
 
 void
-project_export_edc_project(void)
+project_export_edc_project(Eina_List *groups)
 {
-   if (!ap.path.export_edc.path)
-     popup_fileselector_folder_helper("Export source code", NULL, NULL, _export_source_code, NULL, false, false);
+   if (!ap.path.export_edc)
+     popup_fileselector_folder_helper("Export source code", NULL, NULL, _export_source_code, groups, false, false);
    else
      {
         Eina_List *l = NULL;
-        l = eina_list_append(l, ap.path.export_edc.path);
-        _export_source_code(NULL, NULL, l);
+        l = eina_list_append(l, ap.path.export_edc);
+        _export_source_code(groups, NULL, l);
         eina_list_free(l);
      }
 }
@@ -285,16 +320,26 @@ static Eina_Bool
 _export_group_source_code_setup(void *data, Splash_Status status __UNUSED__)
 {
    Eina_Stringshare *path = (Eina_Stringshare *)data;
+   PM_Project_Result result;
+   char buf[BUFF_MAX];
+   Eina_List *groups = NULL;
 
    assert(path != NULL);
 
-   if (!pm_group_source_code_export(ap.project,
-                                    tabs_current_group_get(),
+   groups = eina_list_append(groups, tabs_current_group_get());
+   result = pm_group_source_code_export(ap.project,
+                                    groups,
                                     path,
                                     progress_print,
                                     progress_end,
-                                    NULL))
+                                    NULL);
+   eina_list_free(groups);
+   if (PM_PROJECT_SUCCESS != result)
+     {
+        snprintf(buf, sizeof(buf), "Warning: %s", pm_project_result_string_get(result));
+        popup_add(_("Export source edc"), NULL, BTN_CANCEL, NULL, NULL);
      return false;
+     }
    return true;
 }
 

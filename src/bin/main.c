@@ -84,11 +84,18 @@ _setup_open_splash(void *data, Splash_Status status __UNUSED__)
 {
    Eina_Bool ret = true;
    Eina_Stringshare *path = data;
+   PM_Project_Result result;
+   char buf[BUFF_MAX];
 
    assert(path != NULL);
 
-   if (!pm_project_open(path, progress_print, _tabs_progress_end, NULL))
-     ret = false;
+   result = pm_project_open(path, progress_print, _tabs_progress_end, NULL);
+   if (PM_PROJECT_SUCCESS != result)
+     {
+        snprintf(buf, sizeof(buf), "Warning: %s", pm_project_result_string_get(result));
+        popup_add(_("Open project"), NULL, BTN_CANCEL, NULL, NULL);
+        ret = false;
+     }
    eina_stringshare_del(path);
 
    return ret;
@@ -175,28 +182,6 @@ _new_project(void *data __UNUSED__)
    tabs_home_tab_add(TAB_HOME_NEW_PROJECT);
 }
 
-static void
-_export_edc_path_set(char *edc)
-{
-   char tmp[256];
-   int len = 0, rlen = 0;
-
-   strcpy(tmp, edc);
-   len = strlen(tmp);
-   rlen = strlen(strrchr(tmp, '/'));
-   if (!rlen) return;
-   ap.path.export_edc.file = eina_stringshare_add(tmp + (len - rlen + 1));
-   tmp[len - rlen] = '\0';
-
-   len = strlen(tmp);
-   rlen = strlen(strrchr(tmp, '/'));
-   if (!rlen) return;
-   ap.path.export_edc.folder = eina_stringshare_add(tmp + (len - rlen + 1));
-   tmp[len - rlen] = '\0';
-
-   ap.path.export_edc.path = eina_stringshare_add(tmp);
-}
-
 EAPI_MAIN int
 elm_main(int argc, char **argv)
 {
@@ -226,8 +211,6 @@ elm_main(int argc, char **argv)
    if (!app_init()) return -1;
 
 #ifdef HAVE_ENVENTOR
-   elm_app_compile_data_dir_set(EFLETE_EDJ_PATH);
-   elm_app_info_set(NULL, EFLETE_EDJ_PATH, NULL);
    enventor_init(argc, argv);
 #endif
 
@@ -280,6 +263,8 @@ elm_main(int argc, char **argv)
 
              r = eina_list_data_get(config->recents);
              file = r->path;
+             if (!pm_lock_check(file))
+               goto exit;
              ecore_job_add(_open_project, NULL);
              goto run;
           }
@@ -289,6 +274,8 @@ elm_main(int argc, char **argv)
                _ERR_EXIT(_("File '%s' doesn't exists."), file);
              if (ecore_file_is_dir(file))
                _ERR_EXIT(_("'%s' is a directory."), file);
+             if (!pm_lock_check(file))
+               goto exit;
 
              if (eina_str_has_suffix(file, ".pro"))
                {
@@ -356,10 +343,10 @@ elm_main(int argc, char **argv)
 
 run:
         ap.path.export_edj = export_edj;
-        if (export_edc)
-          _export_edc_path_set(export_edc);
+        ap.path.export_edc = export_edc;
         evas_object_show(ap.win);
         elm_run();
+exit:
 #ifdef HAVE_ENVENTOR
         enventor_shutdown();
 #endif

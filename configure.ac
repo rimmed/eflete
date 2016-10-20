@@ -214,7 +214,8 @@ AC_SUBST(LOCALE_DIR)
 DEPS_EOLIAN_FLAGS=`${PKG_CONFIG} --variable=eolian_flags eo efl evas edje ecore elementary`
 AC_SUBST([DEPS_EOLIAN_FLAGS])
 
-EFLETE_DEFINE+=" -DEFLETE_EDJ_PATH=\\\"${datadir}/eflete/themes/default/\\\" "
+EFLETE_DEFINE+=" -DCOMPILE_PATH=\\\"`pwd`\\\" "
+
 AC_SUBST([EFLETE_DEFINE])
 
 AM_PROG_CC_C_O
