@@ -703,7 +703,13 @@ _project_open_internal(Project_Process_Data *ppd)
    TODO("Add project integrity check here");
 
    _project_dev_file_create(ppd->project);
-   ppd->project->mmap_file = eina_file_open(ppd->project->dev, false);
+
+   Eina_File *tmp_file = eina_file_open(ppd->project->dev, 0);
+   void *file_data = eina_file_map_all(tmp_file, EINA_FILE_SEQUENTIAL);
+   size_t file_size = eina_file_size_get(tmp_file);
+   ppd->project->mmap_file = eina_file_virtualize_writable("virtual_file", file_data, file_size);
+   eina_file_map_free(tmp_file, file_data);
+   eina_file_close(tmp_file);
 
    ppd->project->changed = false;
    ppd->project->close_request = false;
@@ -1114,10 +1120,22 @@ pm_project_save(Project *project,
         last_error = PM_PROJECT_ERROR;
         _end_send(ppd);
      }
-   else if (!eina_file_copy(ppd->project->dev, ppd->project->saved_edj,
+   else
+     {
+        void * file_data = eina_file_map_all(ppd->project->mmap_file, EINA_FILE_SEQUENTIAL);
+        size_t file_size = eina_file_size_get(ppd->project->mmap_file);
+
+        FILE *fileptr = fopen(ppd->project->dev, "wb");
+        fwrite(file_data, file_size, 1, fileptr);
+        fclose(fileptr);
+
+        eina_file_map_free(ppd->project->mmap_file, file_data);
+
+        if (!eina_file_copy(ppd->project->dev, ppd->project->saved_edj,
                             EINA_FILE_COPY_PERMISSION | EINA_FILE_COPY_XATTR,
                             _copy_progress, ppd))
-     last_error = PM_PROJECT_COPY_FILE_FAILED;
+          last_error = PM_PROJECT_COPY_FILE_FAILED;
+     }
 
    return last_error;
 }
@@ -1514,7 +1532,8 @@ pm_project_result_string_get(PM_Project_Result result)
 void
 pm_project_file_reload(Project *project)
 {
+   Eina_File *new_file = eina_file_written_file_get(project->mmap_file);
    eina_file_close(project->mmap_file);
-   project->mmap_file = eina_file_open(project->dev, false);
+   project->mmap_file = new_file;
    edje_object_mmap_set(project->global_object, project->mmap_file, EFLETE_INTERNAL_GROUP_NAME);
 }
