@@ -338,12 +338,18 @@ _on_group_changed(void *data,
 
    assert(pd != NULL);
 
-   resource_name_validator_list_set(group_pd.part_name_validator, &group_pd.group->parts, false);
-   resource_name_validator_list_set(group_pd.group_data_name_validator, &group_pd.group->data_items, true);
-   resource_name_validator_resource_set(group_pd.part_name_validator, group_pd.group->current_selected);
-   resource_name_validator_resource_set(group_pd.group_data_name_validator, group_pd.group->current_selected);
+   /* in case if no group selected then its clean up and no groups are selected */
+   if (event_info)
+     {
+        resource_name_validator_list_set(group_pd.part_name_validator, &group_pd.group->parts, false);
+        resource_name_validator_list_set(group_pd.group_data_name_validator, &group_pd.group->data_items, true);
+        resource_name_validator_resource_set(group_pd.part_name_validator, group_pd.group->current_selected);
+        resource_name_validator_resource_set(group_pd.group_data_name_validator, group_pd.group->current_selected);
+     }
 
    GENLIST_FILTER_APPLY(pd->genlist);
+
+   if (!event_info) return;
 
    if (!group_pd.group->current_selected) /* group_only */
      {
@@ -441,6 +447,8 @@ _filter_cb(Property_Attribute *pa)
            return !!(pa->filter_data.part_types & PART_MASK(((Part2 *)group_pd.group->current_selected)->type));
          else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_STATE)
            return !!(pa->filter_data.part_types & PART_MASK(((State2 *)group_pd.group->current_selected)->part->type));
+         else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_ITEM)
+           return !!(pa->filter_data.part_types & PART_MASK(((Part_Item2 *)group_pd.group->current_selected)->part->type));
          else if (group_pd.group->current_selected->common.type == RESOURCE2_TYPE_PROGRAM)
            return !!(pa->filter_data.action_types & ACTION_MASK(((Program2 *)group_pd.group->current_selected)->type));
          else

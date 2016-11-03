@@ -72,7 +72,8 @@ typedef struct {
                   *save,
                   *dont_save,
                   *replace,
-                  *append;
+                  *append,
+                  *reset;
    } button;
 } Popup_Data;
 
@@ -80,7 +81,6 @@ static void
 _popup_del_job(void *data)
 {
    Popup_Data *pd= data;
-   shortcuts_object_check_pop(pd->popup);
    evas_object_del(pd->popup);
    free(pd);
 }
@@ -96,6 +96,7 @@ _popup_btn_cb(void *data,
    assert(pd->popup != NULL);
 
    ecore_job_add(_popup_del_job, pd);
+   shortcuts_object_check_pop(pd->popup);
    evas_object_smart_callback_call(pd->popup, POPUP_CLOSE_CB, data);
    /* menu clould be deleted in POPUP_CLOSE_CB in exit confirmation popup */
    if (ap.menu)
@@ -110,11 +111,12 @@ _button_add(Popup_Data *pd, int *btn_pos, const char *text, Popup_Button pb)
 
    assert(pd != NULL);
    assert(btn_pos != NULL);
-   assert(*btn_pos < 3); /* maximum buttons count */
    assert(text != NULL);
 
    if (pb == BTN_NONE)
      return NULL;
+
+   assert(*btn_pos < 3); /* maximum buttons count */
 
    BUTTON_ADD(pd->popup, btn, text);
    evas_object_data_set(btn, POPUP_DATA, pd);
@@ -148,10 +150,10 @@ popup_add(const char *title,
    int bt_num = 0;
    pd->button.ok        = _button_add(pd, &bt_num, _("Ok"),         popup_btns & BTN_OK);
    pd->button.save      = _button_add(pd, &bt_num, _("Save"),       popup_btns & BTN_SAVE);
-   pd->button.append    = _button_add(pd, &bt_num, _("Append"),     popup_btns & BTN_APPEND);
    pd->button.replace   = _button_add(pd, &bt_num, _("Replace"),    popup_btns & BTN_REPLACE);
    pd->button.dont_save = _button_add(pd, &bt_num, _("Don't save"), popup_btns & BTN_DONT_SAVE);
    pd->button.cancel    = _button_add(pd, &bt_num, _("Cancel"),     popup_btns & BTN_CANCEL);
+   pd->button.reset     = _button_add(pd, &bt_num, _("Reset"),      popup_btns & BTN_RESET);
 
    if (msg)
      elm_object_text_set(pd->popup, msg);
@@ -188,9 +190,6 @@ popup_button_disabled_set(Evas_Object *popup, Popup_Button btn, Eina_Bool disabl
       case BTN_SAVE:
          elm_object_disabled_set(pd->button.save, disabled);
          break;
-      case BTN_APPEND:
-         elm_object_disabled_set(pd->button.append, disabled);
-         break;
       case BTN_REPLACE:
          elm_object_disabled_set(pd->button.replace, disabled);
          break;
@@ -199,6 +198,9 @@ popup_button_disabled_set(Evas_Object *popup, Popup_Button btn, Eina_Bool disabl
          break;
       case BTN_CANCEL:
          elm_object_disabled_set(pd->button.cancel, disabled);
+         break;
+      case BTN_RESET:
+         elm_object_disabled_set(pd->button.reset, disabled);
          break;
       default:
          ERR("Unknown button.");
@@ -567,7 +569,8 @@ _images_filter(const char *path,
    Eina_Bool res;
    const char *image_formats[] = { "png", "jpg", "jpeg", "jfif", "xpm", "tif",
                                    "tiff", "gif", "pbm", "pgm", "ppm", "pnm",
-                                   "bmp", "wbmp", "webp", "psd", "tga", NULL};
+                                   "bmp", "wbmp", "webp", "psd", "tga", "svg",
+                                   NULL};
    if (dir) return true;
    i = 0;
    while(image_formats[i])
