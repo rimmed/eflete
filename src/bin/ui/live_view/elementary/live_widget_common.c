@@ -370,7 +370,7 @@ object_generate(Demo_Part *part, Evas_Object *object)
               break;
           }
         Elm_Theme *theme = elm_theme_new();
-        elm_theme_set(theme, ap.project->dev);
+        elm_theme_overlay_mmap_add(theme, ap.project->mmap_file);
         elm_object_theme_set(content, theme);
         elm_theme_free(theme);
 

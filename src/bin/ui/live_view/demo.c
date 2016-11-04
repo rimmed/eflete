@@ -34,7 +34,7 @@ demo_add(Evas_Object *parent, Group2 *group)
         else
         {
            Elm_Theme *theme = elm_theme_new();
-           elm_theme_set(theme, ap.project->dev);
+           elm_theme_overlay_mmap_add(theme, ap.project->mmap_file);
            elm_object_theme_set(obj, theme);
            elm_theme_free(theme);
            return obj;

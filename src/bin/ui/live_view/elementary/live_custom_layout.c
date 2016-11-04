@@ -25,7 +25,7 @@ layout_custom_create(Evas_Object *parent, const Group2 *group)
    assert(parent != NULL);
 
    Evas_Object *obj = elm_layout_add(parent);
-   if (!elm_layout_file_set(obj, ap.project->dev, group->common.name))
+   if (!elm_layout_mmap_set(obj, ap.project->mmap_file, group->common.name))
      {
         ERR(N_("Could not load group '%s' from mapped file '%s'."), group->common.name, ap.project->dev)
         evas_object_del(obj);
