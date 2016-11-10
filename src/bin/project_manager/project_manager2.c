@@ -19,6 +19,7 @@
 
 #define _GNU_SOURCE
 #include "project_manager2.h"
+#include "file_virtualize.h"
 #include <fcntl.h>
 #include <errno.h>
 
@@ -154,6 +155,21 @@ _project_process_data_cleanup(Project_Process_Data *ppd)
    _pm_project_descriptor_shutdown(ppd);
 
    free(ppd);
+}
+
+Eina_File *
+_project_mmap_file_open(const char *file)
+{
+   Eina_File *tmp_file, *mmap_file;
+
+   tmp_file = eina_file_open(file, false);
+   void *file_data = eina_file_map_all(tmp_file, EINA_FILE_SEQUENTIAL);
+   size_t file_size = eina_file_size_get(tmp_file);
+   mmap_file = eina_file_virtualize_writable("virtual_file", file_data, file_size);
+   eina_file_map_free(tmp_file, file_data);
+   eina_file_close(tmp_file);
+
+   return mmap_file;
 }
 
 __UNUSED_RESULT__ static PM_Project_Result
@@ -704,12 +720,7 @@ _project_open_internal(Project_Process_Data *ppd)
 
    _project_dev_file_create(ppd->project);
 
-   Eina_File *tmp_file = eina_file_open(ppd->project->dev, 0);
-   void *file_data = eina_file_map_all(tmp_file, EINA_FILE_SEQUENTIAL);
-   size_t file_size = eina_file_size_get(tmp_file);
-   ppd->project->mmap_file = eina_file_virtualize_writable("virtual_file", file_data, file_size);
-   eina_file_map_free(tmp_file, file_data);
-   eina_file_close(tmp_file);
+   ppd->project->mmap_file = file_virtualize_open(ppd->project->dev);
 
    ppd->project->changed = false;
    ppd->project->close_request = false;

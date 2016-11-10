@@ -15,6 +15,7 @@ EXTRA_DIST = \
 	common/widget_macro.h \
 	common/widget_list.h \
 	common/win32.h \
+	common/file_virtualize.h \
 	config/config.h \
 	editor/banned_edje_edit_api.h \
 	editor/change.h \
@@ -68,6 +69,7 @@ libete_a_SOURCES = \
 ../../src/bin/common/tizen_hacks.c \
 ../../src/bin/common/validator.c \
 ../../src/bin/common/widget_list.c \
+../../src/bin/common/file_virtualize.c \
 ../../src/bin/project_manager/group_manager.c \
 ../../src/bin/project_manager/project_manager2.c \
 ../../src/bin/resource_manager/resource_manager2.c \
