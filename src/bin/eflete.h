@@ -187,13 +187,6 @@ app_init(void);
 Eina_Bool
 app_shutdown(void);
 
-#define GET_IMAGE(IMG, PARENT, NAME) \
-{ \
-   IMG = edje_object_add(PARENT); \
-   if (!edje_object_file_set(IMG, EFLETE_RESOURCES, NAME)) \
-     ERR("Image with name \"%s\" was not found in resources\n", NAME); \
-}
-
 #include "alloc.h"
 
 
