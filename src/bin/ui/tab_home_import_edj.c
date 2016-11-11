@@ -26,6 +26,7 @@
 #include "project_common.h"
 #include "widget_list.h"
 #include "config.h"
+#include "file_virtualize.h"
 
 struct _Tab_Home_Edj
 {
@@ -100,8 +101,8 @@ static Eina_Bool
 _validate()
 {
    if (!eina_str_has_extension(elm_entry_entry_get(tab_edj.edj), ".edj") ||
-       !ecore_file_exists(elm_entry_entry_get(tab_edj.edj)) ||
-       !edje_file_collection_list(elm_entry_entry_get(tab_edj.edj)))
+       !ecore_file_exists(elm_entry_entry_get(tab_edj.edj))) // ||
+       //!edje_file_collection_list(elm_entry_entry_get(tab_edj.edj)))
      {
         elm_genlist_clear(tab_edj.genlist);
         goto validation_edj_failed;
@@ -163,6 +164,7 @@ _edj_changed_cb(void *data __UNUSED__,
    Eina_Stringshare *group_name, *prefix;
    Group2 *group;
    Node *node;
+   Eina_File *mmap_file;
 
    if (tab_edj.prev_edj_path && !strcmp(tab_edj.prev_edj_path, elm_entry_entry_get(tab_edj.edj)))
      {
@@ -179,7 +181,9 @@ _edj_changed_cb(void *data __UNUSED__,
      }
    tab_edj.widget_list = NULL;
 
-   collections = edje_file_collection_list(elm_entry_entry_get(tab_edj.edj));
+   mmap_file = file_virtualize_open(elm_entry_entry_get(tab_edj.edj));
+   collections = edje_mmap_collection_list(mmap_file);
+   eina_file_close(mmap_file);
    if (!collections) return;
 
    collections = eina_list_sort(collections, eina_list_count(collections), (Eina_Compare_Cb) strcmp);
@@ -189,7 +193,7 @@ _edj_changed_cb(void *data __UNUSED__,
         group->common.name = eina_stringshare_ref(group_name);
         groups_list = eina_list_append(groups_list, group);
      }
-   edje_file_collection_list_free(collections);
+   edje_mmap_collection_list_free(collections);
 
    elm_genlist_clear(tab_edj.genlist);
 

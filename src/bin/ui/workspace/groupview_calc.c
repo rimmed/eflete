@@ -232,7 +232,7 @@ _conteiner_cell_sizer_add(Groupview_Smart_Data *sd, Groupview_Part *gp, unsigned
 
    cell_content = edje_object_add(evas_object_evas_get(sd->obj));
    item_source = edje_edit_part_item_index_source_get(sd->group->edit_object, gp->part->common.name, index);
-   edje_object_file_set(cell_content, ap.project->dev, item_source);
+   edje_object_mmap_set(cell_content, ap.project->mmap_file, item_source);
    eina_stringshare_del(item_source);
    /* hide this object, it need only for calculate cell size */
    evas_object_hide(cell_content);
@@ -853,7 +853,7 @@ _image_param_update(Groupview_Part *gp, Groupview_Smart_Data *sd)
         id = edje_edit_image_id_get(edit_obj, image_normal);
         edje_edit_string_free(image_normal);
         buf = eina_stringshare_printf("edje/images/%i", id);
-        evas_object_image_file_set(gp->proxy_part, ap.project->dev, buf);
+        evas_object_image_mmap_set(gp->proxy_part, ap.project->mmap_file, buf);
         err = evas_object_image_load_error_get(gp->proxy_part);
         if (err != EVAS_LOAD_ERROR_NONE)
           WARN("Could not update image:\"%s\"\n", evas_load_error_str(err));

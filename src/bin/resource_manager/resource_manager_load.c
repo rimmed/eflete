@@ -605,7 +605,7 @@ _groups_load(Project *pro)
    assert(pro->dev != NULL);
    assert(pro->RM.groups == NULL);
 
-   collections = edje_file_collection_list(pro->dev);
+   collections = edje_mmap_collection_list(pro->mmap_file);
 
    assert(collections != NULL);
 
@@ -615,7 +615,7 @@ _groups_load(Project *pro)
         if (!strcmp(group_name, EFLETE_INTERNAL_GROUP_NAME)) continue;
         _group_add(pro, group_name);
      }
-   edje_file_collection_list_free(collections);
+   edje_mmap_collection_list_free(collections);
 
    EINA_LIST_FOREACH(pro->RM.groups, l, res)
      _group_load(pro, res);

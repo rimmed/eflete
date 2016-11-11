@@ -157,38 +157,28 @@ _project_process_data_cleanup(Project_Process_Data *ppd)
    free(ppd);
 }
 
-Eina_File *
-_project_mmap_file_open(const char *file)
-{
-   Eina_File *tmp_file, *mmap_file;
-
-   tmp_file = eina_file_open(file, false);
-   void *file_data = eina_file_map_all(tmp_file, EINA_FILE_SEQUENTIAL);
-   size_t file_size = eina_file_size_get(tmp_file);
-   mmap_file = eina_file_virtualize_writable("virtual_file", file_data, file_size);
-   eina_file_map_free(tmp_file, file_data);
-   eina_file_close(tmp_file);
-
-   return mmap_file;
-}
-
 __UNUSED_RESULT__ static PM_Project_Result
 _project_special_group_add(Project *project)
 {
    Eina_List *groups;
    Evas_Object *obj;
    Ecore_Evas *ecore_evas;
+   Eina_File *mmap_file;
 
    assert(project != NULL);
 
    last_error = PM_PROJECT_SUCCESS;
-   if (edje_file_group_exists(project->saved_edj, EFLETE_INTERNAL_GROUP_NAME))
-     return last_error;
 
-   groups = edje_file_collection_list(project->saved_edj);
+   mmap_file = file_virtualize_open(project->saved_edj);
+   if (edje_mmap_group_exists(mmap_file, EFLETE_INTERNAL_GROUP_NAME))
+     {
+        eina_file_close(mmap_file);
+        return last_error;
+     }
+   groups = edje_mmap_collection_list(mmap_file);
    ecore_evas = ecore_evas_buffer_new(0, 0);
    obj = edje_edit_object_add(ecore_evas_get(ecore_evas));
-   edje_object_file_set(obj, project->saved_edj, eina_list_data_get(groups));
+   edje_object_mmap_set(obj, mmap_file, eina_list_data_get(groups));
 
    you_shall_not_pass_editor_signals(NULL);
    if (!editor_internal_group_add(obj))
@@ -199,7 +189,8 @@ _project_special_group_add(Project *project)
    you_shall_pass_editor_signals(NULL);
 
    ecore_evas_free(ecore_evas);
-   edje_edit_string_list_free(groups);
+   edje_mmap_collection_list_free(groups);
+   eina_file_close(mmap_file);
 
    return last_error;
 }
@@ -279,15 +270,17 @@ _project_dummy_sample_add(Project *project)
    Evas_Object *obj;
    Ecore_Evas *ecore_evas;
    const char *data;
+   Eina_File *mmap_file, *mmap_wr_file;
 
    assert(project != NULL);
 
    last_error = PM_PROJECT_SUCCESS;
-   list = edje_file_collection_list(project->saved_edj);
+   mmap_file = file_virtualize_open(project->saved_edj);
+   list = edje_mmap_collection_list(mmap_file);
    ecore_evas = ecore_evas_buffer_new(0, 0);
    obj = edje_edit_object_add(ecore_evas_get(ecore_evas));
-   edje_object_file_set(obj, project->saved_edj, eina_list_data_get(list));
-   edje_edit_string_list_free(list);
+   edje_object_mmap_set(obj, mmap_file, eina_list_data_get(list));
+   edje_mmap_collection_list_free(list);
 
    /* check if sample exist */
    list = edje_edit_sound_samples_list_get(obj);
@@ -310,6 +303,11 @@ _project_dummy_sample_add(Project *project)
      }
    you_shall_pass_editor_signals(NULL);
 
+   eina_file_close(mmap_file);
+   mmap_wr_file = eina_file_written_file_get(mmap_file);
+   file_virtualize_save(mmap_wr_file, project->saved_edj);
+
+   eina_file_close(mmap_wr_file);
    ecore_evas_free(ecore_evas);
 
    return last_error;
@@ -323,15 +321,17 @@ _project_dummy_image_add(Project *project)
    Evas_Object *obj;
    Ecore_Evas *ecore_evas;
    const char *data;
+   Eina_File *mmap_file, *mmap_wr_file;
 
    assert(project != NULL);
 
    last_error = PM_PROJECT_SUCCESS;
-   list = edje_file_collection_list(project->saved_edj);
+   mmap_file = file_virtualize_open(project->saved_edj);
+   list = edje_mmap_collection_list(mmap_file);
    ecore_evas = ecore_evas_buffer_new(0, 0);
    obj = edje_edit_object_add(ecore_evas_get(ecore_evas));
-   edje_object_file_set(obj, project->saved_edj, eina_list_data_get(list));
-   edje_edit_string_list_free(list);
+   edje_object_mmap_set(obj, mmap_file, eina_list_data_get(list));
+   edje_mmap_collection_list_free(list);
 
    /* check if images exist */
    list = edje_edit_images_list_get(obj);
@@ -354,6 +354,11 @@ _project_dummy_image_add(Project *project)
      }
    you_shall_pass_editor_signals(NULL);
 
+   eina_file_close(mmap_file);
+   mmap_wr_file = eina_file_written_file_get(mmap_file);
+   file_virtualize_save(mmap_wr_file, project->saved_edj);
+
+   eina_file_close(mmap_wr_file);
    ecore_evas_free(ecore_evas);
 
    return last_error;
@@ -824,6 +829,7 @@ _project_import_edj(Project_Process_Data *ppd)
    Eina_Strbuf *strbuf;
    char buf[PATH_MAX];
    unsigned int count;
+   Eina_File *mmap_file, *mmap_new;
 
    //Eina_Stringshare *msg = eina_stringshare_printf(_("Start import '%s' file as new project"), ptd->edj);
    snprintf(buf, sizeof(buf), "Start import '%s' file as new project", ppd->edj);
@@ -842,9 +848,11 @@ _project_import_edj(Project_Process_Data *ppd)
         return last_error;
      }
 
-   groups = edje_file_collection_list(ppd->edj);
+   mmap_file = file_virtualize_open(ppd->edj);
+   groups = edje_mmap_collection_list(mmap_file);
+   eina_file_close(mmap_file);
    count = eina_list_count(groups);
-   edje_edit_string_list_free(groups);
+   edje_mmap_collection_list_free(groups);
    if (ppd->widgets && (count != eina_list_count(ppd->widgets)))
      {
         //msg = eina_stringshare_printf(_("Merging groups from choosen file"));
@@ -862,6 +870,7 @@ _project_import_edj(Project_Process_Data *ppd)
         eina_strbuf_append_printf(strbuf, "edje_pick -o %s -i %s", edj_out, edj_in);
 
         obj = edje_edit_object_add(evas_object_evas_get(ap.win));
+        mmap_file = file_virtualize_open(edj_in);
         EINA_LIST_FOREACH(ppd->widgets, l, group)
           {
              if ((group[0] == 'c') &&
@@ -873,7 +882,7 @@ _project_import_edj(Project_Process_Data *ppd)
                   char **arr = eina_str_split(group, "***", 0);
                   you_shall_not_pass_editor_signals(NULL);
                   /* load any group for coping */
-                  if (!edje_object_file_set(obj, edj_in, arr[1]))
+                  if (!edje_object_mmap_set(obj, mmap_file, arr[1]))
                     {
                        CRIT("Can't load object");
                        free(arr[0]);
@@ -889,6 +898,11 @@ _project_import_edj(Project_Process_Data *ppd)
                        last_error = PM_PROJECT_COPY_GROUP_FAILED;
                        return last_error;
                     }
+                  mmap_new = eina_file_written_file_get(mmap_file);
+                  eina_file_close(mmap_file);
+                  file_virtualize_save(mmap_new, edj_in);
+                  mmap_file = mmap_new;
+
                   you_shall_pass_editor_signals(NULL);
                   eina_strbuf_append_printf(strbuf, " -g %s", arr[2]);
                   free(arr[0]);
@@ -897,6 +911,7 @@ _project_import_edj(Project_Process_Data *ppd)
              else
                eina_strbuf_append_printf(strbuf, " -g %s", group);
           }
+        eina_file_close(mmap_file);
         evas_object_del(obj);
 
         eina_stringshare_del(ppd->edj);
@@ -1133,14 +1148,7 @@ pm_project_save(Project *project,
      }
    else
      {
-        void * file_data = eina_file_map_all(ppd->project->mmap_file, EINA_FILE_SEQUENTIAL);
-        size_t file_size = eina_file_size_get(ppd->project->mmap_file);
-
-        FILE *fileptr = fopen(ppd->project->dev, "wb");
-        fwrite(file_data, file_size, 1, fileptr);
-        fclose(fileptr);
-
-        eina_file_map_free(ppd->project->mmap_file, file_data);
+        file_virtualize_save(ppd->project->mmap_file, ppd->project->dev);
 
         if (!eina_file_copy(ppd->project->dev, ppd->project->saved_edj,
                             EINA_FILE_COPY_PERMISSION | EINA_FILE_COPY_XATTR,

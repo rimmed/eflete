@@ -88,6 +88,12 @@ TODO("delete it, and remake all strings to eina_stringshare or eina_strbuff")
 #undef elm_object_item_text_get
 #define elm_object_item_text_get 0_NO_DO_NOT_USE_POISONED
 #pragma GCC poison elm_object_item_part_text_get
+#pragma GCC poison edje_file_collection_list
+#pragma GCC poison edje_file_collection_list_free
+#pragma GCC poison edje_file_group_exists
+
+#define edje_object_theme_file_set edje_object_file_set
+#pragma GCC poison edje_object_file_set
 
 #include <Elementary.h>
 #include "logger.h"
