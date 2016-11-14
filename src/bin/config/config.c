@@ -64,6 +64,7 @@ config_dir_get(void)
         conf_path = eina_environment_home_get();
         cfg = eina_stringshare_printf("%s/.config/eflete", conf_path);
      }
+   if (!ecore_file_exists(cfg)) ecore_file_mkpath(cfg);
    return cfg;
 }
 #endif
