@@ -163,7 +163,7 @@ _project_special_group_add(Project *project)
    Eina_List *groups;
    Evas_Object *obj;
    Ecore_Evas *ecore_evas;
-   Eina_File *mmap_file;
+   Eina_File *mmap_file, *mmap_wr_file;
 
    assert(project != NULL);
 
@@ -188,9 +188,13 @@ _project_special_group_add(Project *project)
      }
    you_shall_pass_editor_signals(NULL);
 
+   mmap_wr_file = eina_file_written_file_get(mmap_file);
+   file_virtualize_save(mmap_wr_file, project->saved_edj);
+
    ecore_evas_free(ecore_evas);
    edje_mmap_collection_list_free(groups);
    eina_file_close(mmap_file);
+   eina_file_close(mmap_wr_file);
 
    return last_error;
 }
@@ -303,10 +307,10 @@ _project_dummy_sample_add(Project *project)
      }
    you_shall_pass_editor_signals(NULL);
 
-   eina_file_close(mmap_file);
    mmap_wr_file = eina_file_written_file_get(mmap_file);
    file_virtualize_save(mmap_wr_file, project->saved_edj);
 
+   eina_file_close(mmap_file);
    eina_file_close(mmap_wr_file);
    ecore_evas_free(ecore_evas);
 
