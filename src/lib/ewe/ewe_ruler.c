@@ -1049,14 +1049,10 @@ _ewe_ruler_eo_base_constructor(Eo *obj, Ewe_Ruler_Smart_Data *sd)
 {
    obj = eo_do_super_ret(obj, MY_CLASS, obj, eo_constructor());
    sd->obj = obj;
-<<<<<<< HEAD:src/lib/ewe/ewe_ruler.c
    eo_do(obj,
          evas_obj_type_set(MY_CLASS_NAME_LEGACY),
          evas_obj_smart_callbacks_descriptions_set(_smart_callbacks));
-=======
-   evas_object_smart_callbacks_descriptions_set(obj, _smart_callbacks);
 
->>>>>>> master:src/lib/ewe_ruler.c
    return obj;
 }
 
