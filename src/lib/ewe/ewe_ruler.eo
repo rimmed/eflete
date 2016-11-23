@@ -31,7 +31,7 @@ class Ewe_Ruler (Elm.Widget)
             ]]
          }
          keys {
-           scale: Ewe_Ruler_Scale*;
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
            step: uint;
@@ -48,7 +48,7 @@ class Ewe_Ruler (Elm.Widget)
           return: bool; [[ EINA_TRUE if step was set or EINA_FALSE on failure.]]
          }
          keys {
-           scale: Ewe_Ruler_Scale*;
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
            step: double;
@@ -65,7 +65,7 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[EINA_TRUE if offset was set or EINA_FALSE on failure.]]
          }
          keys {
-           scale: Ewe_Ruler_Scale*;
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
            offset: int;
@@ -84,10 +84,10 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[EINA_TRUE if format was setted or EINA_FALSE on failure.]]
          }
          keys {
-           scale: Ewe_Ruler_Scale*;
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
-           format: const(char)*;
+           format: string;
          }
       }
       @property style {
@@ -103,10 +103,10 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[EINA_TRUE if style was setted or EINA_FALSE on failure.]]
          }
          keys {
-           scale: Ewe_Ruler_Scale*;
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
-           style: const(char)*;
+           style: string;
          }
       }
       @property scale_visible {
@@ -122,7 +122,7 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[EINA_TRUE if offset was set or EINA_FALSE on failure.]]
          }
          keys {
-           scale: Ewe_Ruler_Scale*;
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
            visible: bool;
@@ -141,7 +141,7 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[ EINA_TRUE if middle_mark was set or EINA_FALSE on failure.]]
          }
          keys {
-           scale: Ewe_Ruler_Scale*;
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
            middle_mark: bool;
@@ -160,8 +160,8 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[ EINA_TRUE if position was set or EINA_FALSE on failure.]]
          }
          keys {
-           marker: Ewe_Ruler_Marker*;
-           scale: Ewe_Ruler_Scale*;
+           marker: ptr(Ewe_Ruler_Marker);
+           scale: ptr(Ewe_Ruler_Scale);
          }
          values {
            rel_position: double;
@@ -180,7 +180,7 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[ EINA_TRUE if position was set or EINA_FALSE on failure.]]
          }
          keys {
-           marker: Ewe_Ruler_Marker*;
+           marker: ptr(Ewe_Ruler_Marker);
          }
          values {
            position: int;
@@ -199,7 +199,7 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[EINA_TRUE if visibility was set or EINA_FALSE on failure.]]
          }
          keys {
-           marker: Ewe_Ruler_Marker*;
+           marker: ptr(Ewe_Ruler_Marker);
          }
          values {
            visible: bool;
@@ -218,10 +218,10 @@ class Ewe_Ruler (Elm.Widget)
          return: bool; [[ EINA_TRUE if style was setted or EINA_FALSE on failure.]]
          }
          keys {
-           marker: Ewe_Ruler_Marker*;
+           marker: ptr(Ewe_Ruler_Marker);
          }
          values {
-           style: const(char)*;
+           style: string;
          }
       }
       @property marker_size {
@@ -236,7 +236,7 @@ class Ewe_Ruler (Elm.Widget)
          ]]
          }
          keys {
-           marker: Ewe_Ruler_Marker*;
+           marker: ptr(Ewe_Ruler_Marker);
          }
          values {
            size: int;
@@ -254,10 +254,10 @@ class Ewe_Ruler (Elm.Widget)
          ]]
          }
          keys {
-           marker: Ewe_Ruler_Marker*;
+           marker: ptr(Ewe_Ruler_Marker);
          }
          values {
-           text: const(char)*;
+           text: string;
          }
       }
       @property marker_tooltip {
@@ -267,19 +267,19 @@ class Ewe_Ruler (Elm.Widget)
          ]]
          }
          keys {
-           marker: Ewe_Ruler_Marker*;
+           marker: ptr(Ewe_Ruler_Marker);
          }
          values {
-           text: const(char)*;
+           text: string;
          }
       }
       scale_add {
          [[
           Add new scale to ruler.
          ]]
-         return: Ewe_Ruler_Scale *; [[ Scale object or NULL on failure.]]
+         return: ptr(Ewe_Ruler_Scale); [[ Scale object or NULL on failure.]]
          params {
-            style: const(char)*;
+            style: string;
          }
       }
       scale_del {
@@ -288,16 +288,16 @@ class Ewe_Ruler (Elm.Widget)
          ]]
          return: bool; [[ EINA_TRUE on success, EIAN_FALSE on failure.]]
          params {
-            scale: Ewe_Ruler_Scale*;
+            scale: ptr(Ewe_Ruler_Scale);
          }
       }
       marker_add {
          [[
           Add new marker to ruler.
          ]]
-         return: Ewe_Ruler_Marker *; [[ Marker object or NULL on failure.]]
+         return: ptr(Ewe_Ruler_Marker); [[ Marker object or NULL on failure.]]
          params {
-            style: const(char)*;
+            style: string;
          }
       }
       marker_del {
@@ -306,7 +306,7 @@ class Ewe_Ruler (Elm.Widget)
          ]]
          return: bool; [[ EINA_TRUE on success, EIAN_FALSE on failure.]]
          params {
-            marker: Ewe_Ruler_Marker*;
+            marker: ptr(Ewe_Ruler_Marker);
          }
       }
    }
