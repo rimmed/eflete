@@ -112,7 +112,11 @@ _content_set(void *data,
         tabs.current_workspace = item->content;
         tabs.current_group = item->group;
         if (ap.project)
-          ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_STYLE_ONLY, false);
+          {
+             ui_menu_items_list_disable_set(ap.menu, MENU_ITEMS_LIST_STYLE_ONLY, false);
+             ui_menu_disable_set(ap.menu, MENU_EDIT_STATE_ADD, true);
+             ui_menu_disable_set(ap.menu, MENU_EDIT_ITEM_ADD, true);
+          }
         if (item->need_recalc)
           {
              workspace_groupview_hard_update(tabs.current_workspace);
@@ -831,6 +835,38 @@ _shortcut_tab_close_cb(void *data __UNUSED__,
 }
 
 static void
+_shortcut_image_manager_cb(void *data __UNUSED__,
+                           Evas_Object *obj __UNUSED__,
+                           void *event_info __UNUSED__)
+{
+   image_manager_add();
+}
+
+static void
+_shortcut_sound_manager_cb(void *data __UNUSED__,
+                           Evas_Object *obj __UNUSED__,
+                           void *event_info __UNUSED__)
+{
+   sound_manager_add();
+}
+
+static void
+_shortcut_style_manager_cb(void *data __UNUSED__,
+                           Evas_Object *obj __UNUSED__,
+                           void *event_info __UNUSED__)
+{
+   style_manager_add();
+}
+
+static void
+_shortcut_color_class_manager_cb(void *data __UNUSED__,
+                                Evas_Object *obj __UNUSED__,
+                                void *event_info __UNUSED__)
+{
+   colorclass_manager_add();
+}
+
+static void
 _shortcut_mode_normal_cb(void *data __UNUSED__,
                          Evas_Object *obj __UNUSED__,
                          void *event_info __UNUSED__)
@@ -1051,6 +1087,10 @@ tabs_add(void)
    evas_object_smart_callback_add(ap.win, signals.shortcut.tab.prev, _shortcut_tab_prev_cb, NULL);
    evas_object_smart_callback_add(ap.win, signals.shortcut.tab.num, _shortcut_tab_num_cb, NULL);
    evas_object_smart_callback_add(ap.win, signals.shortcut.tab.close, _shortcut_tab_close_cb, NULL);
+   evas_object_smart_callback_add(ap.win, signals.shortcut.manager.image, _shortcut_image_manager_cb, NULL);
+   evas_object_smart_callback_add(ap.win, signals.shortcut.manager.sound, _shortcut_sound_manager_cb, NULL);
+   evas_object_smart_callback_add(ap.win, signals.shortcut.manager.style, _shortcut_style_manager_cb, NULL);
+   evas_object_smart_callback_add(ap.win, signals.shortcut.manager.color_class, _shortcut_color_class_manager_cb, NULL);
    evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.mode.normal, _shortcut_mode_normal_cb, NULL);
 #if !HAVE_TIZEN
    evas_object_smart_callback_add(ap.win, signals.shortcut.workspace.mode.code, _shortcut_mode_code_cb, NULL);
@@ -1255,7 +1295,7 @@ subtab_select:
    button = elm_object_part_content_get(content, "elm.swallow.btn_create");
    evas_object_smart_callback_call(button, signals.elm.button.clicked, NULL);
 #endif /* HAVE_TIZEN */
-   elm_toolbar_item_selected_set(item->toolbar_item, true);
+   if (!ap.open_group) elm_toolbar_item_selected_set(item->toolbar_item, true);
 }
 
 void
