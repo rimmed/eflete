@@ -204,4 +204,9 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
+   color_class { name: "popup_helper_border";
+      color: 0 138 238 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
 }
