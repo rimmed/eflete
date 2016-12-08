@@ -846,6 +846,7 @@ _project_import_edj(Project_Process_Data *ppd)
    Evas_Object *obj = NULL;
    Eina_Strbuf *strbuf;
    char buf[PATH_MAX];
+   char *str;
    unsigned int count;
    Eina_File *mmap_file, *mmap_new;
 
@@ -929,8 +930,10 @@ _project_import_edj(Project_Process_Data *ppd)
         ppd->edj = eina_stringshare_ref(edj_out);
         ppd->source_edj = eina_stringshare_ref(edj_in);
 
-        ecore_exe_pipe_run(eina_strbuf_string_get(strbuf), FLAGS, NULL);
+        str = string_backslash_insert(eina_strbuf_string_get(strbuf), '&');
+        ecore_exe_pipe_run(str, FLAGS, NULL);
         eina_strbuf_free(strbuf);
+        free(str);
 
         ppd->data_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DATA, _exe_output_handler, ppd);
         ppd->del_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _edje_pick_finish_handler, ppd);
@@ -1043,6 +1046,7 @@ _project_import_edc(void *data)
    ppd->edj = eina_stringshare_printf("%s/out.edj", ppd->tmp_dirname);
    snprintf(buf, sizeof(buf),
             "edje_cc -v %s %s %s", ppd->edc, ppd->edj, ppd->build_options);
+   DBG("Run command for compile: %s\n", buf);
    ecore_exe_pipe_run(buf, FLAGS, NULL);
 
    ppd->data_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DATA, _exe_output_handler, ppd);
@@ -1338,7 +1342,7 @@ _develop_export_finish_handler(void *data,
 
    if (ppd->tmp_dirname)
      {
-        ecore_file_recursive_rm(ppd->path);
+        ecore_file_unlink(ppd->path);
         ecore_file_mv(ppd->tmp_dirname, ppd->path);
         eina_tmpstr_del(ppd->tmp_dirname);
         ppd->tmp_dirname = NULL;
@@ -1384,7 +1388,10 @@ pm_project_develop_export(Project *project,
           eina_strbuf_append_printf(cmd, "edje_pick -o %s", path);
         else
           {
-             eina_file_mkstemp("eflete_export_XXXXXX", &ppd->tmp_dirname);
+             int fd = eina_file_mkstemp("eflete_export_XXXXXX", &ppd->tmp_dirname);
+             /* special for Windows. Window does not like the opened handlers
+                we need close it for write file in future. */
+             close(fd);
              eina_strbuf_append_printf(cmd, "edje_pick -o %s", ppd->tmp_dirname);
              eina_strbuf_append_printf(cmd, " -a %s", path);
           }
