@@ -229,7 +229,7 @@ group { name: "ewe/ruler/marker/vertical/rel1";
       part { name: "ewe.text";
          description { state: "default" 0.0;
             map {
-               on: 1;
+               on: 0;
                rotation {
                   center: "ewe.text";
                   z: -90.00;
@@ -432,7 +432,7 @@ group { name: "ewe/ruler/vertical/dashes/default";
                align: 0.0 0.5;
                ellipsis: -1.0;
             }
-            map.on:1;
+            map.on: 0;
             map.rotation.z: 270;
          }
       }
