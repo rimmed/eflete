@@ -166,7 +166,14 @@ static const char *action_type[] = {"NONE",
                                     "[NOT SUPPORTED] PHYSICS_ANG_VEL_SET",
                                     "[NOT SUPPORTED] PHYSICS_STOP",
                                     "[NOT SUPPORTED] PHYSICS_ROT_SET",
-                                    "[NOT SUPPORTED] VIBRATION_SAMPLE"};
+                                    "[NOT SUPPORTED] VIBRATION_SAMPLE",
+#ifdef HAVE_TIZEN
+                                    "RUN_PLUGIN"
+#else
+                                    "UNKNOWN TYPE"
+#endif
+};
+
 
 static const char *item_aspect_mode_strings[] = { STR_NONE,
                                                   "Neither",
@@ -4861,6 +4868,7 @@ _init_items()
              break;
            case PROPERTY_GROUP_ITEM_PART_MOUSE_EVENTS:
               IT.name = "Mouse events";
+              IT.filter_data.part_types &= ~PART_SPACER;
               _action1(&IT, NULL, NULL, PROPERTY_CONTROL_CHECK, ATTRIBUTE_PART_MOUSE_EVENTS,
                        _("Specifies whether the part emits signals. "
                          "Disabling it prevents the part from emitting "
@@ -4868,6 +4876,7 @@ _init_items()
              break;
            case PROPERTY_GROUP_ITEM_PART_REPEAT_EVENTS:
               IT.name = "Repeat events";
+              IT.filter_data.part_types &= ~PART_SPACER;
               _action1(&IT, NULL, NULL, PROPERTY_CONTROL_CHECK, ATTRIBUTE_PART_REPEAT_EVENTS,
                        _("Specifies whether a part echoes a mouse event "
                          "to other parts below the pointer."));

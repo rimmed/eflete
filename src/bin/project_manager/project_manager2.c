@@ -846,7 +846,6 @@ _project_import_edj(Project_Process_Data *ppd)
    Evas_Object *obj = NULL;
    Eina_Strbuf *strbuf;
    char buf[PATH_MAX];
-   char *str;
    unsigned int count;
    Eina_File *mmap_file, *mmap_new;
 
@@ -929,11 +928,14 @@ _project_import_edj(Project_Process_Data *ppd)
         eina_stringshare_del(ppd->edj);
         ppd->edj = eina_stringshare_ref(edj_out);
         ppd->source_edj = eina_stringshare_ref(edj_in);
-
-        str = string_backslash_insert(eina_strbuf_string_get(strbuf), '&');
+#ifndef _WIN32
+        char *str = string_backslash_insert(eina_strbuf_string_get(strbuf), '&');
         ecore_exe_pipe_run(str, FLAGS, NULL);
-        eina_strbuf_free(strbuf);
         free(str);
+#else
+        ecore_exe_pipe_run(eina_strbuf_string_get(strbuf), FLAGS, NULL);
+        eina_strbuf_free(strbuf);
+#endif /* _WIN32 */
 
         ppd->data_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DATA, _exe_output_handler, ppd);
         ppd->del_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _edje_pick_finish_handler, ppd);
@@ -971,6 +973,7 @@ pm_project_import_edj(const char *name,
                       const void *data)
 {
    Project_Process_Data *ppd;
+   Eina_Stringshare *pro_path;
 
    assert(name != NULL);
    assert(path != NULL);
@@ -993,7 +996,9 @@ pm_project_import_edj(const char *name,
         Project *project = ppd->project;
         _project_process_data_cleanup(ppd);
         _project_close_internal(project);
-        ecore_file_recursive_rm(spath);
+        pro_path = eina_stringshare_printf("%s/%s", spath, name);
+        ecore_file_recursive_rm(pro_path);
+        eina_stringshare_del(pro_path);
      }
 
    free(spath);
