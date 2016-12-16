@@ -127,6 +127,19 @@ _button_add(Popup_Data *pd, int *btn_pos, const char *text, Popup_Button pb)
    return btn;
 }
 
+static void
+_popup_button_click(void *data,
+                    Evas_Object *obj __UNUSED__,
+                    void *event_info __UNUSED__)
+{
+   Evas_Object *btn = data;
+
+   assert(btn != NULL);
+
+   if (!elm_object_disabled_get(btn))
+     evas_object_smart_callback_call(btn, signals.elm.button.clicked, NULL);
+}
+
 Evas_Object *
 popup_add(const char *title,
           const char *msg,
@@ -154,6 +167,11 @@ popup_add(const char *title,
    pd->button.dont_save = _button_add(pd, &bt_num, _("Don't save"), popup_btns & BTN_DONT_SAVE);
    pd->button.cancel    = _button_add(pd, &bt_num, _("Cancel"),     popup_btns & BTN_CANCEL);
    pd->button.reset     = _button_add(pd, &bt_num, _("Reset"),      popup_btns & BTN_RESET);
+
+   if (pd->button.ok)
+     evas_object_smart_callback_add(pd->popup, signals.shortcut.popup.done, _popup_button_click, pd->button.ok);
+   if (pd->button.cancel)
+     evas_object_smart_callback_add(pd->popup, signals.shortcut.popup.cancel, _popup_button_click, pd->button.cancel);
 
    if (msg)
      elm_object_text_set(pd->popup, msg);
@@ -766,10 +784,17 @@ _grid_content_get(void *data,
 
    if (!strcmp(part, "elm.swallow.icon"))
      {
+#ifndef _WIN32
         image_obj = elm_thumb_add(grid);
-        elm_object_style_set(image_obj, "noframe");
         if (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) != 0)
           elm_thumb_file_set(image_obj, it->source, NULL);
+#else
+        TODO("Remove this urgly hack when we fix thumbs on Windows")
+        image_obj = elm_image_add(grid);
+        if (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) != 0)
+          elm_image_file_set(image_obj, it->source, NULL);
+#endif /* _WIN32 */
+        elm_object_style_set(image_obj, "noframe");
         evas_object_show(image_obj);
      }
    else if ((!strcmp(part, "elm.swallow.end") && (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) != 0)))
