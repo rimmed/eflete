@@ -79,7 +79,7 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
-    color_class { name: "entry_bg";
+   color_class { name: "entry_bg";
       color: 255 255 255 255;
       color2: 0 0 0 0;
       color3: 0 0 0 0;
@@ -119,7 +119,7 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
-    color_class { name: "button";
+   color_class { name: "button";
       color: 225 225 225 255;
       color2: 0 0 0 0;
       color3: 0 0 0 0;
@@ -164,7 +164,7 @@ color_classes {
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
-    color_class { name: "over";
+   color_class { name: "over";
       color: 205 233 255 255;
       color2: 0 0 0 0;
       color3: 0 0 0 0;
@@ -206,6 +206,16 @@ color_classes {
    }
    color_class { name: "popup_helper_border";
       color: 0 138 238 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "colorselector_border_bg";
+      color: 255 255 255 255;
+      color2: 0 0 0 0;
+      color3: 0 0 0 0;
+   }
+   color_class { name: "colorselector_bg";
+      color: 248 248 248 255;
       color2: 0 0 0 0;
       color3: 0 0 0 0;
    }
