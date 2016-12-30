@@ -27,7 +27,7 @@
 #include <sys/wait.h>
 #else
 #include <win32.h>
-#include <Windows.h>
+#include <windows.h>
 static HANDLE hMutex = NULL;
 #endif
 
@@ -449,7 +449,7 @@ _project_lock(Project *project)
    dir = ecore_file_dir_get(project->pro_path);
    snprintf(path, sizeof(path), "%s/"LOCK_FILE, dir);
    free(dir);
-   project->fd_lock = open(path, O_RDWR | O_CREAT, S_IWUSR);
+   project->fd_lock = open(path, O_RDWR | O_CREAT);
    if (!project->fd_lock)
      {
         ERR("%s: %s\n", path, strerror(errno));
@@ -1538,7 +1538,7 @@ pm_project_result_string_get(PM_Project_Result result)
    switch (result)
      {
       case PM_PROJECT_SUCCESS:
-         return "Project job is succes";
+         return "Project job is success";
       case PM_PROJECT_CANCEL:
          return "User cancel project job";
       case PM_PROJECT_LOCKED:

@@ -45,6 +45,10 @@ struct _Tab_Home_Edj
    Evas_Object *genlist;
 
    const char *prev_edj_path;
+   /*
+    * This list contain only checked group, so if there are no checked groups
+    * this list should be empty or = NULL.
+    */
    Eina_List *widget_list;
 };
 
@@ -71,33 +75,6 @@ static void
 _tree_nodes_get(Eina_List *groups_list, Node *node);
 
 static Eina_Bool
-_checked_get(void)
-{
-   Tree_Item_Data *widget = NULL, *style = NULL;
-   End_Item_Data *item_style;
-   Eina_List *l, *ll, *lll;
-
-   EINA_LIST_FOREACH(tab_edj.widget_list, l, widget)
-     {
-        if (widget->check)
-          return EINA_TRUE;
-
-        EINA_LIST_FOREACH(widget->list, ll, style)
-          {
-             if (style->check)
-               return EINA_TRUE;
-
-             EINA_LIST_FOREACH(style->list, lll, item_style)
-               {
-                  if (item_style->check)
-                    return EINA_TRUE;
-               }
-          }
-     }
-   return EINA_FALSE;
-}
-
-static Eina_Bool
 _validate()
 {
    if (!eina_str_has_extension(elm_entry_entry_get(tab_edj.edj), ".edj") ||
@@ -108,16 +85,14 @@ _validate()
         goto validation_edj_failed;
      }
 
-   if ((elm_validator_regexp_status_get(tab_edj.name_validator) != ELM_REG_NOERROR) ||
-       (tab_edj.widget_list && !_checked_get()))
+   if (elm_validator_regexp_status_get(tab_edj.name_validator) != ELM_REG_NOERROR)
      goto validation_edj_failed;
 
-   elm_object_disabled_set(tab_edj.btn_create, false);
+   elm_object_disabled_set(tab_edj.btn_create, !eina_list_count(tab_edj.widget_list));
    elm_object_disabled_set(tab_edj.ch_all, false);
    return EINA_TRUE;
 
 validation_edj_failed:
-   elm_object_disabled_set(tab_edj.btn_create, true);
    elm_object_disabled_set(tab_edj.ch_all, true);
    return EINA_FALSE;
 }
@@ -166,14 +141,12 @@ _edj_changed_cb(void *data __UNUSED__,
    Node *node;
    Eina_File *mmap_file;
 
+   _validate();
    if (tab_edj.prev_edj_path && !strcmp(tab_edj.prev_edj_path, elm_entry_entry_get(tab_edj.edj)))
      {
-       return;
+        return;
      }
    tab_edj.prev_edj_path = elm_entry_entry_get(tab_edj.edj);
-
-   if (!_validate())
-      return;
 
    EINA_LIST_FREE(tab_edj.widget_list, group_name)
      {
@@ -241,7 +214,7 @@ _widget_list_group_set(Node *node)
 {
    if (node->check)
      {
-        if (!node->list)
+        if ((!node->list) && (!eina_list_data_find(tab_edj.widget_list, node->name)))
           tab_edj.widget_list = eina_list_append(tab_edj.widget_list, node->name);
      }
    else
@@ -358,7 +331,7 @@ _on_item_activated(void *data __UNUSED__,
                    void *event_info)
 {
    Elm_Object_Item *it = (Elm_Object_Item *)event_info;
-   Tree_Item_Data *widget_data = elm_object_item_data_get(it);
+   Node *widget_data = elm_object_item_data_get(it);
 
    assert(widget_data != NULL);
 
@@ -528,9 +501,9 @@ _after_popup_close(void *data __UNUSED__,
                                elm_entry_entry_get(tab_edj.name),
                                _("Import edj-file"), eina_strbuf_string_get(buf),
 #if !HAVE_TIZEN
-							   FILE_SAVE_ASK,
+                               FILE_SAVE_ASK,
 #else
-							   FILE_SAVE_REPLACE,
+                               FILE_SAVE_REPLACE,
 #endif
                                _after_import_check, NULL);
    eina_strbuf_free(buf);
