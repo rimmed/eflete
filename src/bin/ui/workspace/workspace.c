@@ -345,17 +345,14 @@ _slider_zoom_cb(void *data,
                 Evas_Object *obj __UNUSED__,
                 void *event_info __UNUSED__)
 {
+   Eina_Stringshare *text;
    Workspace_Data *wd = data;
 
    wd->zoom_factor = elm_slider_value_get(wd->toolbar.zoom.slider) / 100;
-#if HAVE_TIZEN
    elm_spinner_value_set(wd->toolbar.zoom.cmb_zoom, (int)(wd->zoom_factor * 100));
-#else
-   Eina_Stringshare *text;
    text = eina_stringshare_printf("%d%%", (int)(wd->zoom_factor * 100));
    elm_object_text_set(wd->toolbar.zoom.cmb_zoom, text);
    eina_stringshare_del(text);
-#endif
    _members_zoom_set(wd);
 }
 
