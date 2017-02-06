@@ -125,6 +125,10 @@ struct _Group
 
    Evas_Object *edit_object;  /**< object needed to access group with edje_edit functions. Should be NULL if group is not open */
    Resource *current_selected;
+   const char *display_name;  /**< display name for project navi. @note don't
+                                   free this member, because it's a slice of
+                                   full group name (common.name) **/
+
 
    History *history;          /**< history of changes in the group */
 };
