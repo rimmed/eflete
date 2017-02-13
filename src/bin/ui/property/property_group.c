@@ -2280,6 +2280,7 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          property_color_control_color_set(action->control, int_val1, int_val2, int_val3, int_val4);
          return editor_state_color_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_OUTLINE_COLOR:
+         if (_state_name_get() == NULL) break;
          edje_edit_state_outline_color_get(EDIT_OBJ, STATE_ARGS, &int_val1, &int_val2, &int_val3, &int_val4);
          property_color_control_color_set(action->control, int_val1, int_val2, int_val3, int_val4);
          effect = edje_edit_part_text_effect_get(EDIT_OBJ, PART_ARGS);
@@ -2292,6 +2293,7 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
            elm_object_disabled_set(action->control, true);
          return editor_state_outline_color_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_SHADOW_COLOR:
+         if (_state_name_get() == NULL) break;
          edje_edit_state_shadow_color_get(EDIT_OBJ, STATE_ARGS, &int_val1, &int_val2, &int_val3, &int_val4);
          property_color_control_color_set(action->control, int_val1, int_val2, int_val3, int_val4);
          effect = edje_edit_part_text_effect_get(EDIT_OBJ, PART_ARGS);
