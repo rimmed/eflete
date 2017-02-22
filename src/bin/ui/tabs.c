@@ -212,7 +212,9 @@ _property_attribute_changed(void *data __UNUSED__,
 {
    Attribute *attr = event_info;
 
-   assert(tabs.current_workspace != NULL);
+   /* for example when image is deleted from image manager */
+   if (!tabs.current_workspace)
+     return;
 
    switch ((int)*attr)
      {
