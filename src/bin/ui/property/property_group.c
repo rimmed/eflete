@@ -205,6 +205,7 @@ static const char *image_border_fill_strings[] = { STR_NONE,
                                                    "Default",
                                                    "Solid",
                                                    NULL};
+static inline void
 _spinner_value_set(Evas_Object *obj, double val)
 {
 #ifdef HAVE_TIZEN
