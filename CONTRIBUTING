@@ -1,0 +1,30 @@
+Bug reports and feature requests:
+https://phab.enlightenment.org/tag/eflete/
+
+Commiting:
+Coding style.
+We are following Google C++ Style Guide (https://google.github.io/styleguide/cppguide.html)
+with few exceptions described below.
+
+File naming: *.cpp, *.hpp
+
+Licenses:
+LGPL for new files.
+If you add an external code or resources you should check that licence allows it.
+Even if file's licence don't forces (for example CC_0) you should specify their
+licence and (if possible) link to the source and author.
+For binary files add this info in sources_list.txt in same folder.
+
+Formatting:
+Manual code formatting consumes a lot of time and is error-prone.
+So we have decided to use clang-format tool instead.
+Before commiting you should call:
+
+clang-format -i -style=file <FILE_THAT_YOU_CHANGED>
+
+"-style=file" option will use our .clang-format config if you are inside project
+folder or subfolder.
+
+Prefered way is to integrate it to your editor or git hooks.
+For vim you could use https://github.com/google/vim-codefmt with style configured
+to "file".
