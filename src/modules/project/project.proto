@@ -1,0 +1,14 @@
+/*
+ * Copyright (C) 2017 Samsung Electronics. All rights reserved.
+ * Licensed under https://www.gnu.org/licenses/lgpl.html <See COPYING file>
+ */
+
+// we need has_foo() API that is generated only for proto2
+// https://developers.google.com/protocol-buffers/docs/reference/cpp-generated#singular-numeric-fields-proto2
+syntax = "proto2";
+
+package eflete.project.internal.data;
+
+message Project
+{
+}

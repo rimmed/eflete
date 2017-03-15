@@ -10,6 +10,8 @@ find_package(Threads REQUIRED)
 
 find_package(GTest REQUIRED)
 
+find_package(Protobuf REQUIRED)
+
 enable_testing()
 
 include_directories(
