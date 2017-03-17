@@ -3,6 +3,8 @@
 PROTOBUF_GENERATE_CPP(PROJECT_PROTO_CPP PROJECT_PROTO_HPP project/project.proto)
 
 add_library(libeflete STATIC
+   filesystem/filesystem.cpp
+   filesystem/filesystem.hpp
    ${PROJECT_PROTO_CPP}
    project/project.cpp
    project/project.hpp

@@ -16,6 +16,7 @@ enable_testing()
 
 include_directories(
    ${CMAKE_SOURCE_DIR}/src/modules/project
+   ${CMAKE_SOURCE_DIR}/src/modules/filesystem
    )
 
 add_custom_target(check
