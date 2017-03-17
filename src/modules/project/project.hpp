@@ -5,6 +5,7 @@
 
 #ifndef EFLETE_MODULES_PROJECT_HPP_
 #define EFLETE_MODULES_PROJECT_HPP_
+#include <memory>
 
 namespace eflete
 {
@@ -12,7 +13,13 @@ namespace eflete
   {
     class Project
     {
+    private:
+      struct Impl;
+      std::unique_ptr<Impl> pimpl;
+
     public:
+      Project();
+      ~Project();
       static void Test();
     };
   };

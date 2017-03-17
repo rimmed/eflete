@@ -11,6 +11,23 @@ namespace eflete
 {
   namespace project
   {
+    struct Project::Impl
+    {
+      static const int kCurrentProjectVersion;
+      internal::data::Project project;
+    };
+
+    /* change this constant after major changes to project format */
+    const int Project::Impl::kCurrentProjectVersion = 1;
+
+    Project::Project()
+      : pimpl{ new Impl{} }
+    {
+      pimpl->project.set_version(Impl::kCurrentProjectVersion);
+    };
+
+    Project::~Project() = default;
+
     void Project::Test()
     {
       std::cout << "Hello\n" << std::endl;

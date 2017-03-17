@@ -11,4 +11,11 @@ package eflete.project.internal.data;
 
 message Project
 {
+  // project file version will be changed only on major changes to project
+  // format
+  required uint32 version = 1;
+  // this map is needed for lazy loading of groups
+  map<string, uint32> groups = 2; // [group_name => group_id]
+  // authors, licenses, comments etc.
+  map<string, string> meta_data = 3; // [name => value]
 }
