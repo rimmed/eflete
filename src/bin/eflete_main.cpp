@@ -8,6 +8,6 @@
 int
 main()
 {
-  Eflete::Project::Project::Test();
+  eflete::project::Project::Test();
   return 0;
 }

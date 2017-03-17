@@ -6,9 +6,14 @@
 #include "project.hpp"
 #include <iostream>
 
-void
-Eflete::Project::Project::Test()
+namespace eflete
 {
-  std::cout << "Hello\n" << std::endl;
-  exit(0);
+  namespace project
+  {
+    void Project::Test()
+    {
+      std::cout << "Hello\n" << std::endl;
+      exit(0);
+    }
+  }
 }

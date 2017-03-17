@@ -9,5 +9,5 @@
 TEST(Project, Test1)
 {
   ASSERT_EXIT(
-    Eflete::Project::Project::Test(), ::testing::ExitedWithCode(0), "");
+    eflete::project::Project::Test(), ::testing::ExitedWithCode(0), "");
 }

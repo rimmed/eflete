@@ -5,9 +5,10 @@
 
 #ifndef EFLETE_MODULES_PROJECT_HPP_
 #define EFLETE_MODULES_PROJECT_HPP_
-namespace Eflete
+
+namespace eflete
 {
-  namespace Project
+  namespace project
   {
     class Project
     {
