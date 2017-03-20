@@ -5,6 +5,7 @@
 
 #include "project.hpp"
 #include <iostream>
+#include "modules/filesystem/filesystem.hpp"
 #include "project.pb.h"
 
 namespace eflete

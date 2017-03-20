@@ -15,8 +15,7 @@ find_package(Protobuf REQUIRED)
 enable_testing()
 
 include_directories(
-   ${CMAKE_SOURCE_DIR}/src/modules/project
-   ${CMAKE_SOURCE_DIR}/src/modules/filesystem
+   ${CMAKE_SOURCE_DIR}/src/
    )
 
 add_custom_target(check

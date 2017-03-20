@@ -9,7 +9,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/text_format.h>
 #include <string>
-#include "filesystem.hpp"
+#include "modules/filesystem/filesystem.hpp"
 
 namespace eflete
 {

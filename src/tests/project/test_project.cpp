@@ -4,7 +4,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "project.hpp"
+#include "modules/project/project.hpp"
 
 TEST(Project, Test1)
 {

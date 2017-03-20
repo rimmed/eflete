@@ -4,7 +4,7 @@
  */
 
 #include <gmock/gmock.h>
-#include "filesystem.hpp"
+#include "modules/filesystem/filesystem.hpp"
 
 namespace mocks
 {
