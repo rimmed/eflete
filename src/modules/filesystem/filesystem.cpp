@@ -15,6 +15,11 @@ namespace
       return (bool)std::ifstream(file);
     };
 
+    void RemoveFile(const std::string &file)
+    {
+      remove(file.c_str());
+    }
+
     std::shared_ptr<std::ostream> GetOutputFileStream(const std::string &file)
     {
       return std::make_shared<std::ofstream>(file);

@@ -5,7 +5,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <cstdio>
 #include <fstream>
 #include "filesystem.hpp"
 
@@ -15,6 +14,7 @@ namespace
   {
   public:
     MOCK_METHOD1(Exists, bool(const std::string &file));
+    MOCK_METHOD1(RemoveFile, void(const std::string &file));
     MOCK_METHOD1(GetOutputFileStream,
                  std::shared_ptr<std::ostream>(const std::string &file));
     MOCK_METHOD1(GetInputFileStream,
@@ -68,6 +68,22 @@ namespace
     *ifs >> read_data;
     // checking read data
     EXPECT_EQ(read_data, kTestData);
+
+    // cleaninng
+    remove(kTestFile.c_str());
+  }
+
+  TEST(FilesystemDefaultImplementation, RemoveFile)
+  {
+    // preparing test file
+    std::ofstream ofs(kTestFile);
+    ofs << kTestData;
+    ofs.close();
+
+    // remove file
+    eflete::filesystem::Get()->RemoveFile(kTestFile);
+    // check that file is deleted
+    EXPECT_EQ(eflete::filesystem::Get()->Exists(kTestFile), false);
 
     // cleaninng
     remove(kTestFile.c_str());

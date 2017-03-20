@@ -16,7 +16,8 @@ namespace eflete
     class Filesystem
     {
     public:
-      virtual bool Exists(const std::string &file) = 0;
+      virtual bool Exists(const std::string &file)     = 0;
+      virtual void RemoveFile(const std::string &file) = 0;
       virtual std::shared_ptr<std::ostream> GetOutputFileStream(
         const std::string &file) = 0;
       virtual std::shared_ptr<std::istream> GetInputFileStream(
