@@ -6,21 +6,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <fstream>
+#include "mocks/filesystem.hpp"
 #include "modules/filesystem/filesystem.hpp"
 
 namespace
 {
-  class MockFilesystem : public eflete::filesystem::Filesystem
-  {
-  public:
-    MOCK_METHOD1(Exists, bool(const std::string &file));
-    MOCK_METHOD1(RemoveFile, void(const std::string &file));
-    MOCK_METHOD1(GetOutputFileStream,
-                 std::shared_ptr<std::ostream>(const std::string &file));
-    MOCK_METHOD1(GetInputFileStream,
-                 std::shared_ptr<std::istream>(const std::string &file));
-  };
-
   const std::string kTestFile = "some_strange_file_for_test_only";
   const std::string kTestData = "some_test_data";
 
@@ -91,7 +81,7 @@ namespace
 
   TEST(Filesystem, InjectionWorks)
   {
-    std::shared_ptr<MockFilesystem> mock = std::make_shared<MockFilesystem>();
+    auto mock = std::make_shared<mocks::MockFilesystem>();
     eflete::filesystem::Set(mock);
     // check that Get returns setted implementation instead of default one
     ASSERT_EQ(eflete::filesystem::Get(), mock);
