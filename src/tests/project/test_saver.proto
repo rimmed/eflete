@@ -1,0 +1,14 @@
+/*
+ * Copyright (C) 2017 Samsung Electronics. All rights reserved.
+ * Licensed under https://www.gnu.org/licenses/lgpl.html <See COPYING file>
+ */
+
+syntax = "proto2";
+
+package tests;
+
+message TestMesage
+{
+  optional uint32 i1 = 1;
+  optional uint32 i2 = 2;
+}

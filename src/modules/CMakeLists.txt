@@ -8,6 +8,8 @@ add_library(libeflete STATIC
    ${PROJECT_PROTO_CPP}
    project/project.cpp
    project/project.hpp
+   project/saver.cpp
+   project/saver.hpp
    )
 
 target_include_directories(libeflete PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
