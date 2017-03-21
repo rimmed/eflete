@@ -27,8 +27,7 @@
 #include <sys/wait.h>
 #else
 #include <win32.h>
-#include <windows.h>
-static HANDLE hMutex = NULL;
+#include <tlhelp32.h>
 #endif
 
 #define PROJECT_FILE_KEY      "project"
@@ -449,24 +448,16 @@ _project_lock(Project *project)
    dir = ecore_file_dir_get(project->pro_path);
    snprintf(path, sizeof(path), "%s/"LOCK_FILE, dir);
    free(dir);
-   project->fd_lock = open(path, O_RDWR | O_CREAT, S_IROTH | S_IWOTH);
+   project->fd_lock = open(path,
+                           O_RDWR | O_CREAT,
+                           S_IREAD | S_IWRITE | S_IRGRP | S_IROTH); /* rw-r--r-- */
    if (!project->fd_lock)
      {
         ERR("%s: %s\n", path, strerror(errno));
         return false;
      }
 
-#ifdef _WIN32
-   hMutex = CreateMutex(NULL, FALSE, PACKAGE_NAME);
-
-   HANDLE handle = CreateFile(path, GENERIC_READ, NULL, NULL, CREATE_NEW,
-                              FILE_FLAG_DELETE_ON_CLOSE, 0);
-   if (INVALID_HANDLE_VALUE == handle)
-     {
-        ERR("Failed to open file \"%s\"", path);
-        return false;
-     }
-#else
+#ifndef _WIN32
    struct flock fl;
    fl.l_type = F_WRLCK;
    fl.l_whence = SEEK_SET;
@@ -479,6 +470,7 @@ _project_lock(Project *project)
         close(project->fd_lock);
         return false;
      }
+#endif /* _WIN32 */
 
    snprintf(buf, sizeof(buf), "%d\n", pid);
    if (!write(project->fd_lock, buf, strlen(buf)))
@@ -486,7 +478,6 @@ _project_lock(Project *project)
         close(project->fd_lock);
         return false;
      }
-#endif /* _WIN32 */
 
    return true;
 }
@@ -499,17 +490,12 @@ _project_unlock(Project *project)
 
    assert(project != NULL);
 
+
    dir = ecore_file_dir_get(project->pro_path);
    snprintf(path, sizeof(path), "%s/"LOCK_FILE, dir);
    free(dir);
 
-#ifdef _WIN32
-   if (hMutex)
-     {
-        CloseHandle(hMutex);
-        hMutex = NULL;
-     }
-#else
+#ifndef _WIN32
    struct flock fl;
    fl.l_type = F_UNLCK;
    fl.l_whence = SEEK_SET;
@@ -530,34 +516,105 @@ _project_unlock(Project *project)
    return true;
 }
 
-static Eina_Bool
+#ifdef _WIN32
+static int
+_process_alive_is(int pid)
+{
+   int ret = 0;
+   HANDLE proc_list;
+   PROCESSENTRY32 proc_entry;
+
+   proc_entry.dwSize = sizeof(PROCESSENTRY32);
+   proc_list = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+
+   if (Process32First(proc_list, &proc_entry))
+     {
+        do
+          {
+             if (proc_entry.th32ProcessID == pid)
+               {
+                  ret = 1;
+                  goto exit;
+               }
+          }
+        while (Process32Next(proc_list, &proc_entry));
+     }
+
+exit:
+   CloseHandle(proc_list);
+   return ret;
+}
+#endif /* _WIN32 */
+
+static PM_Project_Result
+_project_lock_pid_check(const char *lock_file)
+{
+   FILE *lf;
+   int pid;
+
+   assert(lock_file != NULL);
+
+   lf = fopen(lock_file, "r");
+   if (!lf)
+     {
+        return PM_PROJECT_LOCKED_PERMISSION;
+     }
+   if (fscanf(lf, "%i", &pid) <= 0)
+     {
+        ERR(" %s\n", strerror(errno));
+        return PM_PROJECT_LOCKED_PERMISSION;
+     }
+#ifdef _WIN32
+   if (_process_alive_is(pid))
+     return PM_PROJECT_LOCKED;
+   else
+     return PM_PROJECT_LOCKED_PROC_MISS;
+#else
+   if (kill(pid, 0) == -1)
+     {
+        if (ESRCH == errno)
+          return PM_PROJECT_LOCKED_PROC_MISS;
+        if (EPERM == errno)
+          return PM_PROJECT_LOCKED_PERMISSION;
+     }
+   else
+     {
+        return PM_PROJECT_LOCKED;
+     }
+#endif /* _WIN32 */
+   /* It is unexpected result */
+   return PM_PROJECT_ERROR;
+}
+
+static PM_Project_Result
 _project_trylock(const char *pro_path)
 {
    int fd;
    char *dir;
    char path[PATH_MAX];
-   Eina_Bool ret = true;
+   PM_Project_Result ret = true;
 
    assert(path != NULL);
 
    dir = ecore_file_dir_get(pro_path);
    snprintf(path, sizeof(path), "%s/"LOCK_FILE, dir);
    free(dir);
-   if (!ecore_file_exists(path))
-     return true;
+   if (ecore_file_exists(path))
+     {
+        return _project_lock_pid_check(path);
+     }
+   else
+     return PM_PROJECT_SUCCESS;
+
 
    fd = open(path, O_RDWR);
    if (fd < 1)
      {
         ERR(" %s\n", strerror(errno));
-        return false;
+        return PM_PROJECT_LOCKED_PERMISSION;
      }
 
-#ifdef _WIN32
-   hMutex = OpenMutex(MUTEX_ALL_ACCESS, 0, PACKAGE_NAME);
-   if (hMutex)
-     return false;
-#else
+#ifndef _WIN32
    struct flock fl;
    fl.l_type = F_UNLCK;
    fl.l_whence = SEEK_SET;
@@ -567,10 +624,10 @@ _project_trylock(const char *pro_path)
    if (fcntl(fd, F_GETLK, &fl) != -1)
      {
         if (fl.l_type != F_UNLCK)
-          ret = false;
+          ret = PM_PROJECT_LOCKED_PERMISSION;
      }
    else
-     ret = false;
+     ret = PM_PROJECT_LOCKED_PERMISSION;
 #endif /* _WIN32 */
 
    close(fd);
@@ -653,7 +710,7 @@ _project_close_internal(Project *project)
 }
 
 static PM_Project_Result
-_project_open_internal(Project_Process_Data *ppd)
+_project_open_internal(Project_Process_Data *ppd, Eina_Bool recover)
 {
    char buf[PATH_MAX];
    char *file_dir;
@@ -761,11 +818,18 @@ _project_open_internal(Project_Process_Data *ppd)
         ppd->project->version = 5;
      }
 
-   TODO("Add crash recovery prompt here");
    TODO("Add project integrity check here");
 
-   _project_dev_file_create(ppd->project);
-
+   if (!recover)
+     _project_dev_file_create(ppd->project);
+   else
+     {
+        /* if we try to recover project we should be sure that dev file is exist,
+         * in other case we have trouble, bacause we will try to open not
+         * exist file */
+        if (!ecore_file_exists(ppd->project->dev))
+          _project_dev_file_create(ppd->project);
+     }
    ppd->project->mmap_file = file_virtualize_open(ppd->project->dev);
 
    ppd->project->changed = false;
@@ -804,7 +868,8 @@ PM_Project_Result
 pm_project_open(const char *path,
                 PM_Project_Progress_Cb func_progress,
                 PM_Project_End_Cb func_end,
-                const void *data)
+                const void *data,
+                Eina_Bool recover)
 {
    Project_Process_Data *ppd;
    char *spath;
@@ -819,7 +884,7 @@ pm_project_open(const char *path,
    ppd->func_end = func_end;
    ppd->data = (void *)data;
 
-   if (PM_PROJECT_SUCCESS != _project_open_internal(ppd))
+   if (PM_PROJECT_SUCCESS != _project_open_internal(ppd, recover))
      {
         Project *project = ppd->project;
         _project_process_data_cleanup(ppd);
@@ -850,7 +915,7 @@ _edje_pick_finish_handler(void *data,
        PM_PROJECT_SUCCESS != _project_dummy_sample_add(ppd->project))
      return ECORE_CALLBACK_CANCEL;
 
-   if (PM_PROJECT_SUCCESS != _project_open_internal(ppd))
+   if (PM_PROJECT_SUCCESS != _project_open_internal(ppd, false))
      {
         _project_close_internal(ppd->project);
         return ECORE_CALLBACK_CANCEL;
@@ -979,7 +1044,7 @@ _project_import_edj(Project_Process_Data *ppd)
           return last_error;
         if (PM_PROJECT_SUCCESS != _project_dummy_sample_add(ppd->project))
           return last_error;
-        if (PM_PROJECT_SUCCESS != _project_open_internal(ppd))
+        if (PM_PROJECT_SUCCESS != _project_open_internal(ppd, false))
           return last_error;
      }
    return last_error;
@@ -1061,6 +1126,7 @@ static PM_Project_Result
 _project_import_edc(void *data)
 {
    Project_Process_Data *ppd = data;
+   Eina_Strbuf *ebuf;
    char buf[PATH_MAX];
 
    assert(ppd != NULL);
@@ -1071,10 +1137,12 @@ _project_import_edc(void *data)
 
    eina_file_mkdtemp("eflete_build_XXXXXX", &ppd->tmp_dirname);
    ppd->edj = eina_stringshare_printf("%s/out.edj", ppd->tmp_dirname);
-   snprintf(buf, sizeof(buf),
-            "edje_cc -v %s %s %s", ppd->edc, ppd->edj, ppd->build_options);
-   DBG("Run command for compile: %s\n", buf);
-   ecore_exe_pipe_run(buf, FLAGS, NULL);
+
+   ebuf = eina_strbuf_new();
+   eina_strbuf_append_printf(ebuf, "edje_cc -v %s %s %s", ppd->edc, ppd->edj, ppd->build_options);
+   DBG("Run command for compile: %s\n", eina_strbuf_string_get(ebuf));
+   ecore_exe_pipe_run(eina_strbuf_string_get(ebuf), FLAGS, NULL);
+   eina_strbuf_free(ebuf);
 
    ppd->data_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DATA, _exe_output_handler, ppd);
    ppd->del_handler = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _finish_from_edje_cc, ppd);
@@ -1524,11 +1592,11 @@ pm_project_release_export(Project *project,
    return last_error;
 }
 
-Eina_Bool
+PM_Project_Result
 pm_lock_check(const char *path)
 {
    if (ecore_file_exists(path) == false)
-     return true;
+     return PM_PROJECT_SUCCESS;
    return _project_trylock(path);
 }
 

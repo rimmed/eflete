@@ -85,9 +85,9 @@ PKG_CHECK_MODULES([EFL],
     efreet >= efl_version        efreet < efl_version_max
     efreet-mime >= efl_version   efreet-mime < efl_version_max
    ],
-   [have_efl="${GREEN}yes${RESET}"],
-   [have_efl="${RED}no${RESET} (version < efl_version or > efl_version_max)"]
+   [have_efl="${GREEN}yes${RESET}"]
 )
+AC_SUBST([efl_v], [$(pkg-config efl --modversion)])
 
 PKG_CHECK_MODULES([ELEMENTARY], [elementary >= elm_version],
    [have_elm="${GREEN}yes${RESET}"],
@@ -110,7 +110,8 @@ AM_COND_IF([CHECK_FOUND],
 
 #Usage: EFLETE_WITH_BIN(package, binary, default_value). See eflete_binary.m4
 EFLETE_WITH_BIN([edje], [edje_cc], [edje_cc])
-EFLETE_WITH_BIN([eet], [eet-eet], [eet])
+EFLETE_WITH_BIN([edje], [edje_pick], [edje_pick])
+EFLETE_WITH_BIN([eet], [eet_eet], [eet])
 EWE_WITH_BIN([edje], [edje_cc], [edje_cc])
 EWE_WITH_BIN([eolian], [eolian-gen], [eolian_gen])
 CMB_WITH_BIN([edje], [edje_cc], [edje_cc])
@@ -270,7 +271,11 @@ echo "Features:"
 echo "  tizen..........: ${summary_tizen}"
 #dnl echo "  enventor.......: ${summary_enventor}"
 echo ""
-echo "edje-cc path.....: ${edje_cc}"
+echo "Binaries:"
+echo "  eolian_gen path..: ${eolian_gen}"
+echo "  edje_cc path.....: ${edje_cc}"
+echo "  edje_pick path...: ${edje_pick}"
+echo "  eet path.........: ${eet_eet}"
 echo ""
 echo "Testing:"
 echo "  check..........: ${have_check}"

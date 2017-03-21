@@ -282,6 +282,24 @@ _property_attribute_changed(void *data,
               ((Program2 *)program)->targets = eina_list_append(((Program2 *)program)->targets, source);
            }
          break;
+      case RM_ATTRIBUTE_STATE_VECTOR:
+         part = resource_manager_find(group->parts, change->part_name);
+         state = resource_manager_v_find(((Part2 *)part)->states, change->state_name, change->state_value);
+         TODO("Add dummy vector and check it here")
+         if (change->old_value)
+           {
+              old_source = resource_manager_find(pro->RM.vectors, change->old_value);
+              _resource_usage_resource_del(state, old_source);
+           }
+
+         if (change->value && strcmp(change->value, EFLETE_DUMMY_IMAGE_NAME))
+           {
+              source = resource_manager_find(pro->RM.vectors, change->value);
+              _resource_usage_resource_add(state, source);
+           }
+         eina_stringshare_del(((State2 *)state)->normal);
+         ((State2 *)state)->normal = eina_stringshare_add(change->value);
+         break;
       case RM_ATTRIBUTE_STATE_IMAGE:
          part = resource_manager_find(group->parts, change->part_name);
          state = resource_manager_v_find(((Part2 *)part)->states, change->state_name, change->state_value);
@@ -297,9 +315,12 @@ _property_attribute_changed(void *data,
               _resource_usage_resource_del(state, old_source);
            }
          TODO("Support some image sets here");
+
          if (change->value && strcmp(change->value, EFLETE_DUMMY_IMAGE_NAME))
            {
               source = resource_manager_find(pro->RM.images, change->value);
+              if (!source)
+                source = resource_manager_find(pro->RM.image_sets, change->value);
               _resource_usage_resource_add(state, source);
            }
          eina_stringshare_del(((State2 *)state)->normal);
@@ -631,6 +652,68 @@ image_deleted(void *data,
 }
 
 static void
+_image_set_added(void *data,
+             Evas_Object *obj __UNUSED__,
+             void *ei)
+{
+   Image_Set2 *res;
+   const char *name = (const char *)ei;
+   Project *project = (Project *)data;
+
+
+   res = mem_calloc(1, sizeof(Image2));
+   res->common.type = RESOURCE2_TYPE_IMAGE_SET;
+   res->common.name = eina_stringshare_add(name);
+
+   project->RM.image_sets = eina_list_append(project->RM.image_sets, res);
+}
+
+static void
+_image_set_deleted(void *data,
+             Evas_Object *obj __UNUSED__,
+             void *ei)
+{
+   Image_Set2 *res;
+   const char *name = (const char *)ei;
+   Project *project = (Project *)data;
+
+
+   res = (Image_Set2 *)resource_manager_find(project->RM.image_sets, name);
+   _resource_image_set_del(project, res);
+}
+
+static void
+_image_set_image_add(void *data,
+                     Evas_Object *obj __UNUSED__,
+                     void *ei)
+{
+   Image_Set2 *image_set_res;
+   Image2 *image_res;
+   Image_Set_Change *change = (Image_Set_Change *)ei;
+   Project *pro = (Project *)data;
+
+   image_set_res = (Image_Set2 *)resource_manager_find(pro->RM.image_sets, change->set_name);
+   image_res = (Image2 *)resource_manager_find(pro->RM.images, change->image_name);
+   _resource_usage_resource_add((Resource2 *)image_set_res, (Resource2 *)image_res);
+}
+
+static void
+_image_set_image_del(void *data,
+                     Evas_Object *obj __UNUSED__,
+                     void *ei)
+{
+   Image_Set2 *image_set_res;
+   Image2 *image_res;
+   Image_Set_Change *change = (Image_Set_Change *)ei;
+   Project *pro = (Project *)data;
+
+   image_set_res = (Image_Set2 *)resource_manager_find(pro->RM.image_sets, change->set_name);
+   image_res = (Image2 *)resource_manager_find(pro->RM.images, change->image_name);
+
+   _resource_usage_resource_del((Resource2 *)image_set_res, (Resource2 *)image_res);
+}
+
+static void
 _style_added(void *data,
              Evas_Object *obj __UNUSED__,
              void *ei)
@@ -934,6 +1017,10 @@ _resource_callbacks_register(Project *project)
    evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_TONE_DELETED, _tone_deleted, project);
    evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_IMAGE_ADDED, _image_added, project);
    evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_IMAGE_DELETED, image_deleted, project);
+   evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_IMAGE_SET_ADDED, _image_set_added, project);
+   evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_IMAGE_SET_DELETED, _image_set_deleted, project);
+   evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_IMAGE_SET_IMAGE_ADD, _image_set_image_add, project);
+   evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_IMAGE_SET_IMAGE_DEL, _image_set_image_del, project);
    evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_STYLE_ADDED, _style_added, project);
    evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_STYLE_DELETED, _style_deleted, project);
    evas_object_smart_callback_add(ap.win,  SIGNAL_EDITOR_STYLE_TAG_CHANGED, _style_changed, project);
@@ -969,6 +1056,10 @@ _resource_callbacks_unregister(Project *project)
    evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_TONE_DELETED, _tone_deleted, project);
    evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_IMAGE_ADDED, _image_added, project);
    evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_IMAGE_DELETED, image_deleted, project);
+   evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_IMAGE_SET_ADDED, _image_set_added, project);
+   evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_IMAGE_SET_DELETED, _image_set_deleted, project);
+   evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_IMAGE_SET_IMAGE_ADD, _image_set_image_add, project);
+   evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_IMAGE_SET_IMAGE_DEL, _image_set_image_del, project);
    evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_STYLE_ADDED, _style_added, project);
    evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_STYLE_DELETED, _style_deleted, project);
    evas_object_smart_callback_del_full(ap.win,  SIGNAL_EDITOR_STYLE_TAG_CHANGED, _style_changed, project);

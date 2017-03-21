@@ -15,6 +15,13 @@ styles {
    }
 }
 
+fonts {
+   font: "PTS55F.ttf" "PT";
+   font: "PTS75F.ttf" "PT-Bold";
+   font: "PTS56F.ttf" "PT-Italic";
+   font: "PTS76F.ttf" "PT-BoldItalic";
+}
+
 images {
    image: "dragons.svg" RAW;
    image: "dragons_unused.svg" RAW;
@@ -39,6 +46,13 @@ images {
       image { image: "tux-pirate.svg"      RAW; size: 70 70 79 79; }
       image { image: "tux.png"             RAW; size: 80 80 89 89; }
       image { image: "tux-sailor.svg"      RAW; size: 90 90 99 99; }
+   }
+   set { name: "image_set_three";
+      image { image: "horse.jpg"          RAW; size: 30 30 39 39; }
+      image { image: "map.png"            RAW; size: 40 40 49 49; }
+      image { image: "treasure-chest.png" RAW; size: 50 50 59 59; }
+      image { image: "horse.jpg"          RAW; size: 400 400 690 690; }
+      image { image: "horse.jpg"          RAW; size: 700 700 990 990; border: 50 50 50 50;}
    }
 }
 
@@ -267,7 +281,49 @@ collections {
          }
       }
    }
-   group { "test/parts/IMAGE/set";
+      group { "test/parts/IMAGE/set2";
+      parts {
+         part { name: "image_with_set"; type: IMAGE;
+            description { state: "default" 0.0;
+               min: 30 30;
+               max: 30 30;
+               image.normal: "image_set_three";
+            }
+            description { state: "state2" 0.0;
+               inherit: "default" 0.0;
+               min: 40 40;
+               max: 40 40;
+           }
+           description { state: "state3" 0.0;
+               inherit: "default" 0.0;
+               min: 50 50;
+               max: 50 50;
+           }
+        }
+      }
+      programs {
+         program { name: "to_state2";
+            signal: "mouse,down,1";
+            source: "*";
+            action: STATE_SET "state2" 0.0;
+            transition: LINEAR 0.5 CURRENT;
+            target: "image_with_set";
+            after: "to_state3";
+         }
+         program { name: "to_state3";
+            action: STATE_SET "state3" 0.0;
+            transition: LINEAR 0.5 CURRENT;
+            target: "image_with_set";
+            after: "to_default";
+         }
+         program { name: "to_default";
+            action: STATE_SET "default" 0.0;
+            transition: LINEAR 0.5 CURRENT;
+            target: "image_with_set";
+         }
+      }
+   }
+group { "test/parts/IMAGE/set";
       parts {
          part { name: "image_with_set"; type: IMAGE;
             description { state: "default" 0.0;
@@ -353,7 +409,8 @@ collections {
          }
       }
    }
-    group { name: "test/sounds";
+
+   group { name: "test/sounds";
       parts {
          part { name: "click_me_wav"; type: TEXT;
             description { state: "default"; color: 0 0 0 255;
@@ -543,6 +600,47 @@ collections {
             action: PLAY_SAMPLE "not_a_sound_test" 1;
          }
       }
+   }
+
+   group { name: "test/font";
+      parts {
+         part { name: "normal";
+            type: TEXT;
+            description {
+               rel2.relative: 1.0 0.25;
+               text { size: 36; font: "PT"; text: "normal"; };
+            }
+         }
+         part { name: "bold";
+            type: TEXT;
+            description {
+               rel1.relative: 0.0 0.25;
+               rel2.relative: 1.0 0.5;
+               text { size: 36; font: "PT-Bold"; text: "bold"; };
+            }
+         }
+         part { name: "italian";
+            type: TEXT;
+            description {
+               rel1.relative: 0.0 0.5;
+               rel2.relative: 1.0 0.75;
+               text { size: 36; font: "PT-Italic"; text: "italic"; };
+            }
+         }
+         part { name: "bolditalian";
+            type: TEXT;
+            description {
+               rel1.relative: 0.0 0.75;
+               rel2.relative: 1.0 1.0;
+               text { size: 36; font: "PT-BoldItalic"; text: "bold italic"; };
+            }
+         }
+      }
+   }
+
+   /* test for inherit_only attribute */
+   group { "inherit_only";
+      inherit_only: 1;
    }
 
    /* group naming */

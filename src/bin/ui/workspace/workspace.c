@@ -135,7 +135,6 @@ struct _Workspace_Data
    Scroll_Area demo;
    struct {
       Evas_Object *obj;
-      color_data *color_data;
       double size;
    } code;
    Workspace_Mode mode;
@@ -173,7 +172,7 @@ _group_code_get(Workspace_Data *wd)
 
    code = edje_edit_source_generate(wd->group->edit_object);
    str = elm_entry_utf8_to_markup(code);
-   colored = color_apply(wd->code.color_data, str, strlen(str), NULL, NULL);
+   colored = color_apply(ap.color_data, str, strlen(str), NULL, NULL);
 
    free(str);
    eina_stringshare_del(code);
@@ -236,7 +235,6 @@ _workspace_del(void *data,
 
    Workspace_Data *wd = data;
    resource_group_edit_object_unload(wd->group);
-   color_term(wd->code.color_data);
 
    TODO("remove after moving from smart object");
    evas_object_del(wd->normal.layout);
@@ -349,17 +347,18 @@ _slider_zoom_cb(void *data,
                 Evas_Object *obj __UNUSED__,
                 void *event_info __UNUSED__)
 {
+   Eina_Stringshare *text;
    Workspace_Data *wd = data;
 
    wd->zoom_factor = elm_slider_value_get(wd->toolbar.zoom.slider) / 100;
-#if HAVE_TIZEN
    elm_spinner_value_set(wd->toolbar.zoom.cmb_zoom, (int)(wd->zoom_factor * 100));
+#ifdef HAVE_TIZEN
+   text = eina_stringshare_printf("%d", (int)(wd->zoom_factor * 100));
 #else
-   Eina_Stringshare *text;
    text = eina_stringshare_printf("%d%%", (int)(wd->zoom_factor * 100));
+#endif /* HAVE_TIZEN */
    elm_object_text_set(wd->toolbar.zoom.cmb_zoom, text);
    eina_stringshare_del(text);
-#endif
    _members_zoom_set(wd);
 }
 
@@ -523,7 +522,11 @@ _zoom_controls_add(Workspace_Data *wd)
    wd->toolbar.zoom.itc->func.text_get = _combobox_text_get;
    wd->toolbar.zoom.itc->func.del = _combobox_item_del;
    evas_object_size_hint_min_set(wd->toolbar.zoom.cmb_zoom, 70, 0);
+#ifdef HAVE_TIZEN
+   elm_object_text_set(wd->toolbar.zoom.cmb_zoom, _("100"));
+#else
    elm_object_text_set(wd->toolbar.zoom.cmb_zoom, _("100%"));
+#endif /* HAVE_TIZEN */
    evas_object_smart_callback_add(wd->toolbar.zoom.cmb_zoom, signals.elm.combobox.item_pressed, _zoom_selected_cb, wd);
    while (zoom_values[i])
     {
@@ -1611,7 +1614,6 @@ workspace_add(Evas_Object *parent, Group2 *group)
    ENTRY_ADD(wd->panes_h, wd->code.obj, false)
    elm_entry_editable_set(wd->code.obj, false);
    elm_object_part_content_set(wd->panes_h, "right", wd->code.obj);
-   wd->code.color_data = color_init(eina_strbuf_new());
 
    _scroll_area_add(wd, &wd->normal, true);
    elm_object_part_content_set(wd->panes_h, "left", wd->normal.layout);
@@ -2057,6 +2059,8 @@ workspace_delete_request(Evas_Object *obj)
 void
 workspace_zoom_factor_set(Evas_Object *obj, double factor)
 {
+   Eina_Stringshare *text;
+
    WS_DATA_GET(obj);
 
    if (factor * 100 < 10.0) factor = 0.1;
@@ -2065,14 +2069,14 @@ workspace_zoom_factor_set(Evas_Object *obj, double factor)
    if (!elm_object_disabled_get(wd->toolbar.zoom.slider))
      {
         wd->zoom_factor = factor;
-#if HAVE_TIZEN
         elm_slider_value_set(wd->toolbar.zoom.slider, factor * 100);
+#ifdef HAVE_TIZEN
+        text = eina_stringshare_printf("%d", (int)(wd->zoom_factor * 100));
 #else
-        Eina_Stringshare *text;
         text = eina_stringshare_printf("%d%%", (int)(wd->zoom_factor * 100));
+#endif /* HAVE_TIZEN */
         elm_object_text_set(wd->toolbar.zoom.cmb_zoom, text);
         eina_stringshare_del(text);
-#endif
         TODO("Fix elementary callbacks on changing value from code");
         _slider_zoom_cb(wd, wd->toolbar.zoom.slider, NULL);
      }

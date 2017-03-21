@@ -24,6 +24,7 @@
 #include "project_manager2.h"
 #include "validator.h"
 #include "modal_window.h"
+#include "shortcuts.h"
 
 #define STYLE_DEFAULT         "DEFAULT"
 #define STYLE_DEFAULT_VALUE "align=middle font=Sans font_size=24 color=#000000 "
@@ -117,17 +118,27 @@ _on_glit_selected(void *data __UNUSED__,
    glit = (Elm_Object_Item *)event_info;
    glit_parent = elm_genlist_item_parent_get(glit);
 
-   if (!glit_parent) return;
+   if (!glit_parent)
+     {
+        style_name = (char *)elm_object_item_data_get(glit);
+        tag = STYLE_DEFAULT;
+     }
+   else
+     {
+        style_name = elm_object_item_data_get(glit_parent);
+        tag = (char *)elm_object_item_data_get(glit);
+     }
 
    style = eina_strbuf_new();
    eina_strbuf_append(style, STYLE_DEFAULT"='"STYLE_DEFAULT_VALUE);
 
-   style_name = elm_object_item_data_get(glit_parent);
-   tag = (char *)elm_object_item_data_get(glit);
-   if (!strcmp(tag, STYLE_DEFAULT))
-     elm_object_disabled_set(mng.button_del, true);
-   value = edje_edit_style_tag_value_get(ap.project->global_object, style_name, tag);
+   value = edje_edit_style_tag_value_get(ap.project->global_object, style_name, STYLE_DEFAULT);
    eina_strbuf_append(style, value);
+   if (strcmp(tag, STYLE_DEFAULT))
+     {
+        value = edje_edit_style_tag_value_get(ap.project->global_object, style_name, tag);
+        eina_strbuf_append(style, value);
+     }
 
    elm_object_signal_emit(mng.entry_prev, "entry,show", "eflete");
    eina_strbuf_append(style, "'");
@@ -229,10 +240,13 @@ close:
 
 static void
 _style_add_cb(void *data __UNUSED__,
-              Evas_Object *obj __UNUSED__,
+              Evas_Object *obj,
               void *event_info __UNUSED__)
 {
    Evas_Object *popup;
+
+   shortcuts_object_check_pop(obj);
+
    mng.popup.validator = resource_name_validator_new(NAME_REGEX, NULL);
    resource_name_validator_list_set(mng.popup.validator, &ap.project->RM.styles, true);
 
@@ -256,6 +270,23 @@ _add_tag_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Object **to
    if (to_focus) *to_focus = mng.popup.name;
    popup_button_disabled_set(popup, BTN_OK, true);
    return item;
+}
+
+static void
+_menu_dismissed_cb(void *data __UNUSED__,
+                   Evas_Object *obj,
+                   void *event_info __UNUSED__)
+{
+   shortcuts_object_check_pop(obj);
+}
+
+static void
+_menu_dismiss_cb(void *data __UNUSED__,
+                 Evas_Object *obj,
+                 void *event_info __UNUSED__)
+{
+   elm_menu_close(obj);
+   shortcuts_object_check_pop(obj);
 }
 
 typedef struct {
@@ -297,13 +328,15 @@ close:
 }
 static void
 _tag_add_cb(void *data __UNUSED__,
-            Evas_Object *obj __UNUSED__,
+            Evas_Object *obj,
             void *event_info __UNUSED__)
 {
    Style2 *res;
    Eina_Stringshare *buf;
    Evas_Object *popup;
    Tag_Popup_Data * tpd = mem_calloc(1, sizeof(Tag_Popup_Data));
+
+   shortcuts_object_check_pop(obj);
 
    tpd->glit = elm_genlist_selected_item_get(mng.genlist);
    tpd->glit_parent = elm_genlist_item_parent_get(tpd->glit);
@@ -621,19 +654,28 @@ _expanded_cb(void *data __UNUSED__,
 {
    Elm_Object_Item *glit = (Elm_Object_Item *)event_info;
    const char *name = elm_object_item_data_get(glit);
-   Eina_List *tags, *l_tg;
+   Eina_List *l, *l_tg;
    Elm_Object_Item *glit_tag;
-   char *tag;
+   Style2 *style;
+   Style_Tag2 *tag;
 
-   tags = edje_edit_style_tags_list_get(ap.project->global_object, name);
-   EINA_LIST_FOREACH(tags, l_tg, tag)
+   EINA_LIST_FOREACH(ap.project->RM.styles, l, style)
      {
-        glit_tag = elm_genlist_item_append(mng.genlist, _itc_tags,
-                                           tag, glit, ELM_GENLIST_ITEM_NONE,
-                                           _on_glit_selected, NULL);
-        elm_object_item_data_set(glit_tag, tag);
+        if (!strcmp(style->common.name, name))
+          {
+             EINA_LIST_FOREACH(style->tags, l_tg, tag)
+               {
+                  if (strcmp(tag->common.name, STYLE_DEFAULT))
+                    {
+                       glit_tag = elm_genlist_item_append(mng.genlist, _itc_tags,
+                                                          tag->common.name, glit, ELM_GENLIST_ITEM_NONE,
+                                                          _on_glit_selected, NULL);
+                       elm_object_item_data_set(glit_tag, (char *)tag->common.name);
+                    }
+               }
+             return;
+          }
      }
-   eina_list_free(tags);
 }
 
 static void
@@ -664,6 +706,7 @@ _btn_add_cb(void *data __UNUSED__,
    evas_object_geometry_get(obj, &x, &y, NULL, &h);
    elm_menu_move(mng.menu, x, y + h);
    evas_object_show(mng.menu);
+   shortcuts_object_push(mng.menu);
 
    if (elm_genlist_selected_item_get(mng.genlist))
      elm_object_item_disabled_set(mng.menu_tag, false);
@@ -886,6 +929,8 @@ style_manager_add()
    mng.menu = elm_menu_add(ap.win);
    elm_menu_item_add(mng.menu, NULL, "text_style", _("Style"), _style_add_cb, NULL);
    mng.menu_tag = elm_menu_item_add(mng.menu, NULL, "text_style_tag", _("Tag"), _tag_add_cb, NULL);
+   evas_object_smart_callback_add(mng.menu, "dismissed", _menu_dismissed_cb, NULL);
+   evas_object_smart_callback_add(mng.menu, signals.shortcut.popup.cancel, _menu_dismiss_cb, NULL);
 
    button_add = elm_button_add(ap.win);
    elm_object_style_set(button_add, "plus_managers");

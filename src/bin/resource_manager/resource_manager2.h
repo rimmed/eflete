@@ -30,11 +30,13 @@ enum _Resource2_Type
    RESOURCE2_TYPE_STATE,
    RESOURCE2_TYPE_ITEM,
    RESOURCE2_TYPE_PROGRAM,
+   RESOURCE2_TYPE_SCRIPT,
    RESOURCE2_TYPE_LIMIT, /* not yet */
    RESOURCE2_TYPE_DATA_GLOBAL,
    RESOURCE2_TYPE_DATA_GROUP,
 
    /* other managers */
+   RESOURCE2_TYPE_VECTOR,
    RESOURCE2_TYPE_IMAGE,
    RESOURCE2_TYPE_IMAGE_SET,
    RESOURCE2_TYPE_SAMPLE,
@@ -78,10 +80,12 @@ typedef struct _Tone2 Tone2;
 typedef struct _Style_Tag2 Style_Tag2;
 typedef struct _Colorclass2 Colorclass2;
 
+typedef struct _Sound2 Vector2;
 typedef struct _Sound2 Sound2;
 typedef struct _Sound2 Font2;
 typedef struct _Sound2 Global_Data2;
 typedef struct _Sound2 Group_Data2;
+typedef struct _Script2 Script2;
 
 struct _Resource2
 {
@@ -95,6 +99,7 @@ struct _Group2
    Eina_List *programs;
    Eina_List *data_items;
    Eina_List *limits;
+   Script2 *script;
    Group2 *main_group;         /**< pointer to main group. NULL if group is not an alias */
    Eina_List *aliases;        /**< list of pointers to aliases. NULL if group is an alias */
 
@@ -105,6 +110,9 @@ struct _Group2
    Evas_Object *edit_object;  /**< object needed to access group with edje_edit functions. Should be NULL if group is not open */
    Resource2 *current_selected;
    History *history;          /**< history of changes in the group */
+   const char *display_name;  /**< display name for project navi. @note don't
+                                   free this member, because it's a slice of
+                                   full group name (common.name) **/
 };
 
 struct _Part2
@@ -144,6 +152,13 @@ struct _Program2
    Eina_List *afters;
    Eina_Stringshare *filter_part;
    Group2 *group;
+};
+
+
+struct _Script2
+{
+   Resource2_Internal common;
+   Eina_Strbuf *code;          /**< pointer to script code */
 };
 
 struct _Style2

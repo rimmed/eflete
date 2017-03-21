@@ -35,6 +35,7 @@
 #define PART_RECTANGLE PART_MASK(EDJE_PART_TYPE_RECTANGLE)
 #define PART_TEXT PART_MASK(EDJE_PART_TYPE_TEXT)
 #define PART_IMAGE PART_MASK(EDJE_PART_TYPE_IMAGE)
+#define PART_VECTOR PART_MASK(EDJE_PART_TYPE_VECTOR)
 #define PART_SWALLOW PART_MASK(EDJE_PART_TYPE_SWALLOW)
 #define PART_TEXTBLOCK PART_MASK(EDJE_PART_TYPE_TEXTBLOCK)
 #define PART_GROUP PART_MASK(EDJE_PART_TYPE_GROUP)
@@ -516,6 +517,7 @@ _subitems_get(Property_Attribute *pa)
          APPEND(PROPERTY_GROUP_ITEM_GROUP_NAME);
          APPEND(PROPERTY_GROUP_ITEM_GROUP_MIN);
          APPEND(PROPERTY_GROUP_ITEM_GROUP_MAX);
+         APPEND(PROPERTY_GROUP_ITEM_GROUP_SCRIPT);
          break;
       case PROPERTY_GROUP_ITEM_PART_TITLE:
          APPEND(PROPERTY_GROUP_ITEM_PART_NAME);
@@ -558,6 +560,7 @@ _subitems_get(Property_Attribute *pa)
          APPEND(PROPERTY_GROUP_ITEM_STATE_POSITION_TITLE);
          APPEND(PROPERTY_GROUP_ITEM_STATE_MAP_TITLE);
          APPEND(PROPERTY_GROUP_ITEM_STATE_IMAGE_TITLE);
+         APPEND(PROPERTY_GROUP_ITEM_STATE_VECTOR_TITLE);
          APPEND(PROPERTY_GROUP_ITEM_STATE_FILL_TITLE);
          APPEND(PROPERTY_GROUP_ITEM_STATE_TEXT_COMMON_TITLE);
          APPEND(PROPERTY_GROUP_ITEM_STATE_CONTAINER_TITLE);
@@ -619,6 +622,9 @@ _subitems_get(Property_Attribute *pa)
          APPEND(PROPERTY_GROUP_ITEM_STATE_POSITION_REL2_RELATIVE);
          APPEND(PROPERTY_GROUP_ITEM_STATE_POSITION_REL2_OFFSET);
 #endif
+         break;
+      case PROPERTY_GROUP_ITEM_STATE_VECTOR_TITLE:
+         APPEND(PROPERTY_GROUP_ITEM_STATE_VECTOR_NORMAL);
          break;
       case PROPERTY_GROUP_ITEM_STATE_IMAGE_TITLE:
          APPEND(PROPERTY_GROUP_ITEM_STATE_IMAGE_NORMAL);
@@ -786,6 +792,18 @@ _ccl_control_free(void *data __UNUSED__,
    color = evas_object_data_del(obj, "color3");
    evas_object_del(color);
 }
+
+static void
+_btn_script_manager_cb(void *data __UNUSED__,
+                       Evas_Object *obj __UNUSED__,
+                       void *event_info __UNUSED__)
+{
+   if (group_pd.group->current_selected)
+     script_manager_add(group_pd.group->current_selected);
+   else
+     script_manager_add((Resource2 *)group_pd.group);
+}
+
 /*
 static void
 _color_class_colors_fill(void *data __UNUSED__,
@@ -844,10 +862,13 @@ _init_cb(Property_Attribute *pa, Property_Action *action)
       case ATTRIBUTE_PART_ITEM_NAME:
          elm_object_disabled_set(action->control, true);
          break;
+      case ATTRIBUTE_GROUP_SCRIPT:
       case ATTRIBUTE_PROGRAM_SCRIPT:
          elm_entry_single_line_set(action->control, false);
+         elm_entry_editable_set(action->control, false);
          evas_object_size_hint_min_set(action->control, 0, 400);
-         elm_object_disabled_set(action->control, true);
+         elm_scroller_policy_set(action->control, ELM_SCROLLER_POLICY_AUTO, ELM_SCROLLER_POLICY_AUTO);
+         evas_object_smart_callback_add(action->control, signals.eflete.property.script_control.clicked, _btn_script_manager_cb, NULL);
          break;
       case ATTRIBUTE_PART_NAME:
          eo_do(action->control, eo_event_callback_add(ELM_ENTRY_EVENT_VALIDATE, resource_name_validator_helper, group_pd.part_name_validator));
@@ -856,6 +877,7 @@ _init_cb(Property_Attribute *pa, Property_Action *action)
          eo_do(action->control, eo_event_callback_add(ELM_ENTRY_EVENT_VALIDATE, resource_name_validator_helper, group_pd.group_data_name_validator));
          break;
       case ATTRIBUTE_STATE_IMAGE:
+      case ATTRIBUTE_STATE_VECTOR:
       case ATTRIBUTE_GROUP_DATA_VALUE:
       case ATTRIBUTE_STATE_IMAGE_TWEEN:
       case ATTRIBUTE_GROUP_MIN_W:
@@ -1749,6 +1771,7 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
    Eina_Stringshare *str_val1, *str_val2;
    Eina_List *images_list, *l;
    char *code;
+   Edje_Text_Effect effect;
 
    assert(pa != NULL);
    assert(action != NULL);
@@ -1760,6 +1783,11 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
      {
       case ATTRIBUTE_GROUP_NAME:
          property_entry_set(action->control, group_pd.group->common.name);
+         return true;
+      case ATTRIBUTE_GROUP_SCRIPT:
+         code = edje_edit_script_get(EDIT_OBJ);
+         property_color_entry_set(action->control, code, ap.color_data);
+         free(code);
          return true;
       case ATTRIBUTE_STATE_NAME:
          str_val1 = eina_stringshare_printf("%s %.2f",
@@ -1773,7 +1801,7 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return true;
       case ATTRIBUTE_PROGRAM_SCRIPT:
          code = edje_edit_script_program_get(EDIT_OBJ, PROGRAM_ARGS);
-         property_entry_set(action->control, code);
+         property_color_entry_set(action->control, code, ap.color_data);
          free(code);
          return true;
       case ATTRIBUTE_PART_ITEM_NAME:
@@ -1792,6 +1820,13 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          property_entry_set(action->control, str_val1);
          edje_edit_string_free(str_val1);
          return editor_state_image_default_is(EDIT_OBJ, STATE_ARGS);
+      case ATTRIBUTE_STATE_VECTOR:
+         str_val1 = edje_edit_state_vector_get(EDIT_OBJ, STATE_ARGS);
+         if (!str_val1)
+           return true;
+         property_entry_set(action->control, str_val1);
+         edje_edit_string_free(str_val1);
+         return editor_state_vector_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_IMAGE_TWEEN:
          images_list = edje_edit_state_tweens_list_get(EDIT_OBJ, STATE_ARGS);
          property_image_tween_cleanup(action->control);
@@ -1880,6 +1915,8 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          return editor_state_fill_type_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_PART_TEXT_EFFECT:
          elm_object_text_set(action->control, text_effect_strings[(int) edje_edit_part_text_effect_get(EDIT_OBJ, PART_ARGS)]);
+         property_item_update(&group_pd.items[PROPERTY_GROUP_ITEM_STATE_COLORS_OUTLINE_COLOR]);
+         property_item_update(&group_pd.items[PROPERTY_GROUP_ITEM_STATE_COLORS_SHADOWCOLOR]);
          return editor_part_text_effect_default_is(EDIT_OBJ, PART_ARGS);
       case ATTRIBUTE_PART_TEXT_SHADOW_DIRECTION:
          /* shodow directions are shifted by 4 in enum */
@@ -2299,12 +2336,31 @@ _update_cb(Property_Attribute *pa, Property_Action *action)
          property_color_control_color_set(action->control, int_val1, int_val2, int_val3, int_val4);
          return editor_state_color_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_OUTLINE_COLOR:
+         if (_state_name_get() == NULL) break;
          edje_edit_state_outline_color_get(EDIT_OBJ, STATE_ARGS, &int_val1, &int_val2, &int_val3, &int_val4);
          property_color_control_color_set(action->control, int_val1, int_val2, int_val3, int_val4);
+         effect = edje_edit_part_text_effect_get(EDIT_OBJ, PART_ARGS);
+         if ((EDJE_TEXT_EFFECT_OUTLINE == effect) ||
+             (EDJE_TEXT_EFFECT_SOFT_OUTLINE == effect) ||
+             (EDJE_TEXT_EFFECT_OUTLINE_SHADOW == effect) ||
+             (EDJE_TEXT_EFFECT_OUTLINE_SOFT_SHADOW == effect))
+           elm_object_disabled_set(action->control, false);
+         else
+           elm_object_disabled_set(action->control, true);
          return editor_state_outline_color_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_SHADOW_COLOR:
+         if (_state_name_get() == NULL) break;
          edje_edit_state_shadow_color_get(EDIT_OBJ, STATE_ARGS, &int_val1, &int_val2, &int_val3, &int_val4);
          property_color_control_color_set(action->control, int_val1, int_val2, int_val3, int_val4);
+         effect = edje_edit_part_text_effect_get(EDIT_OBJ, PART_ARGS);
+         if ((EDJE_TEXT_EFFECT_SHADOW == effect) ||
+             (EDJE_TEXT_EFFECT_SOFT_SHADOW == effect) ||
+             (EDJE_TEXT_EFFECT_OUTLINE_SHADOW == effect) ||
+             (EDJE_TEXT_EFFECT_OUTLINE_SOFT_SHADOW == effect))
+           elm_object_disabled_set(action->control, false);
+         else
+           elm_object_disabled_set(action->control, true);
+
          return editor_state_shadow_color_default_is(EDIT_OBJ, STATE_ARGS);
       case ATTRIBUTE_STATE_COLOR_CLASS:
          elm_genlist_clear(action->control);
@@ -2663,6 +2719,11 @@ _start_cb(Property_Attribute *pa, Property_Action *action)
               edje_edit_string_free(tmp_str_val1);
               tmp_str_val1 = eina_stringshare_add(_("None"));
            }
+         STR_VAL(str_val1, tmp_str_val1);
+         break;
+      case ATTRIBUTE_STATE_VECTOR:
+         group_pd.history.format = _("vector changed from \"%s\" to \"%s\"");
+         tmp_str_val1 = edje_edit_state_vector_get(EDIT_OBJ, STATE_ARGS);
          STR_VAL(str_val1, tmp_str_val1);
          break;
       case ATTRIBUTE_STATE_IMAGE_TWEEN:
@@ -3442,7 +3503,9 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
          double_val1 = elm_spinner_value_get(action->control);
          break;
       case PROPERTY_CONTROL_ENTRY:
+      case PROPERTY_CONTROL_ENTRY_SCRIPT:
       case PROPERTY_CONTROL_IMAGE_NORMAL:
+      case PROPERTY_CONTROL_VECTOR_NORMAL:
          str_val1 = property_entry_get(action->control);
          break;
       case PROPERTY_CONTROL_CHECK:
@@ -3483,6 +3546,11 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
          break;
       case ATTRIBUTE_STATE_IMAGE:
          CRIT_ON_FAIL(editor_state_image_set(EDIT_OBJ, CHANGE_NO_MERGE, STATE_ARGS, str_val1));
+         eina_stringshare_del(group_pd.history.new.str_val1);
+         group_pd.history.new.str_val1 = str_val1;
+         break;
+      case ATTRIBUTE_STATE_VECTOR:
+         CRIT_ON_FAIL(editor_state_vector_set(EDIT_OBJ, CHANGE_NO_MERGE, STATE_ARGS, str_val1));
          eina_stringshare_del(group_pd.history.new.str_val1);
          group_pd.history.new.str_val1 = str_val1;
          break;
@@ -3769,6 +3837,7 @@ _change_cb(Property_Attribute *pa, Property_Action *action)
          CRIT_ON_FAIL(editor_state_text_text_source_set(EDIT_OBJ, CHANGE_NO_MERGE, STATE_ARGS, str_val1));
          eina_stringshare_del(group_pd.history.new.str_val1);
          group_pd.history.new.str_val1 = str_val1;
+         property_item_update(&group_pd.items[PROPERTY_GROUP_ITEM_STATE_TEXT_COMMON_TEXT]);
          break;
       case ATTRIBUTE_STATE_TEXT_STYLE:
          assert(cb_item_combo != NULL);
@@ -4480,6 +4549,7 @@ _stop_cb(Property_Attribute *pa, Property_Action *action)
    switch (action->type.attribute)
      {
       case ATTRIBUTE_GROUP_NAME:
+      case ATTRIBUTE_GROUP_SCRIPT:
       case ATTRIBUTE_PART_NAME:
       case ATTRIBUTE_GROUP_DATA_NAME:
       case ATTRIBUTE_GROUP_DATA_VALUE:
@@ -4488,6 +4558,7 @@ _stop_cb(Property_Attribute *pa, Property_Action *action)
       case ATTRIBUTE_PROGRAM_SCRIPT:
       case ATTRIBUTE_PART_ITEM_NAME:
       case ATTRIBUTE_STATE_IMAGE:
+      case ATTRIBUTE_STATE_VECTOR:
          CHECK_VAL(str_val1);
          msg = eina_stringshare_printf(group_pd.history.format,
                                        group_pd.history.old.str_val1,
@@ -4834,6 +4905,10 @@ _init_items()
                         _("The maximum height for the container defined by "
                           "the composition of the parts. This value is not enforced."));
              break;
+           case PROPERTY_GROUP_ITEM_GROUP_SCRIPT:
+              IT.name = "Script";
+              _action1(&IT, NULL, NULL, PROPERTY_CONTROL_ENTRY_SCRIPT, ATTRIBUTE_GROUP_SCRIPT, NULL);
+              break;
 
               /* part block */
            case PROPERTY_GROUP_ITEM_PART_TITLE:
@@ -5376,6 +5451,20 @@ _init_items()
                          "number of pixels along the Y axis."));
                break;
 
+              /* part vector */
+           case PROPERTY_GROUP_ITEM_STATE_VECTOR_TITLE:
+              IT.name = "Vector";
+              IT.expandable = true;
+              IT.expanded = true;
+              IT.expand_cb = _subitems_get;
+              IT.filter_data.part_types = PART_VECTOR;
+              break;
+           case PROPERTY_GROUP_ITEM_STATE_VECTOR_NORMAL:
+              IT.name = "Vector";
+              _action1(&IT, NULL, NULL, PROPERTY_CONTROL_VECTOR_NORMAL, ATTRIBUTE_STATE_VECTOR,
+                       _("Name of vector to be used."));
+              break;
+
               /* part image */
            case PROPERTY_GROUP_ITEM_STATE_IMAGE_TITLE:
               IT.name = "Image";
@@ -5809,7 +5898,7 @@ _init_items()
            case PROPERTY_GROUP_ITEM_PROGRAM_ACTION_SCRIPT:
               IT.name = "Script";
               IT.filter_data.action_types = ACTION_SCRIPT;
-              _action1(&IT, NULL, NULL, PROPERTY_CONTROL_ENTRY, ATTRIBUTE_PROGRAM_SCRIPT, NULL);
+              _action1(&IT, NULL, NULL, PROPERTY_CONTROL_ENTRY_SCRIPT, ATTRIBUTE_PROGRAM_SCRIPT, NULL);
               break;
            case PROPERTY_GROUP_ITEM_PROGRAM_ACTION:
               IT.name = "Action";

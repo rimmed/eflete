@@ -31,6 +31,7 @@ struct _Tab_Home_Open {
 
 typedef struct _Tab_Home_Open Tab_Home_Open;
 static Tab_Home_Open tab;
+static Eina_Bool recover = false;
 
 static Eina_Bool
 _eflete_filter(const char *path,
@@ -52,7 +53,8 @@ _setup_open_splash(void *data, Splash_Status status __UNUSED__)
 
    assert(path != NULL);
 
-   result = pm_project_open(path, progress_print, _tabs_progress_end, NULL);
+   result = pm_project_open(path, progress_print, _tabs_progress_end, NULL, recover);
+   recover = false;
    if (PM_PROJECT_SUCCESS != result)
      {
         snprintf(buf, sizeof(buf), "Warning: %s", pm_project_result_string_get(result));
@@ -77,6 +79,25 @@ _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
    return true;
 }
 
+static void
+_popup_recover_cb(void *data,
+                  Evas_Object *obj __UNUSED__,
+                  void *event_info)
+{
+   Eina_Stringshare *file = data;
+   Popup_Button btn_res = (Popup_Button)event_info;
+
+   recover = true;
+   if (BTN_OK == btn_res)
+     {
+        ap.splash = splash_add(ap.win,
+                               _setup_open_splash,
+                               _teardown_open_splash,
+                               NULL,
+                               (void *)eina_stringshare_add(file));
+        evas_object_show(ap.splash);
+     }
+}
 
 static void
 _open_after_popup_close(void *data __UNUSED__,
@@ -84,14 +105,24 @@ _open_after_popup_close(void *data __UNUSED__,
                         void *event_info __UNUSED__)
 {
    const char *selected;
+   PM_Project_Result result;
+   Evas_Object *popup;
 
    selected = elm_fileselector_selected_get(tab.fs);
    if ((!selected) || !eina_str_has_suffix(selected, ".pro")) return;
 
-   if (!pm_lock_check(selected))
+   result = pm_lock_check(selected);
+   if (PM_PROJECT_LOCKED_PROC_MISS == result)
      {
-       popup_add(_("Open project"), _("The given file is locked by another application"), BTN_OK, NULL, NULL);
-       return;
+        popup = popup_add(_("Open project"), _("Given project is dameged. Do you want to recover project?"),
+                          BTN_OK | BTN_CANCEL, NULL, NULL);
+        evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _popup_recover_cb, selected);
+        return;
+     }
+   else if (PM_PROJECT_SUCCESS != result)
+     {
+        popup_add(_("Open project"), _("The given file is locked by another application"), BTN_OK, NULL, NULL);
+        return;
      }
 
    ap.splash = splash_add(ap.win,
@@ -161,9 +192,29 @@ _recent_clear(void *data __UNUSED__,
    evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _recent_clear_popup_close_cb, NULL);
 }
 
+static void
+_fs_mode_cb(void *data __UNUSED__,
+            Evas_Object *obj,
+            void *event_info __UNUSED__)
+{
+   int mode = elm_radio_value_get(obj);
+
+   if (mode == 0)
+     {
+        elm_fileselector_mode_set(tab.fs, ELM_FILESELECTOR_LIST);
+        elm_fileselector_thumbnail_size_set(tab.fs, 14, 14);
+     }
+   else if (mode == 1)
+     {
+        elm_fileselector_mode_set(tab.fs, ELM_FILESELECTOR_GRID);
+        elm_fileselector_thumbnail_size_set(tab.fs, 64, 64);
+     }
+}
+
 Evas_Object *
 _tab_open_project_add(void)
 {
+   Evas_Object *r_list, *r_grid;
    tab.layout = elm_layout_add(ap.win);
    elm_layout_theme_set(tab.layout, "layout", "tab_home", "open_project");
    elm_layout_text_set(tab.layout, "elm.text.recent", _("Open recent"));
@@ -174,6 +225,7 @@ _tab_open_project_add(void)
    evas_object_smart_callback_add(tab.btn_clear, signals.elm.button.clicked, _recent_clear, NULL);
 
    tab.fs = elm_fileselector_add(ap.win);
+   elm_object_style_set(tab.fs, "extended");
    elm_fileselector_expandable_set(tab.fs, false);
    elm_fileselector_path_set(tab.fs, profile_get()->general.projects_folder);
    elm_fileselector_custom_filter_append(tab.fs, _eflete_filter, NULL, "Eflete Files");
@@ -190,6 +242,19 @@ _tab_open_project_add(void)
    elm_object_text_set(elm_layout_content_get(tab.fs, "elm.swallow.ok"), _("Open"));
    elm_object_disabled_set(elm_layout_content_get(tab.fs, "elm.swallow.ok"), true);
 
+   r_list = elm_radio_add(tab.fs);
+   elm_object_style_set(r_list, "fs_list");
+   elm_radio_state_value_set(r_list, 0);
+   elm_layout_content_set(tab.fs, "elm.swallow.btn_list", r_list);
+   evas_object_smart_callback_add(r_list, signals.elm.radio.changed, _fs_mode_cb, NULL);
+
+   r_grid = elm_radio_add(tab.fs);
+   elm_object_style_set(r_grid, "fs_grid");
+   elm_radio_state_value_set(r_grid, 1);
+   elm_layout_content_set(tab.fs, "elm.swallow.btn_grid", r_grid);
+   elm_radio_group_add(r_list, r_grid);
+   evas_object_smart_callback_add(r_grid, signals.elm.radio.changed, _fs_mode_cb, NULL);
+
    elm_layout_content_set(tab.layout, "elm.swallow.fileselector", tab.fs);
 
    _tab_open_project_recents_update();
@@ -203,13 +268,23 @@ _recent_after_popup_close(void *data,
 {
    Recent *r = (Recent *)data;
    Popup_Button pbtn = (Popup_Button) event_info;
+   PM_Project_Result result;
+   Evas_Object *popup;
 
    if (BTN_CANCEL == pbtn) return;
 
-   if (!pm_lock_check(r->path))
+   result = pm_lock_check(r->path);
+   if (PM_PROJECT_LOCKED_PROC_MISS == result)
      {
-       popup_add(_("Open project"), _("The given file is locked by another application"), BTN_OK, NULL, NULL);
-       return;
+        popup = popup_add(_("Open project"), _("Given project is dameged. Do you want to recover project?"),
+                          BTN_OK | BTN_CANCEL, NULL, NULL);
+        evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _popup_recover_cb, r->path);
+        return;
+     }
+   else if (PM_PROJECT_SUCCESS != result)
+     {
+        popup_add(_("Open project"), _("The given file is locked by another application"), BTN_OK, NULL, NULL);
+        return;
      }
 
    ap.splash = splash_add(ap.win,

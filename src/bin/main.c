@@ -38,6 +38,7 @@ static Eina_List *snd_dirs = NULL;
 static Eina_List *fnt_dirs = NULL;
 static Eina_List *data_dirs = NULL;
 static Eina_List *widgets = NULL;
+static Eina_Bool recover = false;
 
 #define _ERR_EXIT(MSG, ...) \
 do { \
@@ -90,7 +91,7 @@ _setup_open_splash(void *data, Splash_Status status __UNUSED__)
 
    assert(path != NULL);
 
-   result = pm_project_open(path, progress_print, _tabs_progress_end, NULL);
+   result = pm_project_open(path, progress_print, _tabs_progress_end, NULL, recover);
    if (PM_PROJECT_SUCCESS != result)
      {
         snprintf(buf, sizeof(buf), "Warning: %s", pm_project_result_string_get(result));
@@ -116,14 +117,43 @@ _cancel_open_splash(void *data __UNUSED__, Splash_Status status __UNUSED__)
 }
 
 static void
+_popup_recover_cb(void *data __UNUSED__,
+                  Evas_Object *obj __UNUSED__,
+                  void *event_info)
+{
+   Popup_Button btn_res = (Popup_Button)event_info;
+
+   if (BTN_OK == btn_res)
+     {
+        ap.splash = splash_add(ap.win,
+                               _setup_open_splash,
+                               _teardown_open_splash,
+                               NULL,
+                               (void *)eina_stringshare_add(file));
+        evas_object_show(ap.splash);
+     }
+}
+
+static void
 _open_project(void *data __UNUSED__)
 {
-   ap.splash = splash_add(ap.win,
-                          _setup_open_splash,
-                          _teardown_open_splash,
-                          NULL,
-                          (void *)eina_stringshare_add(file));
-   evas_object_show(ap.splash);
+   Evas_Object *popup;
+
+   if (!recover)
+     {
+        ap.splash = splash_add(ap.win,
+                               _setup_open_splash,
+                               _teardown_open_splash,
+                               NULL,
+                               (void *)eina_stringshare_add(file));
+        evas_object_show(ap.splash);
+     }
+   else
+     {
+        popup = popup_add(_("Open project"), _("Given project is dameged. Do you want to recover project?"),
+                          BTN_OK | BTN_CANCEL, NULL, NULL);
+        evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _popup_recover_cb, NULL);
+     }
 }
 
 static void
@@ -194,6 +224,7 @@ elm_main(int argc, char **argv)
    Config *config;
    Recent *r;
    int pos;
+   PM_Project_Result result;
 
    Ecore_Getopt_Value values[] = {
      ECORE_GETOPT_VALUE_STR(pro_name),
@@ -219,7 +250,11 @@ elm_main(int argc, char **argv)
 #ifdef HAVE_ENVENTOR
    enventor_init(argc, argv);
 #endif
+   elm_config_profile_set("standard");
+   /*FIXME: remove forcing setup scale value to 1, after fix theme.*/
+   elm_config_scale_set(1);
 
+   elm_config_icon_theme_set(NULL);
    pos = ecore_getopt_parse(&options, values, argc, argv);
    if (pos < 0)
      return 1;
@@ -251,7 +286,7 @@ elm_main(int argc, char **argv)
         buf = eina_strbuf_new();
         eina_strbuf_append_printf(buf, "%s/%s/%s.pro",
                                   path, name, name);
-        if (!pm_lock_check(eina_strbuf_string_get(buf)))
+        if (PM_PROJECT_LOCKED == pm_lock_check(eina_strbuf_string_get(buf)))
           {
              eina_strbuf_free(buf);
              goto exit;
@@ -295,7 +330,10 @@ elm_main(int argc, char **argv)
 
              r = eina_list_data_get(config->recents);
              file = r->path;
-             if (!pm_lock_check(file))
+             result = pm_lock_check(file);
+             if (PM_PROJECT_LOCKED_PROC_MISS == result)
+               recover = true;
+             else if (PM_PROJECT_SUCCESS != result)
                goto exit;
              ecore_job_add(_open_project, NULL);
              goto run;
@@ -306,8 +344,6 @@ elm_main(int argc, char **argv)
                _ERR_EXIT(_("File '%s' doesn't exists."), file);
              if (ecore_file_is_dir(file))
                _ERR_EXIT(_("'%s' is a directory."), file);
-             if (!pm_lock_check(file))
-               goto exit;
 
              if (eina_str_has_suffix(file, ".pro"))
                {
@@ -326,6 +362,11 @@ elm_main(int argc, char **argv)
                   if (widgets)
                     _ERR_EXIT(_("widgets can be added only to new project."));
 
+                  result = pm_lock_check(file);
+                  if (PM_PROJECT_LOCKED_PROC_MISS == result)
+                    recover = true;
+                  else if (PM_PROJECT_SUCCESS != result)
+                    goto exit;
                   ecore_job_add(_open_project, NULL);
                   goto run;
                }
@@ -340,6 +381,8 @@ elm_main(int argc, char **argv)
                   if (data_dirs)
                     _ERR_EXIT(_("*.edj file is given but --dd specified."));
 
+                  if (PM_PROJECT_LOCKED == pm_lock_check(file))
+                    goto exit;
                   ecore_job_add(_import_edj, NULL);
                   goto run;
                }

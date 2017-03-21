@@ -23,6 +23,9 @@ EXTRA_DIST = \
 	m4/cmb.m4 \
 	m4/cmb_binary.m4
 
+authorsdir = $(datadir)/eflete
+authors_DATA = AUTHORS
+
 .PHONY: doc update-po report report_debug coverage
 if HAVE_DOXYGEN
 doc:

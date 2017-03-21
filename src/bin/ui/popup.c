@@ -50,9 +50,12 @@ struct _Item
 {
    const char* image_name;
    const char* source;
+   Image_Instance_Type type;
 };
 typedef struct _Item Item;
 static Elm_Gengrid_Item_Class *gic = NULL;
+static Elm_Gengrid_Item_Class *gic_set = NULL;
+static Elm_Gengrid_Item_Class *gic_vec = NULL;
 
 static void
 _delete_object_job(void *data)
@@ -468,6 +471,25 @@ _done(void *data __UNUSED__,
 }
 
 static void
+_fs_mode_cb(void *data __UNUSED__,
+            Evas_Object *obj,
+            void *event_info __UNUSED__)
+{
+   int mode = elm_radio_value_get(obj);
+
+   if (mode == 0)
+     {
+        elm_fileselector_mode_set(fs, ELM_FILESELECTOR_LIST);
+        elm_fileselector_thumbnail_size_set(fs, 14, 14);
+     }
+   else if (mode == 1)
+     {
+        elm_fileselector_mode_set(fs, ELM_FILESELECTOR_GRID);
+        elm_fileselector_thumbnail_size_set(fs, 64, 64);
+     }
+}
+
+static void
 _fileselector_helper(const char *title,
                      Evas_Object *follow_up,
                      const char *path,
@@ -478,6 +500,7 @@ _fileselector_helper(const char *title,
                      Elm_Fileselector_Filter_Func filter_cb)
 {
    Evas_Object *scroller;
+   Evas_Object *r_list, *r_grid;
 
    dismiss_func = func;
    func_data = data;
@@ -487,6 +510,7 @@ _fileselector_helper(const char *title,
    elm_layout_signal_callback_add(helper, "hint,dismiss", "eflete", _helper_dismiss, follow_up);
 
    fs = elm_fileselector_add(ap.win);
+   elm_object_style_set(fs, "extended");
 #if HAVE_TIZEN
    /* Dirty Hack */
    Evas_Object *files_list;
@@ -510,6 +534,19 @@ _fileselector_helper(const char *title,
    evas_object_smart_callback_add(fs, signals.elm.fileselector.activated, _done, follow_up);
    evas_object_size_hint_min_set(helper, FS_W, FS_H);
    evas_object_resize(helper, FS_W, FS_H);
+
+   r_list = elm_radio_add(fs);
+   elm_object_style_set(r_list, "fs_list");
+   elm_radio_state_value_set(r_list, 0);
+   elm_layout_content_set(fs, "elm.swallow.btn_list", r_list);
+   evas_object_smart_callback_add(r_list, signals.elm.radio.changed, _fs_mode_cb, fs);
+
+   r_grid = elm_radio_add(fs);
+   elm_object_style_set(r_grid, "fs_grid");
+   elm_radio_state_value_set(r_grid, 1);
+   elm_layout_content_set(fs, "elm.swallow.btn_grid", r_grid);
+   elm_radio_group_add(r_list, r_grid);
+   evas_object_smart_callback_add(r_grid, signals.elm.radio.changed, _fs_mode_cb, fs);
 
    /* scroller is necessary to fix issues with fileselector size */
    SCROLLER_ADD(ap.win, scroller);
@@ -708,8 +745,48 @@ _grid_del(void *data,
    assert(it != NULL);
 
    eina_stringshare_del(it->image_name);
-   eina_stringshare_del(it->source);
+   TODO("Remove 'IF' when exporting from edj to svg would be done properly")
+   if (it->source)
+     eina_stringshare_del(it->source);
    free(it);
+}
+
+static Eina_Bool
+_vector_gengrid_init(Helper_Data *helper_data)
+{
+   Eina_List *l = NULL;
+   Item *it = NULL;
+   Eina_List *vectors = NULL;
+   int counter = 0;
+   Vector2 *res;
+
+   vectors = ap.project->RM.vectors;
+
+   if (vectors)
+     {
+        EINA_LIST_FOREACH(vectors, l, res)
+           {
+              counter++;
+              if (!res->common.name)
+                {
+                   ERR("name not found for image #%d",counter);
+                   continue;
+                }
+              it = (Item *)mem_malloc(sizeof(Item));
+              it->image_name = eina_stringshare_add(res->common.name);
+              TODO("Export SVG images then allow to load it properly, through source");
+              it->source = NULL; /*  eina_stringshare_add(res->source); */
+              it->type = VECTOR_IMAGE;
+              elm_gengrid_item_append(helper_data->gengrid, gic_vec, it, NULL, NULL);
+           }
+         elm_gengrid_item_bring_in(elm_gengrid_first_item_get(helper_data->gengrid),
+                                   ELM_GENGRID_ITEM_SCROLLTO_TOP);
+     }
+   elm_scroller_policy_set(helper_data->gengrid, ELM_SCROLLER_POLICY_OFF,
+                           ELM_SCROLLER_POLICY_AUTO);
+   evas_object_smart_calculate(helper_data->gengrid);
+
+   return true;
 }
 
 static Eina_Bool
@@ -720,6 +797,7 @@ _image_gengrid_init(Helper_Data *helper_data)
    Eina_List *images = NULL;
    int counter = 0;
    Image2 *res;
+   Image_Set2 *image_set = NULL;
 
    images = ap.project->RM.images;
 
@@ -744,11 +822,34 @@ _image_gengrid_init(Helper_Data *helper_data)
               it = (Item *)mem_malloc(sizeof(Item));
               it->image_name = eina_stringshare_add(res->common.name);
               it->source = eina_stringshare_add(res->source);
+              it->type = SINGLE_IMAGE;
               elm_gengrid_item_append(helper_data->gengrid, gic, it, NULL, NULL);
            }
          elm_gengrid_item_bring_in(elm_gengrid_first_item_get(helper_data->gengrid),
                                    ELM_GENGRID_ITEM_SCROLLTO_TOP);
      }
+
+   counter = 0;
+   EINA_LIST_FOREACH(ap.project->RM.image_sets, l, image_set)
+     {
+        counter++;
+        if (!image_set->common.name)
+          {
+             ERR("name not found for image #%d",counter);
+             continue;
+          }
+
+        it = (Item *)mem_calloc(1, sizeof(Item));
+        it->image_name = eina_stringshare_add(image_set->common.name);
+        if (image_set->common.uses___)
+          {
+             res = eina_list_data_get(image_set->common.uses___);
+             it->source = eina_stringshare_add(res->source);
+          }
+        it->type = IMAGE_SET;
+        elm_gengrid_item_append(helper_data->gengrid, gic_set, it, NULL, NULL);
+     }
+
    elm_scroller_policy_set(helper_data->gengrid, ELM_SCROLLER_POLICY_OFF,
                            ELM_SCROLLER_POLICY_AUTO);
    evas_object_smart_calculate(helper_data->gengrid);
@@ -762,9 +863,23 @@ _grid_label_get(void *data,
                 const char  *part __UNUSED__)
 {
    const Item *it = data;
-   if (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) == 0)
-     return strdup("None");
-   return strdup(it->image_name);
+   Resource2 *res;
+
+   if (!strcmp(part, "elm.text.count"))
+     {
+        res = resource_manager_find(ap.project->RM.image_sets, it->image_name);
+        int count = eina_list_count(res->common.uses___);
+        if (count <= 4 && count > 0) return strdup("");
+        char buf[256];
+        snprintf(buf, 256, "%d", count);
+        return strdup(buf);
+     }
+   else
+     {
+        if (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) == 0)
+          return strdup("None");
+        return strdup(it->image_name);
+     }
 }
 
 /* icon fetching callback */
@@ -800,6 +915,118 @@ _grid_content_get(void *data,
    else if ((!strcmp(part, "elm.swallow.end") && (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) != 0)))
      {
         res = resource_manager_find(ap.project->RM.images, it->image_name);
+        if (eina_list_count(res->common.used_in) == 0)
+          {
+             image_obj = elm_icon_add(grid);
+             elm_image_file_set(image_obj, ap.path.theme_edj, "elm/image/icon/attention");
+             evas_object_show(image_obj);
+          }
+     }
+
+   return image_obj;
+}
+#undef MAX_ICON_SIZE
+
+/* icon fetching callback */
+static Evas_Object *
+_grid_image_set_content_get(void *data,
+                            Evas_Object *obj,
+                            const char  *part)
+{
+   Item *it = data;
+   Evas_Object *image_obj = NULL;
+   Evas_Object *grid = (Evas_Object *)obj;
+   Resource2 *res;
+   Image2 *img_res = NULL;
+
+   assert(it != NULL);
+   assert(grid != NULL);
+
+   if (!strcmp(part, "elm.swallow.end") && (strcmp(it->image_name, EFLETE_DUMMY_IMAGE_NAME) != 0))
+     {
+        res = resource_manager_find(ap.project->RM.image_sets, it->image_name);
+        if (!res->common.used_in)
+          {
+             image_obj = elm_icon_add(grid);
+             elm_image_file_set(image_obj, ap.path.theme_edj, "elm/image/icon/attention");
+             evas_object_show(image_obj);
+          }
+     }
+   else
+     {
+#ifndef _WIN32
+        image_obj = elm_thumb_add(grid);
+#else
+        image_obj = elm_image_add(grid);
+#endif /* _win32 */
+        elm_object_style_set(image_obj, "noframe");
+        res = resource_manager_find(ap.project->RM.image_sets, it->image_name);
+        int count = eina_list_count(res->common.uses___);
+
+        if (!strcmp(part, "elm.swallow.first"))
+          {
+             img_res = (Image2 *)(eina_list_nth(res->common.uses___, 0));
+          }
+        else if (!strcmp(part, "elm.swallow.second"))
+          {
+             img_res = (Image2 *)(eina_list_nth(res->common.uses___, 1));
+          }
+        else if (!strcmp(part, "elm.swallow.third"))
+          {
+             img_res = (Image2 *)(eina_list_nth(res->common.uses___, 2));
+          }
+        else if (!strcmp(part, "elm.swallow.fouth"))
+          {
+             if (count > 4) goto empty_content;
+             img_res = (Image2 *)(eina_list_nth(res->common.uses___, 3));
+          }
+        if (!img_res) goto empty_content;
+#ifndef _WIN32
+        elm_thumb_file_set(image_obj, img_res->source, NULL);
+#else
+        elm_image_file_set(image_obj, img_res->source, NULL);
+#endif /* _WIN32 */
+        elm_object_style_set(image_obj, "noframe");
+        evas_object_show(image_obj);
+     }
+   return image_obj;
+
+empty_content:
+   evas_object_del(image_obj);
+   return NULL;
+}
+
+/* icon fetching callback */
+static Evas_Object *
+_grid_vector_content_get(void *data,
+                             Evas_Object *obj,
+                             const char  *part)
+{
+   Item *it = data;
+   Evas_Object *image_obj = NULL;
+   Evas_Object *grid = (Evas_Object *)obj;
+   Resource2 *res;
+
+   assert(it != NULL);
+   assert(grid != NULL);
+
+   if (!strcmp(part, "elm.swallow.icon"))
+     {
+#ifndef _WIN32
+        image_obj = elm_thumb_add(grid);
+        TODO("Learn how to load picture from eet file to show OR wait when export svg implemenetation will be")
+//        elm_thumb_file_set(image_obj, it->source, it->image_name);
+#else
+        TODO("Remove this urgly hack when we fix thumbs on Windows")
+        image_obj = elm_image_add(grid);
+//        elm_image_file_set(image_obj, it->source, it->image_name);
+#endif /* _WIN32 */
+        elm_object_style_set(image_obj, "noframe");
+        evas_object_show(image_obj);
+     }
+   else if (!strcmp(part, "elm.swallow.end"))
+     {
+        res = resource_manager_find(ap.project->RM.vectors, it->image_name);
         if (eina_list_count(res->common.used_in) == 0)
           {
              image_obj = elm_icon_add(grid);
@@ -865,7 +1092,7 @@ _btn_image_manager_cb(void *data __UNUSED__,
 void
 popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
                            Helper_Done_Cb func, void *data,
-                           Eina_Bool multi)
+                           Eina_Bool multi, Eina_Bool vector)
 {
    Evas_Object *entry, *icon, *button;
    Helper_Data *helper_data = (Helper_Data *)mem_calloc(1, sizeof(Helper_Data));
@@ -920,7 +1147,28 @@ popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
         gic->func.del = _grid_del;
      }
 
-   _image_gengrid_init(helper_data);
+   if (!gic_set)
+     {
+        gic_set = elm_gengrid_item_class_new();
+        gic_set->item_style = "image_set";
+        gic_set->func.text_get = _grid_label_get;
+        gic_set->func.content_get = _grid_image_set_content_get;
+        gic_set->func.del = _grid_del;
+     }
+
+   if (!gic_vec)
+     {
+        gic_vec = elm_gengrid_item_class_new();
+        gic_vec->item_style = "default";
+        gic_vec->func.text_get = _grid_label_get;
+        gic_vec->func.content_get = _grid_vector_content_get;
+        gic_vec->func.del = _grid_del;
+     }
+
+   if (vector)
+     _vector_gengrid_init(helper_data);
+   else
+     _image_gengrid_init(helper_data);
 
    ENTRY_ADD(fs, entry, true);
    elm_object_part_text_set(entry, "guide", _("Search"));

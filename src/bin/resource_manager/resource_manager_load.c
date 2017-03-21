@@ -122,6 +122,37 @@ _image_resources_load(Project *project)
 }
 
 Eina_Bool
+_vector_resources_load(Project *project)
+{
+   Image2 *res;
+   Eina_List *vectors;
+   Eina_Stringshare *resource_folder;
+   Eina_Stringshare *vector_name;
+   Eina_List *l;
+
+   assert(project != NULL);
+
+   resource_folder = eina_stringshare_printf("%s/vectors", project->develop_path);
+   vectors = edje_edit_vectors_list_get(project->global_object);
+   EINA_LIST_FOREACH(vectors, l, vector_name)
+     {
+        /* for supporting old themes, which were compilled
+         * with edje_cc version less than 1.10 */
+        res = mem_calloc(1, sizeof(Vector2));
+        res->common.type = RESOURCE2_TYPE_VECTOR;
+        res->common.name = eina_stringshare_add(vector_name);
+        res->common.id = edje_edit_vector_id_get(project->global_object, vector_name);
+        res->source = eina_stringshare_printf("%s/%s", resource_folder, vector_name);
+
+        project->RM.vectors = eina_list_append(project->RM.vectors, res);
+     }
+
+   edje_edit_string_list_free(vectors);
+   eina_stringshare_del(resource_folder);
+   return true;
+}
+
+Eina_Bool
 _sound_resources_load(Project *project)
 {
    Sound2 *res;
@@ -364,7 +395,7 @@ State2 *
 _state_add(Project *pro, Group2 *group, Part2 *part, const char *state_name, double state_value)
 {
    State2 *state;
-   Eina_Stringshare *image_name;
+   Eina_Stringshare *image_name, *vector_name;
    Eina_List *tween_list, *l;
    Resource2 *res;
 
@@ -406,6 +437,17 @@ _state_add(Project *pro, Group2 *group, Part2 *part, const char *state_name, dou
              state->tweens = eina_list_append(state->tweens, res);
           }
         edje_edit_string_list_free(tween_list);
+     }
+
+   if (part->type == EDJE_PART_TYPE_VECTOR)
+     {
+        vector_name = edje_edit_state_vector_get(group->edit_object,
+                                                part->common.name,
+                                                state->common.name,
+                                                state->val);
+        if (vector_name)
+          state->normal = eina_stringshare_add(vector_name);
+        edje_edit_string_free(vector_name);
      }
 
    return state;
@@ -583,6 +625,15 @@ _group_load(Project *pro, Group2 *group)
    resource_group_edit_object_unload(group);
 }
 
+static int
+groupcmp(const void *d1, const void *d2)
+{
+   Group2 *g1 = (Group2 *)d1;
+   Group2 *g2 = (Group2 *)d2;
+
+   return strcmp(g1->common.name, g2->common.name);
+}
+
 Group2 *
 _group_add(Project *pro, Eina_Stringshare *group_name)
 {
@@ -590,8 +641,8 @@ _group_add(Project *pro, Eina_Stringshare *group_name)
 
    res = mem_calloc(1, sizeof(Group2));
    res->common.type = RESOURCE2_TYPE_GROUP;
-   res->common.name = eina_stringshare_add(group_name);
-   pro->RM.groups = eina_list_append(pro->RM.groups, res);
+   res->common.name = eina_stringshare_ref(group_name);
+   pro->RM.groups = eina_list_sorted_insert(pro->RM.groups, groupcmp,  res);
 
    return res;
 }
@@ -611,11 +662,11 @@ _groups_load(Project *pro)
 
    assert(collections != NULL);
 
-   collections = eina_list_sort(collections, eina_list_count(collections), (Eina_Compare_Cb) strcmp);
-   EINA_LIST_FOREACH(collections, l, group_name)
+   EINA_LIST_FREE(collections, group_name)
      {
         if (!strcmp(group_name, EFLETE_INTERNAL_GROUP_NAME)) continue;
         _group_add(pro, group_name);
+        eina_stringshare_del(group_name);
      }
    edje_mmap_collection_list_free(collections);
 

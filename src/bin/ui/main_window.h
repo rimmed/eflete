@@ -111,6 +111,14 @@ typedef enum
    FILE_SAVE_APPEND
 } File_Save;
 
+typedef enum
+{
+   VECTOR_IMAGE,
+   SINGLE_IMAGE,
+   IMAGE_SET,
+   IMAGE_SET_ITEM
+} Image_Instance_Type;
+
 /**
  * The validation func for popup action.
  *
@@ -415,7 +423,7 @@ popup_log_message_helper(const char *msg);
 void
 popup_gengrid_image_helper(const char *title, Evas_Object *follow_up,
                            Helper_Done_Cb func, void *data,
-                           Eina_Bool multi);
+                           Eina_Bool multi, Eina_Bool vector);
 
 void
 popup_gengrid_helper_item_select(const char *item_title);
@@ -492,6 +500,20 @@ struct _Image_Item
    int quality;
    Eina_Bool is_used;
    int height, width;
+   Image_Instance_Type type;
+   struct {
+        int border_l;
+        int border_r;
+        int border_t;
+        int border_b;
+        int min_w;
+        int min_h;
+        int max_w;
+        int max_h;
+        const char *name;
+        int position;
+        double border_scale;
+   } set;
 };
 
 /**
@@ -567,13 +589,24 @@ typedef struct _Sound_Data Sound_Data;
 /**
  * Add new sound manager layout object.
  *
+ * @return Pointer to layout object, which contain code of group script,
+ * etc.
+ *
+ * @ingroup Window
+ */
+Evas_Object *
+sound_manager_add(void);
+
+/**
+ * Add new script manager layout object.
+ *
  * @return Pointer to layout object, which contain list of sounds,
  * control buttons, etc.
  *
  * @ingroup Window
  */
 Evas_Object *
-sound_manager_add(void);
+script_manager_add(Resource2 *res);
 
 /**
  * Show the whole inwin window by using some data

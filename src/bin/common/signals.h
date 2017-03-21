@@ -111,6 +111,9 @@ typedef struct {
          const struct {
             const char *changed;
          } image_selector;
+         const struct {
+            const char *clicked;
+         } script_control;
       } property;
    } eflete;
 
@@ -543,7 +546,7 @@ typedef struct {
 #define SIGNAL_EDITOR_TONE_ADDED "SIGNAL_EDITOR_TONE_ADDED"
 
 /**
- * emited when sound is deleted.
+ * emited when tone is deleted.
  * eventinfo - tone's name
  *
  * @ingroup Window
@@ -551,7 +554,7 @@ typedef struct {
 #define SIGNAL_EDITOR_TONE_DELETED "SIGNAL_EDITOR_TONE_DELETED"
 
 /**
- * emited when tone is added.
+ * emited when image is added.
  * eventinfo - image's name
  *
  * @ingroup Window
@@ -559,7 +562,7 @@ typedef struct {
 #define SIGNAL_EDITOR_IMAGE_ADDED "SIGNAL_EDITOR_IMAGE_ADDED"
 
 /**
- * emited when sound is deleted.
+ * emited when image is deleted.
  * eventinfo - image's name
  *
  * @ingroup Window
@@ -567,7 +570,44 @@ typedef struct {
 #define SIGNAL_EDITOR_IMAGE_DELETED "SIGNAL_EDITOR_IMAGE_DELETED"
 
 /**
- * emited when tone is added.
+ * emited when image set added.
+ * eventinfo - image set name.
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_IMAGE_SET_ADDED "SIGNAL_EDITOR_IMAGE_SET_ADDED"
+
+/**
+ * emited when image set deleted.
+ * eventinfo - image set name.
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_IMAGE_SET_DELETED "SIGNAL_EDITOR_IMAGE_SET_DELETED"
+
+typedef struct {
+     int image_position;
+     const char *set_name;
+     const char *image_name;
+} Image_Set_Change;
+/**
+ * emited on add new image into image set
+ * eventinfo - Image_Set_Change struct
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_IMAGE_SET_IMAGE_ADD "SIGNAL_EDITOR_IMAGE_SET_IMAGE_ADD"
+
+/**
+ * emited on delete image from image set
+ * eventinfo - Image_Set_Change struct
+ *
+ * @ingroup Window
+ */
+#define SIGNAL_EDITOR_IMAGE_SET_IMAGE_DEL "SIGNAL_EDITOR_IMAGE_SET_IMAGE_DEL"
+
+/**
+ * emited when textblock style is added.
  * eventinfo - NULL
  *
  * @ingroup Window
@@ -575,7 +615,7 @@ typedef struct {
 #define SIGNAL_EDITOR_STYLE_ADDED "SIGNAL_EDITOR_STYLE_ADDED"
 
 /**
- * emited when sound is deleted.
+ * emited when textblock style is deleted.
  * eventinfo - NULL
  *
  * @ingroup Window

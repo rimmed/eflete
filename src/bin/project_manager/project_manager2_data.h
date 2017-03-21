@@ -72,6 +72,7 @@ struct _Project
       Eina_List *groups;
       Eina_List *tones;
       Eina_List *sounds;
+      Eina_List *vectors;
       Eina_List *images;
       Eina_List *image_sets;
       Eina_List *fonts;
@@ -145,6 +146,8 @@ enum _PM_Project_Result
    PM_PROJECT_EXPORT_DEVELOP_EDJ_FAILED,
    PM_PROJECT_EXPORT_RELEASE_EDJ_FAILED,
    PM_PROJECT_BUILD_SOURCE_EDC_FAILED,
+   PM_PROJECT_LOCKED_PROC_MISS,
+   PM_PROJECT_LOCKED_PERMISSION,
    PM_PROJECT_LAST
 };
 

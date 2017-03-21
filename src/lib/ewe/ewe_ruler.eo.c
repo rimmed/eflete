@@ -1,134 +1,135 @@
+
 Eina_Bool _ewe_ruler_horizontal_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Eina_Bool horizontal);
 
-EO_FUNC_BODYV(ewe_obj_ruler_horizontal_set, Eina_Bool, 0, EO_FUNC_CALL(horizontal), Eina_Bool horizontal);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_horizontal_set, Eina_Bool, 0, EO_FUNC_CALL(horizontal), Eina_Bool horizontal);
 
 Eina_Bool _ewe_ruler_horizontal_get(Eo *obj, Ewe_Ruler_Smart_Data *pd);
 
-EO_FUNC_BODY(ewe_obj_ruler_horizontal_get, Eina_Bool, 0);
+EOAPI EO_FUNC_BODY(ewe_obj_ruler_horizontal_get, Eina_Bool, 0);
 
 Eina_Bool _ewe_ruler_step_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale, unsigned int step);
 
-EO_FUNC_BODYV(ewe_obj_ruler_step_set, Eina_Bool, 0, EO_FUNC_CALL(scale, step), Ewe_Ruler_Scale * scale, unsigned int step);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_step_set, Eina_Bool, 0, EO_FUNC_CALL(scale, step), Ewe_Ruler_Scale * scale, unsigned int step);
 
 unsigned int _ewe_ruler_step_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_step_get, unsigned int, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_step_get, unsigned int, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_value_step_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale, double step);
 
-EO_FUNC_BODYV(ewe_obj_ruler_value_step_set, Eina_Bool, 0, EO_FUNC_CALL(scale, step), Ewe_Ruler_Scale * scale, double step);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_value_step_set, Eina_Bool, 0, EO_FUNC_CALL(scale, step), Ewe_Ruler_Scale * scale, double step);
 
 double _ewe_ruler_value_step_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_value_step_get, double, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_value_step_get, double, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_zero_offset_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale, int offset);
 
-EO_FUNC_BODYV(ewe_obj_ruler_zero_offset_set, Eina_Bool, 0, EO_FUNC_CALL(scale, offset), Ewe_Ruler_Scale * scale, int offset);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_zero_offset_set, Eina_Bool, 0, EO_FUNC_CALL(scale, offset), Ewe_Ruler_Scale * scale, int offset);
 
 int _ewe_ruler_zero_offset_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_zero_offset_get, int, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_zero_offset_get, int, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_format_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale, const char *format);
 
-EO_FUNC_BODYV(ewe_obj_ruler_format_set, Eina_Bool, 0, EO_FUNC_CALL(scale, format), Ewe_Ruler_Scale * scale, const char *format);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_format_set, Eina_Bool, 0, EO_FUNC_CALL(scale, format), Ewe_Ruler_Scale * scale, const char *format);
 
 const char * _ewe_ruler_format_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_format_get, const char *, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_format_get, const char *, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_style_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale, const char *style);
 
-EO_FUNC_BODYV(ewe_obj_ruler_style_set, Eina_Bool, 0, EO_FUNC_CALL(scale, style), Ewe_Ruler_Scale * scale, const char *style);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_style_set, Eina_Bool, 0, EO_FUNC_CALL(scale, style), Ewe_Ruler_Scale * scale, const char *style);
 
 const char * _ewe_ruler_style_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_style_get, const char *, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_style_get, const char *, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_scale_visible_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale, Eina_Bool visible);
 
-EO_FUNC_BODYV(ewe_obj_ruler_scale_visible_set, Eina_Bool, 0, EO_FUNC_CALL(scale, visible), Ewe_Ruler_Scale * scale, Eina_Bool visible);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_scale_visible_set, Eina_Bool, 0, EO_FUNC_CALL(scale, visible), Ewe_Ruler_Scale * scale, Eina_Bool visible);
 
 Eina_Bool _ewe_ruler_scale_visible_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_scale_visible_get, Eina_Bool, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_scale_visible_get, Eina_Bool, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_scale_middle_mark_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale, Eina_Bool middle_mark);
 
-EO_FUNC_BODYV(ewe_obj_ruler_scale_middle_mark_set, Eina_Bool, 0, EO_FUNC_CALL(scale, middle_mark), Ewe_Ruler_Scale * scale, Eina_Bool middle_mark);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_scale_middle_mark_set, Eina_Bool, 0, EO_FUNC_CALL(scale, middle_mark), Ewe_Ruler_Scale * scale, Eina_Bool middle_mark);
 
 Eina_Bool _ewe_ruler_scale_middle_mark_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_scale_middle_mark_get, Eina_Bool, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_scale_middle_mark_get, Eina_Bool, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_marker_relative_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale, double rel_position);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_relative_set, Eina_Bool, 0, EO_FUNC_CALL(marker, scale, rel_position), Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale, double rel_position);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_relative_set, Eina_Bool, 0, EO_FUNC_CALL(marker, scale, rel_position), Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale, double rel_position);
 
 double _ewe_ruler_marker_relative_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_relative_get, double, 0, EO_FUNC_CALL(marker, scale), Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_relative_get, double, 0, EO_FUNC_CALL(marker, scale), Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale);
 
 Eina_Bool _ewe_ruler_marker_absolute_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, int position);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_absolute_set, Eina_Bool, 0, EO_FUNC_CALL(marker, position), Ewe_Ruler_Marker * marker, int position);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_absolute_set, Eina_Bool, 0, EO_FUNC_CALL(marker, position), Ewe_Ruler_Marker * marker, int position);
 
 int _ewe_ruler_marker_absolute_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_absolute_get, int, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_absolute_get, int, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
 
 Eina_Bool _ewe_ruler_marker_visible_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, Eina_Bool visible);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_visible_set, Eina_Bool, 0, EO_FUNC_CALL(marker, visible), Ewe_Ruler_Marker * marker, Eina_Bool visible);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_visible_set, Eina_Bool, 0, EO_FUNC_CALL(marker, visible), Ewe_Ruler_Marker * marker, Eina_Bool visible);
 
 Eina_Bool _ewe_ruler_marker_visible_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_visible_get, Eina_Bool, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_visible_get, Eina_Bool, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
 
 Eina_Bool _ewe_ruler_marker_style_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, const char *style);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_style_set, Eina_Bool, 0, EO_FUNC_CALL(marker, style), Ewe_Ruler_Marker * marker, const char *style);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_style_set, Eina_Bool, 0, EO_FUNC_CALL(marker, style), Ewe_Ruler_Marker * marker, const char *style);
 
 const char * _ewe_ruler_marker_style_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_style_get, const char *, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_style_get, const char *, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
 
 void _ewe_ruler_marker_size_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, int size);
 
-EO_VOID_FUNC_BODYV(ewe_obj_ruler_marker_size_set, EO_FUNC_CALL(marker, size), Ewe_Ruler_Marker * marker, int size);
+EOAPI EO_VOID_FUNC_BODYV(ewe_obj_ruler_marker_size_set, EO_FUNC_CALL(marker, size), Ewe_Ruler_Marker * marker, int size);
 
 int _ewe_ruler_marker_size_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_size_get, int, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_size_get, int, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
 
 void _ewe_ruler_marker_text_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, const char *text);
 
-EO_VOID_FUNC_BODYV(ewe_obj_ruler_marker_text_set, EO_FUNC_CALL(marker, text), Ewe_Ruler_Marker * marker, const char *text);
+EOAPI EO_VOID_FUNC_BODYV(ewe_obj_ruler_marker_text_set, EO_FUNC_CALL(marker, text), Ewe_Ruler_Marker * marker, const char *text);
 
 const char * _ewe_ruler_marker_text_get(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_text_get, const char *, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_text_get, const char *, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker * marker);
 
 void _ewe_ruler_marker_tooltip_set(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker * marker, const char *text);
 
-EO_VOID_FUNC_BODYV(ewe_obj_ruler_marker_tooltip_set, EO_FUNC_CALL(marker, text), Ewe_Ruler_Marker * marker, const char *text);
+EOAPI EO_VOID_FUNC_BODYV(ewe_obj_ruler_marker_tooltip_set, EO_FUNC_CALL(marker, text), Ewe_Ruler_Marker * marker, const char *text);
 
 Ewe_Ruler_Scale * _ewe_ruler_scale_add(Eo *obj, Ewe_Ruler_Smart_Data *pd, const char *style);
 
-EO_FUNC_BODYV(ewe_obj_ruler_scale_add, Ewe_Ruler_Scale *, 0, EO_FUNC_CALL(style), const char *style);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_scale_add, Ewe_Ruler_Scale *, 0, EO_FUNC_CALL(style), const char *style);
 
 Eina_Bool _ewe_ruler_scale_del(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Scale *scale);
 
-EO_FUNC_BODYV(ewe_obj_ruler_scale_del, Eina_Bool, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale *scale);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_scale_del, Eina_Bool, 0, EO_FUNC_CALL(scale), Ewe_Ruler_Scale *scale);
 
 Ewe_Ruler_Marker * _ewe_ruler_marker_add(Eo *obj, Ewe_Ruler_Smart_Data *pd, const char *style);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_add, Ewe_Ruler_Marker *, 0, EO_FUNC_CALL(style), const char *style);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_add, Ewe_Ruler_Marker *, 0, EO_FUNC_CALL(style), const char *style);
 
 Eina_Bool _ewe_ruler_marker_del(Eo *obj, Ewe_Ruler_Smart_Data *pd, Ewe_Ruler_Marker *marker);
 
-EO_FUNC_BODYV(ewe_obj_ruler_marker_del, Eina_Bool, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker *marker);
+EOAPI EO_FUNC_BODYV(ewe_obj_ruler_marker_del, Eina_Bool, 0, EO_FUNC_CALL(marker), Ewe_Ruler_Marker *marker);
 
 Eo_Base * _ewe_ruler_eo_base_constructor(Eo *obj, Ewe_Ruler_Smart_Data *pd);
 
@@ -214,7 +215,7 @@ static const Eo_Class_Description _ewe_ruler_class_desc = {
 };
 
 EO_DEFINE_CLASS(ewe_ruler_class_get, &_ewe_ruler_class_desc, ELM_WIDGET_CLASS, NULL);
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_horizontal_set(Ewe_Ruler *obj, Eina_Bool horizontal)
 {
    Eina_Bool ret;
@@ -222,7 +223,7 @@ ewe_ruler_horizontal_set(Ewe_Ruler *obj, Eina_Bool horizontal)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_horizontal_get(const Ewe_Ruler *obj)
 {
    Eina_Bool ret;
@@ -230,7 +231,7 @@ ewe_ruler_horizontal_get(const Ewe_Ruler *obj)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_step_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, unsigned int step)
 {
    Eina_Bool ret;
@@ -238,7 +239,7 @@ ewe_ruler_step_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, unsigned int step)
    return ret;
 }
 
-unsigned int
+EAPI unsigned int
 ewe_ruler_step_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
 {
    unsigned int ret;
@@ -246,7 +247,7 @@ ewe_ruler_step_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_value_step_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, double step)
 {
    Eina_Bool ret;
@@ -254,7 +255,7 @@ ewe_ruler_value_step_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, double step)
    return ret;
 }
 
-double
+EAPI double
 ewe_ruler_value_step_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
 {
    double ret;
@@ -262,7 +263,7 @@ ewe_ruler_value_step_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_zero_offset_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, int offset)
 {
    Eina_Bool ret;
@@ -270,7 +271,7 @@ ewe_ruler_zero_offset_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, int offset)
    return ret;
 }
 
-int
+EAPI int
 ewe_ruler_zero_offset_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
 {
    int ret;
@@ -278,7 +279,7 @@ ewe_ruler_zero_offset_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_format_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, const char *format)
 {
    Eina_Bool ret;
@@ -286,7 +287,7 @@ ewe_ruler_format_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, const char *format
    return ret;
 }
 
-const char *
+EAPI const char *
 ewe_ruler_format_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
 {
    const char * ret;
@@ -294,7 +295,7 @@ ewe_ruler_format_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_style_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, const char *style)
 {
    Eina_Bool ret;
@@ -302,7 +303,7 @@ ewe_ruler_style_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, const char *style)
    return ret;
 }
 
-const char *
+EAPI const char *
 ewe_ruler_style_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
 {
    const char * ret;
@@ -310,7 +311,7 @@ ewe_ruler_style_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_scale_visible_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, Eina_Bool visible)
 {
    Eina_Bool ret;
@@ -318,7 +319,7 @@ ewe_ruler_scale_visible_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, Eina_Bool v
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_scale_visible_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
 {
    Eina_Bool ret;
@@ -326,7 +327,7 @@ ewe_ruler_scale_visible_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_scale_middle_mark_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, Eina_Bool middle_mark)
 {
    Eina_Bool ret;
@@ -334,7 +335,7 @@ ewe_ruler_scale_middle_mark_set(Ewe_Ruler *obj, Ewe_Ruler_Scale * scale, Eina_Bo
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_scale_middle_mark_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
 {
    Eina_Bool ret;
@@ -342,7 +343,7 @@ ewe_ruler_scale_middle_mark_get(const Ewe_Ruler *obj, Ewe_Ruler_Scale * scale)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_marker_relative_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale, double rel_position)
 {
    Eina_Bool ret;
@@ -350,7 +351,7 @@ ewe_ruler_marker_relative_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, Ewe_Rul
    return ret;
 }
 
-double
+EAPI double
 ewe_ruler_marker_relative_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, Ewe_Ruler_Scale * scale)
 {
    double ret;
@@ -358,7 +359,7 @@ ewe_ruler_marker_relative_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, E
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_marker_absolute_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, int position)
 {
    Eina_Bool ret;
@@ -366,7 +367,7 @@ ewe_ruler_marker_absolute_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, int pos
    return ret;
 }
 
-int
+EAPI int
 ewe_ruler_marker_absolute_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
 {
    int ret;
@@ -374,7 +375,7 @@ ewe_ruler_marker_absolute_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_marker_visible_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, Eina_Bool visible)
 {
    Eina_Bool ret;
@@ -382,7 +383,7 @@ ewe_ruler_marker_visible_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, Eina_Boo
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_marker_visible_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
 {
    Eina_Bool ret;
@@ -390,7 +391,7 @@ ewe_ruler_marker_visible_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_marker_style_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, const char *style)
 {
    Eina_Bool ret;
@@ -398,7 +399,7 @@ ewe_ruler_marker_style_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, const char
    return ret;
 }
 
-const char *
+EAPI const char *
 ewe_ruler_marker_style_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
 {
    const char * ret;
@@ -406,13 +407,13 @@ ewe_ruler_marker_style_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
    return ret;
 }
 
-void
+EAPI void
 ewe_ruler_marker_size_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, int size)
 {
    eo_do((Ewe_Ruler *)obj, ewe_obj_ruler_marker_size_set(marker, size));
 }
 
-int
+EAPI int
 ewe_ruler_marker_size_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
 {
    int ret;
@@ -420,13 +421,13 @@ ewe_ruler_marker_size_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
    return ret;
 }
 
-void
+EAPI void
 ewe_ruler_marker_text_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, const char *text)
 {
    eo_do((Ewe_Ruler *)obj, ewe_obj_ruler_marker_text_set(marker, text));
 }
 
-const char *
+EAPI const char *
 ewe_ruler_marker_text_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
 {
    const char * ret;
@@ -434,13 +435,13 @@ ewe_ruler_marker_text_get(const Ewe_Ruler *obj, Ewe_Ruler_Marker * marker)
    return ret;
 }
 
-void
+EAPI void
 ewe_ruler_marker_tooltip_set(Ewe_Ruler *obj, Ewe_Ruler_Marker * marker, const char *text)
 {
    eo_do((Ewe_Ruler *)obj, ewe_obj_ruler_marker_tooltip_set(marker, text));
 }
 
-Ewe_Ruler_Scale *
+EAPI Ewe_Ruler_Scale *
 ewe_ruler_scale_add(Ewe_Ruler *obj, const char *style)
 {
    Ewe_Ruler_Scale * ret;
@@ -448,7 +449,7 @@ ewe_ruler_scale_add(Ewe_Ruler *obj, const char *style)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_scale_del(Ewe_Ruler *obj, Ewe_Ruler_Scale *scale)
 {
    Eina_Bool ret;
@@ -456,7 +457,7 @@ ewe_ruler_scale_del(Ewe_Ruler *obj, Ewe_Ruler_Scale *scale)
    return ret;
 }
 
-Ewe_Ruler_Marker *
+EAPI Ewe_Ruler_Marker *
 ewe_ruler_marker_add(Ewe_Ruler *obj, const char *style)
 {
    Ewe_Ruler_Marker * ret;
@@ -464,7 +465,7 @@ ewe_ruler_marker_add(Ewe_Ruler *obj, const char *style)
    return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ewe_ruler_marker_del(Ewe_Ruler *obj, Ewe_Ruler_Marker *marker)
 {
    Eina_Bool ret;

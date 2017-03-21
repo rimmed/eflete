@@ -168,6 +168,7 @@ _dir_del(Eina_List **dirs_list, Dir_Data *dir_data,
    if (eina_list_count(*dirs_list) == 1)
      {
         tmp = eina_list_data_get(*dirs_list);
+        elm_entry_entry_set(tmp->entry, NULL);
         elm_object_disabled_set(tmp->btn_del, true);
      }
 }
@@ -447,7 +448,7 @@ _after_popup_close(void *data __UNUSED__,
                              elm_entry_entry_get(tab_edc.path),
                              elm_entry_entry_get(tab_edc.name),
                              elm_entry_entry_get(tab_edc.name));
-   if (!pm_lock_check(eina_strbuf_string_get(buf)))
+   if (PM_PROJECT_SUCCESS != pm_lock_check(eina_strbuf_string_get(buf)))
      {
        popup_add(_("Import EDC-file"), _("The given file is locked by another application"), BTN_OK, NULL, NULL);
        return;

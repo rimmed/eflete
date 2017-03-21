@@ -32,7 +32,6 @@ EXTRA_DIST = \
 	project_manager/group_manager_resources.h \
 	project_manager/project_manager2.h \
 	project_manager/project_manager2_data.h \
-	project_manager/resource_manager.h \
 	resource_manager/resource_manager2.h \
 	resource_manager/resource_manager_private.h \
 	resource_manager/resource_manager_signals.h \
@@ -108,6 +107,7 @@ libete_a_SOURCES = \
 ../../src/bin/ui/project_navigator.c \
 ../../src/bin/ui/image_manager.c \
 ../../src/bin/ui/colorclass_manager.c \
+../../src/bin/ui/script_manager.c \
 ../../src/bin/ui/tabs.c \
 ../../src/bin/ui/tab_home_common.c \
 ../../src/bin/ui/tab_home_open.c \
@@ -127,6 +127,7 @@ libete_a_SOURCES = \
 ../../src/bin/ui/property/property_sound.c \
 ../../src/bin/ui/property/property_textblock.c \
 ../../src/bin/ui/property/property_group.c \
+../../src/bin/ui/property/property_script.c \
 ../../src/bin/ui/sound_player/sound_player.c \
 ../../src/bin/ui/property/property_demo.c \
 ../../src/bin/ui/workspace/workspace.c \

@@ -84,7 +84,7 @@ _add_colorclass_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Obje
 {
    Evas_Object *item = NULL;
 
-   LAYOUT_PROP_ADD(ap.win, _("Color class name: "), "property", "1swallow")
+   LAYOUT_PROP_ADD(ap.win, _("Color class name: "), "popup", "1swallow")
    ENTRY_ADD(item, mng.entry, true);
    eo_do(mng.entry, eo_event_callback_add(ELM_ENTRY_EVENT_VALIDATE, resource_name_validator_helper, mng.name_validator));
    evas_object_smart_callback_add(mng.entry, "changed", _validation, popup);
@@ -438,7 +438,7 @@ colorclass_manager_add(void)
    evas_object_smart_callback_add(mng.win, signals.eflete.modal_window.done, _mw_done_cb, NULL);
 #if !HAVE_TIZEN
    ic = elm_icon_add(mng.win);
-   elm_icon_standard_set(ic, "image2");
+   elm_icon_standard_set(ic, "color");
 #else
    IMAGE_ADD_NEW(mng.win, ic, "icon", "logo");
 #endif

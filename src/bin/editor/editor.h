@@ -32,6 +32,7 @@ typedef enum {
    RM_ATTRIBUTE_GROUP_MIN_H,
    RM_ATTRIBUTE_GROUP_MAX_W,
    RM_ATTRIBUTE_GROUP_MAX_H,
+   RM_ATTRIBUTE_GROUP_SCRIPT,
    RM_ATTRIBUTE_GROUP_DATA_NAME,
    RM_ATTRIBUTE_GROUP_DATA_VALUE,
    RM_ATTRIBUTE_STATE_NAME,
@@ -74,6 +75,7 @@ typedef enum {
    RM_ATTRIBUTE_STATE_FIXED_W,
    RM_ATTRIBUTE_STATE_FILL_SMOOTH,
    RM_ATTRIBUTE_STATE_VISIBLE,
+   RM_ATTRIBUTE_STATE_VECTOR,
    RM_ATTRIBUTE_STATE_IMAGE,
    RM_ATTRIBUTE_STATE_IMAGE_TWEEN,
    RM_ATTRIBUTE_STATE_COLOR_CLASS,
@@ -223,8 +225,19 @@ typedef enum {
 
    RM_ATTRIBUTE_RESOURCES_COLORCLASS_DESCRIPTION,
    RM_ATTRIBUTE_RESOURCES_COLORCLASS_COLORS,
+
    RM_ATTRIBUTE_RESOURCES_STYLE_TAG_ADDED,
    RM_ATTRIBUTE_RESOURCES_STYLE_TAG_DELETED,
+
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_BORDER_LEFT,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_BORDER_RIGHT,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_BORDER_TOP,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_BORDER_BOTTOM,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_BORDER_SCALE,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_MIN_W,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_MIN_H,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_MAX_W,
+   RM_ATTRIBUTE_RESOURCES_IMAGE_SET_IMAGE_MAX_H,
 
    RM_ATTRIBUTE_RESOURCES_LAST
 } RM_Attribute_Resources;
@@ -254,9 +267,15 @@ typedef struct {
    Eina_Stringshare *tag_value;
    Eina_Stringshare *tag_name;
 
+   Eina_Stringshare *image_set_name;
+   int image_pos;
+
    int r, g, b, a;
    int r2, g2, b2, a2;
    int r3, g3, b3, a3;
+   int left, right, top, bottom;
+
+
 } Editor_Attribute_Resource_Change;
 
 
@@ -269,6 +288,45 @@ editor_image_add(Evas_Object *obj, const char *selected, Eina_Bool notify) EINA_
 
 Eina_Bool
 editor_image_del(Evas_Object *obj, const char *selected, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_add(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_del(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_add(Evas_Object *obj, const char *image_set_name, const char *image, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_del(Evas_Object *obj, const char *image_set_name, const char *image, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_border_left_set(Evas_Object *obj, const char *name, int position, int l) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_border_right_set(Evas_Object *obj, const char *name, int position, int r) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_border_top_set(Evas_Object *obj, const char *name, int position, int t) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_border_bottom_set(Evas_Object *obj, const char *name, int position, int b) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_max_height_set(Evas_Object *obj, const char *name, int position, int max_h) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_max_width_set(Evas_Object *obj, const char *name, int position, int max_w) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_min_height_set(Evas_Object *obj, const char *name, int position, int min_h) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_min_width_set(Evas_Object *obj, const char *name, int position, int min_w) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_image_set_image_border_scale_set(Evas_Object *obj, const char *name, int position, double scale) EINA_WARN_UNUSED_RESULT;
 
 Eina_Bool
 editor_color_class_add(Evas_Object *obj, const char *name, Eina_Bool notify) EINA_WARN_UNUSED_RESULT;
@@ -363,6 +421,10 @@ editor_group_data_add(Evas_Object *edit_object, Change *change, Eina_Bool merge,
 Eina_Bool
 editor_group_data_del(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
                       const char *item_name) EINA_WARN_UNUSED_RESULT;
+Eina_Bool
+editor_group_script_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
+                        const char *new_val) EINA_WARN_UNUSED_RESULT;
+
 Eina_Bool
 editor_group_data_value_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
                             const char *item_name, const char *new_val) EINA_WARN_UNUSED_RESULT;
@@ -597,6 +659,10 @@ editor_state_font_set(Evas_Object *obj, Change *change, Eina_Bool merge, Eina_Bo
       const char * new_val) EINA_WARN_UNUSED_RESULT;
 Eina_Bool
 editor_state_image_set(Evas_Object *obj, Change *change, Eina_Bool merge, Eina_Bool apply, const char *part_name, const char *state_name, double state_val,
+      const char * new_val) EINA_WARN_UNUSED_RESULT;
+
+Eina_Bool
+editor_state_vector_set(Evas_Object *obj, Change *change, Eina_Bool merge, Eina_Bool apply, const char *part_name, const char *state_name, double state_val,
       const char * new_val) EINA_WARN_UNUSED_RESULT;
 
 
@@ -937,6 +1003,10 @@ editor_program_source_set(Evas_Object *edit_object, Change *change, Eina_Bool me
 Eina_Bool
 editor_program_state_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
                          const char *program, const char *new_val) EINA_WARN_UNUSED_RESULT;
+Eina_Bool
+editor_program_script_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,
+                          const char *program, const char *new_val) EINA_WARN_UNUSED_RESULT;
+
 #define edje_edit_program_emit_signal_get edje_edit_program_state_get
 Eina_Bool
 editor_program_emit_signal_set(Evas_Object *edit_object, Change *change, Eina_Bool merge, Eina_Bool apply,

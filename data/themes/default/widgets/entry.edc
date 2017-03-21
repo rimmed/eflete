@@ -1,5 +1,7 @@
 group { name: "elm/entry/base/default";
    alias: "elm/entry/base-single-noedit/default";
+   alias: "elm/entry/base-nowrap-noedit/default";
+   alias: "elm/entry/base-nowrap/default";
    parts {
       part { name: "elm.guide";
          type: TEXTBLOCK;
@@ -76,6 +78,26 @@ group { name: "elm/entry/base/default";
          source: "";
          action: FOCUS_SET;
          target: "elm.text";
+      }
+   }
+}
+
+group { name: "elm/entry/base-noedit/default";
+   inherit: "elm/entry/base/default";
+   parts {
+      part { name: "elm.text";
+         type: TEXTBLOCK;
+         source: "elm/entry/selection/default";
+         source4: "";
+         source6: "elm/entry/anchor/default";
+         description { state: "default" 0.0;
+            fixed: 1 0;
+            text {
+               style: "entry_main_text";
+               align: 0.0 0.0;
+               min: 0 1;
+            }
+         }
       }
    }
 }
@@ -571,6 +593,21 @@ group { name: "elm/scroller/entry/default";
                normal: "control-focus.png";
                border: 8 8 8 8;
                middle: DEFAULT;
+            }
+         }
+      }
+      part { name: "elm.swallow.elipsis";
+         type: SWALLOW;
+         description { state: "default" 0.0;
+            align: 1.0 0.0;
+            fixed: 1 1;
+            max: 24 24;
+            min: 24 24;
+            rel1 {
+               offset: 0 -2;
+            }
+            rel2 {
+               offset: 1 0;
             }
          }
       }

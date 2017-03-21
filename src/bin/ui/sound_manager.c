@@ -26,6 +26,7 @@
 #include "config.h"
 #include "validator.h"
 #include "sound_player.h"
+#include "shortcuts.h"
 
 #ifndef HAVE_TIZEN
    #define ITEM_WIDTH 100
@@ -138,11 +139,14 @@ _grid_sel_cb(void *data __UNUSED__,
      {
       case SOUND_TYPE_SAMPLE:
          res = resource_manager_find(ap.project->RM.sounds, snd->name);
+         elm_layout_text_set(mng.player, "eflete.sound.type", _("sample"));
          break;
       case SOUND_TYPE_TONE:
          res = resource_manager_find(ap.project->RM.tones, snd->name);
+         elm_layout_text_set(mng.player, "eflete.sound.type", _("tone"));
          break;
      }
+   elm_layout_text_set(mng.player, "eflete.sound.value", snd->type_label);
 
    assert(res != NULL);
 
@@ -297,10 +301,29 @@ _tone_add(void)
 
 static void
 _sample_add_cb(void *data,
-               Evas_Object *obj __UNUSED__,
+               Evas_Object *obj,
                void *event_info __UNUSED__)
 {
+   shortcuts_object_check_pop(obj);
+
    popup_fileselector_sound_helper(_("Choose a sound"), NULL, NULL, _add_sample_done, data, false, false);
+}
+
+static void
+_menu_dismissed_cb(void *data __UNUSED__,
+                   Evas_Object *obj,
+                   void *event_info __UNUSED__)
+{
+   shortcuts_object_check_pop(obj);
+}
+
+static void
+_menu_dismiss_cb(void *data __UNUSED__,
+                 Evas_Object *obj,
+                 void *event_info __UNUSED__)
+{
+   elm_menu_close(obj);
+   shortcuts_object_check_pop(obj);
 }
 
 static void
@@ -398,11 +421,14 @@ _tone_add_cb(void *data __UNUSED__,
              void *event_info __UNUSED__)
 {
    Evas_Object *popup;
+
+   shortcuts_object_check_pop(obj);
+
    mng.tone_validator = resource_name_validator_new(NAME_REGEX, NULL);
    resource_name_validator_list_set(mng.tone_validator, &ap.project->RM.tones, true);
    mng.frq_validator = elm_validator_regexp_new(FREQUENCY_REGEX, NULL);
 
-   popup = popup_add(_("Create a new layout"), NULL, BTN_OK|BTN_CANCEL, _add_tone_content_get, mng.tone_entry);
+   popup = popup_add(_("Create a new tone"), NULL, BTN_OK|BTN_CANCEL, _add_tone_content_get, mng.tone_entry);
    popup_button_disabled_set(popup, BTN_OK, true);
    evas_object_smart_callback_add(popup, POPUP_CLOSE_CB, _tone_add_popup_close_cb, NULL);
 }
@@ -420,6 +446,7 @@ _sound_add_cb(void *data __UNUSED__,
 
    elm_menu_move(mng.menu, x, y + h);
    evas_object_show(mng.menu);
+   shortcuts_object_push(mng.menu);
 }
 
 static void
@@ -492,6 +519,9 @@ _mw_cancel_cb(void *data __UNUSED__,
 {
    Evas_Object *content;
 
+   elm_layout_text_set(mng.player, "eflete.sound.value", NULL);
+   elm_layout_text_set(mng.player, "eflete.sound.type", NULL);
+
    /* unset and hide the image property */
    content = elm_object_content_unset(mng.win);
    evas_object_hide(content);
@@ -536,7 +566,7 @@ sound_manager_add(void)
    evas_object_smart_callback_add(mng.win, signals.eflete.modal_window.done, _mw_done_cb, NULL);
 #if !HAVE_TIZEN
    ic = elm_icon_add(mng.win);
-   elm_icon_standard_set(ic, "image2");
+   elm_icon_standard_set(ic, "sound2");
 #else
    IMAGE_ADD_NEW(mng.win, ic, "icon", "logo");
 #endif
@@ -612,6 +642,8 @@ sound_manager_add(void)
    mng.menu = elm_menu_add(ap.win);
    elm_menu_item_add(mng.menu, NULL, "sound_sample", _("Sample"), _sample_add_cb, NULL);
    elm_menu_item_add(mng.menu, NULL, "sound_tone", _("Tone"), _tone_add_cb, NULL);
+   evas_object_smart_callback_add(mng.menu, "dismissed", _menu_dismissed_cb, NULL);
+   evas_object_smart_callback_add(mng.menu, signals.shortcut.popup.cancel, _menu_dismiss_cb, NULL);
 
    ENTRY_ADD(mng.layout, search_entry, true);
    elm_object_part_text_set(search_entry, "guide", _("Search"));
