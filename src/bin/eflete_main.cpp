@@ -3,7 +3,7 @@
  * Licensed under https://www.gnu.org/licenses/lgpl.html <See COPYING file>
  */
 
-#include "project.hpp"
+#include "modules/project/project.hpp"
 
 int
 main()
