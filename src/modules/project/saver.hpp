@@ -105,8 +105,8 @@ namespace eflete
           return changed_;
         }
       };
-    };
-  };
-};
+    }
+  }
+}
 
 #endif // EFLETE_MODULES_PROJECT_SAVER_HPP_

@@ -22,6 +22,6 @@ namespace eflete
       ~Project();
       static void Test();
     };
-  };
-};
+  }
+}
 #endif // EFLETE_MODULES_PROJECT_HPP_

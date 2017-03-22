@@ -19,4 +19,4 @@ namespace mocks
     MOCK_METHOD1(GetInputFileStream,
                  std::shared_ptr<std::istream>(const std::string &file));
   };
-};
+}

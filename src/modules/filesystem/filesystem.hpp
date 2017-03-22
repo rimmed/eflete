@@ -16,6 +16,7 @@ namespace eflete
     class Filesystem
     {
     public:
+      virtual ~Filesystem()                            = default;
       virtual bool Exists(const std::string &file)     = 0;
       virtual void RemoveFile(const std::string &file) = 0;
       virtual bool MakePath(const std::string &path)   = 0;
@@ -26,6 +27,6 @@ namespace eflete
     };
     std::shared_ptr<Filesystem> Get();
     void Set(std::shared_ptr<Filesystem>);
-  };
-};
+  }
+}
 #endif // EFLETE_MODULES_FILESYSTEM_HPP_

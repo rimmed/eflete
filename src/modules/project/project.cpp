@@ -25,7 +25,7 @@ namespace eflete
       : pimpl{ new Impl{} }
     {
       pimpl->project.set_version(Impl::kCurrentProjectVersion);
-    };
+    }
 
     Project::~Project() = default;
 

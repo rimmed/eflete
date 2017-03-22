@@ -13,7 +13,7 @@ namespace
   {
     bool Exists(const std::string &file)
     {
-      return (bool)std::ifstream(file);
+      return std::ifstream(file).good();
     };
 
     void RemoveFile(const std::string &file)
@@ -65,7 +65,7 @@ namespace
       return std::make_shared<std::ifstream>(file);
     };
   };
-};
+}
 
 namespace eflete
 {
@@ -82,5 +82,5 @@ namespace eflete
     {
       _fs = fs;
     }
-  };
-};
+  }
+}
