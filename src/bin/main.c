@@ -254,7 +254,6 @@ elm_main(int argc, char **argv)
    /*FIXME: remove forcing setup scale value to 1, after fix theme.*/
    elm_config_scale_set(1);
 
-   elm_config_icon_theme_set(NULL);
    pos = ecore_getopt_parse(&options, values, argc, argv);
    if (pos < 0)
      return 1;
