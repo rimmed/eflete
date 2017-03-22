@@ -804,8 +804,8 @@ _add_image_set_content_get(void *data __UNUSED__, Evas_Object *popup, Evas_Objec
    elm_box_padding_set(box, 0, 10);
    LAYOUT_PROP_ADD(box, _("Image set name:"), "popup", "1swallow")
    ENTRY_ADD(item, mng.image_set.entry, true);
-   efl_event_callback_add(mng.image_set.entry, ELM_ENTRY_EVENT_VALIDATE,
-                          resource_name_validator_helper, mng.image_set.validator);
+   eo_do(mng.image_set.entry, eo_event_callback_add(ELM_ENTRY_EVENT_VALIDATE,
+                                                    resource_name_validator_helper, mng.image_set.validator));
    evas_object_smart_callback_add(mng.image_set.entry, signals.elm.entry.changed, _validation, popup);
    elm_object_part_text_set(mng.image_set.entry, "guide", _("Type a new image set name"));
    elm_object_part_content_set(item, "elm.swallow.content", mng.image_set.entry);
