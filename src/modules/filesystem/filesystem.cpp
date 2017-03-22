@@ -4,6 +4,7 @@
  */
 
 #include "filesystem.hpp"
+#include <sys/stat.h>
 #include <fstream>
 
 namespace
@@ -18,6 +19,40 @@ namespace
     void RemoveFile(const std::string &file)
     {
       remove(file.c_str());
+    }
+
+    bool MakePath(const std::string &path)
+    {
+      bool result = true;
+      // 0777 will inherit mode from process
+      auto mkdir_res = mkdir(path.c_str(), 0777);
+      if (mkdir_res != 0)
+        {
+          switch (errno)
+            {
+              case EEXIST:
+                // nothing to do
+                break;
+              case ENOENT:
+                // parent doesn't exists
+                // create it
+                result = MakePath(path.substr(0, path.find_last_of('/')));
+                // and try once again
+                result = result && (mkdir(path.c_str(), 0777) == 0);
+                break;
+              default:
+                result = false;
+                break;
+            }
+        }
+
+      // check that path is available
+      struct stat info;
+      result = result && (stat(path.c_str(), &info) == 0);
+      // and it is a directory
+      result = result && ((info.st_mode & S_IFDIR) == S_IFDIR);
+
+      return result;
     }
 
     std::shared_ptr<std::ostream> GetOutputFileStream(const std::string &file)

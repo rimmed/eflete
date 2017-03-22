@@ -79,6 +79,33 @@ namespace
     remove(kTestFile.c_str());
   }
 
+  TEST(FilesystemDefaultImplementation, MakePath)
+  {
+    const std::string kTestPath = "some/strange/file/path/for foleders";
+    EXPECT_EQ(eflete::filesystem::Get()->MakePath(kTestPath), true);
+
+    // if path was created we can create file there
+    auto test_file_path = kTestPath + "/" + kTestFile;
+    std::ofstream test_file(test_file_path);
+    EXPECT_EQ(test_file.good(), true);
+    test_file.close();
+
+    // if name is used by a file we can't create path
+    EXPECT_EQ(eflete::filesystem::Get()->MakePath(test_file_path), false);
+    // if one of parent folder is actually a file
+    EXPECT_EQ(
+      eflete::filesystem::Get()->MakePath(test_file_path + "/sub_folder"),
+      false);
+
+    // cleaninng
+    remove(test_file_path.c_str());
+    rmdir("some/strange/file/path/for foleders");
+    rmdir("some/strange/file/path");
+    rmdir("some/strange/file");
+    rmdir("some/strange");
+    rmdir("some");
+  }
+
   TEST(Filesystem, InjectionWorks)
   {
     auto mock = std::make_shared<mocks::MockFilesystem>();

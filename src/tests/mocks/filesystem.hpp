@@ -13,6 +13,7 @@ namespace mocks
   public:
     MOCK_METHOD1(Exists, bool(const std::string &file));
     MOCK_METHOD1(RemoveFile, void(const std::string &file));
+    MOCK_METHOD1(MakePath, bool(const std::string &path));
     MOCK_METHOD1(GetOutputFileStream,
                  std::shared_ptr<std::ostream>(const std::string &file));
     MOCK_METHOD1(GetInputFileStream,
